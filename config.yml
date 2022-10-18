@@ -1,0 +1,27 @@
+build:
+  binary: "ojod"
+  main: "./cmd/ojod"
+genesis:
+  chain_id: "ojo-testnet"
+  app_state:
+    staking:
+      params:
+        bond_denom: "uojo"
+accounts:
+  - name: alice
+    coins: ["39000000000000uojo"]
+    mnemonic: "entry garbage bike poem grunt negative easily annual miss happy license blur false fringe program picture inner tape dismiss eagle include quality drill master"
+  - name: bob
+    coins: ["5500000000000uojo"]
+  - name: faucet
+    coins: ["5500000000000uojo"]
+validator:
+  name: alice
+  staked: "33500000000000uojo"
+servers:
+  dev-ui-address: "localhost:12345"
+faucet:
+  port: 4500
+  name: "faucet"
+  coins: ["5500000000000uojo"]
+  coins_max: ["1000000000uojo"]
