@@ -3,10 +3,11 @@ package main
 import (
 	"os"
 
+	"ojo/app"
+
 	svrcmd "github.com/cosmos/cosmos-sdk/server/cmd"
 	"github.com/ignite/cli/ignite/pkg/cosmoscmd"
 	"github.com/ignite/cli/ignite/pkg/xstrings"
-	"ojo/app"
 )
 
 func main() {
@@ -17,7 +18,6 @@ func main() {
 		xstrings.NoDash(app.Name),
 		app.ModuleBasics,
 		app.New,
-		// this line is used by starport scaffolding # root/arguments
 	)
 	if err := svrcmd.Execute(rootCmd, "", app.DefaultNodeHome); err != nil {
 		os.Exit(1)
