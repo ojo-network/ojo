@@ -2,24 +2,18 @@ package main
 
 import (
 	"os"
-
-	"ojo/app"
+	"strings"
 
 	svrcmd "github.com/cosmos/cosmos-sdk/server/cmd"
-	"github.com/ignite/cli/ignite/pkg/cosmoscmd"
-	"github.com/ignite/cli/ignite/pkg/xstrings"
+
+	ojoapp "github.com/ojo-network/ojo/app"
+	appparams "github.com/ojo-network/ojo/app/params"
+	"github.com/ojo-network/ojo/cmd/ojod/cmd"
 )
 
 func main() {
-	rootCmd, _ := cosmoscmd.NewRootCmd(
-		app.Name,
-		app.AccountAddressPrefix,
-		app.DefaultNodeHome,
-		xstrings.NoDash(app.Name),
-		app.ModuleBasics,
-		app.New,
-	)
-	if err := svrcmd.Execute(rootCmd, "", app.DefaultNodeHome); err != nil {
+	rootCmd, _ := cmd.NewRootCmd()
+	if err := svrcmd.Execute(rootCmd, strings.ToUpper(appparams.Name), ojoapp.DefaultNodeHome); err != nil {
 		os.Exit(1)
 	}
 }

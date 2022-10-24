@@ -1,9 +1,0 @@
-syntax = "proto3";
-package ojo.ojo;
-
-
-option go_package = "ojo/x/ojo/types";
-
-// Msg defines the Msg service.
-service Msg {
-}
