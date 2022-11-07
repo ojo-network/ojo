@@ -16,7 +16,7 @@ I have...
 - [ ] included the correct [type prefix](https://github.com/commitizen/conventional-commit-types/blob/v3.0.0/index.json) in the PR title
 - [ ] added `!` to the type prefix if API or client breaking change
 - [ ] added appropriate labels to the PR
-- [ ] targeted the correct branch (see [PR Targeting](https://github.com/ojo-network/ojo/blob/main/CONTRIBUTING.md#pr-targeting))
+- [ ] targeted the correct branch
 - [ ] provided a link to the relevant issue or specification
 - [ ] added a changelog entry to `CHANGELOG.md`
 - [ ] included comments for [documenting Go code](https://blog.golang.org/godoc)
