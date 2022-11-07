@@ -8,8 +8,8 @@ DIST_DIR       ?= $(CURDIR)/dist
 LEDGER_ENABLED ?= true
 TM_VERSION     := $(shell go list -m github.com/tendermint/tendermint | sed 's:.* ::')
 DOCKER         := $(shell which docker)
-PROJECT_NAME   := umee
-HTTPS_GIT      := https://github.com/umee-network/umee.git
+PROJECT_NAME   := ojo
+HTTPS_GIT      := https://github.com/ojo-network/ojo.git
 
 ###############################################################################
 ##                                  Version                                  ##
@@ -57,8 +57,8 @@ whitespace += $(whitespace)
 comma := ,
 build_tags_comma_sep := $(subst $(whitespace),$(comma),$(build_tags))
 
-ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=umee \
-		  -X github.com/cosmos/cosmos-sdk/version.AppName=umeed \
+ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=ojo \
+		  -X github.com/cosmos/cosmos-sdk/version.AppName=ojod \
 		  -X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
 		  -X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
 		  -X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags_comma_sep)" \
@@ -106,13 +106,13 @@ clean:
 ###############################################################################
 
 docker-build:
-	@docker build -t umeenet/umeed-e2e -f umee.e2e.Dockerfile .
+	@docker build -t ojonet/ojod-e2e -f ojo.e2e.Dockerfile .
 
 docker-push-hermes:
-	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/hermes-e2e:latest -f hermes.Dockerfile .; docker push ghcr.io/umee-network/hermes-e2e:latest
+	@cd tests/e2e/docker; docker build -t ghcr.io/ojo-network/hermes-e2e:latest -f hermes.Dockerfile .; docker push ghcr.io/ojo-network/hermes-e2e:latest
 
 docker-push-gaia:
-	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/gaia-e2e:latest -f gaia.Dockerfile .; docker push ghcr.io/umee-network/gaia-e2e:latest
+	@cd tests/e2e/docker; docker build -t ghcr.io/ojo-network/gaia-e2e:latest -f gaia.Dockerfile .; docker push ghcr.io/ojo-network/gaia-e2e:latest
 
 .PHONY: docker-build docker-push-hermes docker-push-gaia
 

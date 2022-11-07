@@ -1,5 +1,5 @@
 ---
-project_name: umee
+project_name: ojo
 
 env:
   - GO111MODULE=on
@@ -9,9 +9,9 @@ before:
     - go mod tidy -compat=1.19
 
 builds:
-  - main: ./cmd/umeed
-    id: "umeed"
-    binary: umeed
+  - main: ./cmd/ojod
+    id: "ojod"
+    binary: ojod
     mod_timestamp: "{{ .CommitTimestamp }}"
     flags:
       - -tags=badgerdb ledger netgo
@@ -19,7 +19,7 @@ builds:
     env:
       - CGO_ENABLED=0
     ldflags:
-      - -s -w -X main.commit={{.Commit}} -X main.date={{ .CommitDate }} -X github.com/cosmos/cosmos-sdk/version.Name=umee -X github.com/cosmos/cosmos-sdk/version.AppName=umeed -X github.com/cosmos/cosmos-sdk/version.Version={{ .Version }} -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }} -X github.com/cosmos/cosmos-sdk/version.BuildTags=netgo,ledger -X github.com/tendermint/tendermint/version.TMCoreSemVer={{ .Env.TM_VERSION }}
+      - -s -w -X main.commit={{.Commit}} -X main.date={{ .CommitDate }} -X github.com/cosmos/cosmos-sdk/version.Name=ojo -X github.com/cosmos/cosmos-sdk/version.AppName=ojod -X github.com/cosmos/cosmos-sdk/version.Version={{ .Version }} -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }} -X github.com/cosmos/cosmos-sdk/version.BuildTags=netgo,ledger -X github.com/tendermint/tendermint/version.TMCoreSemVer={{ .Env.TM_VERSION }}
     goos:
       - darwin
       - linux
@@ -41,8 +41,8 @@ archives:
 
 release:
   github:
-    owner: umee-network
-    name: umee
+    owner: ojo-network
+    name: ojo
   name_template: "v{{.Version}}"
 
 checksum:
