@@ -53,9 +53,9 @@ var DefaultConsensusParams = &abci.ConsensusParams{
 
 type EmptyAppOptions struct{}
 
-func (EmptyAppOptions) Get(o string) interface{} { return nil }
+func (EmptyAppOptions) Get(_ string) interface{} { return nil }
 
-func Setup(t *testing.T, isCheckTx bool, invCheckPeriod uint) *App {
+func Setup(t *testing.T, _ bool, _ uint) *App {
 	t.Helper()
 
 	privVal := mock.NewPV()
