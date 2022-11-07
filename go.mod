@@ -22,7 +22,7 @@ require (
 	google.golang.org/genproto v0.0.0-20221027153422-115e99e71e1c
 	google.golang.org/grpc v1.50.1
 	gopkg.in/yaml.v3 v3.0.1
-	mvdan.cc/gofumpt v0.3.1
+	mvdan.cc/gofumpt v0.4.0
 )
 
 require (
