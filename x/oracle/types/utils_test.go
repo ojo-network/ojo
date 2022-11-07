@@ -109,7 +109,7 @@ func (sk MockStakingKeeper) Validators() []MockValidator {
 	return sk.validators
 }
 
-func (sk MockStakingKeeper) Validator(ctx sdk.Context, address sdk.ValAddress) stakingtypes.ValidatorI {
+func (sk MockStakingKeeper) Validator(_ sdk.Context, address sdk.ValAddress) stakingtypes.ValidatorI {
 	for _, validator := range sk.validators {
 		if validator.GetOperator().Equals(address) {
 			return validator
@@ -123,11 +123,11 @@ func (MockStakingKeeper) TotalBondedTokens(_ sdk.Context) sdkmath.Int {
 	return sdk.ZeroInt()
 }
 
-func (k MockStakingKeeper) GetBondedValidatorsByPower(ctx sdk.Context) []stakingtypes.Validator {
+func (sk MockStakingKeeper) GetBondedValidatorsByPower(_ sdk.Context) []stakingtypes.Validator {
 	return nil
 }
 
-func (MockStakingKeeper) ValidatorsPowerStoreIterator(ctx sdk.Context) sdk.Iterator {
+func (MockStakingKeeper) ValidatorsPowerStoreIterator(_ sdk.Context) sdk.Iterator {
 	return sdk.KVStoreReversePrefixIterator(nil, nil)
 }
 
@@ -139,7 +139,7 @@ func (MockStakingKeeper) MaxValidators(sdk.Context) uint32 {
 	return 100
 }
 
-func (MockStakingKeeper) PowerReduction(ctx sdk.Context) (res sdkmath.Int) {
+func (MockStakingKeeper) PowerReduction(_ sdk.Context) (res sdkmath.Int) {
 	return sdk.DefaultPowerReduction
 }
 
@@ -210,7 +210,7 @@ func (v MockValidator) GetBondedTokens() sdkmath.Int {
 	return sdk.TokensFromConsensusPower(v.power, sdk.DefaultPowerReduction)
 }
 
-func (v MockValidator) GetConsensusPower(powerReduction sdkmath.Int) int64 {
+func (v MockValidator) GetConsensusPower(_ sdkmath.Int) int64 {
 	return v.power
 }
 
@@ -242,10 +242,10 @@ func (v MockValidator) TokensFromSharesRoundUp(sdk.Dec) sdk.Dec {
 	return sdk.ZeroDec()
 }
 
-func (v MockValidator) SharesFromTokens(amt sdkmath.Int) (sdk.Dec, error) {
+func (v MockValidator) SharesFromTokens(_ sdkmath.Int) (sdk.Dec, error) {
 	return sdk.ZeroDec(), nil
 }
 
-func (v MockValidator) SharesFromTokensTruncated(amt sdkmath.Int) (sdk.Dec, error) {
+func (v MockValidator) SharesFromTokensTruncated(_ sdkmath.Int) (sdk.Dec, error) {
 	return sdk.ZeroDec(), nil
 }
