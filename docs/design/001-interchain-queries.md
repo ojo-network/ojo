@@ -33,8 +33,6 @@ There are a few issues with bringing both of these solutions in-house:
 1. Ease of API - The quicksilver & strangelove implementations are for agnostic data, and in order to consume relayed packets, the *Client* chain would have to parse this. This should be a part of the *Client* module.
 2. Economic Factor - Neither implementation allows for relayers to be paid for their services; in fact, in both implementation if the gas fee of a chain is above 0, it *costs* coins to run a relayer between both chains.
 
-In order to solve #1, the *Client* module will contain a simple API
-
 ## Specification
 
 ### Host Module
@@ -67,64 +65,99 @@ In order for on-chain data to not be intercepted and relayed, any packets which 
 
 -  `DecryptResponsePacket(requestID, encryptedData)` - Allows only active validators to decrypt a given packet of data with a secret key. This is so that non-validators are unable to relay.
 
-### User requirements
+#### Responsibility
 
-> Specify expected user behavior
+The relayer will loop through:
+
+1. Querying for outstanding Data Requests on the *Host* Chain.
+2. Querying for the data requested.
+3. Decrypting the data.
+4. Submitting a `FulfillDataRequest` on the *Client* chain.
+5. Submitting a `VerifyRelay` on the *Host* chain.
 
 ### Proposed API
 
-> Describe new API or changed API
+#### Client Module
+
+The client module should have an easy-to-use API specific to the type of data being relayed. At this level, data should not be generic. An example of the Keeper APIs we could implement here are:
+
+- `GetPrice(denom) sdk.Dec` - returns relayed price of the asset `denom`.
+- `GetReservesProof(denom) sdk.Dec` - returns an `sdk.Dec` in the range of `[0, 1]`, determining how valid a set of reserves are.
+
+#### Host Module
+
+The host module should have APIs that other modules can use to store datasets. Other modules should be concerned with aggregating data such as `pricing`, `proof of reserves`, and then submitting that information to be stored by `x/icq`.
+
+These keepers should provide an argnostic API, which would look like:
+
+`SetDatapoint(key, value) error`
 
 ### Outcomes
 
-> This section does not need to be filled in at the beginning, but must
-> be completed prior to the merging of the implementation.
-> Here are some common questions that get answered as part of the detailed design:
->
-> - What systems will be affected?
-> - Are there any logging, monitoring or observability needs?
-> - Are there any security considerations?
-> - Will these changes require a breaking (major) release?
-> - Does this change require coordination with other teams?
+> What systems will be affected?
+
+This will affect validator requirements, on-chain and off-chain.
+
+> Are there any logging, monitoring or observability needs?
+
+We will want to strictly consider logging for the `Relayer` tool.
+
+> Are there any security considerations?
+
+We need to ensure bad actors will not:
+
+1. Relay information without being a validator on `Ojo`.
+2. Relay **bad** information from `Ojo` to the `Client` chain.
+3. Relay information between these modules without submitting a `SubmitDataRequest` msg.
+4. Abuse `SubmitDataRequest` to send malicious information to the receiving chain.
+5. Request information that is unavailable.
+
+> Will these changes require a breaking (major) release?
+
+Yes
+
+> Does this change require coordination with other teams?
+
+Mainly the validator set.
 
 ## Alternative Approaches
 
-> This section contains information around alternative options that are considered
-> before making a decision. It should contain a explanation on why the alternative
-> approach(es) were not chosen.
+As mentioned in [Context](##Context), there are existing ICQ methods that do not allow for:
 
-## Test Cases [optional]
+1. An easy-to-use API.
+2. A reward system for relayers.
 
-> How will the changes be tested?
-> Test cases in the form of example scenarios for an implementation are mandatory for designs that are affecting important parts of the system functionality. Design docs can include links to test cases if applicable.
+Because of these points, we need this altered version.
 
 ## Consequences
 
-> This section describes the consequences, after applying the decision. All
-> consequences should be summarized here, not just the "positive" ones.
-
 ### Backwards Compatibility
 
-> All design docs that introduce backwards incompatibilities must include a section describing these incompatibilities and their severity. The doc must explain how the author proposes to deal with these incompatibilities. Submissions without a sufficient backwards compatibility treatise may be rejected outright.
+N/A. This is a new set of modules.
 
 ### Positive
 
+* Economic factor
+* Allows for secure information
+* Ease of implementation on the *Client* side
+* Not dependent on IBC versions
+
 ### Negative
+
+* Development time & support
+* ABCI blocktime impact
 
 ### Neutral
 
+* Does not fully leverage IBC standards
+
 ## Further Discussions
 
-> This section should contain potential followups or issues to be solved in future iterations (usually referencing comments from a pull-request discussion).
+* Could relayers not have to be validators, using some sort of ante system?
 
-## Comments
-
-> Optional. Provide additional important comments.
-> If the proposal is rejected, document why it was rejected.
 
 ## References
 
-> Are there any relevant PR comments, issues that led up to this, or articles
-> referenced for why we made the given design choice? If so link them here!
 
-- {reference link}
+- [Strangelove's ICQ](https://github.com/strangelove-ventures/ibc-go/tree/feature/icq_implementation/modules/apps/icq)
+- [Quicksilver's ICQ](https://github.com/ingenuity-build/quicksilver)
