@@ -3,7 +3,7 @@ module github.com/ojo-network/ojo
 go 1.18
 
 require (
-	cosmossdk.io/math v1.0.0-beta.3
+	cosmossdk.io/math v1.0.0-beta.4
 	github.com/cosmos/cosmos-sdk v0.46.2
 	github.com/cosmos/ibc-go/v5 v5.0.0-rc1
 	github.com/gogo/protobuf v1.3.3
