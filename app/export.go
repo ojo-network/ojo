@@ -18,7 +18,6 @@ import (
 func (app *App) ExportAppStateAndValidators(
 	forZeroHeight bool, jailAllowedAddrs []string,
 ) (servertypes.ExportedApp, error) {
-
 	// as if they could withdraw from the start of the next block
 	ctx := app.NewContext(true, tmproto.Header{Height: app.LastBlockHeight()})
 
@@ -36,7 +35,7 @@ func (app *App) ExportAppStateAndValidators(
 		return servertypes.ExportedApp{}, err
 	}
 
-	validators, err := staking.WriteValidators(ctx, app.StakingKeeper)
+	validators, err := staking.WriteValidators(ctx, *app.StakingKeeper)
 	if err != nil {
 		return servertypes.ExportedApp{}, err
 	}
