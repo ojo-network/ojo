@@ -100,8 +100,6 @@ import (
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 
 	appparams "github.com/ojo-network/ojo/app/params"
-
-	"github.com/ignite/cli/ignite/pkg/cosmoscmd"
 )
 
 const (
@@ -168,7 +166,7 @@ var (
 )
 
 var (
-	_ cosmoscmd.App           = (*App)(nil)
+	_ CosmosApp               = (*App)(nil)
 	_ servertypes.Application = (*App)(nil)
 	_ simapp.App              = (*App)(nil)
 )
