@@ -214,12 +214,7 @@ proto-all: proto-format proto-lint proto-gen proto-swagger-gen
 proto-gen:
 	@echo "Generating Protobuf files"
 	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoGen}$$"; then docker start -a $(containerProtoGen); else docker run --name $(containerProtoGen) -v $(CURDIR):/workspace --workdir /workspace $(containerProtoImage) \
-		sh ./contrib/scripts/protocgen.sh; fi
-
-proto-swagger-gen:
-	@echo "Generating Swagger of Protobuf"
-	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoGenSwagger}$$"; then docker start -a $(containerProtoGenSwagger); else docker run --name $(containerProtoGenSwagger) -v $(CURDIR):/workspace --workdir /workspace $(containerProtoImage) \
-		sh ./contrib/scripts/protoc-swagger-gen.sh; fi
+		sh ./scripts/proto-gen.sh; fi
 
 proto-format:
 	@echo "Formatting Protobuf files"
