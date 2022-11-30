@@ -45,8 +45,8 @@ There are a few issues with bringing both of these solutions in-house:
 
 The relayer will loop through:
 
-1. Querying for outstanding Data Requests on the *Host* Chain.
-2. Querying for the data requested.
+1. Querying for outstanding Data Requests on the *Client* chain.
+2. Querying Ojo for the requested data.
 3. Submitting a `FulfillDataRequest` on the *Client* chain.
 
 ### Proposed API
