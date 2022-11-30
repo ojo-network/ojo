@@ -25,4 +25,7 @@ while [ ${CNT} -lt $ITER ]; do
 done
 
 echo "Failed: timeout reached"
+
+tail /home/runner/work/ojo/ojo/scripts/node-data/ojotest-1.n0.log
+
 exit 1
