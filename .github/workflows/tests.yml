@@ -84,9 +84,9 @@ jobs:
       - name: Start single node chain
         if: env.GIT_DIFF && steps.cache-binaries.outputs.cache-hit == 'true'
         run: |
-          ./contrib/scripts/single-node.sh
+          ./scripts/single-node.sh
       - name: Test Local Network Liveness
         if: env.GIT_DIFF && steps.cache-binaries.outputs.cache-hit == 'true'
         run: |
           sleep 1m
-          ./contrib/scripts/test_localnet_liveness.sh 50 5 50 localhost:26657
+          ./scripts/localnet-liveness.sh 50 5 50 localhost:26657
