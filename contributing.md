@@ -76,7 +76,7 @@ branch.
 
 - Ensure the PR branch is rebased on `main`.
 - Ensure you provided unit tests and integration tests.
-- Run `make test-unit test-e2e` to ensure that all tests pass.
+- Run `make test-unit` to ensure that all tests pass.
 - Merge the PR!
 
 ## Release procedure
