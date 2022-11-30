@@ -18,7 +18,7 @@ There are two main existing solutions :
 
 ### [Quicksilver's Interchain Queries](https://github.com/ingenuity-build/quicksilver/tree/main/x/interchainquery/keeper)
 
-Quicksilver requires accurate about other chains in order to utilize interchain accounts for their remote liquid staking solution.
+Quicksilver requires accurate information about other chains in order to utilize interchain accounts for their remote liquid staking solution.
 
 This is a KV store solution which requires the *Client* and *Relayer* infrastructure, but does not require a *Host* module. Quicksilver also requires validators to prove that data is accurate before accepting it on-chain.
 
