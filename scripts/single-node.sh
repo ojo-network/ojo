@@ -123,6 +123,7 @@ if [[ ! -d "$hdir" ]]; then
       | .app_state["gov"]["deposit_params"]["min_deposit"][0]["denom"]="'$DENOM'"
       | .app_state["mint"]["params"]["mint_denom"]="'$DENOM'"
       | .app_state["staking"]["params"]["bond_denom"]="'$DENOM'"
+      | .app_state["staking"]["params"]["max_validators"]="100"
       | .app_state["gov"]["voting_params"]["voting_period"]="10s"' \
         $n0cfgDir/genesis.json > $n0cfgDir/tmp_genesis.json && mv $n0cfgDir/tmp_genesis.json $n0cfgDir/genesis.json
 
