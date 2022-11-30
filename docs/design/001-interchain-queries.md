@@ -89,7 +89,7 @@ Mainly the validator set.
 
 ## Alternative Approaches
 
-As mentioned in [Context](##Context), there are existing ICQ methods that do not allow for:
+There are existing ICQ methods that do not allow for:
 
 1. An easy-to-use API.
 2. A reward system for relayers.
