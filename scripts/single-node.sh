@@ -14,7 +14,7 @@
 
 CWD="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
-NODE_BIN="${1:-$CWD/../../build/ojod}"
+NODE_BIN="${1:-$CWD/../build/ojod}"
 
 # These options can be overridden by env
 CHAIN_ID="${CHAIN_ID:-ojotest-1}"
@@ -95,7 +95,7 @@ if [[ ! -d "$hdir" ]]; then
   echo "--- Initializing home..."
 
   # Initialize the home directory of node
-  $NODE_BIN $home0 $cid init n0 &>/dev/null
+  $NODE_BIN $home0 $cid init n0
 
   echo "--- Enabling node API"
   sed -i -s '108s/enable = false/enable = true/' $n0app
