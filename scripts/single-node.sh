@@ -131,7 +131,7 @@ if [[ ! -d "$hdir" ]]; then
   jq '.app_state["gov"]["voting_params"]["voting_period"]="'$VOTING_PERIOD'"' $n0cfgDir/genesis.json > $n0cfgDir/tmp_genesis.json && mv $n0cfgDir/tmp_genesis.json $n0cfgDir/genesis.json
 
   echo "--- Creating gentx..."
-  $NODE_BIN $home0 gentx-gravity $VAL0_KEY 1000$SCALE_FACTOR$STAKE_DENOM 0xfac5EC50BdfbB803f5cFc9BF0A0C2f52aDE5b6dd $VAL0_ADDR $kbt $cid
+  $NODE_BIN $home0 gentx $VAL0_KEY 1000$SCALE_FACTOR$STAKE_DENOM $VAL0_ADDR $kbt $cid
 
   $NODE_BIN $home0 collect-gentxs > /dev/null
 
