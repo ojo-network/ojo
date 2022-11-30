@@ -10,7 +10,7 @@ In order for the Ojo network to effectively provide services to other chains, we
 
 *Client* Module - accepts validator responses to requests made by the *Client*; requires a *Proof* for information to be accepted.
 
-*Relayer* - allows relayers to move information between the *Host* and *Client*, and is responsible for submitting proofs.
+*Relayer* - allows relayers to move information between Ojo and the *Client*, and is responsible for submitting proofs.
 
 ## Context
 
