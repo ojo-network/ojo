@@ -16,7 +16,7 @@ func TestAggregateExchangeRatePrevoteString(t *testing.T) {
 		100,
 	)
 
-	require.Equal(t, "hash: 19c30cf9ea8aa0e0b03904162cadec0f2024a76d\nvoter: ojovaloper1v9jxgu33ta047h6lta047h6lta047h6l5ltnvg\nsubmit_block: 100\n", aggregateExchangeRatePreVote.String())
+	require.Equal(t, "hash: ccd44c2be8cec771f4bc8a0b33895bd44e3459b9\nvoter: ojovaloper1v9jxgu33ta047h6lta047h6lta047h6ludnc0y\nsubmit_block: 100\n", aggregateExchangeRatePreVote.String())
 }
 
 func TestAggregateExchangeRateVoteString(t *testing.T) {
@@ -27,7 +27,7 @@ func TestAggregateExchangeRateVoteString(t *testing.T) {
 		sdk.ValAddress(sdk.AccAddress([]byte("addr1_______________"))),
 	)
 
-	require.Equal(t, "exchange_rate_tuples:\n    - denom: uojo\n      exchange_rate: \"1.000000000000000000\"\nvoter: ojovaloper1v9jxgu33ta047h6lta047h6lta047h6l5ltnvg\n", aggregateExchangeRatePreVote.String())
+	require.Equal(t, "exchange_rate_tuples:\n    - denom: uojo\n      exchange_rate: \"1.000000000000000000\"\nvoter: ojovaloper1v9jxgu33ta047h6lta047h6lta047h6ludnc0y\n", aggregateExchangeRatePreVote.String())
 }
 
 func TestExchangeRateTuplesString(t *testing.T) {

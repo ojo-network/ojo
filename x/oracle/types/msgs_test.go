@@ -94,9 +94,9 @@ func TestMsgAggregateExchangeRateVote(t *testing.T) {
 	msgInvalidUnknownRequest := "must provide at least one oracle exchange rate: unknown request"
 	msgInvalidFeederAddr := "invalid feeder address (empty address string is not allowed): invalid address"
 	msgInvalidOperatorAddr := "invalid operator address (empty address string is not allowed): invalid address"
-	msgInvalidOraclePrice := "failed to parse exchange rates string cause: invalid oracle price: invalid coins"
+	msgInvalidOraclePrice := "oracle price"
 	msgInvalidOverflowExceedCharacter := "exchange rates string can not exceed 4096 characters: invalid request"
-	msgInvalidExchangeRates := "failed to parse exchange rates string cause: invalid exchange rate a: invalid coins"
+	msgInvalidExchangeRates := "invalid exchange rate"
 
 	tests := []struct {
 		feeder           sdk.AccAddress
