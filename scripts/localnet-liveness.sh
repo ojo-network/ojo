@@ -1,5 +1,7 @@
 #!/bin/bash -eu
 
+tail -f /home/runner/work/ojo/ojo/scripts/node-data/ojotest-1.n0.log
+
 CNT=0
 ITER="${1:-50}"
 SLEEP="${2:-5}"
@@ -25,7 +27,5 @@ while [ ${CNT} -lt $ITER ]; do
 done
 
 echo "Failed: timeout reached"
-
-tail /home/runner/work/ojo/ojo/scripts/node-data/ojotest-1.n0.log
 
 exit 1
