@@ -6,11 +6,12 @@ Draft
 
 ## Abstract
 
-In order for the Ojo network to effectively provide services to other chains, we need a method of transport at Layer 1. We must develop two mechanisms: a *Client* module for consumer chains to use; and a *Relayer* to move messages in between The Ojo chain and the *Client* chain. The Client chain will request data, which the relayer will then pick up, query Ojo for the requested data, and then respond back to the original chain.
+In order for the Ojo network to effectively provide services to other chains, we need a method of transport at Layer 1. We must develop two mechanisms:
 
 *Client* Module - accepts validator responses to requests made by the *Client*; requires a *Proof* for information to be accepted.
-
 *Relayer* - allows relayers to move information between Ojo and the *Client*, and is responsible for submitting proofs.
+
+The Client chain will request data, which the relayer will then pick up, query Ojo for the requested data, and then respond back to the original chain.
 
 ## Context
 
@@ -32,7 +33,7 @@ There are a few issues with bringing both of these solutions in-house:
 2. Economic Factor - Neither implementation allows for relayers to be paid for their services; in fact, in both implementation if the gas fee of a chain is above 0, it *costs* coins to run a relayer between both chains. The economic model in this case will be dealt with in a future design doc.
 
 ## Specification
-### Client Module
+### Client
 
 #### Msgs
 
