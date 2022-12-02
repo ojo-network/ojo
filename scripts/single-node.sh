@@ -14,10 +14,10 @@
 
 CWD="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
-NODE_BIN="${1:-$CWD/../build/ojod}"
+NODE_BIN="ojod"
 
 # These options can be overridden by env
-CHAIN_ID="${CHAIN_ID:-ojotest-1}"
+CHAIN_ID="${CHAIN_ID:-ojotest-1}"C
 CHAIN_DIR="${CHAIN_DIR:-$CWD/node-data}"
 DENOM="${DENOM:-uojo}"
 STAKE_DENOM="${STAKE_DENOM:-$DENOM}"
@@ -49,7 +49,8 @@ fi
 echo "--- Chain ID = $CHAIN_ID"
 echo "--- Chain Dir = $CHAIN_DIR"
 echo "--- Coin Denom = $DENOM"
-$NODE_BIN version
+VERSION=$($NODE_BIN version)
+echo "--- Binary Version = $VERSION"
 
 killall "$NODE_BIN" &>/dev/null || true
 
