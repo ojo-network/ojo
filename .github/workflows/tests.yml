@@ -67,26 +67,20 @@ jobs:
             go.mod
             go.sum
 
-      - name: Cache updated version binary
-        id: cache-binaries
-        uses: actions/cache@v3
+      - name: gets ojod bin
+        if: env.GIT_DIFF
+        uses: actions/download-artifact@v3
         with:
-          path: ./cmd/ojod/ojod
-          key: ojod-linux-amd64
-
-      - name: Move new version binary to build folder
-        if: steps.cache-binaries.outputs.cache-hit == 'true'
-        run: |
-          mkdir -p build
-          cp ./cmd/ojod/ojod ./build/ojod
-          chmod +x ./build/ojod
+          name: ojod-linux-amd64
+          path: ./build
 
       - name: Start single node chain
-        if: env.GIT_DIFF && steps.cache-binaries.outputs.cache-hit == 'true'
+        if: env.GIT_DIFF
         run: |
+          chmod +x ./build/ojod
           ./scripts/single-node.sh
       - name: Test Local Network Liveness
-        if: env.GIT_DIFF && steps.cache-binaries.outputs.cache-hit == 'true'
+        if: env.GIT_DIFF
         run: |
           sleep 1m
           ./scripts/localnet-liveness.sh 50 5 50 localhost:26657
