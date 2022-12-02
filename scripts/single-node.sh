@@ -14,10 +14,10 @@
 
 CWD="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
-NODE_BIN="ojod"
+NODE_BIN="${1:-$CWD/../build/ojod}"
 
 # These options can be overridden by env
-CHAIN_ID="${CHAIN_ID:-ojotest-1}"C
+CHAIN_ID="${CHAIN_ID:-ojotest-1}"
 CHAIN_DIR="${CHAIN_DIR:-$CWD/node-data}"
 DENOM="${DENOM:-uojo}"
 STAKE_DENOM="${STAKE_DENOM:-$DENOM}"
