@@ -49,6 +49,7 @@ fi
 echo "--- Chain ID = $CHAIN_ID"
 echo "--- Chain Dir = $CHAIN_DIR"
 echo "--- Coin Denom = $DENOM"
+$NODE_BIN version
 
 killall "$NODE_BIN" &>/dev/null || true
 
