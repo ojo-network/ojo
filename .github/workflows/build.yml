@@ -18,12 +18,6 @@ jobs:
     name: ojo ${{ matrix.arch }} for ${{ matrix.targetos }}
     steps:
       - uses: actions/checkout@v3
-      - name: Cache binaries
-        id: cache-binaries
-        uses: actions/cache@v3
-        with:
-          path: ./cmd/ojod/ojod
-          key: ojod-${{ matrix.targetos }}-${{ matrix.arch }}
       - uses: technote-space/get-diff-action@v6.1.1
         with:
           PATTERNS: |
@@ -31,7 +25,7 @@ jobs:
             go.mod
             go.sum
       - name: Setup go
-        if: steps.cache-binaries.outputs.cache-hit != 'true' && env.GIT_DIFF
+        if: env.GIT_DIFF
         uses: actions/setup-go@v3
         with:
           go-version: 1.19
@@ -40,8 +34,14 @@ jobs:
           GOOS: ${{ matrix.targetos }}
           GOARCH: ${{ matrix.arch }}
       - name: Compile
-        if: steps.cache-binaries.outputs.cache-hit != 'true' && env.GIT_DIFF
+        if: env.GIT_DIFF
         run: |
           go mod download
           cd cmd/ojod
           go build .
+      - uses: actions/upload-artifact@v3
+        if: env.GIT_DIFF
+        with:
+          name: ojod-${{ matrix.targetos }}-${{ matrix.arch }}
+          path: cmd/ojod/ojod
+          retention-days: 1

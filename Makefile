@@ -92,9 +92,6 @@ go.sum: go.mod
 	@echo "--> Ensure dependencies have not been modified"
 	@go mod verify
 
-go-mod-tidy:
-	@contrib/scripts/go-mod-tidy-all.sh
-
 clean:
 	@echo "--> Cleaning..."
 	@rm -rf $(BUILD_DIR)/**  $(DIST_DIR)/**
@@ -102,28 +99,12 @@ clean:
 .PHONY: install build build-linux clean
 
 ###############################################################################
-##                                  Docker                                   ##
-###############################################################################
-
-docker-build:
-	@docker build -t ojonet/ojod-e2e -f ojo.e2e.Dockerfile .
-
-docker-push-hermes:
-	@cd tests/e2e/docker; docker build -t ghcr.io/ojo-network/hermes-e2e:latest -f hermes.Dockerfile .; docker push ghcr.io/ojo-network/hermes-e2e:latest
-
-docker-push-gaia:
-	@cd tests/e2e/docker; docker build -t ghcr.io/ojo-network/gaia-e2e:latest -f gaia.Dockerfile .; docker push ghcr.io/ojo-network/gaia-e2e:latest
-
-.PHONY: docker-build docker-push-hermes docker-push-gaia
-
-###############################################################################
 ##                                   Tests                                   ##
 ###############################################################################
 
-PACKAGES_UNIT=$(shell go list ./... | grep -v -e '/tests/e2e' -e '/tests/simulation' -e '/tests/network')
-PACKAGES_E2E=$(shell go list ./... | grep '/e2e')
+PACKAGES_UNIT=$(shell go list ./...)
 TEST_PACKAGES=./...
-TEST_TARGETS := test-unit test-unit-cover test-race test-e2e
+TEST_TARGETS := test-unit test-unit-cover test-race
 TEST_COVERAGE_PROFILE=coverage.txt
 
 test-unit: ARGS=-timeout=10m -tags='norace'
@@ -132,8 +113,6 @@ test-unit-cover: ARGS=-timeout=10m -tags='norace' -coverprofile=$(TEST_COVERAGE_
 test-unit-cover: TEST_PACKAGES=$(PACKAGES_UNIT)
 test-race: ARGS=-timeout=10m -race
 test-race: TEST_PACKAGES=$(PACKAGES_UNIT)
-test-e2e: ARGS=-timeout=25m -v
-test-e2e: TEST_PACKAGES=$(PACKAGES_E2E)
 $(TEST_TARGETS): run-tests
 
 run-tests:
