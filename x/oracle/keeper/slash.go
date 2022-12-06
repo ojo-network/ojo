@@ -19,17 +19,17 @@ func (k Keeper) SlashAndResetMissCounters(ctx sdk.Context) {
 		votePeriod           = int64(k.VotePeriod(ctx))
 		votePeriodsPerWindow = sdk.NewDec(slashWindow).QuoInt64(votePeriod).TruncateInt64()
 
-		numberOfAssets              = int64(len(k.GetParams(ctx).AcceptList))
-		possibleVotesPerSlashWindow = votePeriodsPerWindow * numberOfAssets
-		minValidPerWindow           = k.MinValidPerWindow(ctx)
+		numberOfAssets             = int64(len(k.GetParams(ctx).AcceptList))
+		possibleWinsPerSlashWindow = votePeriodsPerWindow * numberOfAssets
+		minValidPerWindow          = k.MinValidPerWindow(ctx)
 
 		slashFraction  = k.SlashFraction(ctx)
 		powerReduction = k.StakingKeeper.PowerReduction(ctx)
 	)
 
 	k.IterateMissCounters(ctx, func(operator sdk.ValAddress, missCounter uint64) bool {
-		numValidVotes := sdk.NewInt(possibleVotesPerSlashWindow - int64(missCounter))
-		validVoteRate := sdk.NewDecFromInt(numValidVotes).QuoInt64(possibleVotesPerSlashWindow)
+		validVotes := sdk.NewInt(possibleWinsPerSlashWindow - int64(missCounter))
+		validVoteRate := sdk.NewDecFromInt(validVotes).QuoInt64(possibleWinsPerSlashWindow)
 
 		// Slash and jail the validator if their valid vote rate is smaller than the
 		// minimum threshold.
