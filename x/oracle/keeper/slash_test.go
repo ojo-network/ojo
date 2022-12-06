@@ -3,7 +3,7 @@ package keeper_test
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
-	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
 func (s *IntegrationTestSuite) TestSlashAndResetMissCounters() {
@@ -34,7 +34,7 @@ func (s *IntegrationTestSuite) TestSlashAndResetMissCounters() {
 
 	// Case 3, slash unbonded validator
 	validator, _ = s.app.StakingKeeper.GetValidator(s.ctx, valAddr)
-	validator.Status = stakingtypes.Unbonded
+	validator.Status = stakingTypes.Unbonded
 	validator.Jailed = false
 	validator.Tokens = amt
 	s.app.StakingKeeper.SetValidator(s.ctx, validator)
@@ -47,7 +47,7 @@ func (s *IntegrationTestSuite) TestSlashAndResetMissCounters() {
 
 	// Case 4, slash jailed validator
 	validator, _ = s.app.StakingKeeper.GetValidator(s.ctx, valAddr)
-	validator.Status = stakingtypes.Bonded
+	validator.Status = stakingTypes.Bonded
 	validator.Jailed = true
 	validator.Tokens = amt
 	s.app.StakingKeeper.SetValidator(s.ctx, validator)
