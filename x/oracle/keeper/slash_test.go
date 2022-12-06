@@ -15,10 +15,12 @@ func (s *IntegrationTestSuite) TestSlashAndResetMissCounters() {
 	s.Require().Equal(amt, s.app.StakingKeeper.Validator(s.ctx, addr2).GetBondedTokens())
 
 	votePeriodsPerWindow := sdk.NewDec(int64(s.app.OracleKeeper.SlashWindow(s.ctx))).QuoInt64(int64(s.app.OracleKeeper.VotePeriod(s.ctx))).TruncateInt64()
+	numberOfAssets := int64(len(s.app.OracleKeeper.GetParams(s.ctx).AcceptList))
+	possibleVotesPerSlashWindow := votePeriodsPerWindow * numberOfAssets
 	slashFraction := s.app.OracleKeeper.SlashFraction(s.ctx)
-	minValidVotes := s.app.OracleKeeper.MinValidPerWindow(s.ctx).MulInt64(votePeriodsPerWindow).TruncateInt64()
+	minValidVotes := s.app.OracleKeeper.MinValidPerWindow(s.ctx).MulInt64(votePeriodsPerWindow * numberOfAssets).TruncateInt64()
 	// Case 1, no slash
-	s.app.OracleKeeper.SetMissCounter(s.ctx, valAddr, uint64(votePeriodsPerWindow-minValidVotes))
+	s.app.OracleKeeper.SetMissCounter(s.ctx, valAddr, uint64(possibleVotesPerSlashWindow-minValidVotes))
 	s.app.OracleKeeper.SlashAndResetMissCounters(s.ctx)
 	staking.EndBlocker(s.ctx, *s.app.StakingKeeper)
 
@@ -26,7 +28,7 @@ func (s *IntegrationTestSuite) TestSlashAndResetMissCounters() {
 	s.Require().Equal(amt, validator.GetBondedTokens())
 
 	// Case 2, slash
-	s.app.OracleKeeper.SetMissCounter(s.ctx, valAddr, uint64(votePeriodsPerWindow-minValidVotes+1))
+	s.app.OracleKeeper.SetMissCounter(s.ctx, valAddr, uint64(possibleVotesPerSlashWindow-minValidVotes+1))
 	s.app.OracleKeeper.SlashAndResetMissCounters(s.ctx)
 	validator, _ = s.app.StakingKeeper.GetValidator(s.ctx, valAddr)
 	s.Require().Equal(amt.Sub(slashFraction.MulInt(amt).TruncateInt()), validator.GetBondedTokens())
@@ -39,7 +41,7 @@ func (s *IntegrationTestSuite) TestSlashAndResetMissCounters() {
 	validator.Tokens = amt
 	s.app.StakingKeeper.SetValidator(s.ctx, validator)
 
-	s.app.OracleKeeper.SetMissCounter(s.ctx, valAddr, uint64(votePeriodsPerWindow-minValidVotes+1))
+	s.app.OracleKeeper.SetMissCounter(s.ctx, valAddr, uint64(possibleVotesPerSlashWindow-minValidVotes+1))
 	s.app.OracleKeeper.SlashAndResetMissCounters(s.ctx)
 	validator, _ = s.app.StakingKeeper.GetValidator(s.ctx, valAddr)
 	s.Require().Equal(amt, validator.Tokens)
@@ -52,7 +54,7 @@ func (s *IntegrationTestSuite) TestSlashAndResetMissCounters() {
 	validator.Tokens = amt
 	s.app.StakingKeeper.SetValidator(s.ctx, validator)
 
-	s.app.OracleKeeper.SetMissCounter(s.ctx, valAddr, uint64(votePeriodsPerWindow-minValidVotes+1))
+	s.app.OracleKeeper.SetMissCounter(s.ctx, valAddr, uint64(possibleVotesPerSlashWindow-minValidVotes+1))
 	s.app.OracleKeeper.SlashAndResetMissCounters(s.ctx)
 	validator, _ = s.app.StakingKeeper.GetValidator(s.ctx, valAddr)
 	s.Require().Equal(amt, validator.Tokens)
