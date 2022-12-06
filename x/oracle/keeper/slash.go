@@ -1,8 +1,6 @@
 package keeper
 
 import (
-	"fmt"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -35,7 +33,6 @@ func (k Keeper) SlashAndResetMissCounters(ctx sdk.Context) {
 
 		// Slash and jail the validator if their valid vote rate is smaller than the
 		// minimum threshold.
-		fmt.Printf("validatorVoteRate: %d, minValidPerWindow: %d\n", validVoteRate, minValidPerWindow)
 		if validVoteRate.LT(minValidPerWindow) {
 			validator := k.StakingKeeper.Validator(ctx, operator)
 			if validator.IsBonded() && !validator.IsJailed() {
