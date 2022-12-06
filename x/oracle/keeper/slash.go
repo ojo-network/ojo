@@ -12,19 +12,12 @@ import (
 // slashed and jailed.
 func (k Keeper) SlashAndResetMissCounters(ctx sdk.Context) {
 	var (
-		height             = ctx.BlockHeight()
-		distributionHeight = height - sdk.ValidatorUpdateDelay - 1
-
-		slashWindow          = int64(k.SlashWindow(ctx))
-		votePeriod           = int64(k.VotePeriod(ctx))
-		votePeriodsPerWindow = sdk.NewDec(slashWindow).QuoInt64(votePeriod).TruncateInt64()
-
-		numberOfAssets             = int64(len(k.GetParams(ctx).AcceptList))
-		possibleWinsPerSlashWindow = votePeriodsPerWindow * numberOfAssets
+		possibleWinsPerSlashWindow = k.PossibleWinsPerSlashWindow(ctx)
 		minValidPerWindow          = k.MinValidPerWindow(ctx)
 
-		slashFraction  = k.SlashFraction(ctx)
-		powerReduction = k.StakingKeeper.PowerReduction(ctx)
+		distributionHeight = ctx.BlockHeight() - sdk.ValidatorUpdateDelay - 1
+		slashFraction      = k.SlashFraction(ctx)
+		powerReduction     = k.StakingKeeper.PowerReduction(ctx)
 	)
 
 	k.IterateMissCounters(ctx, func(operator sdk.ValAddress, missCounter uint64) bool {
@@ -55,4 +48,14 @@ func (k Keeper) SlashAndResetMissCounters(ctx sdk.Context) {
 		k.DeleteMissCounter(ctx, operator)
 		return false
 	})
+}
+
+func (k Keeper) PossibleWinsPerSlashWindow(ctx sdk.Context) int64 {
+	slashWindow := int64(k.SlashWindow(ctx))
+	votePeriod := int64(k.VotePeriod(ctx))
+
+	votePeriodsPerWindow := sdk.NewDec(slashWindow).QuoInt64(votePeriod).TruncateInt64()
+	numberOfAssets := int64(len(k.GetParams(ctx).AcceptList))
+
+	return (votePeriodsPerWindow * numberOfAssets)
 }

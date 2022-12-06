@@ -2,60 +2,83 @@ package keeper_test
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
 func (s *IntegrationTestSuite) TestSlashAndResetMissCounters() {
-	// initial setup
-	addr, addr2 := valAddr, valAddr2
-	amt := sdk.TokensFromConsensusPower(100, sdk.DefaultPowerReduction)
+	initialTokens := sdk.TokensFromConsensusPower(100, sdk.DefaultPowerReduction)
+	s.Require().Equal(initialTokens, s.app.StakingKeeper.Validator(s.ctx, valAddr).GetBondedTokens())
 
-	s.Require().Equal(amt, s.app.StakingKeeper.Validator(s.ctx, addr).GetBondedTokens())
-	s.Require().Equal(amt, s.app.StakingKeeper.Validator(s.ctx, addr2).GetBondedTokens())
+	var (
+		slashFraction              = s.app.OracleKeeper.SlashFraction(s.ctx)
+		possibleWinsPerSlashWindow = s.app.OracleKeeper.PossibleWinsPerSlashWindow(s.ctx)
+		minValidPerWindow          = s.app.OracleKeeper.MinValidPerWindow(s.ctx)
+		minValidVotes              = minValidPerWindow.MulInt64(possibleWinsPerSlashWindow).TruncateInt()
+		maxMissesBeforeSlash       = sdk.NewInt(possibleWinsPerSlashWindow).Sub(minValidVotes).Uint64()
+	)
 
-	votePeriodsPerWindow := sdk.NewDec(int64(s.app.OracleKeeper.SlashWindow(s.ctx))).QuoInt64(int64(s.app.OracleKeeper.VotePeriod(s.ctx))).TruncateInt64()
-	numberOfAssets := int64(len(s.app.OracleKeeper.GetParams(s.ctx).AcceptList))
-	possibleWinsPerSlashWindow := votePeriodsPerWindow * numberOfAssets
-	slashFraction := s.app.OracleKeeper.SlashFraction(s.ctx)
-	minValidVotes := s.app.OracleKeeper.MinValidPerWindow(s.ctx).MulInt64(votePeriodsPerWindow * numberOfAssets).TruncateInt64()
-	// Case 1, no slash
-	s.app.OracleKeeper.SetMissCounter(s.ctx, valAddr, uint64(possibleWinsPerSlashWindow-minValidVotes))
-	s.app.OracleKeeper.SlashAndResetMissCounters(s.ctx)
-	staking.EndBlocker(s.ctx, *s.app.StakingKeeper)
+	testCases := []struct {
+		name         string
+		missCounter  uint64
+		status       stakingtypes.BondStatus
+		jailedBefore bool
+		jailedAfter  bool
+		slashed      bool
+	}{
+		{
+			name:         "bonded validator above minValidVotes",
+			missCounter:  maxMissesBeforeSlash,
+			status:       stakingtypes.Bonded,
+			jailedBefore: false,
+			jailedAfter:  false,
+			slashed:      false,
+		},
+		{
+			name:         "bonded validator below minValidVotes",
+			missCounter:  maxMissesBeforeSlash + 1,
+			status:       stakingtypes.Bonded,
+			jailedBefore: false,
+			jailedAfter:  true,
+			slashed:      true,
+		},
+		{
+			name:         "unBonded validator below minValidVotes",
+			missCounter:  maxMissesBeforeSlash + 1,
+			status:       stakingtypes.Unbonded,
+			jailedBefore: false,
+			jailedAfter:  false,
+			slashed:      false,
+		},
+		{
+			name:         "jailed validator below minValidVotes",
+			missCounter:  maxMissesBeforeSlash + 1,
+			status:       stakingtypes.Bonded,
+			jailedBefore: true,
+			jailedAfter:  true,
+			slashed:      false,
+		},
+	}
 
-	validator, _ := s.app.StakingKeeper.GetValidator(s.ctx, valAddr)
-	s.Require().Equal(amt, validator.GetBondedTokens())
+	for _, tc := range testCases {
+		s.Run(tc.name, func() {
+			validator, _ := s.app.StakingKeeper.GetValidator(s.ctx, valAddr)
+			validator.Status = tc.status
+			validator.Jailed = tc.jailedBefore
+			validator.Tokens = initialTokens
+			s.app.StakingKeeper.SetValidator(s.ctx, validator)
 
-	// Case 2, slash
-	s.app.OracleKeeper.SetMissCounter(s.ctx, valAddr, uint64(possibleWinsPerSlashWindow-minValidVotes+1))
-	s.app.OracleKeeper.SlashAndResetMissCounters(s.ctx)
-	validator, _ = s.app.StakingKeeper.GetValidator(s.ctx, valAddr)
-	s.Require().Equal(amt.Sub(slashFraction.MulInt(amt).TruncateInt()), validator.GetBondedTokens())
-	s.Require().True(validator.Jailed)
+			s.app.OracleKeeper.SetMissCounter(s.ctx, valAddr, tc.missCounter)
+			s.app.OracleKeeper.SlashAndResetMissCounters(s.ctx)
 
-	// Case 3, slash unbonded validator
-	validator, _ = s.app.StakingKeeper.GetValidator(s.ctx, valAddr)
-	validator.Status = stakingtypes.Unbonded
-	validator.Jailed = false
-	validator.Tokens = amt
-	s.app.StakingKeeper.SetValidator(s.ctx, validator)
+			expectedTokens := initialTokens
+			if tc.slashed {
+				expectedTokens = initialTokens.Sub(slashFraction.MulInt(initialTokens).TruncateInt())
+			}
 
-	s.app.OracleKeeper.SetMissCounter(s.ctx, valAddr, uint64(possibleWinsPerSlashWindow-minValidVotes+1))
-	s.app.OracleKeeper.SlashAndResetMissCounters(s.ctx)
-	validator, _ = s.app.StakingKeeper.GetValidator(s.ctx, valAddr)
-	s.Require().Equal(amt, validator.Tokens)
-	s.Require().False(validator.Jailed)
+			validator, _ = s.app.StakingKeeper.GetValidator(s.ctx, valAddr)
+			s.Require().Equal(expectedTokens, validator.Tokens)
+			s.Require().Equal(tc.jailedAfter, validator.Jailed)
+		})
+	}
 
-	// Case 4, slash jailed validator
-	validator, _ = s.app.StakingKeeper.GetValidator(s.ctx, valAddr)
-	validator.Status = stakingtypes.Bonded
-	validator.Jailed = true
-	validator.Tokens = amt
-	s.app.StakingKeeper.SetValidator(s.ctx, validator)
-
-	s.app.OracleKeeper.SetMissCounter(s.ctx, valAddr, uint64(possibleWinsPerSlashWindow-minValidVotes+1))
-	s.app.OracleKeeper.SlashAndResetMissCounters(s.ctx)
-	validator, _ = s.app.StakingKeeper.GetValidator(s.ctx, valAddr)
-	s.Require().Equal(amt, validator.Tokens)
 }
