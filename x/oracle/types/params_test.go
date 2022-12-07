@@ -63,20 +63,20 @@ func TestValidateRewardDistributionWindow(t *testing.T) {
 }
 
 func TestValidateAcceptList(t *testing.T) {
-	err := validateAcceptList("invalidUint64")
+	err := validateDenomList("invalidUint64")
 	require.ErrorContains(t, err, "invalid parameter type: string")
 
-	err = validateAcceptList(DenomList{
+	err = validateDenomList(DenomList{
 		{BaseDenom: ""},
 	})
 	require.ErrorContains(t, err, "oracle parameter AcceptList Denom must have BaseDenom")
 
-	err = validateAcceptList(DenomList{
+	err = validateDenomList(DenomList{
 		{BaseDenom: DenomOjo.BaseDenom, SymbolDenom: ""},
 	})
 	require.ErrorContains(t, err, "oracle parameter AcceptList Denom must have SymbolDenom")
 
-	err = validateAcceptList(DenomList{
+	err = validateDenomList(DenomList{
 		{BaseDenom: DenomOjo.BaseDenom, SymbolDenom: DenomOjo.SymbolDenom},
 	})
 	require.Nil(t, err)

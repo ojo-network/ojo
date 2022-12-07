@@ -45,6 +45,18 @@ func (k Keeper) SetAcceptList(ctx sdk.Context, acceptList types.DenomList) {
 	k.paramSpace.Set(ctx, types.KeyAcceptList, acceptList)
 }
 
+// MandatoryList returns the denom list that can be activated
+func (k Keeper) MandatoryList(ctx sdk.Context) (res types.DenomList) {
+	k.paramSpace.Get(ctx, types.KeyMandatoryList, &res)
+	return
+}
+
+// SetMandatoryList updates the accepted list of assets supported by the x/oracle
+// module.
+func (k Keeper) SetMandatoryList(ctx sdk.Context, mandatoryList types.DenomList) {
+	k.paramSpace.Set(ctx, types.KeyMandatoryList, mandatoryList)
+}
+
 // SlashFraction returns oracle voting penalty rate
 func (k Keeper) SlashFraction(ctx sdk.Context) (res sdk.Dec) {
 	k.paramSpace.Get(ctx, types.KeySlashFraction, &res)
