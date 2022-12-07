@@ -6,29 +6,23 @@ import (
 
 // SlashAndResetMissCounters iterates over all the current missed counters and
 // calculates the "valid vote rate" as:
-// (votePeriodsPerWindow - missCounter)/votePeriodsPerWindow.
+// (possibleWinsPerSlashWindow - missCounter)/possibleWinsPerSlashWindow.
 //
 // If the valid vote rate is below the minValidPerWindow, the validator will be
 // slashed and jailed.
 func (k Keeper) SlashAndResetMissCounters(ctx sdk.Context) {
-	height := ctx.BlockHeight()
-	distributionHeight := height - sdk.ValidatorUpdateDelay - 1
-
 	var (
-		slashWindow          = int64(k.SlashWindow(ctx))
-		votePeriod           = int64(k.VotePeriod(ctx))
-		votePeriodsPerWindow = sdk.NewDec(slashWindow).QuoInt64(votePeriod).TruncateInt64()
-	)
+		possibleWinsPerSlashWindow = k.PossibleWinsPerSlashWindow(ctx)
+		minValidPerWindow          = k.MinValidPerWindow(ctx)
 
-	var (
-		minValidPerWindow = k.MinValidPerWindow(ctx)
-		slashFraction     = k.SlashFraction(ctx)
-		powerReduction    = k.StakingKeeper.PowerReduction(ctx)
+		distributionHeight = ctx.BlockHeight() - sdk.ValidatorUpdateDelay - 1
+		slashFraction      = k.SlashFraction(ctx)
+		powerReduction     = k.StakingKeeper.PowerReduction(ctx)
 	)
 
 	k.IterateMissCounters(ctx, func(operator sdk.ValAddress, missCounter uint64) bool {
-		diff := sdk.NewInt(votePeriodsPerWindow - int64(missCounter))
-		validVoteRate := sdk.NewDecFromInt(diff).QuoInt64(votePeriodsPerWindow)
+		validVotes := sdk.NewInt(possibleWinsPerSlashWindow - int64(missCounter))
+		validVoteRate := sdk.NewDecFromInt(validVotes).QuoInt64(possibleWinsPerSlashWindow)
 
 		// Slash and jail the validator if their valid vote rate is smaller than the
 		// minimum threshold.
@@ -54,4 +48,17 @@ func (k Keeper) SlashAndResetMissCounters(ctx sdk.Context) {
 		k.DeleteMissCounter(ctx, operator)
 		return false
 	})
+}
+
+// PossibleWinsPerSlashWindow returns the total number of possible correct votes
+// that a validator can have per asset multiplied by the number of vote
+// periods in the slash window
+func (k Keeper) PossibleWinsPerSlashWindow(ctx sdk.Context) int64 {
+	slashWindow := int64(k.SlashWindow(ctx))
+	votePeriod := int64(k.VotePeriod(ctx))
+
+	votePeriodsPerWindow := sdk.NewDec(slashWindow).QuoInt64(votePeriod).TruncateInt64()
+	numberOfAssets := int64(len(k.GetParams(ctx).AcceptList))
+
+	return (votePeriodsPerWindow * numberOfAssets)
 }

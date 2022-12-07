@@ -2,7 +2,6 @@ package keeper_test
 
 import (
 	"fmt"
-	"math/rand"
 	"strings"
 	"testing"
 
@@ -136,18 +135,6 @@ func (s *IntegrationTestSuite) TestGetFeederDelegation() {
 	resp, err := app.OracleKeeper.GetFeederDelegation(ctx, valAddr)
 	s.Require().NoError(err)
 	s.Require().Equal(resp, feederAddr)
-}
-
-func (s *IntegrationTestSuite) TestMissCounter() {
-	app, ctx := s.app, s.ctx
-	missCounter := uint64(rand.Intn(100))
-
-	s.Require().Equal(app.OracleKeeper.GetMissCounter(ctx, valAddr), uint64(0))
-	app.OracleKeeper.SetMissCounter(ctx, valAddr, missCounter)
-	s.Require().Equal(app.OracleKeeper.GetMissCounter(ctx, valAddr), missCounter)
-
-	app.OracleKeeper.DeleteMissCounter(ctx, valAddr)
-	s.Require().Equal(app.OracleKeeper.GetMissCounter(ctx, valAddr), uint64(0))
 }
 
 func (s *IntegrationTestSuite) TestAggregateExchangeRatePrevote() {

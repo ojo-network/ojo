@@ -62,13 +62,13 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		voteTargetsLen := len(voteTargets)
 		claimSlice := types.ClaimMapToSlice(validatorClaimMap)
 		for _, claim := range claimSlice {
-			// Skip valid voters
-			if int(claim.WinCount) == voteTargetsLen {
+			misses := uint64(voteTargetsLen - int(claim.WinCount))
+			if misses == 0 {
 				continue
 			}
 
 			// Increase miss counter
-			k.SetMissCounter(ctx, claim.Recipient, k.GetMissCounter(ctx, claim.Recipient)+1)
+			k.SetMissCounter(ctx, claim.Recipient, k.GetMissCounter(ctx, claim.Recipient)+misses)
 		}
 
 		// Distribute rewards to ballot winners
