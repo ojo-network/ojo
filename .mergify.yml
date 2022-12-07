@@ -1,0 +1,19 @@
+queue_rules:
+  - name: default
+    conditions:
+      - "#approved-reviews-by>1"
+
+pull_request_rules:
+  - name: Automatic merge on approval
+    conditions:
+      - "#approved-reviews-by>=1"
+      - base=main
+      - label=A:Automerge
+    actions:
+      queue:
+        name: default
+      merge:
+        method: squash
+        commit_message_template: |
+          {{ title }} (#{{ number }})
+          {{ body }}
