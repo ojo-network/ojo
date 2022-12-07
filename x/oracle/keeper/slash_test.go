@@ -3,6 +3,7 @@ package keeper_test
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/ojo-network/ojo/x/oracle/types"
 )
 
 func (s *IntegrationTestSuite) TestSlashAndResetMissCounters() {
@@ -78,6 +79,54 @@ func (s *IntegrationTestSuite) TestSlashAndResetMissCounters() {
 			validator, _ = s.app.StakingKeeper.GetValidator(s.ctx, valAddr)
 			s.Require().Equal(expectedTokens, validator.Tokens)
 			s.Require().Equal(tc.jailedAfter, validator.Jailed)
+		})
+	}
+
+}
+
+func (s *IntegrationTestSuite) TestPossibleWinsPerSlashWindow() {
+	atomDenom := types.Denom{BaseDenom: "atom", SymbolDenom: "ATOM"}
+	umeeDenom := types.Denom{BaseDenom: "umee", SymbolDenom: "UMEE"}
+
+	testCases := []struct {
+		name                       string
+		votePeriod                 uint64
+		slashWindow                uint64
+		acceptList                 types.DenomList
+		possibleWinsPerSlashWindow int64
+	}{
+		{
+			name:                       "multiple denoms in accept list",
+			votePeriod:                 5,
+			slashWindow:                15,
+			acceptList:                 types.DenomList{atomDenom, umeeDenom},
+			possibleWinsPerSlashWindow: 6,
+		},
+		{
+			name:                       "no denoms in accept list",
+			votePeriod:                 5,
+			slashWindow:                15,
+			acceptList:                 types.DenomList{},
+			possibleWinsPerSlashWindow: 0,
+		},
+		{
+			name:                       "single denom in accept list",
+			votePeriod:                 2,
+			slashWindow:                10,
+			acceptList:                 types.DenomList{atomDenom},
+			possibleWinsPerSlashWindow: 5,
+		},
+	}
+
+	for _, tc := range testCases {
+		s.Run(tc.name, func() {
+			params := types.DefaultParams()
+			params.VotePeriod = tc.votePeriod
+			params.SlashWindow = tc.slashWindow
+			params.AcceptList = tc.acceptList
+			s.app.OracleKeeper.SetParams(s.ctx, params)
+			actual := s.app.OracleKeeper.PossibleWinsPerSlashWindow(s.ctx)
+			s.Require().Equal(tc.possibleWinsPerSlashWindow, actual)
 		})
 	}
 
