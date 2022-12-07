@@ -6,7 +6,7 @@ import (
 
 // SlashAndResetMissCounters iterates over all the current missed counters and
 // calculates the "valid vote rate" as:
-// (votePeriodsPerWindow - missCounter)/votePeriodsPerWindow.
+// (possibleWinsPerSlashWindow - missCounter)/possibleWinsPerSlashWindow.
 //
 // If the valid vote rate is below the minValidPerWindow, the validator will be
 // slashed and jailed.
@@ -50,6 +50,9 @@ func (k Keeper) SlashAndResetMissCounters(ctx sdk.Context) {
 	})
 }
 
+// PossibleWinsPerSlashWindow returns the total number of possible correct votes
+// that a validator can have per asset multiplied by the number of vote
+// periods in the slash window
 func (k Keeper) PossibleWinsPerSlashWindow(ctx sdk.Context) int64 {
 	slashWindow := int64(k.SlashWindow(ctx))
 	votePeriod := int64(k.VotePeriod(ctx))
