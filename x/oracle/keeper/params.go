@@ -45,15 +45,16 @@ func (k Keeper) SetAcceptList(ctx sdk.Context, acceptList types.DenomList) {
 	k.paramSpace.Set(ctx, types.KeyAcceptList, acceptList)
 }
 
-// MandatoryList returns the denom list that can be activated
+// MandatoryList returns the denom list that are mandatory
 func (k Keeper) MandatoryList(ctx sdk.Context) (res types.DenomList) {
 	k.paramSpace.Get(ctx, types.KeyMandatoryList, &res)
 	return
 }
 
-// SetMandatoryList updates the accepted list of assets supported by the x/oracle
+// SetMandatoryList updates the mandatory list of assets supported by the x/oracle
 // module.
-func (k Keeper) SetMandatoryList(ctx sdk.Context, mandatoryList types.DenomList) {
+func (k Keeper) SetMandatoryList(ctx sdk.Context,
+	mandatoryList types.DenomList) {
 	k.paramSpace.Set(ctx, types.KeyMandatoryList, mandatoryList)
 }
 
