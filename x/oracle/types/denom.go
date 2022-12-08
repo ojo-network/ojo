@@ -41,16 +41,6 @@ func (dl DenomList) Contains(symbolDenom string) bool {
 	return false
 }
 
-// ContainsDenom checks whether or not a Denom (e.g. uOJO) is in the DenomList
-func (dl DenomList) ContainsDenom(denom string) bool {
-	for _, d := range dl {
-		if strings.EqualFold(d.BaseDenom, denom) {
-			return true
-		}
-	}
-	return false
-}
-
 // ContainDenoms checks if d is a subset of dl
 func (dl DenomList) ContainDenoms(d DenomList) bool {
 	contains := make(map[string]struct{})
