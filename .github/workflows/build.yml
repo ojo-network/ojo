@@ -18,7 +18,7 @@ jobs:
     name: ojo ${{ matrix.arch }} for ${{ matrix.targetos }}
     steps:
       - uses: actions/checkout@v3
-      - uses: technote-space/get-diff-action@v6.1.1
+      - uses: technote-space/get-diff-action@v6.1.2
         with:
           PATTERNS: |
             **/**.go

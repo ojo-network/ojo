@@ -63,7 +63,7 @@ func (k Keeper) SlashFraction(ctx sdk.Context) (res sdk.Dec) {
 	return
 }
 
-// SlashWindow returns # of vote period for oracle slashing
+// SlashWindow returns the number of total blocks in a slash window
 func (k Keeper) SlashWindow(ctx sdk.Context) (res uint64) {
 	k.paramSpace.Get(ctx, types.KeySlashWindow, &res)
 	return

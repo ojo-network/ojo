@@ -34,6 +34,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 			voteTargetDenoms []string
 		)
 		for _, v := range params.AcceptList {
+			voteTargets = append(voteTargets, v.SymbolDenom)
 			voteTargetDenoms = append(voteTargetDenoms, v.BaseDenom)
 		}
 
@@ -59,16 +60,16 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		}
 
 		// update miss counting & slashing
-		voteTargetsLen := len(params.MandatoryList)
+		voteTargetsLen := len(voteTargets)
 		claimSlice := types.ClaimMapToSlice(validatorClaimMap)
 		for _, claim := range claimSlice {
-			// Skip valid voters
-			if int(claim.MandatoryWinCount) == voteTargetsLen {
+			misses := uint64(voteTargetsLen - int(claim.WinCount))
+			if misses == 0 {
 				continue
 			}
 
 			// Increase miss counter
-			k.SetMissCounter(ctx, claim.Recipient, k.GetMissCounter(ctx, claim.Recipient)+1)
+			k.SetMissCounter(ctx, claim.Recipient, k.GetMissCounter(ctx, claim.Recipient)+misses)
 		}
 
 		// Distribute rewards to ballot winners
