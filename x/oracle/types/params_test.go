@@ -62,7 +62,7 @@ func TestValidateRewardDistributionWindow(t *testing.T) {
 	require.Nil(t, err)
 }
 
-func TestValidateAcceptList(t *testing.T) {
+func TestValidateDenomList(t *testing.T) {
 	err := validateDenomList("invalidUint64")
 	require.ErrorContains(t, err, "invalid parameter type: string")
 

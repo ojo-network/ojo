@@ -15,7 +15,7 @@ var (
 	KeyRewardBand               = []byte("RewardBand")
 	KeyRewardDistributionWindow = []byte("RewardDistributionWindow")
 	KeyAcceptList               = []byte("AcceptList")
-	KeyMandatoryList            = []byte("KeyMandatoryList")
+	KeyMandatoryList            = []byte("MandatoryList")
 	KeySlashFraction            = []byte("SlashFraction")
 	KeySlashWindow              = []byte("SlashWindow")
 	KeyMinValidPerWindow        = []byte("MinValidPerWindow")
@@ -44,7 +44,13 @@ var (
 			Exponent:    AtomExponent,
 		},
 	}
-	DefaultMandatoryList     = DefaultAcceptList
+	DefaultMandatoryList = DenomList{
+		{
+			BaseDenom:   AtomDenom,
+			SymbolDenom: AtomSymbol,
+			Exponent:    AtomExponent,
+		},
+	}
 	DefaultSlashFraction     = sdk.NewDecWithPrec(1, 4) // 0.01%
 	DefaultMinValidPerWindow = sdk.NewDecWithPrec(5, 2) // 5%
 )
