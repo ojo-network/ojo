@@ -77,10 +77,16 @@ func (k Keeper) RewardBallotWinners(
 			continue
 		}
 
-		rewardCoins, _ := periodRewards.MulDec(
-			sdk.NewDec(int64(k.GetMissCounter(ctx, winner.Recipient))).
-				QuoInt64(totalMissCounters)).
-			TruncateDecimal()
+		var rewardCoins sdk.Coins
+		if totalMissCounters == 0 {
+			rewardCoins, _ = periodRewards.QuoDec(sdk.NewDec(int64(len(ballotWinners)))).TruncateDecimal()
+		} else {
+			rewardCoins, _ = periodRewards.MulDec(
+				sdk.NewDec(int64(k.GetMissCounter(ctx, winner.Recipient))).
+					QuoInt64(totalMissCounters)).
+				TruncateDecimal()
+		}
+
 		if rewardCoins.IsZero() {
 			continue
 		}
