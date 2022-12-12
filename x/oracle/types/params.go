@@ -175,17 +175,17 @@ func (p Params) Validate() error {
 
 	for _, denom := range p.MandatoryList {
 		if len(denom.BaseDenom) == 0 {
-			return fmt.Errorf("oracle parameter AcceptList Denom must have BaseDenom")
+			return fmt.Errorf("oracle parameter MandatoryList Denom must have BaseDenom")
 		}
 		if len(denom.SymbolDenom) == 0 {
-			return fmt.Errorf("oracle parameter AcceptList Denom must have SymbolDenom")
+			return fmt.Errorf("oracle parameter MandatoryList Denom must have SymbolDenom")
 		}
 
 	}
 
 	// all denoms in mandatory list must be in accept list
 	if !p.AcceptList.ContainDenoms(p.MandatoryList) {
-		return fmt.Errorf("denom in mandatory list not present in accept list")
+		return fmt.Errorf("denom in MandatoryList not present in AcceptList")
 	}
 
 	return nil
