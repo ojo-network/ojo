@@ -9,7 +9,7 @@ import (
 	"github.com/ojo-network/ojo/x/oracle/types"
 )
 
-// prependOjoIfUnique pushs `uojo` denom to the front of the list, if it is not yet included.
+// prependOjoIfUnique pushes `uojo` denom to the front of the list, if it is not yet included.
 func prependOjoIfUnique(voteTargets []string) []string {
 	if genmap.Contains(types.OjoDenom, voteTargets) {
 		return voteTargets

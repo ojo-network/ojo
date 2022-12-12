@@ -40,3 +40,20 @@ func (dl DenomList) Contains(symbolDenom string) bool {
 	}
 	return false
 }
+
+// ContainDenoms checks if d is a subset of dl
+func (dl DenomList) ContainDenoms(d DenomList) bool {
+	contains := make(map[string]struct{})
+
+	for _, denom := range dl {
+		contains[denom.String()] = struct{}{}
+	}
+
+	for _, denom := range d {
+		if _, found := contains[denom.String()]; !found {
+			return false
+		}
+	}
+
+	return true
+}
