@@ -148,19 +148,19 @@ func BallotMapToSlice(votes map[string]ExchangeRateBallot) []BallotDenom {
 
 // Claim is an interface that directs its rewards to an attached bank account.
 type Claim struct {
-	Power     int64
-	Weight    int64
-	WinCount  int64
-	Recipient sdk.ValAddress
+	Power             int64
+	Weight            int64
+	MandatoryWinCount int64
+	Recipient         sdk.ValAddress
 }
 
 // NewClaim generates a Claim instance.
-func NewClaim(power, weight, winCount int64, recipient sdk.ValAddress) Claim {
+func NewClaim(power, weight, mandatoryWinCount int64, recipient sdk.ValAddress) Claim {
 	return Claim{
-		Power:     power,
-		Weight:    weight,
-		WinCount:  winCount,
-		Recipient: recipient,
+		Power:             power,
+		Weight:            weight,
+		MandatoryWinCount: mandatoryWinCount,
+		Recipient:         recipient,
 	}
 }
 
@@ -170,10 +170,10 @@ func ClaimMapToSlice(claims map[string]Claim) []Claim {
 	i := 0
 	for _, claim := range claims {
 		c[i] = Claim{
-			Power:     claim.Power,
-			Weight:    claim.Weight,
-			WinCount:  claim.WinCount,
-			Recipient: claim.Recipient,
+			Power:             claim.Power,
+			Weight:            claim.Weight,
+			MandatoryWinCount: claim.MandatoryWinCount,
+			Recipient:         claim.Recipient,
 		}
 		i++
 	}

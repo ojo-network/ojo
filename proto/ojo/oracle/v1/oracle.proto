@@ -41,6 +41,11 @@ message Params {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
+  repeated Denom mandatory_list = 9 [
+    (gogoproto.moretags)     = "yaml:\"mandatory_list\"",
+    (gogoproto.castrepeated) = "DenomList",
+    (gogoproto.nullable)     = false
+  ];
 }
 
 // Denom - the object to hold configurations of each denom

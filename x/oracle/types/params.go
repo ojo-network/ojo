@@ -15,6 +15,7 @@ var (
 	KeyRewardBand               = []byte("RewardBand")
 	KeyRewardDistributionWindow = []byte("RewardDistributionWindow")
 	KeyAcceptList               = []byte("AcceptList")
+	KeyMandatoryList            = []byte("MandatoryList")
 	KeySlashFraction            = []byte("SlashFraction")
 	KeySlashWindow              = []byte("SlashWindow")
 	KeyMinValidPerWindow        = []byte("MinValidPerWindow")
@@ -43,6 +44,13 @@ var (
 			Exponent:    AtomExponent,
 		},
 	}
+	DefaultMandatoryList = DenomList{
+		{
+			BaseDenom:   AtomDenom,
+			SymbolDenom: AtomSymbol,
+			Exponent:    AtomExponent,
+		},
+	}
 	DefaultSlashFraction     = sdk.NewDecWithPrec(1, 4) // 0.01%
 	DefaultMinValidPerWindow = sdk.NewDecWithPrec(5, 2) // 5%
 )
@@ -57,6 +65,7 @@ func DefaultParams() Params {
 		RewardBand:               DefaultRewardBand,
 		RewardDistributionWindow: DefaultRewardDistributionWindow,
 		AcceptList:               DefaultAcceptList,
+		MandatoryList:            DefaultMandatoryList,
 		SlashFraction:            DefaultSlashFraction,
 		SlashWindow:              DefaultSlashWindow,
 		MinValidPerWindow:        DefaultMinValidPerWindow,
@@ -95,7 +104,12 @@ func (p *Params) ParamSetPairs() paramstypes.ParamSetPairs {
 		paramstypes.NewParamSetPair(
 			KeyAcceptList,
 			&p.AcceptList,
-			validateAcceptList,
+			validateDenomList,
+		),
+		paramstypes.NewParamSetPair(
+			KeyMandatoryList,
+			&p.MandatoryList,
+			validateDenomList,
 		),
 		paramstypes.NewParamSetPair(
 			KeySlashFraction,
@@ -158,6 +172,22 @@ func (p Params) Validate() error {
 			return fmt.Errorf("oracle parameter AcceptList Denom must have SymbolDenom")
 		}
 	}
+
+	for _, denom := range p.MandatoryList {
+		if len(denom.BaseDenom) == 0 {
+			return fmt.Errorf("oracle parameter MandatoryList Denom must have BaseDenom")
+		}
+		if len(denom.SymbolDenom) == 0 {
+			return fmt.Errorf("oracle parameter MandatoryList Denom must have SymbolDenom")
+		}
+
+	}
+
+	// all denoms in mandatory list must be in accept list
+	if !p.AcceptList.ContainDenoms(p.MandatoryList) {
+		return fmt.Errorf("denom in MandatoryList not present in AcceptList")
+	}
+
 	return nil
 }
 
@@ -221,7 +251,7 @@ func validateRewardDistributionWindow(i interface{}) error {
 	return nil
 }
 
-func validateAcceptList(i interface{}) error {
+func validateDenomList(i interface{}) error {
 	v, ok := i.(DenomList)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)

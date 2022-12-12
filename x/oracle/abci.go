@@ -31,11 +31,9 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 
 		var (
 			// voteTargets defines the symbol (ticker) denoms that we require votes on
-			voteTargets      []string
 			voteTargetDenoms []string
 		)
 		for _, v := range params.AcceptList {
-			voteTargets = append(voteTargets, v.SymbolDenom)
 			voteTargetDenoms = append(voteTargetDenoms, v.BaseDenom)
 		}
 
@@ -46,8 +44,10 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 
 		// Iterate through ballots and update exchange rates; drop if not enough votes have been achieved.
 		for _, ballotDenom := range ballotDenomSlice {
+			// Increment Mandatory Win count if Denom in Mandatory list
+			incrementWin := params.MandatoryList.Contains(ballotDenom.Denom)
 			// Get weighted median of exchange rates
-			exchangeRate, err := Tally(ballotDenom.Ballot, params.RewardBand, validatorClaimMap)
+			exchangeRate, err := Tally(ballotDenom.Ballot, params.RewardBand, validatorClaimMap, incrementWin)
 			if err != nil {
 				return err
 			}
@@ -59,10 +59,10 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		}
 
 		// update miss counting & slashing
-		voteTargetsLen := len(voteTargets)
+		voteTargetsLen := len(params.MandatoryList)
 		claimSlice := types.ClaimMapToSlice(validatorClaimMap)
 		for _, claim := range claimSlice {
-			misses := uint64(voteTargetsLen - int(claim.WinCount))
+			misses := uint64(voteTargetsLen - int(claim.MandatoryWinCount))
 			if misses == 0 {
 				continue
 			}
@@ -100,6 +100,7 @@ func Tally(
 	ballot types.ExchangeRateBallot,
 	rewardBand sdk.Dec,
 	validatorClaimMap map[string]types.Claim,
+	incrementWin bool,
 ) (sdk.Dec, error) {
 	weightedMedian, err := ballot.WeightedMedian()
 	if err != nil {
@@ -125,7 +126,10 @@ func Tally(
 			claim := validatorClaimMap[key]
 
 			claim.Weight += tallyVote.Power
-			claim.WinCount++
+			if incrementWin {
+				claim.MandatoryWinCount++
+			}
+
 			validatorClaimMap[key] = claim
 		}
 	}
