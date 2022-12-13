@@ -6,6 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ojo-network/ojo/util/genmap"
+	"github.com/ojo-network/ojo/util/reward"
 	"github.com/ojo-network/ojo/x/oracle/types"
 )
 
@@ -20,12 +21,16 @@ func prependOjoIfUnique(voteTargets []string) []string {
 	return rewardDenoms
 }
 
-func (k Keeper) totalMissCounters(ctx sdk.Context, ballotWinners []types.Claim) (missCounterSum int64) {
-	for _, winner := range ballotWinners {
-		missCounterSum += int64(k.GetMissCounter(ctx, winner.Recipient))
+func (k Keeper) smallestMissCountInBallot(ctx sdk.Context, ballotWinners []types.Claim) (missCount uint64) {
+	missCount = k.GetMissCounter(ctx, ballotWinners[0].Recipient)
+	for _, winner := range ballotWinners[1:] {
+		count := k.GetMissCounter(ctx, winner.Recipient)
+		if count < missCount {
+			missCount = count
+		}
 	}
 
-	return missCounterSum
+	return missCount
 }
 
 // RewardBallotWinners is executed at the end of every voting period, where we
@@ -69,7 +74,7 @@ func (k Keeper) RewardBallotWinners(
 	// distribute rewards
 	var distributedReward sdk.Coins
 
-	totalMissCounters := k.totalMissCounters(ctx, ballotWinners)
+	smallestMissCount := k.smallestMissCountInBallot(ctx, ballotWinners)
 	for _, winner := range ballotWinners {
 		receiverVal := k.StakingKeeper.Validator(ctx, winner.Recipient)
 		// in case absence of the validator, we just skip distribution
@@ -77,16 +82,16 @@ func (k Keeper) RewardBallotWinners(
 			continue
 		}
 
-		var rewardCoins sdk.Coins
-		if totalMissCounters == 0 {
-			rewardCoins, _ = periodRewards.QuoDec(sdk.NewDec(int64(len(ballotWinners)))).TruncateDecimal()
-		} else {
-			rewardCoins, _ = periodRewards.MulDec(
-				sdk.NewDec(int64(k.GetMissCounter(ctx, winner.Recipient))).
-					QuoInt64(totalMissCounters)).
-				TruncateDecimal()
-		}
+		rewardFactor := reward.CalculateRewardFactor(
+			k.GetMissCounter(ctx, winner.Recipient),
+			uint64(len(voteTargets)),
+			smallestMissCount,
+		)
 
+		rewardCoins, _ := periodRewards.MulDec(
+			sdk.MustNewDecFromStr(rewardFactor).
+				QuoInt64(int64(len(ballotWinners)))).
+			TruncateDecimal()
 		if rewardCoins.IsZero() {
 			continue
 		}
