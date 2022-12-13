@@ -6,7 +6,7 @@ The Oracle module provides the Ojo blockchain with an up-to-date and accurate pr
 
 As price information is extrinsic to the blockchain, the Ojo network relies on validators to periodically vote on current exchange rates, with the protocol tallying up the results once per `VotePeriod` and updating the on-chain exchange rates as the weighted median of the ballot.
 
-> Since the Oracle service is powered by validators, you may find it interesting to look at the [Staking](https://github.com/cosmos/cosmos-sdk/tree/master/x/staking/spec/README.md) module, which covers the logic for staking and validators.
+> Since the Oracle service is powered by validators, you may find it interesting to look at the [Staking](https://github.com/cosmos/cosmos-sdk/tree/main/x/staking#readme) module, which covers the logic for staking and validators.
 
 ## Contents
 
@@ -97,7 +97,7 @@ The control flow for vote-tallying, exchange rate updates, ballot rewards and sl
 
 ### ExchangeRate
 
-An `sdk.Dec` that stores an exchange rate against USD, which is used by the [Leverage](../leverage/README.md) module.
+An `sdk.Dec` that stores an exchange rate against USD.
 
 - ExchangeRate: `0x01 | byte(denom) -> sdk.Dec`
 
