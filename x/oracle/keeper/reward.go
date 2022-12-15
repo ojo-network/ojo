@@ -45,17 +45,6 @@ func (k Keeper) RewardBallotWinners(
 	voteTargets []string,
 	ballotWinners []types.Claim,
 ) {
-	// sum weight of the claims
-	var ballotPowerSum int64
-	for _, winner := range ballotWinners {
-		ballotPowerSum += winner.Weight
-	}
-
-	// return if the ballot is empty
-	if ballotPowerSum == 0 {
-		return
-	}
-
 	distributionRatio := sdk.NewDec(votePeriod).QuoInt64(rewardDistributionWindow)
 	var periodRewards sdk.DecCoins
 	rewardDenoms := prependOjoIfUnique(voteTargets)

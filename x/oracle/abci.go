@@ -23,10 +23,9 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 	if isPeriodLastBlock(ctx, params.VotePeriod) {
 		// Build claim map over all validators in active set
 		validatorClaimMap := make(map[string]types.Claim)
-		powerReduction := k.StakingKeeper.PowerReduction(ctx)
 		for _, v := range k.StakingKeeper.GetBondedValidatorsByPower(ctx) {
 			addr := v.GetOperator()
-			validatorClaimMap[addr.String()] = types.NewClaim(v.GetConsensusPower(powerReduction), 0, 0, addr)
+			validatorClaimMap[addr.String()] = types.NewClaim(0, addr)
 		}
 
 		var (
@@ -102,30 +101,29 @@ func Tally(
 	validatorClaimMap map[string]types.Claim,
 	incrementWin bool,
 ) (sdk.Dec, error) {
-	weightedMedian, err := ballot.WeightedMedian()
+	median, err := ballot.Median()
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
-	standardDeviation, err := ballot.StandardDeviation()
+	standardDeviation, err := ballot.StandardDeviation(median)
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
 
 	// rewardSpread is the MAX((weightedMedian * (rewardBand/2)), standardDeviation)
-	rewardSpread := weightedMedian.Mul(rewardBand.QuoInt64(2))
+	rewardSpread := median.Mul(rewardBand.QuoInt64(2))
 	rewardSpread = sdk.MaxDec(rewardSpread, standardDeviation)
 
 	for _, tallyVote := range ballot {
 		// Filter ballot winners. For voters, we filter out the tally vote iff:
 		// (weightedMedian - rewardSpread) <= ExchangeRate <= (weightedMedian + rewardSpread)
-		if (tallyVote.ExchangeRate.GTE(weightedMedian.Sub(rewardSpread)) &&
-			tallyVote.ExchangeRate.LTE(weightedMedian.Add(rewardSpread))) ||
+		if (tallyVote.ExchangeRate.GTE(median.Sub(rewardSpread)) &&
+			tallyVote.ExchangeRate.LTE(median.Add(rewardSpread))) ||
 			!tallyVote.ExchangeRate.IsPositive() {
 
 			key := tallyVote.Voter.String()
 			claim := validatorClaimMap[key]
 
-			claim.Weight += tallyVote.Power
 			if incrementWin {
 				claim.MandatoryWinCount++
 			}
@@ -134,5 +132,5 @@ func Tally(
 		}
 	}
 
-	return weightedMedian, nil
+	return median, nil
 }
