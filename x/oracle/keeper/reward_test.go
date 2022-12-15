@@ -95,3 +95,39 @@ func (s *IntegrationTestSuite) TestRewardBallotWinnersZeroMissCounters() {
 	s.Require().Equal(sdk.NewDecFromInt(givingAmt.AmountOf(types.OjoDenom)).QuoInt64(votePeriodsPerWindow).QuoInt64(2).TruncateInt(),
 		outstandingRewardsVal2.AmountOf(types.OjoDenom))
 }
+
+func (s *IntegrationTestSuite) TestRewardBallotWinnersZeroVoteTargets() {
+	app, ctx := s.app, s.ctx
+
+	// Add claim pools
+	claims := []types.Claim{
+		types.NewClaim(0, valAddr),
+		types.NewClaim(0, valAddr2),
+	}
+
+	app.OracleKeeper.RewardBallotWinners(ctx, (int64)(app.OracleKeeper.VotePeriod(ctx)), (int64)(app.OracleKeeper.RewardDistributionWindow(ctx)), []string{}, claims)
+	outstandingRewardsDecVal1 := app.DistrKeeper.GetValidatorOutstandingRewardsCoins(ctx, valAddr)
+	outstandingRewardsVal1, _ := outstandingRewardsDecVal1.TruncateDecimal()
+	outstandingRewardsDecVal2 := app.DistrKeeper.GetValidatorOutstandingRewardsCoins(ctx, valAddr2)
+	outstandingRewardsVal2, _ := outstandingRewardsDecVal2.TruncateDecimal()
+	s.Require().Equal(sdk.ZeroDec().TruncateInt(), outstandingRewardsVal1.AmountOf(types.OjoDenom))
+	s.Require().Equal(sdk.ZeroDec().TruncateInt(), outstandingRewardsVal2.AmountOf(types.OjoDenom))
+}
+
+func (s *IntegrationTestSuite) TestRewardBallotWinnersZeroClaims() {
+	app, ctx := s.app, s.ctx
+
+	var voteTargets []string
+	params := app.OracleKeeper.GetParams(ctx)
+	for _, v := range params.AcceptList {
+		voteTargets = append(voteTargets, v.SymbolDenom)
+	}
+
+	app.OracleKeeper.RewardBallotWinners(ctx, (int64)(app.OracleKeeper.VotePeriod(ctx)), (int64)(app.OracleKeeper.RewardDistributionWindow(ctx)), voteTargets, []types.Claim{})
+	outstandingRewardsDecVal1 := app.DistrKeeper.GetValidatorOutstandingRewardsCoins(ctx, valAddr)
+	outstandingRewardsVal1, _ := outstandingRewardsDecVal1.TruncateDecimal()
+	outstandingRewardsDecVal2 := app.DistrKeeper.GetValidatorOutstandingRewardsCoins(ctx, valAddr2)
+	outstandingRewardsVal2, _ := outstandingRewardsDecVal2.TruncateDecimal()
+	s.Require().Equal(sdk.ZeroDec().TruncateInt(), outstandingRewardsVal1.AmountOf(types.OjoDenom))
+	s.Require().Equal(sdk.ZeroDec().TruncateInt(), outstandingRewardsVal2.AmountOf(types.OjoDenom))
+}
