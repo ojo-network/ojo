@@ -15,8 +15,8 @@ func (s *IntegrationTestSuite) TestRewardBallotWinners() {
 
 	// Add claim pools
 	claims := []types.Claim{
-		types.NewClaim(0, valAddr),
-		types.NewClaim(0, valAddr2),
+		types.NewClaim(10, 0, valAddr),
+		types.NewClaim(20, 0, valAddr2),
 	}
 
 	missCounters := []types.MissCounter{
@@ -67,8 +67,8 @@ func (s *IntegrationTestSuite) TestRewardBallotWinnersZeroMissCounters() {
 
 	// Add claim pools
 	claims := []types.Claim{
-		types.NewClaim(0, valAddr),
-		types.NewClaim(0, valAddr2),
+		types.NewClaim(10, 0, valAddr),
+		types.NewClaim(20, 0, valAddr2),
 	}
 
 	// Prepare reward pool
@@ -101,8 +101,8 @@ func (s *IntegrationTestSuite) TestRewardBallotWinnersZeroVoteTargets() {
 
 	// Add claim pools
 	claims := []types.Claim{
-		types.NewClaim(0, valAddr),
-		types.NewClaim(0, valAddr2),
+		types.NewClaim(10, 0, valAddr),
+		types.NewClaim(20, 0, valAddr2),
 	}
 
 	app.OracleKeeper.RewardBallotWinners(ctx, (int64)(app.OracleKeeper.VotePeriod(ctx)), (int64)(app.OracleKeeper.RewardDistributionWindow(ctx)), []string{}, claims)

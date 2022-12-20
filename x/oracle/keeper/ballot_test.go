@@ -28,13 +28,14 @@ func (s *IntegrationTestSuite) TestBallot_OrganizeBallotByDenom() {
 	)
 
 	claimMap[valAddr.String()] = types.Claim{
+		Power:             1,
 		MandatoryWinCount: 1,
 		Recipient:         valAddr,
 	}
 	res = s.app.OracleKeeper.OrganizeBallotByDenom(s.ctx, claimMap)
 	require.Equal([]types.BallotDenom{
 		{
-			Ballot: types.ExchangeRateBallot{types.NewVoteForTally(sdk.OneDec(), "OJO", valAddr)},
+			Ballot: types.ExchangeRateBallot{types.NewVoteForTally(sdk.OneDec(), "OJO", valAddr, 1)},
 			Denom:  "OJO",
 		},
 	}, res)

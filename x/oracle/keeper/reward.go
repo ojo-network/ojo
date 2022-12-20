@@ -23,7 +23,7 @@ func prependOjoIfUnique(voteTargets []string) []string {
 
 // smallestMissCountInBallot iterates through a given list of Claims and returns the smallest
 // misscount in that list
-func (k Keeper) smallestMissCountInBallot(ctx sdk.Context, ballotWinners []types.Claim) uint64 {
+func (k Keeper) smallestMissCountInBallot(ctx sdk.Context, ballotWinners []types.Claim) int64 {
 	if len(ballotWinners) == 0 {
 		return 0
 	}
@@ -36,7 +36,7 @@ func (k Keeper) smallestMissCountInBallot(ctx sdk.Context, ballotWinners []types
 		}
 	}
 
-	return missCount
+	return int64(missCount)
 }
 
 // RewardBallotWinners is executed at the end of every voting period, where we
@@ -78,9 +78,9 @@ func (k Keeper) RewardBallotWinners(
 		}
 
 		rewardFactor := reward.CalculateRewardFactor(
-			k.GetMissCounter(ctx, winner.Recipient),
-			uint64(len(voteTargets)),
-			smallestMissCount,
+			sdk.NewDec(int64(k.GetMissCounter(ctx, winner.Recipient))),
+			sdk.NewDec(int64(len(voteTargets))),
+			sdk.NewDec(smallestMissCount),
 		)
 
 		rewardCoins, _ := periodRewards.MulDec(

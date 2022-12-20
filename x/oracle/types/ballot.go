@@ -13,14 +13,16 @@ type VoteForTally struct {
 	Denom        string
 	ExchangeRate sdk.Dec
 	Voter        sdk.ValAddress
+	Power        int64
 }
 
 // NewVoteForTally returns a new VoteForTally instance.
-func NewVoteForTally(rate sdk.Dec, denom string, voter sdk.ValAddress) VoteForTally {
+func NewVoteForTally(rate sdk.Dec, denom string, voter sdk.ValAddress, power int64) VoteForTally {
 	return VoteForTally{
 		ExchangeRate: rate,
 		Denom:        denom,
 		Voter:        voter,
+		Power:        power,
 	}
 }
 
@@ -37,6 +39,16 @@ func (pb ExchangeRateBallot) ToMap() map[string]sdk.Dec {
 	}
 
 	return exchangeRateMap
+}
+
+// Power returns the total amount of voting power in the ballot.
+func (pb ExchangeRateBallot) Power() int64 {
+	var totalPower int64
+	for _, vote := range pb {
+		totalPower += vote.Power
+	}
+
+	return totalPower
 }
 
 // ExchangeRates returns the exchange rates in the ballot as a list.
@@ -113,13 +125,15 @@ func BallotMapToSlice(votes map[string]ExchangeRateBallot) []BallotDenom {
 
 // Claim is an interface that directs its rewards to an attached bank account.
 type Claim struct {
+	Power             int64
 	MandatoryWinCount int64
 	Recipient         sdk.ValAddress
 }
 
 // NewClaim generates a Claim instance.
-func NewClaim(mandatoryWinCount int64, recipient sdk.ValAddress) Claim {
+func NewClaim(power, mandatoryWinCount int64, recipient sdk.ValAddress) Claim {
 	return Claim{
+		Power:             power,
 		MandatoryWinCount: mandatoryWinCount,
 		Recipient:         recipient,
 	}
@@ -131,6 +145,7 @@ func ClaimMapToSlice(claims map[string]Claim) []Claim {
 	i := 0
 	for _, claim := range claims {
 		c[i] = Claim{
+			Power:             claim.Power,
 			MandatoryWinCount: claim.MandatoryWinCount,
 			Recipient:         claim.Recipient,
 		}

@@ -17,12 +17,15 @@ func (k Keeper) OrganizeBallotByDenom(
 	// collect aggregate votes
 	aggregateHandler := func(voterAddr sdk.ValAddress, vote types.AggregateExchangeRateVote) bool {
 		// organize ballot only for the active validators
-		_, ok := validatorClaimMap[vote.Voter]
+		claim, ok := validatorClaimMap[vote.Voter]
 		if ok {
+			power := claim.Power
+
 			for _, tuple := range vote.ExchangeRateTuples {
+				tmpPower := power
 				votes[tuple.Denom] = append(
 					votes[tuple.Denom],
-					types.NewVoteForTally(tuple.ExchangeRate, tuple.Denom, voterAddr),
+					types.NewVoteForTally(tuple.ExchangeRate, tuple.Denom, voterAddr, tmpPower),
 				)
 			}
 		}

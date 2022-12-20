@@ -9,6 +9,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
+	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 )
 
 func TestToMap(t *testing.T) {
@@ -21,16 +22,19 @@ func TestToMap(t *testing.T) {
 				Voter:        sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address()),
 				Denom:        OjoDenom,
 				ExchangeRate: sdk.NewDec(1600),
+				Power:        100,
 			},
 			{
 				Voter:        sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address()),
 				Denom:        OjoDenom,
 				ExchangeRate: sdk.ZeroDec(),
+				Power:        100,
 			},
 			{
 				Voter:        sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address()),
 				Denom:        OjoDenom,
 				ExchangeRate: sdk.NewDec(1500),
+				Power:        100,
 			},
 		},
 		[]bool{true, false, true},
@@ -62,31 +66,73 @@ func TestSqrt(t *testing.T) {
 	require.Equal(t, sdk.NewDecWithPrec(12, 2), num)
 }
 
+func TestPBPower(t *testing.T) {
+	ctx := sdk.NewContext(nil, tmproto.Header{}, false, nil)
+	valAccAddrs, sk := GenerateRandomTestCase()
+	pb := ExchangeRateBallot{}
+	ballotPower := int64(0)
+
+	for i := 0; i < len(sk.Validators()); i++ {
+		power := sk.Validator(ctx, valAccAddrs[i]).GetConsensusPower(sdk.DefaultPowerReduction)
+		vote := NewVoteForTally(
+			sdk.ZeroDec(),
+			OjoDenom,
+			valAccAddrs[i],
+			power,
+		)
+
+		pb = append(pb, vote)
+		require.NotEqual(t, int64(0), vote.Power)
+
+		ballotPower += vote.Power
+	}
+
+	require.Equal(t, ballotPower, pb.Power())
+
+	// Mix in a fake validator, the total power should not have changed.
+	pubKey := secp256k1.GenPrivKey().PubKey()
+	faceValAddr := sdk.ValAddress(pubKey.Address())
+	fakeVote := NewVoteForTally(
+		sdk.OneDec(),
+		OjoDenom,
+		faceValAddr,
+		0,
+	)
+
+	pb = append(pb, fakeVote)
+	require.Equal(t, ballotPower, pb.Power())
+}
+
 func TestPBMedian(t *testing.T) {
 	tests := []struct {
 		inputs      []int64
+		powers      []int64
 		isValidator []bool
 		median      sdk.Dec
 	}{
 		{
 			// Supermajority one number
 			[]int64{1, 2, 10, 100000},
+			[]int64{1, 1, 100, 1},
 			[]bool{true, true, true, true},
 			sdk.NewDec(6),
 		},
 		{
 			// Adding fake validator doesn't change outcome
 			[]int64{1, 2, 10, 100000, 10000000000},
+			[]int64{1, 1, 100, 1, 10000},
 			[]bool{true, true, true, true, false},
 			sdk.NewDec(10),
 		},
 		{
 			[]int64{1, 2, 3, 4},
+			[]int64{1, 100, 100, 1},
 			[]bool{true, true, true, true},
 			sdk.MustNewDecFromStr("2.5"),
 		},
 		{
 			// No votes
+			[]int64{},
 			[]int64{},
 			[]bool{true, true, true, true},
 			sdk.NewDec(0),
@@ -95,13 +141,19 @@ func TestPBMedian(t *testing.T) {
 
 	for _, tc := range tests {
 		pb := ExchangeRateBallot{}
-		for _, input := range tc.inputs {
+		for i, input := range tc.inputs {
 			valAddr := sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address())
+
+			power := tc.powers[i]
+			if !tc.isValidator[i] {
+				power = 0
+			}
 
 			vote := NewVoteForTally(
 				sdk.NewDec(int64(input)),
 				OjoDenom,
 				valAddr,
+				power,
 			)
 
 			pb = append(pb, vote)
@@ -116,6 +168,7 @@ func TestPBMedian(t *testing.T) {
 func TestPBStandardDeviation(t *testing.T) {
 	tests := []struct {
 		inputs            []sdk.Dec
+		powers            []int64
 		isValidator       []bool
 		standardDeviation sdk.Dec
 	}{
@@ -127,6 +180,7 @@ func TestPBStandardDeviation(t *testing.T) {
 				sdk.MustNewDecFromStr("10.0"),
 				sdk.MustNewDecFromStr("100000.00"),
 			},
+			[]int64{1, 1, 100, 1},
 			[]bool{true, true, true, true},
 			sdk.MustNewDecFromStr("49997.000142508550309932"),
 		},
@@ -139,6 +193,7 @@ func TestPBStandardDeviation(t *testing.T) {
 				sdk.MustNewDecFromStr("100000.00"),
 				sdk.MustNewDecFromStr("10000000000"),
 			},
+			[]int64{1, 1, 100, 1, 10000},
 			[]bool{true, true, true, true, false},
 			sdk.MustNewDecFromStr("4472135950.751005519905537611"),
 		},
@@ -149,12 +204,14 @@ func TestPBStandardDeviation(t *testing.T) {
 				sdk.MustNewDecFromStr("3.0"),
 				sdk.MustNewDecFromStr("4.00"),
 			},
+			[]int64{1, 100, 100, 1},
 			[]bool{true, true, true, true},
 			sdk.MustNewDecFromStr("1.118033988749894848"),
 		},
 		{
 			// No votes
 			[]sdk.Dec{},
+			[]int64{},
 			[]bool{true, true, true, true},
 			sdk.NewDecWithPrec(0, 0),
 		},
@@ -162,13 +219,19 @@ func TestPBStandardDeviation(t *testing.T) {
 
 	for _, tc := range tests {
 		pb := ExchangeRateBallot{}
-		for _, input := range tc.inputs {
+		for i, input := range tc.inputs {
 			valAddr := sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address())
+
+			power := tc.powers[i]
+			if !tc.isValidator[i] {
+				power = 0
+			}
 
 			vote := NewVoteForTally(
 				input,
 				OjoDenom,
 				valAddr,
+				power,
 			)
 
 			pb = append(pb, vote)
@@ -190,16 +253,19 @@ func TestPBStandardDeviation_Overflow(t *testing.T) {
 			sdk.OneDec(),
 			OjoSymbol,
 			valAddr,
+			2,
 		),
 		NewVoteForTally(
 			sdk.NewDec(1234),
 			OjoSymbol,
 			valAddr,
+			2,
 		),
 		NewVoteForTally(
 			overflowRate,
 			OjoSymbol,
 			valAddr,
+			1,
 		),
 	}
 	median, err := pb.Median()
@@ -218,11 +284,13 @@ func TestBallotMapToSlice(t *testing.T) {
 			sdk.NewDec(1234),
 			OjoSymbol,
 			valAddress[0],
+			2,
 		),
 		NewVoteForTally(
 			sdk.NewDec(12345),
 			OjoSymbol,
 			valAddress[0],
+			1,
 		),
 	}
 
@@ -241,11 +309,13 @@ func TestExchangeRateBallotSwap(t *testing.T) {
 			sdk.NewDec(1234),
 			OjoSymbol,
 			valAddress[0],
+			2,
 		),
 		NewVoteForTally(
 			sdk.NewDec(12345),
 			OjoSymbol,
 			valAddress[1],
+			1,
 		),
 	}
 
@@ -260,7 +330,7 @@ func TestExchangeRateBallotSwap(t *testing.T) {
 
 func TestClaimMapToSlice(t *testing.T) {
 	valAddress := GenerateRandomValAddr(1)
-	claim := NewClaim(4, valAddress[0])
+	claim := NewClaim(10, 4, valAddress[0])
 	claimSlice := ClaimMapToSlice(map[string]Claim{
 		"testClaim":    claim,
 		"anotherClaim": claim,
