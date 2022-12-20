@@ -24,10 +24,6 @@ func prependOjoIfUnique(voteTargets []string) []string {
 // smallestMissCountInBallot iterates through a given list of Claims and returns the smallest
 // misscount in that list
 func (k Keeper) smallestMissCountInBallot(ctx sdk.Context, ballotWinners []types.Claim) int64 {
-	if len(ballotWinners) == 0 {
-		return 0
-	}
-
 	missCount := k.GetMissCounter(ctx, ballotWinners[0].Recipient)
 	for _, winner := range ballotWinners[1:] {
 		count := k.GetMissCounter(ctx, winner.Recipient)
@@ -49,6 +45,10 @@ func (k Keeper) RewardBallotWinners(
 	voteTargets []string,
 	ballotWinners []types.Claim,
 ) {
+	if len(ballotWinners) == 0 {
+		return
+	}
+
 	distributionRatio := sdk.NewDec(votePeriod).QuoInt64(rewardDistributionWindow)
 	var periodRewards sdk.DecCoins
 	rewardDenoms := prependOjoIfUnique(voteTargets)
