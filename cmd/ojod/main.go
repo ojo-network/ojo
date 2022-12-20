@@ -12,6 +12,7 @@ import (
 )
 
 func main() {
+	appparams.SetAddressPrefixes()
 	rootCmd, _ := cmd.NewRootCmd()
 	if err := svrcmd.Execute(rootCmd, strings.ToUpper(appparams.Name), ojoapp.DefaultNodeHome); err != nil {
 		os.Exit(1)
