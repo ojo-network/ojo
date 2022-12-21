@@ -26,13 +26,9 @@ const (
 // Transactions with gas-price smaller than ProtocolMinGasPrice will fail during DeliverTx.
 var ProtocolMinGasPrice = sdk.NewDecCoinFromDec(BondDenom, sdk.MustNewDecFromStr("0.00"))
 
-func init() {
-	// XXX: If other upstream or external application's depend on any of Ojo's
-	// CLI or command functionality, then this would require us to move the
-	// SetAddressConfig call to somewhere external such as the root command
-	// constructor and anywhere else we contract the app.
+// SetAddressPrefixes call this in init to set sdk config's bech32 address prefix
+func SetAddressPrefixes() {
 	SetAddressConfig()
-
 	if AccountAddressPrefix != Name {
 		log.Fatal("AccountAddresPrefix must equal Name")
 	}
