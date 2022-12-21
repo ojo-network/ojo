@@ -103,21 +103,19 @@ func TestPBPower(t *testing.T) {
 	require.Equal(t, ballotPower, pb.Power())
 }
 
-func TestPBWeightedMedian(t *testing.T) {
+func TestPBMedian(t *testing.T) {
 	tests := []struct {
 		inputs      []int64
-		weights     []int64
+		powers      []int64
 		isValidator []bool
 		median      sdk.Dec
-		success     bool
 	}{
 		{
 			// Supermajority one number
 			[]int64{1, 2, 10, 100000},
 			[]int64{1, 1, 100, 1},
 			[]bool{true, true, true, true},
-			sdk.NewDec(10),
-			true,
+			sdk.NewDec(6),
 		},
 		{
 			// Adding fake validator doesn't change outcome
@@ -125,15 +123,12 @@ func TestPBWeightedMedian(t *testing.T) {
 			[]int64{1, 1, 100, 1, 10000},
 			[]bool{true, true, true, true, false},
 			sdk.NewDec(10),
-			true,
 		},
 		{
-			// Tie votes
 			[]int64{1, 2, 3, 4},
 			[]int64{1, 100, 100, 1},
 			[]bool{true, true, true, true},
-			sdk.NewDec(2),
-			true,
+			sdk.MustNewDecFromStr("2.5"),
 		},
 		{
 			// No votes
@@ -141,15 +136,6 @@ func TestPBWeightedMedian(t *testing.T) {
 			[]int64{},
 			[]bool{true, true, true, true},
 			sdk.NewDec(0),
-			true,
-		},
-		{
-			// Out of order
-			[]int64{1, 2, 10, 3},
-			[]int64{1, 1, 100, 1},
-			[]bool{true, true, true, true},
-			sdk.NewDec(10),
-			false,
 		},
 	}
 
@@ -158,7 +144,7 @@ func TestPBWeightedMedian(t *testing.T) {
 		for i, input := range tc.inputs {
 			valAddr := sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address())
 
-			power := tc.weights[i]
+			power := tc.powers[i]
 			if !tc.isValidator[i] {
 				power = 0
 			}
@@ -173,21 +159,16 @@ func TestPBWeightedMedian(t *testing.T) {
 			pb = append(pb, vote)
 		}
 
-		median, err := pb.WeightedMedian()
-		if tc.success {
-			require.NoError(t, err)
-			require.Equal(t, tc.median, median)
-		} else {
-			require.Error(t, err)
-		}
-
+		median, err := pb.Median()
+		require.NoError(t, err)
+		require.Equal(t, tc.median, median)
 	}
 }
 
 func TestPBStandardDeviation(t *testing.T) {
 	tests := []struct {
 		inputs            []sdk.Dec
-		weights           []int64
+		powers            []int64
 		isValidator       []bool
 		standardDeviation sdk.Dec
 	}{
@@ -201,7 +182,7 @@ func TestPBStandardDeviation(t *testing.T) {
 			},
 			[]int64{1, 1, 100, 1},
 			[]bool{true, true, true, true},
-			sdk.MustNewDecFromStr("49995.000362536252310906"),
+			sdk.MustNewDecFromStr("49997.000142508550309932"),
 		},
 		{
 			// Adding fake validator doesn't change outcome
@@ -217,7 +198,6 @@ func TestPBStandardDeviation(t *testing.T) {
 			sdk.MustNewDecFromStr("4472135950.751005519905537611"),
 		},
 		{
-			// Tie votes
 			[]sdk.Dec{
 				sdk.MustNewDecFromStr("1.0"),
 				sdk.MustNewDecFromStr("2.0"),
@@ -226,7 +206,7 @@ func TestPBStandardDeviation(t *testing.T) {
 			},
 			[]int64{1, 100, 100, 1},
 			[]bool{true, true, true, true},
-			sdk.MustNewDecFromStr("1.224744871391589049"),
+			sdk.MustNewDecFromStr("1.118033988749894848"),
 		},
 		{
 			// No votes
@@ -242,7 +222,7 @@ func TestPBStandardDeviation(t *testing.T) {
 		for i, input := range tc.inputs {
 			valAddr := sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address())
 
-			power := tc.weights[i]
+			power := tc.powers[i]
 			if !tc.isValidator[i] {
 				power = 0
 			}
@@ -256,15 +236,17 @@ func TestPBStandardDeviation(t *testing.T) {
 
 			pb = append(pb, vote)
 		}
-		stdDev, _ := pb.StandardDeviation()
-
+		median, err := pb.Median()
+		require.NoError(t, err)
+		stdDev, _ := pb.StandardDeviation(median)
+		require.NoError(t, err)
 		require.Equal(t, tc.standardDeviation, stdDev)
 	}
 }
 
 func TestPBStandardDeviation_Overflow(t *testing.T) {
 	valAddr := sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address())
-	overflowRate, err := sdk.NewDecFromStr("100000000000000000000000000000000000000000000000000000000.0")
+	overflowRate, err := sdk.NewDecFromStr("1000000000000000000000000000000000000000000000000000000000000.0")
 	require.NoError(t, err)
 	pb := ExchangeRateBallot{
 		NewVoteForTally(
@@ -286,10 +268,11 @@ func TestPBStandardDeviation_Overflow(t *testing.T) {
 			1,
 		),
 	}
-
-	deviation, err := pb.StandardDeviation()
+	median, err := pb.Median()
 	require.NoError(t, err)
-	expectedDevation := sdk.MustNewDecFromStr("871.862661203013097586")
+	deviation, err := pb.StandardDeviation(median)
+	require.NoError(t, err)
+	expectedDevation := sdk.MustNewDecFromStr("616.5")
 	require.Equal(t, expectedDevation, deviation)
 }
 
@@ -345,31 +328,9 @@ func TestExchangeRateBallotSwap(t *testing.T) {
 	require.Equal(t, pb[0], voteTallies[1])
 }
 
-func TestStandardDeviationUnsorted(t *testing.T) {
-	valAddress := GenerateRandomValAddr(1)
-	pb := ExchangeRateBallot{
-		NewVoteForTally(
-			sdk.NewDec(1234),
-			OjoSymbol,
-			valAddress[0],
-			2,
-		),
-		NewVoteForTally(
-			sdk.NewDec(12),
-			OjoSymbol,
-			valAddress[0],
-			1,
-		),
-	}
-
-	deviation, err := pb.StandardDeviation()
-	require.ErrorIs(t, err, ErrBallotNotSorted)
-	require.Equal(t, "0.000000000000000000", deviation.String())
-}
-
 func TestClaimMapToSlice(t *testing.T) {
 	valAddress := GenerateRandomValAddr(1)
-	claim := NewClaim(10, 1, 4, valAddress[0])
+	claim := NewClaim(10, 4, valAddress[0])
 	claimSlice := ClaimMapToSlice(map[string]Claim{
 		"testClaim":    claim,
 		"anotherClaim": claim,

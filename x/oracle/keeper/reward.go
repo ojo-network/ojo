@@ -6,6 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ojo-network/ojo/util/genmap"
+	"github.com/ojo-network/ojo/util/reward"
 	"github.com/ojo-network/ojo/x/oracle/types"
 )
 
@@ -20,6 +21,20 @@ func prependOjoIfUnique(voteTargets []string) []string {
 	return rewardDenoms
 }
 
+// smallestMissCountInBallot iterates through a given list of Claims and returns the smallest
+// misscount in that list
+func (k Keeper) smallestMissCountInBallot(ctx sdk.Context, ballotWinners []types.Claim) int64 {
+	missCount := k.GetMissCounter(ctx, ballotWinners[0].Recipient)
+	for _, winner := range ballotWinners[1:] {
+		count := k.GetMissCounter(ctx, winner.Recipient)
+		if count < missCount {
+			missCount = count
+		}
+	}
+
+	return int64(missCount)
+}
+
 // RewardBallotWinners is executed at the end of every voting period, where we
 // give out a portion of seigniorage reward(reward-weight) to the oracle voters
 // that voted correctly.
@@ -30,14 +45,7 @@ func (k Keeper) RewardBallotWinners(
 	voteTargets []string,
 	ballotWinners []types.Claim,
 ) {
-	// sum weight of the claims
-	var ballotPowerSum int64
-	for _, winner := range ballotWinners {
-		ballotPowerSum += winner.Weight
-	}
-
-	// return if the ballot is empty
-	if ballotPowerSum == 0 {
+	if len(ballotWinners) == 0 {
 		return
 	}
 
@@ -61,6 +69,7 @@ func (k Keeper) RewardBallotWinners(
 	// distribute rewards
 	var distributedReward sdk.Coins
 
+	smallestMissCount := k.smallestMissCountInBallot(ctx, ballotWinners)
 	for _, winner := range ballotWinners {
 		receiverVal := k.StakingKeeper.Validator(ctx, winner.Recipient)
 		// in case absence of the validator, we just skip distribution
@@ -68,8 +77,16 @@ func (k Keeper) RewardBallotWinners(
 			continue
 		}
 
-		// reflects contribution
-		rewardCoins, _ := periodRewards.MulDec(sdk.NewDec(winner.Weight).QuoInt64(ballotPowerSum)).TruncateDecimal()
+		rewardFactor := reward.CalculateRewardFactor(
+			sdk.NewDec(int64(k.GetMissCounter(ctx, winner.Recipient))),
+			sdk.NewDec(int64(len(voteTargets))),
+			sdk.NewDec(smallestMissCount),
+		)
+
+		rewardCoins, _ := periodRewards.MulDec(
+			sdk.MustNewDecFromStr(rewardFactor).
+				QuoInt64(int64(len(ballotWinners)))).
+			TruncateDecimal()
 		if rewardCoins.IsZero() {
 			continue
 		}

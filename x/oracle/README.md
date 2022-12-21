@@ -4,7 +4,7 @@
 
 The Oracle module provides the Ojo blockchain with an up-to-date and accurate price feed of exchange rates of multiple currencies against the USD.
 
-As price information is extrinsic to the blockchain, the Ojo network relies on validators to periodically vote on current exchange rates, with the protocol tallying up the results once per `VotePeriod` and updating the on-chain exchange rates as the weighted median of the ballot.
+As price information is extrinsic to the blockchain, the Ojo network relies on validators to periodically vote on current exchange rates, with the protocol tallying up the results once per `VotePeriod` and updating the on-chain exchange rates as the median of the ballot.
 
 > Since the Oracle service is powered by validators, you may find it interesting to look at the [Staking](https://github.com/cosmos/cosmos-sdk/tree/main/x/staking#readme) module, which covers the logic for staking and validators.
 
@@ -48,7 +48,7 @@ Validators must first pre-commit to a set of exchange rates, then in the subsequ
 
   The submitted salt of each vote is used to verify consistency with the prevote submitted by the validator in `P_t-1`. If the validator has not submitted a prevote, or the SHA256 resulting from the salt does not match the hash from the prevote, the vote is dropped.
 
-  For each exchange rate, if the total voting power of submitted votes exceeds 50%, the weighted median of the votes is recorded on-chain as the effective rate for that denomination against USD for the following `VotePeriod` `P_t+1`.
+  For each exchange rate the median of the votes is recorded on-chain as the effective rate for that denomination against USD for the following `VotePeriod` `P_t+1`.
 
   Exchange rates receiving fewer than `VoteThreshold` total voting power have their exchange rates deleted from the store.
 
@@ -56,11 +56,13 @@ Validators must first pre-commit to a set of exchange rates, then in the subsequ
 
   After the votes are tallied, the winners of the ballots are determined with `tally()`.
 
-  Voters that have managed to vote within a narrow band around the weighted median are rewarded with a portion of the collected seigniorage. See `k.RewardBallotWinners()` for more details.
+  Voters that have managed to vote within a narrow band around the median are rewarded with a portion of the collected seigniorage.
+
+  The reward portion is determined by the [MissCounter](#misscounter) amount for the voted on exchange rates accrued by each validator in the `SlashWindow`, where the validator with smallest [MissCounter](#misscounter) collects the most reward and the rest are rewarded logarithimically favoring fewer miss counts. See `k.RewardBallotWinners()` for more details.
 
 ### Reward Band
 
-Let `M` be the weighted median, `𝜎` be the standard deviation of the votes in the ballot, and `R` be the RewardBand parameter. The band around the median is set to be `𝜀 = max(𝜎, R/2)`. All valid (i.e. bonded and non-jailed) validators that submitted an exchange rate vote in the interval `[M - 𝜀, M + 𝜀]` should be included in the set of winners, weighted by their relative vote power.
+Let `M` be the median, `𝜎` be the standard deviation of the votes in the ballot, and `R` be the RewardBand parameter. The band around the median is set to be `𝜀 = max(𝜎, R/2)`. All valid (i.e. bonded and non-jailed) validators that submitted an exchange rate vote in the interval `[M - 𝜀, M + 𝜀]` should be included in the set of winners.
 
 ### Reward Pool
 
@@ -79,7 +81,7 @@ A `VotePeriod` during which either of the following events occur is considered a
 
 - The validator fails to submits a vote for **each and every** exchange rate specified in `AcceptList`.
 
-- The validator fails to vote within the `reward band` around the weighted median for one or more denominations.
+- The validator fails to vote within the `reward band` around the median for one or more denominations.
 
 During every `SlashWindow`, participating validators must maintain a valid vote rate of at least `MinValidPerWindow` (5%), lest they get their stake slashed (currently set to 0.01%). The slashed validator is automatically temporarily "jailed" by the protocol (to protect the funds of delegators), and the operator is expected to fix the discrepancy promptly to resume validator participation.
 
@@ -168,7 +170,7 @@ At the end of every block, the `Oracle` module checks whether it's the last bloc
 
 4. For each remaining `denom` with a passing ballot:
 
-   - Tally up votes and find the weighted median exchange rate and winners with `tally()`
+   - Tally up votes and find the median exchange rate and winners with `tally()`
    - Iterate through winners of the ballot and add their weight to their running total
    - Set the exchange rate on the blockchain for that `denom` with `k.SetExchangeRate()`
    - Emit an `exchange_rate_update` event

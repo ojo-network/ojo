@@ -4,6 +4,8 @@ import (
 	"sort"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/ojo-network/ojo/util/decmath"
 )
 
 // VoteForTally is a convenience wrapper to reduce redundant lookup cost.
@@ -49,62 +51,37 @@ func (pb ExchangeRateBallot) Power() int64 {
 	return totalPower
 }
 
-// WeightedMedian returns the median weighted by the power of the ExchangeRateVote.
-// CONTRACT: The ballot must be sorted.
-func (pb ExchangeRateBallot) WeightedMedian() (sdk.Dec, error) {
-	if !sort.IsSorted(pb) {
-		return sdk.ZeroDec(), ErrBallotNotSorted
-	}
-	totalPower := pb.Power()
-
-	if pb.Len() > 0 {
-		var pivot int64
-		for _, v := range pb {
-			votePower := v.Power
-
-			pivot += votePower
-			if pivot >= (totalPower / 2) {
-				return v.ExchangeRate, nil
-			}
+// ExchangeRates returns the exchange rates in the ballot as a list.
+func (pb ExchangeRateBallot) ExchangeRates() []sdk.Dec {
+	exchangeRates := []sdk.Dec{}
+	for _, vote := range pb {
+		if vote.ExchangeRate.BigInt().BitLen() <= sdk.MaxBitLen {
+			exchangeRates = append(exchangeRates, vote.ExchangeRate)
 		}
 	}
 
-	return sdk.ZeroDec(), nil
+	return exchangeRates
 }
 
-// StandardDeviation returns the standard deviation by the power of the ExchangeRateVote.
-func (pb ExchangeRateBallot) StandardDeviation() (sdk.Dec, error) {
-	if len(pb) == 0 {
+// Median returns the median of the ExchangeRateVote.
+func (pb ExchangeRateBallot) Median() (sdk.Dec, error) {
+	rates := pb.ExchangeRates()
+	if len(rates) == 0 {
 		return sdk.ZeroDec(), nil
 	}
 
-	median, err := pb.WeightedMedian()
-	if err != nil {
-		return sdk.ZeroDec(), err
+	return decmath.Median(rates)
+}
+
+// StandardDeviation returns the standard deviation around the median of the
+// ExchangeRateVote.
+func (pb ExchangeRateBallot) StandardDeviation(median sdk.Dec) (sdk.Dec, error) {
+	rates := pb.ExchangeRates()
+	if len(rates) == 0 {
+		return sdk.ZeroDec(), nil
 	}
 
-	sum := sdk.ZeroDec()
-	ballotLength := int64(len(pb))
-	for _, v := range pb {
-		func() {
-			defer func() {
-				if e := recover(); e != nil {
-					ballotLength--
-				}
-			}()
-			deviation := v.ExchangeRate.Sub(median)
-			sum = sum.Add(deviation.Mul(deviation))
-		}()
-	}
-
-	variance := sum.QuoInt64(ballotLength)
-
-	standardDeviation, err := variance.ApproxSqrt()
-	if err != nil {
-		return sdk.ZeroDec(), err
-	}
-
-	return standardDeviation, nil
+	return decmath.MedianDeviation(median, rates)
 }
 
 // Len implements sort.Interface
@@ -149,16 +126,14 @@ func BallotMapToSlice(votes map[string]ExchangeRateBallot) []BallotDenom {
 // Claim is an interface that directs its rewards to an attached bank account.
 type Claim struct {
 	Power             int64
-	Weight            int64
 	MandatoryWinCount int64
 	Recipient         sdk.ValAddress
 }
 
 // NewClaim generates a Claim instance.
-func NewClaim(power, weight, mandatoryWinCount int64, recipient sdk.ValAddress) Claim {
+func NewClaim(power, mandatoryWinCount int64, recipient sdk.ValAddress) Claim {
 	return Claim{
 		Power:             power,
-		Weight:            weight,
 		MandatoryWinCount: mandatoryWinCount,
 		Recipient:         recipient,
 	}
@@ -171,7 +146,6 @@ func ClaimMapToSlice(claims map[string]Claim) []Claim {
 	for _, claim := range claims {
 		c[i] = Claim{
 			Power:             claim.Power,
-			Weight:            claim.Weight,
 			MandatoryWinCount: claim.MandatoryWinCount,
 			Recipient:         claim.Recipient,
 		}
