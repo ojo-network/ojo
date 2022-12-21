@@ -26,6 +26,7 @@ const (
 // Transactions with gas-price smaller than ProtocolMinGasPrice will fail during DeliverTx.
 var ProtocolMinGasPrice = sdk.NewDecCoinFromDec(BondDenom, sdk.MustNewDecFromStr("0.00"))
 
+// SetAddressPrefixes call this in init to set sdk config's bech32 address prefix
 func SetAddressPrefixes() {
 	SetAddressConfig()
 	if AccountAddressPrefix != Name {

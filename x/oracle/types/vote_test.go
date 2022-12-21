@@ -10,6 +10,7 @@ import (
 	"github.com/ojo-network/ojo/x/oracle/types"
 )
 
+// init, to set sdk bech32 address prefix for tests
 func init() {
 	appparams.SetAddressPrefixes()
 }
