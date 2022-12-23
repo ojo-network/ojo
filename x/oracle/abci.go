@@ -44,6 +44,10 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 
 		// Iterate through ballots and update exchange rates; drop if not enough votes have been achieved.
 		for _, ballotDenom := range ballotDenomSlice {
+			if sdk.NewDec(ballotDenom.Ballot.Power() / 100).LTE(k.VoteThreshold(ctx)) {
+				continue
+			}
+
 			// Increment Mandatory Win count if Denom in Mandatory list
 			incrementWin := params.MandatoryList.Contains(ballotDenom.Denom)
 			// Get median of exchange rates
