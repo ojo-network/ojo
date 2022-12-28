@@ -34,9 +34,11 @@ type IntegrationTestSuite struct {
 }
 
 const (
-	initialPower = int64(10000000000)
+	initialPower = int64(100)
 )
 
+// SetupTest will create and supply two validators with %100
+// of the consensus power worth of tokens split 70/30.
 func (s *IntegrationTestSuite) SetupTest() {
 	require := s.Require()
 	isCheckTx := false
@@ -50,8 +52,6 @@ func (s *IntegrationTestSuite) SetupTest() {
 
 	sh := teststaking.NewHelper(s.T(), ctx, *app.StakingKeeper)
 	sh.Denom = bondDenom
-	amt1 := sdk.TokensFromConsensusPower(70, sdk.DefaultPowerReduction)
-	amt2 := sdk.TokensFromConsensusPower(30, sdk.DefaultPowerReduction)
 
 	// mint and send coins to validator
 	require.NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
@@ -59,8 +59,8 @@ func (s *IntegrationTestSuite) SetupTest() {
 	require.NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
 	require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr2, initCoins))
 
-	sh.CreateValidator(valAddr1, valPubKey1, amt1, true)
-	sh.CreateValidator(valAddr2, valPubKey2, amt2, true)
+	sh.CreateValidatorWithValPower(valAddr1, valPubKey1, 70, true)
+	sh.CreateValidatorWithValPower(valAddr2, valPubKey2, 30, true)
 
 	staking.EndBlocker(ctx, *app.StakingKeeper)
 
@@ -89,12 +89,14 @@ var (
 func (s *IntegrationTestSuite) TestEnblockerVoteThreshold() {
 	app, ctx := s.app, s.ctx
 
-	var val1Tuples types.ExchangeRateTuples
-	var val2Tuples types.ExchangeRateTuples
-	var val1PreVotes []types.AggregateExchangeRatePrevote
-	var val2PreVotes []types.AggregateExchangeRatePrevote
-	var val1Votes []types.AggregateExchangeRateVote
-	var val2Votes []types.AggregateExchangeRateVote
+	var (
+		val1Tuples types.ExchangeRateTuples
+		val2Tuples types.ExchangeRateTuples
+		val1PreVotes types.AggregateExchangeRatePrevote
+		val2PreVotes types.AggregateExchangeRatePrevote
+		val1Votes types.AggregateExchangeRateVote
+		val2Votes types.AggregateExchangeRateVote
+	)
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		val1Tuples = append(val1Tuples, types.ExchangeRateTuple{
 			Denom:        denom.SymbolDenom,
@@ -104,40 +106,36 @@ func (s *IntegrationTestSuite) TestEnblockerVoteThreshold() {
 			Denom:        denom.SymbolDenom,
 			ExchangeRate: sdk.MustNewDecFromStr("0.5"),
 		})
-
-		val1PreVotes = append(val1PreVotes, types.AggregateExchangeRatePrevote{
-			Hash:        "hash1",
-			Voter:       valAddr1.String(),
-			SubmitBlock: uint64(ctx.BlockHeight()),
-		})
-		val2PreVotes = append(val2PreVotes, types.AggregateExchangeRatePrevote{
-			Hash:        "hash2",
-			Voter:       valAddr2.String(),
-			SubmitBlock: uint64(ctx.BlockHeight()),
-		})
-
-		val1Votes = append(val1Votes, types.AggregateExchangeRateVote{
-			ExchangeRateTuples: val1Tuples,
-			Voter:              valAddr1.String(),
-		})
-		val2Votes = append(val2Votes, types.AggregateExchangeRateVote{
-			ExchangeRateTuples: val2Tuples,
-			Voter:              valAddr2.String(),
-		})
 	}
 
-	// total voting power per denom is 100
-	for i := range val1PreVotes {
-		app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr1, val1PreVotes[i])
-		app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes[i])
+	val1PreVotes = types.AggregateExchangeRatePrevote{
+		Hash:        "hash1",
+		Voter:       valAddr1.String(),
+		SubmitBlock: uint64(ctx.BlockHeight()),
 	}
+	val2PreVotes = types.AggregateExchangeRatePrevote{
+		Hash:        "hash2",
+		Voter:       valAddr2.String(),
+		SubmitBlock: uint64(ctx.BlockHeight()),
+	}
+
+	val1Votes = types.AggregateExchangeRateVote{
+		ExchangeRateTuples: val1Tuples,
+		Voter:              valAddr1.String(),
+	}
+	val2Votes = types.AggregateExchangeRateVote{
+		ExchangeRateTuples: val2Tuples,
+		Voter:              valAddr2.String(),
+	}
+
+	// total voting power per denom is 100%
+	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr1, val1PreVotes)
+	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + int64(app.OracleKeeper.VotePeriod(ctx)))
-	for i := range val1Votes {
-		app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes[i])
-		app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes[i])
-	}
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
@@ -146,16 +144,16 @@ func (s *IntegrationTestSuite) TestEnblockerVoteThreshold() {
 		s.Require().Equal(sdk.MustNewDecFromStr("0.75"), rate)
 	}
 
-	// total voting power per denom is 30
-	for i := range val2PreVotes {
-		app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes[i])
-	}
+	// update prevotes' block
+	val1PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
+	val2PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
+
+	// total voting power per denom is 30%
+	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + int64(app.OracleKeeper.VotePeriod(ctx)))
-	for i := range val2Votes {
-		app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes[i])
-	}
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
@@ -163,6 +161,47 @@ func (s *IntegrationTestSuite) TestEnblockerVoteThreshold() {
 		s.Require().ErrorIs(err, sdkerrors.Wrap(types.ErrUnknownDenom, denom.SymbolDenom))
 		s.Require().Equal(sdk.ZeroDec(), rate)
 	}
+
+	// update prevotes' block
+	val1PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
+	val2PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
+
+
+	// ojo has 100% power, and atom has 30%
+	val1Tuples = types.ExchangeRateTuples{
+		types.ExchangeRateTuple{
+			Denom:        "ojo",
+			ExchangeRate: sdk.MustNewDecFromStr("1.0"),
+		},
+	}
+	val2Tuples = types.ExchangeRateTuples{
+		types.ExchangeRateTuple{
+			Denom:        "ojo",
+			ExchangeRate: sdk.MustNewDecFromStr("0.5"),
+		},
+		types.ExchangeRateTuple{
+			Denom:        "atom",
+			ExchangeRate: sdk.MustNewDecFromStr("0.5"),
+		},
+	}
+	val1Votes.ExchangeRateTuples = val1Tuples
+	val2Votes.ExchangeRateTuples = val2Tuples
+
+	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr1, val1PreVotes)
+	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
+	oracle.EndBlocker(ctx, app.OracleKeeper)
+
+	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + int64(app.OracleKeeper.VotePeriod(ctx)))
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
+	oracle.EndBlocker(ctx, app.OracleKeeper)
+
+	rate, err := app.OracleKeeper.GetExchangeRate(ctx, "ojo")
+	s.Require().NoError(err)
+	s.Require().Equal(sdk.MustNewDecFromStr("0.75"), rate)
+	rate, err = app.OracleKeeper.GetExchangeRate(ctx, "atom")
+	s.Require().ErrorIs(err, sdkerrors.Wrap(types.ErrUnknownDenom, "atom"))
+	s.Require().Equal(sdk.ZeroDec(), rate)
 }
 
 func TestOracleTestSuite(t *testing.T) {
