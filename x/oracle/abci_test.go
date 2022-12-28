@@ -90,12 +90,12 @@ func (s *IntegrationTestSuite) TestEnblockerVoteThreshold() {
 	app, ctx := s.app, s.ctx
 
 	var (
-		val1Tuples types.ExchangeRateTuples
-		val2Tuples types.ExchangeRateTuples
+		val1Tuples   types.ExchangeRateTuples
+		val2Tuples   types.ExchangeRateTuples
 		val1PreVotes types.AggregateExchangeRatePrevote
 		val2PreVotes types.AggregateExchangeRatePrevote
-		val1Votes types.AggregateExchangeRateVote
-		val2Votes types.AggregateExchangeRateVote
+		val1Votes    types.AggregateExchangeRateVote
+		val2Votes    types.AggregateExchangeRateVote
 	)
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		val1Tuples = append(val1Tuples, types.ExchangeRateTuple{
@@ -165,7 +165,6 @@ func (s *IntegrationTestSuite) TestEnblockerVoteThreshold() {
 	// update prevotes' block
 	val1PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
 	val2PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
-
 
 	// ojo has 100% power, and atom has 30%
 	val1Tuples = types.ExchangeRateTuples{
