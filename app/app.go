@@ -95,6 +95,7 @@ import (
 	tmos "github.com/tendermint/tendermint/libs/os"
 	dbm "github.com/tendermint/tm-db"
 
+	"github.com/ojo-network/ojo/util/genmap"
 	"github.com/ojo-network/ojo/x/oracle"
 	oraclekeeper "github.com/ojo-network/ojo/x/oracle/keeper"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
@@ -225,8 +226,12 @@ type App struct {
 	// mm is the module manager
 	mm *module.Manager
 
-	// sm is the simulation manager
-	sm           *module.SimulationManager
+	// simulation manager
+	sm *module.SimulationManager
+	// simulation manager to create state
+	StateSimulationManager *module.SimulationManager
+
+	// module configurator
 	configurator module.Configurator
 }
 
@@ -586,23 +591,17 @@ func New(
 	app.mm.RegisterServices(app.configurator)
 
 	// create the simulation manager and define the order of the modules for deterministic simulations
-	app.sm = module.NewSimulationManager(
-		auth.NewAppModule(appCodec, app.AccountKeeper, authsims.RandomGenesisAccounts),
-		authzmodule.NewAppModule(appCodec, app.AuthzKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
-		bank.NewAppModule(appCodec, app.BankKeeper, app.AccountKeeper),
-		capability.NewAppModule(appCodec, *app.CapabilityKeeper),
-		feegrantmodule.NewAppModule(appCodec, app.AccountKeeper, app.BankKeeper, app.FeeGrantKeeper, app.interfaceRegistry),
-		gov.NewAppModule(appCodec, app.GovKeeper, app.AccountKeeper, app.BankKeeper),
-		mint.NewAppModule(appCodec, app.MintKeeper, app.AccountKeeper, minttypes.DefaultInflationCalculationFn),
-		staking.NewAppModule(appCodec, *app.StakingKeeper, app.AccountKeeper, app.BankKeeper),
-		distr.NewAppModule(appCodec, app.DistrKeeper, app.AccountKeeper, app.BankKeeper, app.StakingKeeper),
-		slashing.NewAppModule(appCodec, app.SlashingKeeper, app.AccountKeeper, app.BankKeeper, app.StakingKeeper),
-		params.NewAppModule(app.ParamsKeeper),
-		groupmodule.NewAppModule(appCodec, app.GroupKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
-		evidence.NewAppModule(app.EvidenceKeeper),
-		ibc.NewAppModule(app.IBCKeeper),
-		transferModule,
-	)
+	overrideModules := map[string]module.AppModuleSimulation{
+		authtypes.ModuleName: auth.NewAppModule(app.appCodec, app.AccountKeeper, authsims.RandomGenesisAccounts),
+	}
+
+	simStateModules := genmap.Pick(app.mm.Modules,
+		[]string{stakingtypes.ModuleName, authtypes.ModuleName, oracletypes.ModuleName})
+	simTestModules := genmap.Pick(simStateModules, []string{oracletypes.ModuleName})
+
+	app.StateSimulationManager = module.NewSimulationManagerFromAppModules(simStateModules, overrideModules)
+	app.sm = module.NewSimulationManagerFromAppModules(simTestModules, nil)
+
 	app.sm.RegisterStoreDecoders()
 
 	// initialize stores
