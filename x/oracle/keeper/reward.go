@@ -79,7 +79,7 @@ func (k Keeper) RewardBallotWinners(
 
 		rewardFactor := reward.CalculateRewardFactor(
 			sdk.NewDec(int64(k.GetMissCounter(ctx, winner.Recipient))),
-			sdk.NewDec(int64(len(voteTargets))),
+			sdk.NewDec(int64(len(voteTargets)*(int(k.SlashWindow(ctx)/k.VotePeriod(ctx))))),
 			sdk.NewDec(smallestMissCount),
 		)
 
