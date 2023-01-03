@@ -3,13 +3,12 @@ package decmath
 import (
 	"fmt"
 	"sort"
+	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-var (
-	ErrEmptyList = fmt.Errorf("empty price list passed in")
-)
+var ErrEmptyList = fmt.Errorf("empty price list passed in")
 
 // Median returns the median of a list of sdk.Dec. Returns error
 // if ds is empty list.
@@ -100,4 +99,11 @@ func Min(ds []sdk.Dec) (sdk.Dec, error) {
 	}
 
 	return min, nil
+}
+
+// NewDecFromFloat converts a float64 into a sdk.Dec. Returns error
+// if float64 cannot be converted into a string, or into a subsequent
+// sdk.Dec.
+func NewDecFromFloat(f float64) (sdk.Dec, error) {
+	return sdk.NewDecFromStr(strconv.FormatFloat(f, 'f', -1, 64))
 }
