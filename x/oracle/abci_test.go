@@ -215,7 +215,7 @@ func (s *IntegrationTestSuite) TestEnblockerValidatorRewards() {
 	app.OracleKeeper.SetMandatoryList(ctx, types.DenomList{
 		{
 			BaseDenom:   bondDenom,
-			SymbolDenom: "ojo",
+			SymbolDenom: appparams.DisplayDenom,
 			Exponent:    uint32(6),
 		},
 		{
