@@ -44,9 +44,12 @@ func (s *IntegrationTestSuite) TestRewardBallotWinners() {
 	for i := 1; i <= 3; i++ {
 		voteTargets = append(voteTargets, fmt.Sprintf("%s%d", types.OjoSymbol, i))
 	}
+	maximumMissCounts := uint64(len(voteTargets)) * (app.OracleKeeper.SlashWindow(ctx) / app.OracleKeeper.VotePeriod(ctx))
 
-	val1ExpectedRewardFactor := fmt.Sprintf("%f", 1-(math.Log(float64(missCounters[0].MissCounter-missCounters[0].MissCounter+1))/math.Log(float64(len(voteTargets)-int(missCounters[0].MissCounter)+1))))
-	val2ExpectedRewardFactor := fmt.Sprintf("%f", 1-(math.Log(float64(missCounters[1].MissCounter-missCounters[0].MissCounter+1))/math.Log(float64(len(voteTargets)-int(missCounters[0].MissCounter)+1))))
+	val1ExpectedRewardFactor := fmt.Sprintf("%f", 1-(math.Log(float64(missCounters[0].MissCounter-missCounters[0].MissCounter+1))/
+		math.Log(float64(maximumMissCounts-(missCounters[0].MissCounter)+1))))
+	val2ExpectedRewardFactor := fmt.Sprintf("%f", 1-(math.Log(float64(missCounters[1].MissCounter-missCounters[0].MissCounter+1))/
+		math.Log(float64(maximumMissCounts-(missCounters[0].MissCounter)+1))))
 
 	votePeriodsPerWindow := sdk.NewDec((int64)(app.OracleKeeper.RewardDistributionWindow(ctx))).
 		QuoInt64((int64)(app.OracleKeeper.VotePeriod(ctx))).
