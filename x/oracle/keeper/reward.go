@@ -69,7 +69,7 @@ func (k Keeper) RewardBallotWinners(
 	// distribute rewards
 	var distributedReward sdk.Coins
 
-	smallestMissCount := k.smallestMissCountInBallot(ctx, ballotWinners)
+	smallestMissCount := sdk.NewDec(k.smallestMissCountInBallot(ctx, ballotWinners))
 	for _, winner := range ballotWinners {
 		receiverVal := k.StakingKeeper.Validator(ctx, winner.Recipient)
 		// in case absence of the validator, we just skip distribution
@@ -77,11 +77,9 @@ func (k Keeper) RewardBallotWinners(
 			continue
 		}
 
-		rewardFactor := reward.CalculateRewardFactor(
-			sdk.NewDec(int64(k.GetMissCounter(ctx, winner.Recipient))),
-			sdk.NewDec(int64(len(voteTargets)*(int(k.SlashWindow(ctx)/k.VotePeriod(ctx))))),
-			sdk.NewDec(smallestMissCount),
-		)
+		missCount := sdk.NewDec(int64(k.GetMissCounter(ctx, winner.Recipient)))
+		maxMissCount := sdk.NewDec(int64(len(voteTargets) * (int(k.SlashWindow(ctx) / k.VotePeriod(ctx)))))
+		rewardFactor := reward.CalculateRewardFactor(missCount, maxMissCount, smallestMissCount)
 
 		rewardCoins, _ := periodRewards.MulDec(
 			sdk.MustNewDecFromStr(rewardFactor).

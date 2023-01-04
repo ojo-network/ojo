@@ -22,8 +22,10 @@ import (
 )
 
 const (
-	displayDenom string = appparams.DisplayDenom
-	bondDenom    string = appparams.BondDenom
+	displayDenom     string = appparams.DisplayDenom
+	bondDenom        string = appparams.BondDenom
+	preVoteBlockDiff int64  = 2
+	voteBlockDiff    int64  = 3
 )
 
 type IntegrationTestSuite struct {
@@ -137,7 +139,7 @@ func (s *IntegrationTestSuite) TestEnblockerVoteThreshold() {
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
-	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + 3)
+	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
@@ -149,7 +151,7 @@ func (s *IntegrationTestSuite) TestEnblockerVoteThreshold() {
 	}
 
 	// update prevotes' block
-	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + 2)
+	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
 	val1PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
 	val2PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
 
@@ -157,7 +159,7 @@ func (s *IntegrationTestSuite) TestEnblockerVoteThreshold() {
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
-	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + 3)
+	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
@@ -168,7 +170,7 @@ func (s *IntegrationTestSuite) TestEnblockerVoteThreshold() {
 	}
 
 	// update prevotes' block
-	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + 2)
+	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
 	val1PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
 	val2PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
 
@@ -196,7 +198,7 @@ func (s *IntegrationTestSuite) TestEnblockerVoteThreshold() {
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
-	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + 3)
+	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
@@ -269,7 +271,7 @@ func (s *IntegrationTestSuite) TestEnblockerValidatorRewards() {
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
-	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + 3)
+	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
@@ -278,7 +280,7 @@ func (s *IntegrationTestSuite) TestEnblockerValidatorRewards() {
 	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 31), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr2).Rewards[0])
 
 	// update prevotes' block
-	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + 2)
+	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
 	val1PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
 	val2PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
 
@@ -307,7 +309,7 @@ func (s *IntegrationTestSuite) TestEnblockerValidatorRewards() {
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
-	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + 3)
+	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
@@ -316,7 +318,7 @@ func (s *IntegrationTestSuite) TestEnblockerValidatorRewards() {
 	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 60), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr2).Rewards[0])
 
 	// update prevotes' block
-	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + 2)
+	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
 	val1PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
 	val2PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
 
@@ -329,7 +331,7 @@ func (s *IntegrationTestSuite) TestEnblockerValidatorRewards() {
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
-	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + 3)
+	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
