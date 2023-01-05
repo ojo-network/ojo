@@ -5,6 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/ojo-network/ojo/util/decmath"
 	"github.com/ojo-network/ojo/util/genmap"
 	"github.com/ojo-network/ojo/util/reward"
 	"github.com/ojo-network/ojo/x/oracle/types"
@@ -69,7 +70,7 @@ func (k Keeper) RewardBallotWinners(
 	// distribute rewards
 	var distributedReward sdk.Coins
 
-	smallestMissCount := sdk.NewDec(k.smallestMissCountInBallot(ctx, ballotWinners))
+	smallestMissCount := k.smallestMissCountInBallot(ctx, ballotWinners)
 	for _, winner := range ballotWinners {
 		receiverVal := k.StakingKeeper.Validator(ctx, winner.Recipient)
 		// in case absence of the validator, we just skip distribution
@@ -77,14 +78,20 @@ func (k Keeper) RewardBallotWinners(
 			continue
 		}
 
-		missCount := sdk.NewDec(int64(k.GetMissCounter(ctx, winner.Recipient)))
-		maxMissCount := sdk.NewDec(int64(len(voteTargets) * (int(k.SlashWindow(ctx) / k.VotePeriod(ctx)))))
-		rewardFactor := reward.CalculateRewardFactor(missCount, maxMissCount, smallestMissCount)
+		missCount := int64(k.GetMissCounter(ctx, winner.Recipient))
+		maxMissCount := int64(len(voteTargets) * (int(k.SlashWindow(ctx) / k.VotePeriod(ctx))))
+		rewardFactor := reward.CalculateRewardFactor(
+			missCount,
+			maxMissCount,
+			smallestMissCount,
+		)
+		rewardDec, err := decmath.NewDecFromFloat(rewardFactor)
+		if err != nil {
+		}
+		ballotLength := int64(len(ballotWinners))
 
-		rewardCoins, _ := periodRewards.MulDec(
-			sdk.MustNewDecFromStr(rewardFactor).
-				QuoInt64(int64(len(ballotWinners)))).
-			TruncateDecimal()
+		rewardCoins, _ := periodRewards.MulDec(rewardDec.QuoInt64(
+			ballotLength)).TruncateDecimal()
 		if rewardCoins.IsZero() {
 			continue
 		}
