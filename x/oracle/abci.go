@@ -60,6 +60,17 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 			if err = k.SetExchangeRateWithEvent(ctx, ballotDenom.Denom, exchangeRate); err != nil {
 				return err
 			}
+
+			if isPeriodLastBlock(ctx, params.HistoricStampPeriod) {
+				k.AddHistoricPrice(ctx, ballotDenom.Denom, exchangeRate)
+			}
+
+			// Calculate and stamp median/median deviation if median stamp period has passed
+			if isPeriodLastBlock(ctx, params.MedianStampPeriod) {
+				if err = k.CalcAndSetHistoricMedian(ctx, ballotDenom.Denom); err != nil {
+					return err
+				}
+			}
 		}
 
 		// update miss counting & slashing
@@ -92,6 +103,18 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 	// reset miss counters of all validators at the last block of slash window
 	if isPeriodLastBlock(ctx, params.SlashWindow) {
 		k.SlashAndResetMissCounters(ctx)
+	}
+
+	// Prune historic prices and medians outside pruning period determined by
+	// the stamp period multiplied by the max stamps.
+	if isPeriodLastBlock(ctx, params.HistoricStampPeriod) {
+		pruneHistoricPeriod := params.HistoricStampPeriod*(params.MaximumPriceStamps) - params.VotePeriod
+		pruneMedianPeriod := params.MedianStampPeriod*(params.MaximumMedianStamps) - params.VotePeriod
+		for _, v := range params.AcceptList {
+			k.DeleteHistoricPrice(ctx, v.SymbolDenom, uint64(ctx.BlockHeight())-pruneHistoricPeriod)
+			k.DeleteHistoricMedian(ctx, v.SymbolDenom, uint64(ctx.BlockHeight())-pruneMedianPeriod)
+			k.DeleteHistoricMedianDeviation(ctx, v.SymbolDenom, uint64(ctx.BlockHeight())-pruneMedianPeriod)
+		}
 	}
 
 	return nil

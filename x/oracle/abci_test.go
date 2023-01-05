@@ -39,8 +39,6 @@ const (
 	initialPower = int64(100)
 )
 
-// SetupTest will create and supply two validators with %100
-// of the consensus power worth of tokens split 70/30.
 func (s *IntegrationTestSuite) SetupTest() {
 	require := s.Require()
 	isCheckTx := false
@@ -92,7 +90,7 @@ var (
 	initCoins  = sdk.NewCoins(sdk.NewCoin(bondDenom, initTokens))
 )
 
-func (s *IntegrationTestSuite) TestEnblockerVoteThreshold() {
+func (s *IntegrationTestSuite) TestEndblockerVoteThreshold() {
 	app, ctx := s.app, s.ctx
 
 	var (
@@ -211,7 +209,7 @@ func (s *IntegrationTestSuite) TestEnblockerVoteThreshold() {
 	s.Require().Equal(sdk.ZeroDec(), rate)
 }
 
-func (s *IntegrationTestSuite) TestEnblockerValidatorRewards() {
+func (s *IntegrationTestSuite) TestEndblockerValidatorRewards() {
 	app, ctx := s.app, s.ctx
 
 	app.OracleKeeper.SetMandatoryList(ctx, types.DenomList{

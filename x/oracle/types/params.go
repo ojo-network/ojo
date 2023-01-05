@@ -19,6 +19,10 @@ var (
 	KeySlashFraction            = []byte("SlashFraction")
 	KeySlashWindow              = []byte("SlashWindow")
 	KeyMinValidPerWindow        = []byte("MinValidPerWindow")
+	KeyHistoricStampPeriod      = []byte("HistoricStampPeriod")
+	KeyMedianStampPeriod        = []byte("MedianStampPeriod")
+	KeyMaximumPriceStamps       = []byte("MaximumPriceStamps")
+	KeyMaximumMedianStamps      = []byte("MedianStampAmount")
 )
 
 // Default parameter values
@@ -26,6 +30,10 @@ const (
 	DefaultVotePeriod               = BlocksPerMinute / 2 // 30 seconds
 	DefaultSlashWindow              = BlocksPerWeek       // window for a week
 	DefaultRewardDistributionWindow = BlocksPerYear       // window for a year
+	DefaultHistoricStampPeriod      = BlocksPerMinute * 5 // window for 5 minutes
+	DefaultMaximumPriceStamps       = 36                  // retain for 3 hours
+	DefaultMedianStampPeriod        = BlocksPerHour * 3   // window for 3 hours
+	DefaultMaximumMedianStamps      = 24                  // retain for 3 days
 )
 
 // Default parameter values
@@ -69,6 +77,10 @@ func DefaultParams() Params {
 		SlashFraction:            DefaultSlashFraction,
 		SlashWindow:              DefaultSlashWindow,
 		MinValidPerWindow:        DefaultMinValidPerWindow,
+		HistoricStampPeriod:      DefaultHistoricStampPeriod,
+		MedianStampPeriod:        DefaultMedianStampPeriod,
+		MaximumPriceStamps:       DefaultMaximumPriceStamps,
+		MaximumMedianStamps:      DefaultMaximumMedianStamps,
 	}
 }
 
@@ -125,6 +137,26 @@ func (p *Params) ParamSetPairs() paramstypes.ParamSetPairs {
 			KeyMinValidPerWindow,
 			&p.MinValidPerWindow,
 			validateMinValidPerWindow,
+		),
+		paramstypes.NewParamSetPair(
+			KeyHistoricStampPeriod,
+			&p.HistoricStampPeriod,
+			validateHistoricStampPeriod,
+		),
+		paramstypes.NewParamSetPair(
+			KeyMedianStampPeriod,
+			&p.MedianStampPeriod,
+			validateMedianStampPeriod,
+		),
+		paramstypes.NewParamSetPair(
+			KeyMaximumPriceStamps,
+			&p.MaximumPriceStamps,
+			validateMaximumPriceStamps,
+		),
+		paramstypes.NewParamSetPair(
+			KeyMaximumMedianStamps,
+			&p.MaximumMedianStamps,
+			validateMaximumMedianStamps,
 		),
 	}
 }
@@ -311,6 +343,58 @@ func validateMinValidPerWindow(i interface{}) error {
 
 	if v.GT(sdk.OneDec()) {
 		return fmt.Errorf("min valid per window is too large: %s", v)
+	}
+
+	return nil
+}
+
+func validateHistoricStampPeriod(i interface{}) error {
+	v, ok := i.(uint64)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if v < 1 {
+		return fmt.Errorf("historic stamp period must be positive: %d", v)
+	}
+
+	return nil
+}
+
+func validateMedianStampPeriod(i interface{}) error {
+	v, ok := i.(uint64)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if v < 1 {
+		return fmt.Errorf("median stamp period must be positive: %d", v)
+	}
+
+	return nil
+}
+
+func validateMaximumPriceStamps(i interface{}) error {
+	v, ok := i.(uint64)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if v < 1 {
+		return fmt.Errorf("maximum price stamps must be positive: %d", v)
+	}
+
+	return nil
+}
+
+func validateMaximumMedianStamps(i interface{}) error {
+	v, ok := i.(uint64)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if v < 1 {
+		return fmt.Errorf("maximum median stamps must be positive: %d", v)
 	}
 
 	return nil
