@@ -87,6 +87,8 @@ func (k Keeper) RewardBallotWinners(
 		)
 		rewardDec, err := decmath.NewDecFromFloat(rewardFactor)
 		if err != nil {
+			k.Logger(ctx).With(err).Error("unable to calculate validator reward factor!")
+			return
 		}
 		ballotLength := int64(len(ballotWinners))
 
