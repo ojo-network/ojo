@@ -97,3 +97,49 @@ func TestMax(t *testing.T) {
 	max, err = Max([]sdk.Dec{})
 	require.ErrorIs(err, ErrEmptyList)
 }
+
+func TestNewDecFromFloat(t *testing.T) {
+	testCases := []struct {
+		name       string
+		float      float64
+		dec        sdk.Dec
+		expectPass bool
+	}{
+		{
+			name:       "max float64 precision",
+			float:      1.000_000_000_000_001,
+			dec:        sdk.MustNewDecFromStr("1.000000000000001"),
+			expectPass: true,
+		},
+		{
+			name:       "over max float64 precision",
+			float:      1.000_000_000_000_000_1,
+			dec:        sdk.MustNewDecFromStr("1"),
+			expectPass: true,
+		},
+		{
+			name:       "simple float",
+			float:      2999999.9,
+			dec:        sdk.MustNewDecFromStr("2999999.9"),
+			expectPass: true,
+		},
+		{
+			name:       "negative float",
+			float:      -10.598,
+			dec:        sdk.MustNewDecFromStr("-10.598"),
+			expectPass: true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			dec, err := NewDecFromFloat(tc.float)
+			if tc.expectPass {
+				require.NoError(t, err)
+				require.Equal(t, tc.dec, dec)
+			} else {
+				require.Error(t, err)
+			}
+		})
+	}
+}
