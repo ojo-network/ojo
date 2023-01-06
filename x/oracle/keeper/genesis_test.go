@@ -12,10 +12,10 @@ func (s *IntegrationTestSuite) TestIterateAllHistoricPrices() {
 
 	historicPrices := []types.Price{
 		{BlockNum: 10, ExchangeRateTuple: types.ExchangeRateTuple{
-			Denom: "umee", ExchangeRate: sdk.MustNewDecFromStr("20.45"),
+			Denom: "ojo", ExchangeRate: sdk.MustNewDecFromStr("20.45"),
 		}},
 		{BlockNum: 11, ExchangeRateTuple: types.ExchangeRateTuple{
-			Denom: "umee", ExchangeRate: sdk.MustNewDecFromStr("20.44"),
+			Denom: "ojo", ExchangeRate: sdk.MustNewDecFromStr("20.44"),
 		}},
 		{BlockNum: 10, ExchangeRateTuple: types.ExchangeRateTuple{
 			Denom: "btc", ExchangeRate: sdk.MustNewDecFromStr("1200.56"),
@@ -57,7 +57,7 @@ FOUND:
 func (s *IntegrationTestSuite) TestIterateAllMedianPrices() {
 	keeper, ctx := s.app.OracleKeeper, s.ctx
 	medians := []types.ExchangeRateTuple{
-		{Denom: "umee", ExchangeRate: sdk.MustNewDecFromStr("20.44")},
+		{Denom: "ojo", ExchangeRate: sdk.MustNewDecFromStr("20.44")},
 		{Denom: "atom", ExchangeRate: sdk.MustNewDecFromStr("2.66")},
 		{Denom: "osmo", ExchangeRate: sdk.MustNewDecFromStr("13.64")},
 	}
@@ -91,7 +91,7 @@ FOUND:
 func (s *IntegrationTestSuite) TestIterateAllMedianDeviationPrices() {
 	keeper, ctx := s.app.OracleKeeper, s.ctx
 	medians := []types.ExchangeRateTuple{
-		{Denom: "umee", ExchangeRate: sdk.MustNewDecFromStr("21.44")},
+		{Denom: "ojo", ExchangeRate: sdk.MustNewDecFromStr("21.44")},
 		{Denom: "atom", ExchangeRate: sdk.MustNewDecFromStr("3.66")},
 		{Denom: "osmo", ExchangeRate: sdk.MustNewDecFromStr("14.64")},
 	}

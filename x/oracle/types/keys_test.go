@@ -107,3 +107,33 @@ func TestGetAggregateExchangeRateVoteKey(t *testing.T) {
 		require.Equalf(t, testCase.expectedKey, actualKey, "test %d - expected key: %s should be the same as actual key: %s", i, testCase.expectedKey, actualKey)
 	}
 }
+
+func TestParseDenomAndBlockFromHistoricPriceKey(t *testing.T) {
+	denom := "ojo"
+	blockNum := uint64(4567)
+	key := types.KeyHistoricPrice(denom, blockNum)
+
+	parsedDenom, parsedBlockNum := types.ParseDenomAndBlockFromKey(key, types.KeyPrefixHistoricPrice)
+	require.Equal(t, denom, parsedDenom)
+	require.Equal(t, blockNum, parsedBlockNum)
+}
+
+func TestParseDenomAndBlockFromMedianKey(t *testing.T) {
+	denom := "ojo"
+	blockNum := uint64(4567)
+	key := types.KeyMedian(denom, blockNum)
+
+	parsedDenom, parsedBlockNum := types.ParseDenomAndBlockFromKey(key, types.KeyPrefixMedian)
+	require.Equal(t, denom, parsedDenom)
+	require.Equal(t, blockNum, parsedBlockNum)
+}
+
+func TestParseDenomAndBlockFromMedianDeviationKey(t *testing.T) {
+	denom := "ojo"
+	blockNum := uint64(4567)
+	key := types.KeyMedianDeviation(denom, blockNum)
+
+	parsedDenom, parsedBlockNum := types.ParseDenomAndBlockFromKey(key, types.KeyPrefixMedianDeviation)
+	require.Equal(t, denom, parsedDenom)
+	require.Equal(t, blockNum, parsedBlockNum)
+}
