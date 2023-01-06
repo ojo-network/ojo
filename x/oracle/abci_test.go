@@ -23,7 +23,6 @@ import (
 )
 
 const (
-	displayDenom     string = appparams.DisplayDenom
 	bondDenom        string = appparams.BondDenom
 	preVoteBlockDiff int64  = 2
 	voteBlockDiff    int64  = 3
