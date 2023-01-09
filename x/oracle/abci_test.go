@@ -380,10 +380,6 @@ func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 89), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr2).Rewards[0])
 }
 
-func TestOracleTestSuite(t *testing.T) {
-	suite.Run(t, new(IntegrationTestSuite))
-}
-
 var historacleTestCases = []struct {
 	exchangeRates                         []string
 	expectedHistoricMedians               []sdk.Dec
@@ -530,4 +526,8 @@ func (s *IntegrationTestSuite) TestEndBlockerHistoracle() {
 
 		ctx = ctx.WithBlockHeight(initHeight)
 	}
+}
+
+func TestOracleTestSuite(t *testing.T) {
+	suite.Run(t, new(IntegrationTestSuite))
 }
