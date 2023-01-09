@@ -86,3 +86,55 @@ func (k Keeper) GetParams(ctx sdk.Context) (params types.Params) {
 func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
 	k.paramSpace.SetParamSet(ctx, &params)
 }
+
+// HistoricStampPeriod returns the amount of blocks the oracle module waits
+// before recording a new historic price.
+func (k Keeper) HistoricStampPeriod(ctx sdk.Context) (res uint64) {
+	k.paramSpace.Get(ctx, types.KeyHistoricStampPeriod, &res)
+	return
+}
+
+// SetHistoricStampPeriod updates the amount of blocks the oracle module waits
+// before recording a new historic price.
+func (k Keeper) SetHistoricStampPeriod(ctx sdk.Context, historicPriceStampPeriod uint64) {
+	k.paramSpace.Set(ctx, types.KeyHistoricStampPeriod, historicPriceStampPeriod)
+}
+
+// MedianStampPeriod returns the amount blocks the oracle module waits between
+// calculating a new median and standard deviation of that median.
+func (k Keeper) MedianStampPeriod(ctx sdk.Context) (res uint64) {
+	k.paramSpace.Get(ctx, types.KeyMedianStampPeriod, &res)
+	return
+}
+
+// SetMedianStampPeriod updates the amount blocks the oracle module waits between
+// calculating a new median and standard deviation of that median.
+func (k Keeper) SetMedianStampPeriod(ctx sdk.Context, medianStampPeriod uint64) {
+	k.paramSpace.Set(ctx, types.KeyMedianStampPeriod, medianStampPeriod)
+}
+
+// MaximumPriceStamps returns the maximum amount of historic prices the oracle
+// module will hold.
+func (k Keeper) MaximumPriceStamps(ctx sdk.Context) (res uint64) {
+	k.paramSpace.Get(ctx, types.KeyMaximumPriceStamps, &res)
+	return
+}
+
+// SetMaximumPriceStamps updates the the maximum amount of historic prices the
+// oracle module will hold.
+func (k Keeper) SetMaximumPriceStamps(ctx sdk.Context, maximumPriceStamps uint64) {
+	k.paramSpace.Set(ctx, types.KeyMaximumPriceStamps, maximumPriceStamps)
+}
+
+// MaximumMedianStamps returns the maximum amount of medians the oracle module will
+// hold.
+func (k Keeper) MaximumMedianStamps(ctx sdk.Context) (res uint64) {
+	k.paramSpace.Get(ctx, types.KeyMaximumMedianStamps, &res)
+	return
+}
+
+// SetMaximumMedianStamps updates the the maximum amount of medians the oracle module will
+// hold.
+func (k Keeper) SetMaximumMedianStamps(ctx sdk.Context, maximumMedianStamps uint64) {
+	k.paramSpace.Set(ctx, types.KeyMaximumMedianStamps, maximumMedianStamps)
+}
