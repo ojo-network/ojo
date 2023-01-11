@@ -30,7 +30,7 @@ jobs:
         env:
           TM_VERSION: ${{ env.TM_VERSION }}
       - name: Update Devnet
-        uses: ./.github/actions/update-testnet
+        uses: ./.github/update-testnet
         with:
           COSMOS_BINARY_NAME: ojod
           COSMOS_BINARY_VERSION: ${{ github.ref_name }}
