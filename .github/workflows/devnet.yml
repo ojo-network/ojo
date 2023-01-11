@@ -1,0 +1,43 @@
+# This workflow helps trigger new Devnets
+name: Devnet
+on:
+  workflow_call:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
+          cache: true
+
+      - name: Set Env
+        run: echo "TM_VERSION=$(go list -m github.com/tendermint/tendermint | sed 's:.* ::')" >> $GITHUB_ENV
+      - name: Build
+        uses: goreleaser/goreleaser-action@v4
+        if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'Enable:ReleaseBuild')
+        with:
+          version: latest
+          args: build --rm-dist --skip-validate # skip validate skips initial sanity checks in order to be able to fully run
+        env:
+          TM_VERSION: ${{ env.TM_VERSION }}
+      - name: Update Devnet
+        uses: ./.github/actions/update-testnet
+        with:
+          COSMOS_BINARY_NAME: ojod
+          COSMOS_BINARY_VERSION: ${{ github.ref_name }}
+          PULUMI_PROJECT_DIR: infra/pulumi/testnet
+          PULUMI_STACK_NAME: ojo-network/devnet
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UMEE_INFRA_SSH_KEY: ${{ secrets.UMEE_INFRA_SSH_KEY }}
+          GCP_WORKLOAD_IDENTITY_PROVIDER: projects/451365972553/locations/global/workloadIdentityPools/ojo-pool/providers/ojo-gh-provider
+          GCP_SERVICE_ACCOUNT: 'ojo-gh-actions-service@ojo-network.iam.gserviceaccount.com'
