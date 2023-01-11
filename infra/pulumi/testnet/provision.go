@@ -485,7 +485,7 @@ type DNSRecordsArgs struct {
 
 func createDNSRecords(ctx *pulumi.Context, ip pulumi.StringInput, names DNSRecordsArgs) ([]pulumi.Resource, error) {
 	project := "ojo-network"
-	managedZone := "node-ojo-network"
+	managedZone := "ojo-network"
 
 	apiDNS, err := dns.NewRecordSet(ctx, "DNS-A-"+names.APIHostName, &dns.RecordSetArgs{
 		ManagedZone: pulumi.String(managedZone),
