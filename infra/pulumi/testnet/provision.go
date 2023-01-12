@@ -27,8 +27,6 @@ import (
 	"github.com/umee-network/umee-infra/lib/umeedconfiggen"
 	netconfig "github.com/umee-network/umee-infra/lib/umeednetworkconfigurator"
 	"github.com/umee-network/umee-infra/lib/umeedwrapper"
-
-	_ "github.com/umee-network/umee/app"
 )
 
 func (network Network) Provision(ctx *pulumi.Context, secrets []NodeSecretConfig) error {
