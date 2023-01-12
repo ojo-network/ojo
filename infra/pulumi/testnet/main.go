@@ -18,7 +18,6 @@ func main() {
 		var network Network
 		var secrets []NodeSecretConfig
 		cfg.RequireObject("config", &network)
-		// cfg.RequireSecretObject("secrets", &secrets)
 
 		return network.Provision(ctx, secrets)
 	})

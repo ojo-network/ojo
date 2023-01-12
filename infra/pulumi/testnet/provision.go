@@ -30,7 +30,6 @@ import (
 )
 
 func (network Network) Provision(ctx *pulumi.Context, secrets []NodeSecretConfig) error {
-	// addrs
 	var addrs pulumi.StringArray
 	var nodeHostNames []string
 	var dnsArgs []DNSRecordsArgs
