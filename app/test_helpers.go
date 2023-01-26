@@ -55,7 +55,7 @@ type EmptyAppOptions struct{}
 
 func (EmptyAppOptions) Get(_ string) interface{} { return nil }
 
-func Setup(t *testing.T, _ bool, _ uint) *App {
+func Setup(t *testing.T) *App {
 	t.Helper()
 
 	privVal := mock.NewPV()
