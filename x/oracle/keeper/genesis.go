@@ -21,13 +21,24 @@ func (k Keeper) IterateAllHistoricPrices(
 		k.cdc.MustUnmarshal(iter.Value(), &decProto)
 		denom, blockNum := types.ParseDenomAndBlockFromKey(iter.Key(), types.KeyPrefixHistoricPrice)
 		historicPrice := types.Price{
-			ExchangeRateTuple: types.ExchangeRateTuple{ExchangeRate: decProto.Dec, Denom: denom},
-			BlockNum:          blockNum,
+			ExchangeRate: &sdk.DecCoin{Denom: denom, Amount: decProto.Dec},
+			BlockNum:     blockNum,
 		}
 		if handler(historicPrice) {
 			break
 		}
 	}
+}
+
+// AllHistoricPrices is a helper function that collects and returns all
+// median prices using the IterateAllHistoricPrices iterator
+func (k Keeper) AllHistoricPrices(ctx sdk.Context) types.Prices {
+	prices := types.Prices{}
+	k.IterateAllHistoricPrices(ctx, func(median types.Price) (stop bool) {
+		prices = append(prices, median)
+		return false
+	})
+	return prices
 }
 
 // IterateAllMedianPrices iterates over all median prices.
@@ -45,14 +56,25 @@ func (k Keeper) IterateAllMedianPrices(
 		k.cdc.MustUnmarshal(iter.Value(), &decProto)
 		denom, blockNum := types.ParseDenomAndBlockFromKey(iter.Key(), types.KeyPrefixMedian)
 		median := types.Price{
-			ExchangeRateTuple: types.ExchangeRateTuple{ExchangeRate: decProto.Dec, Denom: denom},
-			BlockNum:          blockNum,
+			ExchangeRate: &sdk.DecCoin{Denom: denom, Amount: decProto.Dec},
+			BlockNum:     blockNum,
 		}
 
 		if handler(median) {
 			break
 		}
 	}
+}
+
+// AllMedianPrices is a helper function that collects and returns all
+// median prices using the IterateAllMedianPrices iterator
+func (k Keeper) AllMedianPrices(ctx sdk.Context) types.Prices {
+	prices := types.Prices{}
+	k.IterateAllMedianPrices(ctx, func(median types.Price) (stop bool) {
+		prices = append(prices, median)
+		return false
+	})
+	return prices
 }
 
 // IterateAllMedianDeviationPrices iterates over all median deviation prices.
@@ -70,12 +92,23 @@ func (k Keeper) IterateAllMedianDeviationPrices(
 		k.cdc.MustUnmarshal(iter.Value(), &decProto)
 		denom, blockNum := types.ParseDenomAndBlockFromKey(iter.Key(), types.KeyPrefixMedianDeviation)
 		medianDeviation := types.Price{
-			ExchangeRateTuple: types.ExchangeRateTuple{ExchangeRate: decProto.Dec, Denom: denom},
-			BlockNum:          blockNum,
+			ExchangeRate: &sdk.DecCoin{Denom: denom, Amount: decProto.Dec},
+			BlockNum:     blockNum,
 		}
 
 		if handler(medianDeviation) {
 			break
 		}
 	}
+}
+
+// AllMedianDeviationPrices is a helper function that collects and returns
+// all median prices using the IterateAllMedianDeviationPrices iterator
+func (k Keeper) AllMedianDeviationPrices(ctx sdk.Context) types.Prices {
+	prices := types.Prices{}
+	k.IterateAllMedianDeviationPrices(ctx, func(median types.Price) (stop bool) {
+		prices = append(prices, median)
+		return false
+	})
+	return prices
 }

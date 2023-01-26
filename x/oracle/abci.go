@@ -10,113 +10,104 @@ import (
 	"github.com/ojo-network/ojo/x/oracle/types"
 )
 
-// isPeriodLastBlock returns true if we are at the last block of the period
-func isPeriodLastBlock(ctx sdk.Context, blocksPerPeriod uint64) bool {
-	return (uint64(ctx.BlockHeight())+1)%blocksPerPeriod == 0
-}
-
 // EndBlocker is called at the end of every block
 func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 	defer telemetry.ModuleMeasureSince(types.ModuleName, time.Now(), telemetry.MetricKeyEndBlocker)
 
 	params := k.GetParams(ctx)
-	if isPeriodLastBlock(ctx, params.VotePeriod) {
-		// Build claim map over all validators in active set
-		validatorClaimMap := make(map[string]types.Claim)
-		powerReduction := k.StakingKeeper.PowerReduction(ctx)
-		for _, v := range k.StakingKeeper.GetBondedValidatorsByPower(ctx) {
-			addr := v.GetOperator()
-			validatorClaimMap[addr.String()] = types.NewClaim(v.GetConsensusPower(powerReduction), 0, addr)
+	if k.IsPeriodLastBlock(ctx, params.VotePeriod) {
+		if err := CalcPrices(ctx, params, k); err != nil {
+			return err
 		}
-
-		var (
-			// voteTargets defines the symbol (ticker) denoms that we require votes on
-			voteTargetDenoms []string
-		)
-		for _, v := range params.AcceptList {
-			voteTargetDenoms = append(voteTargetDenoms, v.BaseDenom)
-		}
-
-		k.ClearExchangeRates(ctx)
-
-		// NOTE: it filters out inactive or jailed validators
-		ballotDenomSlice := k.OrganizeBallotByDenom(ctx, validatorClaimMap)
-
-		// Iterate through ballots and update exchange rates; drop if not enough votes have been achieved.
-		for _, ballotDenom := range ballotDenomSlice {
-			if sdk.NewDecWithPrec(ballotDenom.Ballot.Power(), 2).LTE(k.VoteThreshold(ctx)) {
-				continue
-			}
-
-			// Increment Mandatory Win count if Denom in Mandatory list
-			incrementWin := params.MandatoryList.Contains(ballotDenom.Denom)
-			// Get median of exchange rates
-			exchangeRate, err := Tally(ballotDenom.Ballot, params.RewardBand, validatorClaimMap, incrementWin)
-			if err != nil {
-				return err
-			}
-
-			// Set the exchange rate, emit ABCI event
-			if err = k.SetExchangeRateWithEvent(ctx, ballotDenom.Denom, exchangeRate); err != nil {
-				return err
-			}
-
-			if isPeriodLastBlock(ctx, params.HistoricStampPeriod) {
-				k.AddHistoricPrice(ctx, ballotDenom.Denom, exchangeRate)
-			}
-
-			// Calculate and stamp median/median deviation if median stamp period has passed
-			if isPeriodLastBlock(ctx, params.MedianStampPeriod) {
-				if err = k.CalcAndSetHistoricMedian(ctx, ballotDenom.Denom); err != nil {
-					return err
-				}
-			}
-		}
-
-		// update miss counting & slashing
-		voteTargetsLen := len(params.MandatoryList)
-		claimSlice := types.ClaimMapToSlice(validatorClaimMap)
-		for _, claim := range claimSlice {
-			misses := uint64(voteTargetsLen - int(claim.MandatoryWinCount))
-			if misses == 0 {
-				continue
-			}
-
-			// Increase miss counter
-			k.SetMissCounter(ctx, claim.Recipient, k.GetMissCounter(ctx, claim.Recipient)+misses)
-		}
-
-		// Distribute rewards to ballot winners
-		k.RewardBallotWinners(
-			ctx,
-			int64(params.VotePeriod),
-			int64(params.RewardDistributionWindow),
-			voteTargetDenoms,
-			claimSlice,
-		)
-
-		// Clear the ballot
-		k.ClearBallots(ctx, params.VotePeriod)
 	}
 
 	// Slash oracle providers who missed voting over the threshold and
 	// reset miss counters of all validators at the last block of slash window
-	if isPeriodLastBlock(ctx, params.SlashWindow) {
+	if k.IsPeriodLastBlock(ctx, params.SlashWindow) {
 		k.SlashAndResetMissCounters(ctx)
 	}
 
-	// Prune historic prices and medians outside pruning period determined by
-	// the stamp period multiplied by the max stamps.
-	if isPeriodLastBlock(ctx, params.HistoricStampPeriod) {
-		pruneHistoricPeriod := params.HistoricStampPeriod*(params.MaximumPriceStamps) - params.VotePeriod
-		pruneMedianPeriod := params.MedianStampPeriod*(params.MaximumMedianStamps) - params.VotePeriod
-		for _, v := range params.AcceptList {
-			k.DeleteHistoricPrice(ctx, v.SymbolDenom, uint64(ctx.BlockHeight())-pruneHistoricPeriod)
-			k.DeleteHistoricMedian(ctx, v.SymbolDenom, uint64(ctx.BlockHeight())-pruneMedianPeriod)
-			k.DeleteHistoricMedianDeviation(ctx, v.SymbolDenom, uint64(ctx.BlockHeight())-pruneMedianPeriod)
+	k.PruneAllPrices(ctx)
+
+	return nil
+}
+
+func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
+	// Build claim map over all validators in active set
+	validatorClaimMap := make(map[string]types.Claim)
+	powerReduction := k.StakingKeeper.PowerReduction(ctx)
+	for _, v := range k.StakingKeeper.GetBondedValidatorsByPower(ctx) {
+		addr := v.GetOperator()
+		validatorClaimMap[addr.String()] = types.NewClaim(v.GetConsensusPower(powerReduction), 0, addr)
+	}
+
+	// voteTargets defines the symbol (ticker) denoms that we require votes on
+	voteTargetDenoms := make([]string, 0)
+	for _, v := range params.AcceptList {
+		voteTargetDenoms = append(voteTargetDenoms, v.BaseDenom)
+	}
+
+	k.ClearExchangeRates(ctx)
+
+	// NOTE: it filters out inactive or jailed validators
+	ballotDenomSlice := k.OrganizeBallotByDenom(ctx, validatorClaimMap)
+
+	// Iterate through ballots and update exchange rates; drop if not enough votes have been achieved.
+	for _, ballotDenom := range ballotDenomSlice {
+		if sdk.NewDecWithPrec(ballotDenom.Ballot.Power(), 2).LTE(k.VoteThreshold(ctx)) {
+			ctx.Logger().Info("Ballot voting power is under vote threshold, dropping ballot for", ballotDenom)
+			continue
+		}
+
+		// Increment Mandatory Win count if Denom in Mandatory list
+		incrementWin := params.MandatoryList.Contains(ballotDenom.Denom)
+		// Get median of exchange rates
+		exchangeRate, err := Tally(ballotDenom.Ballot, params.RewardBand, validatorClaimMap, incrementWin)
+		if err != nil {
+			return err
+		}
+
+		// Set the exchange rate, emit ABCI event
+		if err = k.SetExchangeRateWithEvent(ctx, ballotDenom.Denom, exchangeRate); err != nil {
+			return err
+		}
+
+		if k.IsPeriodLastBlock(ctx, params.HistoricStampPeriod) {
+			k.AddHistoricPrice(ctx, ballotDenom.Denom, exchangeRate)
+		}
+
+		// Calculate and stamp median/median deviation if median stamp period has passed
+		if k.IsPeriodLastBlock(ctx, params.MedianStampPeriod) {
+			if err = k.CalcAndSetHistoricMedian(ctx, ballotDenom.Denom); err != nil {
+				return err
+			}
 		}
 	}
 
+	// update miss counting & slashing
+	voteTargetsLen := len(params.MandatoryList)
+	claimSlice := types.ClaimMapToSlice(validatorClaimMap)
+	for _, claim := range claimSlice {
+		misses := uint64(voteTargetsLen - int(claim.MandatoryWinCount))
+		if misses == 0 {
+			continue
+		}
+
+		// Increase miss counter
+		k.SetMissCounter(ctx, claim.Recipient, k.GetMissCounter(ctx, claim.Recipient)+misses)
+	}
+
+	// Distribute rewards to ballot winners
+	k.RewardBallotWinners(
+		ctx,
+		int64(params.VotePeriod),
+		int64(params.RewardDistributionWindow),
+		voteTargetDenoms,
+		claimSlice,
+	)
+
+	// Clear the ballot
+	k.ClearBallots(ctx, params.VotePeriod)
 	return nil
 }
 

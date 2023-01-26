@@ -3,6 +3,7 @@ package ojo.oracle.v1;
 
 import "gogoproto/gogo.proto";
 import "ojo/oracle/v1/oracle.proto";
+import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/ojo-network/ojo/x/oracle/types";
 
@@ -10,28 +11,28 @@ option (gogoproto.goproto_getters_all) = false;
 
 // GenesisState defines the oracle module's genesis state.
 message GenesisState {
-  Params                    params             = 1 [(gogoproto.nullable) = false];
+  Params params = 1 [ (gogoproto.nullable) = false ];
   repeated FeederDelegation feeder_delegations = 2
-      [(gogoproto.nullable) = false];
-  repeated ExchangeRateTuple exchange_rates = 3 [
-    (gogoproto.castrepeated) = "ExchangeRateTuples",
-    (gogoproto.nullable)     = false
+      [ (gogoproto.nullable) = false ];
+  repeated cosmos.base.v1beta1.DecCoin exchange_rates = 3 [
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins",
+    (gogoproto.nullable) = false
   ];
-  repeated MissCounter                  miss_counters                    = 4 [(gogoproto.nullable) = false];
+  repeated MissCounter miss_counters = 4 [ (gogoproto.nullable) = false ];
   repeated AggregateExchangeRatePrevote aggregate_exchange_rate_prevotes = 5
-      [(gogoproto.nullable) = false];
+      [ (gogoproto.nullable) = false ];
   repeated AggregateExchangeRateVote aggregate_exchange_rate_votes = 6
-      [(gogoproto.nullable) = false];
-  repeated Price medians          = 7 [(gogoproto.nullable) = false];
-  repeated Price historic_prices  = 8 [(gogoproto.nullable) = false];
-  repeated Price medianDeviations = 9 [(gogoproto.nullable) = false];
+      [ (gogoproto.nullable) = false ];
+  repeated Price medians = 7 [ (gogoproto.nullable) = false ];
+  repeated Price historic_prices = 8 [ (gogoproto.nullable) = false ];
+  repeated Price medianDeviations = 9 [ (gogoproto.nullable) = false ];
 }
 
 // FeederDelegation is the address for where oracle feeder authority are
 // delegated to. By default this struct is only used at genesis to feed in
 // default feeder addresses.
 message FeederDelegation {
-  string feeder_address    = 1;
+  string feeder_address = 1;
   string validator_address = 2;
 }
 
@@ -39,13 +40,11 @@ message FeederDelegation {
 // oracle module's genesis state
 message MissCounter {
   string validator_address = 1;
-  uint64 miss_counter      = 2;
+  uint64 miss_counter = 2;
 }
 
 // Price is an instance of a price "stamp"
 message Price {
-  ExchangeRateTuple exchange_rate_tuple = 1 [
-    (gogoproto.nullable) = false
-  ];
+  cosmos.base.v1beta1.DecCoin exchange_rate = 1;
   uint64 block_num = 2;
 }

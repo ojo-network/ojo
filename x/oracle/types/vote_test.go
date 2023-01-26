@@ -29,56 +29,45 @@ func TestAggregateExchangeRatePrevoteString(t *testing.T) {
 
 func TestAggregateExchangeRateVoteString(t *testing.T) {
 	aggregateExchangeRatePreVote := types.NewAggregateExchangeRateVote(
-		types.ExchangeRateTuples{
-			types.NewExchangeRateTuple(types.OjoDenom, sdk.OneDec()),
+		sdk.DecCoins{
+			sdk.NewDecCoinFromDec(types.OjoDenom, sdk.OneDec()),
 		},
 		sdk.ValAddress(sdk.AccAddress([]byte("addr1_______________"))),
 	)
 
-	require.Equal(t, "exchange_rate_tuples:\n    - denom: uojo\n      exchange_rate: \"1.000000000000000000\"\nvoter: ojovaloper1v9jxgu33ta047h6lta047h6lta047h6ludnc0y\n", aggregateExchangeRatePreVote.String())
+	require.Equal(t, "exchangerates:\n    - denom: uojo\n      amount: \"1.000000000000000000\"\nvoter: ojovaloper1v9jxgu33ta047h6lta047h6lta047h6ludnc0y\n", aggregateExchangeRatePreVote.String())
 }
 
-func TestExchangeRateTuplesString(t *testing.T) {
-	exchangeRateTuple := types.NewExchangeRateTuple(types.OjoDenom, sdk.OneDec())
-	require.Equal(t, exchangeRateTuple.String(), "denom: uojo\nexchange_rate: \"1.000000000000000000\"\n")
-
-	exchangeRateTuples := types.ExchangeRateTuples{
-		exchangeRateTuple,
-		types.NewExchangeRateTuple(types.IbcDenomAtom, sdk.SmallestDec()),
-	}
-	require.Equal(t, "- denom: uojo\n  exchange_rate: \"1.000000000000000000\"\n- denom: ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2\n  exchange_rate: \"0.000000000000000001\"\n", exchangeRateTuples.String())
-}
-
-func TestParseExchangeRateTuples(t *testing.T) {
+func TestParseExchangeRateDecCoins(t *testing.T) {
 	valid := "uojo:123.0,uatom:123.123"
-	_, err := types.ParseExchangeRateTuples(valid)
+	_, err := types.ParseExchangeRateDecCoins(valid)
 	require.NoError(t, err)
 
 	duplicatedDenom := "uojo:100.0,uatom:123.123,uatom:121233.123"
-	_, err = types.ParseExchangeRateTuples(duplicatedDenom)
+	_, err = types.ParseExchangeRateDecCoins(duplicatedDenom)
 	require.Error(t, err)
 
 	invalidCoins := "123.123"
-	_, err = types.ParseExchangeRateTuples(invalidCoins)
+	_, err = types.ParseExchangeRateDecCoins(invalidCoins)
 	require.Error(t, err)
 
 	invalidCoinsWithValid := "uojo:123.0,123.1"
-	_, err = types.ParseExchangeRateTuples(invalidCoinsWithValid)
+	_, err = types.ParseExchangeRateDecCoins(invalidCoinsWithValid)
 	require.Error(t, err)
 
 	zeroCoinsWithValid := "uojo:0.0,uatom:123.1"
-	_, err = types.ParseExchangeRateTuples(zeroCoinsWithValid)
+	_, err = types.ParseExchangeRateDecCoins(zeroCoinsWithValid)
 	require.Error(t, err)
 
 	negativeCoinsWithValid := "uojo:-1234.5,uatom:123.1"
-	_, err = types.ParseExchangeRateTuples(negativeCoinsWithValid)
+	_, err = types.ParseExchangeRateDecCoins(negativeCoinsWithValid)
 	require.Error(t, err)
 
 	multiplePricesPerRate := "uojo:123: uojo:456,uusdc:789"
-	_, err = types.ParseExchangeRateTuples(multiplePricesPerRate)
+	_, err = types.ParseExchangeRateDecCoins(multiplePricesPerRate)
 	require.Error(t, err)
 
-	res, err := types.ParseExchangeRateTuples("")
+	res, err := types.ParseExchangeRateDecCoins("")
 	require.Nil(t, err)
 	require.Nil(t, res)
 }

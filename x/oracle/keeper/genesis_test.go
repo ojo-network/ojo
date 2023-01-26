@@ -11,22 +11,22 @@ func (s *IntegrationTestSuite) TestIterateAllHistoricPrices() {
 	keeper, ctx := s.app.OracleKeeper, s.ctx
 
 	historicPrices := []types.Price{
-		{BlockNum: 10, ExchangeRateTuple: types.ExchangeRateTuple{
-			Denom: "ojo", ExchangeRate: sdk.MustNewDecFromStr("20.45"),
+		{BlockNum: 10, ExchangeRate: &sdk.DecCoin{
+			Denom: "ojo", Amount: sdk.MustNewDecFromStr("20.45"),
 		}},
-		{BlockNum: 11, ExchangeRateTuple: types.ExchangeRateTuple{
-			Denom: "ojo", ExchangeRate: sdk.MustNewDecFromStr("20.44"),
+		{BlockNum: 11, ExchangeRate: &sdk.DecCoin{
+			Denom: "ojo", Amount: sdk.MustNewDecFromStr("20.44"),
 		}},
-		{BlockNum: 10, ExchangeRateTuple: types.ExchangeRateTuple{
-			Denom: "btc", ExchangeRate: sdk.MustNewDecFromStr("1200.56"),
+		{BlockNum: 10, ExchangeRate: &sdk.DecCoin{
+			Denom: "btc", Amount: sdk.MustNewDecFromStr("1200.56"),
 		}},
-		{BlockNum: 11, ExchangeRateTuple: types.ExchangeRateTuple{
-			Denom: "btc", ExchangeRate: sdk.MustNewDecFromStr("1200.19"),
+		{BlockNum: 11, ExchangeRate: &sdk.DecCoin{
+			Denom: "btc", Amount: sdk.MustNewDecFromStr("1200.19"),
 		}},
 	}
 
 	for _, hp := range historicPrices {
-		keeper.SetHistoricPrice(ctx, hp.ExchangeRateTuple.Denom, hp.BlockNum, hp.ExchangeRateTuple.ExchangeRate)
+		keeper.SetHistoricPrice(ctx, hp.ExchangeRate.Denom, hp.BlockNum, hp.ExchangeRate.Amount)
 	}
 
 	newPrices := []types.Price{}
@@ -45,8 +45,8 @@ func (s *IntegrationTestSuite) TestIterateAllHistoricPrices() {
 FOUND:
 	for _, oldPrice := range historicPrices {
 		for _, newPrice := range newPrices {
-			if oldPrice.BlockNum == newPrice.BlockNum && oldPrice.ExchangeRateTuple.Denom == newPrice.ExchangeRateTuple.Denom {
-				s.Require().Equal(oldPrice.ExchangeRateTuple.ExchangeRate, newPrice.ExchangeRateTuple.ExchangeRate)
+			if oldPrice.BlockNum == newPrice.BlockNum && oldPrice.ExchangeRate.Denom == newPrice.ExchangeRate.Denom {
+				s.Require().Equal(oldPrice.ExchangeRate.Amount, newPrice.ExchangeRate.Amount)
 				continue FOUND
 			}
 		}
@@ -56,14 +56,14 @@ FOUND:
 
 func (s *IntegrationTestSuite) TestIterateAllMedianPrices() {
 	keeper, ctx := s.app.OracleKeeper, s.ctx
-	medians := []types.ExchangeRateTuple{
-		{Denom: "ojo", ExchangeRate: sdk.MustNewDecFromStr("20.44")},
-		{Denom: "atom", ExchangeRate: sdk.MustNewDecFromStr("2.66")},
-		{Denom: "osmo", ExchangeRate: sdk.MustNewDecFromStr("13.64")},
+	medians := sdk.DecCoins{
+		{Denom: "ojo", Amount: sdk.MustNewDecFromStr("20.44")},
+		{Denom: "atom", Amount: sdk.MustNewDecFromStr("2.66")},
+		{Denom: "osmo", Amount: sdk.MustNewDecFromStr("13.64")},
 	}
 
 	for _, m := range medians {
-		keeper.SetHistoricMedian(ctx, m.Denom, uint64(s.ctx.BlockHeight()), m.ExchangeRate)
+		keeper.SetHistoricMedian(ctx, m.Denom, uint64(s.ctx.BlockHeight()), m.Amount)
 	}
 
 	newMedians := []types.Price{}
@@ -79,8 +79,8 @@ func (s *IntegrationTestSuite) TestIterateAllMedianPrices() {
 FOUND:
 	for _, oldMedian := range medians {
 		for _, newMedian := range newMedians {
-			if oldMedian.Denom == newMedian.ExchangeRateTuple.Denom {
-				s.Require().Equal(oldMedian.ExchangeRate, newMedian.ExchangeRateTuple.ExchangeRate)
+			if oldMedian.Denom == newMedian.ExchangeRate.Denom {
+				s.Require().Equal(oldMedian.Amount, newMedian.ExchangeRate.Amount)
 				continue FOUND
 			}
 		}
@@ -90,14 +90,14 @@ FOUND:
 
 func (s *IntegrationTestSuite) TestIterateAllMedianDeviationPrices() {
 	keeper, ctx := s.app.OracleKeeper, s.ctx
-	medians := []types.ExchangeRateTuple{
-		{Denom: "ojo", ExchangeRate: sdk.MustNewDecFromStr("21.44")},
-		{Denom: "atom", ExchangeRate: sdk.MustNewDecFromStr("3.66")},
-		{Denom: "osmo", ExchangeRate: sdk.MustNewDecFromStr("14.64")},
+	medians := sdk.DecCoins{
+		{Denom: "ojo", Amount: sdk.MustNewDecFromStr("21.44")},
+		{Denom: "atom", Amount: sdk.MustNewDecFromStr("3.66")},
+		{Denom: "osmo", Amount: sdk.MustNewDecFromStr("14.64")},
 	}
 
 	for _, m := range medians {
-		keeper.SetHistoricMedianDeviation(ctx, m.Denom, uint64(s.ctx.BlockHeight()), m.ExchangeRate)
+		keeper.SetHistoricMedianDeviation(ctx, m.Denom, uint64(s.ctx.BlockHeight()), m.Amount)
 	}
 
 	newMedians := []types.Price{}
@@ -113,8 +113,8 @@ func (s *IntegrationTestSuite) TestIterateAllMedianDeviationPrices() {
 FOUND:
 	for _, oldMedian := range medians {
 		for _, newMedian := range newMedians {
-			if oldMedian.Denom == newMedian.ExchangeRateTuple.Denom {
-				s.Require().Equal(oldMedian.ExchangeRate, newMedian.ExchangeRateTuple.ExchangeRate)
+			if oldMedian.Denom == newMedian.ExchangeRate.Denom {
+				s.Require().Equal(oldMedian.Amount, newMedian.ExchangeRate.Amount)
 				continue FOUND
 			}
 		}
