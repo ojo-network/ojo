@@ -280,7 +280,7 @@ func (q querier) Medians(
 			medians[i] = sdk.NewDecCoinFromDec(req.Denom, median)
 		}
 	} else {
-		q.IterateAllMedianPrices(ctx, func(median types.Price) (stop bool) {
+		q.IterateAllMedianPrices(ctx, func(median types.PriceStamp) (stop bool) {
 			medians = append(
 				medians,
 				sdk.NewDecCoinFromDec(median.ExchangeRate.Denom, median.ExchangeRate.Amount),
@@ -314,7 +314,7 @@ func (q querier) MedianDeviations(
 
 		medians = medians.Add(sdk.NewDecCoinFromDec(req.Denom, exchangeRate))
 	} else {
-		q.IterateAllMedianDeviationPrices(ctx, func(medianDeviation types.Price) (stop bool) {
+		q.IterateAllMedianDeviationPrices(ctx, func(medianDeviation types.PriceStamp) (stop bool) {
 			medians = medians.Add(sdk.NewDecCoinFromDec(
 				medianDeviation.ExchangeRate.Denom,
 				medianDeviation.ExchangeRate.Amount,

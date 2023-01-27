@@ -102,3 +102,8 @@ message AggregateExchangeRateVote {
 
   string voter = 2 [ (gogoproto.moretags) = "yaml:\"voter\"" ];
 }
+
+message PriceStamp {
+  cosmos.base.v1beta1.DecCoin exchange_rate = 1;
+  uint64 block_num = 2;
+}

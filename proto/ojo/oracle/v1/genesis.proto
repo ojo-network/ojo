@@ -23,9 +23,9 @@ message GenesisState {
       [ (gogoproto.nullable) = false ];
   repeated AggregateExchangeRateVote aggregate_exchange_rate_votes = 6
       [ (gogoproto.nullable) = false ];
-  repeated Price medians = 7 [ (gogoproto.nullable) = false ];
-  repeated Price historic_prices = 8 [ (gogoproto.nullable) = false ];
-  repeated Price medianDeviations = 9 [ (gogoproto.nullable) = false ];
+  repeated PriceStamp medians = 7 [ (gogoproto.nullable) = false ];
+  repeated PriceStamp historic_prices = 8 [ (gogoproto.nullable) = false ];
+  repeated PriceStamp medianDeviations = 9 [ (gogoproto.nullable) = false ];
 }
 
 // FeederDelegation is the address for where oracle feeder authority are
@@ -41,10 +41,4 @@ message FeederDelegation {
 message MissCounter {
   string validator_address = 1;
   uint64 miss_counter = 2;
-}
-
-// Price is an instance of a price "stamp"
-message Price {
-  cosmos.base.v1beta1.DecCoin exchange_rate = 1;
-  uint64 block_num = 2;
 }

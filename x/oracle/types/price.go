@@ -6,10 +6,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-type Prices []Price
+type PriceStamps []PriceStamp
 
-func NewPrice(exchangeRate sdk.Dec, denom string, blockNum uint64) *Price {
-	return &Price{
+func NewPriceStamp(exchangeRate sdk.Dec, denom string, blockNum uint64) *PriceStamp {
+	return &PriceStamp{
 		ExchangeRate: &sdk.DecCoin{
 			Amount: exchangeRate,
 			Denom:  denom,
@@ -18,44 +18,44 @@ func NewPrice(exchangeRate sdk.Dec, denom string, blockNum uint64) *Price {
 	}
 }
 
-func (p *Prices) Decs() []sdk.Dec {
+func (p *PriceStamps) Decs() []sdk.Dec {
 	decs := []sdk.Dec{}
-	for _, price := range *p {
-		decs = append(decs, price.ExchangeRate.Amount)
+	for _, priceStamp := range *p {
+		decs = append(decs, priceStamp.ExchangeRate.Amount)
 	}
 	return decs
 }
 
-func (p *Prices) FilterByBlock(blockNum uint64) *Prices {
-	prices := Prices{}
-	for _, price := range *p {
-		if price.BlockNum == blockNum {
-			prices = append(prices, price)
+func (p *PriceStamps) FilterByBlock(blockNum uint64) *PriceStamps {
+	priceStamps := PriceStamps{}
+	for _, priceStamp := range *p {
+		if priceStamp.BlockNum == blockNum {
+			priceStamps = append(priceStamps, priceStamp)
 		}
 	}
-	return &prices
+	return &priceStamps
 }
 
-func (p *Prices) FilterByDenom(denom string) *Prices {
-	prices := Prices{}
-	for _, price := range *p {
-		if price.ExchangeRate.Denom == denom {
-			prices = append(prices, price)
+func (p *PriceStamps) FilterByDenom(denom string) *PriceStamps {
+	priceStamps := PriceStamps{}
+	for _, priceStamp := range *p {
+		if priceStamp.ExchangeRate.Denom == denom {
+			priceStamps = append(priceStamps, priceStamp)
 		}
 	}
-	return &prices
+	return &priceStamps
 }
 
-func (p *Prices) Sort() *Prices {
-	prices := *p
+func (p *PriceStamps) Sort() *PriceStamps {
+	priceStamps := *p
 	sort.Slice(
-		prices,
+		priceStamps,
 		func(i, j int) bool {
-			if prices[i].BlockNum == prices[j].BlockNum {
-				return prices[i].ExchangeRate.Denom < prices[j].ExchangeRate.Denom
+			if priceStamps[i].BlockNum == priceStamps[j].BlockNum {
+				return priceStamps[i].ExchangeRate.Denom < priceStamps[j].ExchangeRate.Denom
 			}
-			return prices[i].BlockNum < prices[j].BlockNum
+			return priceStamps[i].BlockNum < priceStamps[j].BlockNum
 		},
 	)
-	return &prices
+	return &priceStamps
 }

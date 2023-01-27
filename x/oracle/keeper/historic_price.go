@@ -337,7 +337,7 @@ func (k Keeper) DeleteHistoricMedianDeviation(
 }
 
 func (k Keeper) PruneHistoricPricesBeforeBlock(ctx sdk.Context, blockNum uint64) {
-	k.IterateAllHistoricPrices(ctx, func(price types.Price) (stop bool) {
+	k.IterateAllHistoricPrices(ctx, func(price types.PriceStamp) (stop bool) {
 		if price.BlockNum <= blockNum {
 			k.DeleteHistoricPrice(ctx, price.ExchangeRate.Denom, price.BlockNum)
 		}
@@ -346,7 +346,7 @@ func (k Keeper) PruneHistoricPricesBeforeBlock(ctx sdk.Context, blockNum uint64)
 }
 
 func (k Keeper) PruneMediansBeforeBlock(ctx sdk.Context, blockNum uint64) {
-	k.IterateAllMedianPrices(ctx, func(price types.Price) (stop bool) {
+	k.IterateAllMedianPrices(ctx, func(price types.PriceStamp) (stop bool) {
 		if price.BlockNum <= blockNum {
 			k.DeleteHistoricMedian(ctx, price.ExchangeRate.Denom, price.BlockNum)
 		}
@@ -355,7 +355,7 @@ func (k Keeper) PruneMediansBeforeBlock(ctx sdk.Context, blockNum uint64) {
 }
 
 func (k Keeper) PruneMedianDeviationsBeforeBlock(ctx sdk.Context, blockNum uint64) {
-	k.IterateAllMedianDeviationPrices(ctx, func(price types.Price) (stop bool) {
+	k.IterateAllMedianDeviationPrices(ctx, func(price types.PriceStamp) (stop bool) {
 		if price.BlockNum <= blockNum {
 			k.DeleteHistoricMedianDeviation(ctx, price.ExchangeRate.Denom, price.BlockNum)
 		}

@@ -10,7 +10,7 @@ import (
 func (s *IntegrationTestSuite) TestIterateAllHistoricPrices() {
 	keeper, ctx := s.app.OracleKeeper, s.ctx
 
-	historicPrices := []types.Price{
+	historicPrices := []types.PriceStamp{
 		{BlockNum: 10, ExchangeRate: &sdk.DecCoin{
 			Denom: "ojo", Amount: sdk.MustNewDecFromStr("20.45"),
 		}},
@@ -29,10 +29,10 @@ func (s *IntegrationTestSuite) TestIterateAllHistoricPrices() {
 		keeper.SetHistoricPrice(ctx, hp.ExchangeRate.Denom, hp.BlockNum, hp.ExchangeRate.Amount)
 	}
 
-	newPrices := []types.Price{}
+	newPrices := []types.PriceStamp{}
 	keeper.IterateAllHistoricPrices(
 		ctx,
-		func(historicPrice types.Price) bool {
+		func(historicPrice types.PriceStamp) bool {
 			newPrices = append(newPrices, historicPrice)
 			return false
 		},
@@ -66,10 +66,10 @@ func (s *IntegrationTestSuite) TestIterateAllMedianPrices() {
 		keeper.SetHistoricMedian(ctx, m.Denom, uint64(s.ctx.BlockHeight()), m.Amount)
 	}
 
-	newMedians := []types.Price{}
+	newMedians := []types.PriceStamp{}
 	keeper.IterateAllMedianPrices(
 		ctx,
-		func(median types.Price) bool {
+		func(median types.PriceStamp) bool {
 			newMedians = append(newMedians, median)
 			return false
 		},
@@ -100,10 +100,10 @@ func (s *IntegrationTestSuite) TestIterateAllMedianDeviationPrices() {
 		keeper.SetHistoricMedianDeviation(ctx, m.Denom, uint64(s.ctx.BlockHeight()), m.Amount)
 	}
 
-	newMedians := []types.Price{}
+	newMedians := []types.PriceStamp{}
 	keeper.IterateAllMedianDeviationPrices(
 		ctx,
-		func(median types.Price) bool {
+		func(median types.PriceStamp) bool {
 			newMedians = append(newMedians, median)
 			return false
 		},

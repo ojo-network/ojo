@@ -15,9 +15,9 @@ func NewGenesisState(
 	missCounters []MissCounter,
 	aggregateExchangeRatePrevotes []AggregateExchangeRatePrevote,
 	aggregateExchangeRateVotes []AggregateExchangeRateVote,
-	historicPrices []Price,
-	medianPrices []Price,
-	medianDeviationPrices []Price,
+	historicPrices []PriceStamp,
+	medianPrices []PriceStamp,
+	medianDeviationPrices []PriceStamp,
 ) *GenesisState {
 	return &GenesisState{
 		Params:                        params,
@@ -42,9 +42,9 @@ func DefaultGenesisState() *GenesisState {
 		MissCounters:                  []MissCounter{},
 		AggregateExchangeRatePrevotes: []AggregateExchangeRatePrevote{},
 		AggregateExchangeRateVotes:    []AggregateExchangeRateVote{},
-		HistoricPrices:                []Price{},
-		Medians:                       []Price{},
-		MedianDeviations:              []Price{},
+		HistoricPrices:                []PriceStamp{},
+		Medians:                       []PriceStamp{},
+		MedianDeviations:              []PriceStamp{},
 	}
 }
 
