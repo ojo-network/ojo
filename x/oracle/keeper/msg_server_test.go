@@ -121,7 +121,7 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 	s.Require().NoError(err)
 	vote, err := s.app.OracleKeeper.GetAggregateExchangeRateVote(ctx, valAddr)
 	s.Require().Nil(err)
-	for _, v := range vote.ExchangeRateTuples {
+	for _, v := range vote.ExchangeRates {
 		s.Require().Contains(acceptListFlat, strings.ToLower(v.Denom))
 	}
 
@@ -136,7 +136,7 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 	s.Require().NoError(err)
 	vote, err = s.app.OracleKeeper.GetAggregateExchangeRateVote(ctx, valAddr)
 	s.Require().NoError(err)
-	for _, v := range vote.ExchangeRateTuples {
+	for _, v := range vote.ExchangeRates {
 		s.Require().Contains(acceptListFlat, strings.ToLower(v.Denom))
 	}
 }

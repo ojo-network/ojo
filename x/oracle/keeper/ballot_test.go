@@ -17,10 +17,10 @@ func (s *IntegrationTestSuite) TestBallot_OrganizeBallotByDenom() {
 
 	s.app.OracleKeeper.SetAggregateExchangeRateVote(
 		s.ctx, valAddr, types.AggregateExchangeRateVote{
-			ExchangeRateTuples: types.ExchangeRateTuples{
-				types.ExchangeRateTuple{
-					Denom:        "OJO",
-					ExchangeRate: sdk.OneDec(),
+			ExchangeRates: sdk.DecCoins{
+				sdk.DecCoin{
+					Denom:  "OJO",
+					Amount: sdk.OneDec(),
 				},
 			},
 			Voter: valAddr.String(),
@@ -52,14 +52,14 @@ func (s *IntegrationTestSuite) TestBallot_ClearBallots() {
 	s.Require().NoError(err)
 	s.Require().Equal(prevoteRes, prevote)
 
-	var tuples types.ExchangeRateTuples
-	tuples = append(tuples, types.ExchangeRateTuple{
-		Denom:        "OJO",
-		ExchangeRate: sdk.ZeroDec(),
+	var decCoins sdk.DecCoins
+	decCoins = append(decCoins, sdk.DecCoin{
+		Denom:  "OJO",
+		Amount: sdk.ZeroDec(),
 	})
 	vote := types.AggregateExchangeRateVote{
-		ExchangeRateTuples: tuples,
-		Voter:              addr.String(),
+		ExchangeRates: decCoins,
+		Voter:         addr.String(),
 	}
 	s.app.OracleKeeper.SetAggregateExchangeRateVote(s.ctx, valAddr, vote)
 	voteRes, err := s.app.OracleKeeper.GetAggregateExchangeRateVote(s.ctx, valAddr)
