@@ -166,15 +166,15 @@ func (s *IntegrationTestSuite) TestAggregateExchangeRatePrevoteError() {
 func (s *IntegrationTestSuite) TestAggregateExchangeRateVote() {
 	app, ctx := s.app, s.ctx
 
-	var tuples types.ExchangeRateTuples
-	tuples = append(tuples, types.ExchangeRateTuple{
-		Denom:        displayDenom,
-		ExchangeRate: sdk.ZeroDec(),
+	var decCoins sdk.DecCoins
+	decCoins = append(decCoins, sdk.DecCoin{
+		Denom:  displayDenom,
+		Amount: sdk.ZeroDec(),
 	})
 
 	vote := types.AggregateExchangeRateVote{
-		ExchangeRateTuples: tuples,
-		Voter:              addr.String(),
+		ExchangeRates: decCoins,
+		Voter:         addr.String(),
 	}
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr, vote)
 

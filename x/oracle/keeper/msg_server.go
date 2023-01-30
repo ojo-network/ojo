@@ -83,7 +83,7 @@ func (ms msgServer) AggregateExchangeRateVote(
 		return nil, types.ErrRevealPeriodMissMatch
 	}
 
-	exchangeRateTuples, err := types.ParseExchangeRateTuples(msg.ExchangeRates)
+	exchangeRates, err := types.ParseExchangeRateDecCoins(msg.ExchangeRates)
 	if err != nil {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidCoins, err.Error())
 	}
@@ -95,15 +95,15 @@ func (ms msgServer) AggregateExchangeRateVote(
 	}
 
 	// Filter out rates which aren't included in the AcceptList
-	filteredTuples := types.ExchangeRateTuples{}
-	for _, tuple := range exchangeRateTuples {
-		if params.AcceptList.Contains(tuple.Denom) {
-			filteredTuples = append(filteredTuples, tuple)
+	filteredDecCoins := sdk.DecCoins{}
+	for _, decCoin := range exchangeRates {
+		if params.AcceptList.Contains(decCoin.Denom) {
+			filteredDecCoins = append(filteredDecCoins, decCoin)
 		}
 	}
 
 	// Move aggregate prevote to aggregate vote with given exchange rates
-	ms.SetAggregateExchangeRateVote(ctx, valAddr, types.NewAggregateExchangeRateVote(filteredTuples, valAddr))
+	ms.SetAggregateExchangeRateVote(ctx, valAddr, types.NewAggregateExchangeRateVote(filteredDecCoins, valAddr))
 	ms.DeleteAggregateExchangeRatePrevote(ctx, valAddr)
 
 	return &types.MsgAggregateExchangeRateVoteResponse{}, nil

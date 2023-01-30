@@ -27,7 +27,7 @@ func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, genState types.GenesisSt
 	}
 
 	for _, ex := range genState.ExchangeRates {
-		keeper.SetExchangeRate(ctx, ex.Denom, ex.ExchangeRate)
+		keeper.SetExchangeRate(ctx, ex.Denom, ex.Amount)
 	}
 
 	for _, mc := range genState.MissCounters {
@@ -58,19 +58,19 @@ func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, genState types.GenesisSt
 	}
 
 	for _, hp := range genState.HistoricPrices {
-		keeper.SetHistoricPrice(ctx, hp.ExchangeRateTuple.Denom, hp.BlockNum, hp.ExchangeRateTuple.ExchangeRate)
+		keeper.SetHistoricPrice(ctx, hp.ExchangeRate.Denom, hp.BlockNum, hp.ExchangeRate.Amount)
 	}
 
 	for _, median := range genState.Medians {
-		keeper.SetHistoricMedian(ctx, median.ExchangeRateTuple.Denom, median.BlockNum, median.ExchangeRateTuple.ExchangeRate)
+		keeper.SetHistoricMedian(ctx, median.ExchangeRate.Denom, median.BlockNum, median.ExchangeRate.Amount)
 	}
 
 	for _, medianDeviation := range genState.MedianDeviations {
 		keeper.SetHistoricMedianDeviation(
 			ctx,
-			medianDeviation.ExchangeRateTuple.Denom,
+			medianDeviation.ExchangeRate.Denom,
 			medianDeviation.BlockNum,
-			medianDeviation.ExchangeRateTuple.ExchangeRate,
+			medianDeviation.ExchangeRate.Amount,
 		)
 	}
 
@@ -97,11 +97,11 @@ func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) *types.GenesisState {
 		return false
 	})
 
-	exchangeRates := []types.ExchangeRateTuple{}
+	exchangeRates := sdk.DecCoins{}
 	keeper.IterateExchangeRates(ctx, func(denom string, rate sdk.Dec) (stop bool) {
-		exchangeRates = append(exchangeRates, types.ExchangeRateTuple{
-			Denom:        denom,
-			ExchangeRate: rate,
+		exchangeRates = append(exchangeRates, sdk.DecCoin{
+			Denom:  denom,
+			Amount: rate,
 		})
 
 		return false
@@ -135,28 +135,28 @@ func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) *types.GenesisState {
 		},
 	)
 
-	historicPrices := []types.Price{}
+	historicPrices := []types.PriceStamp{}
 	keeper.IterateAllHistoricPrices(
 		ctx,
-		func(historicPrice types.Price) bool {
+		func(historicPrice types.PriceStamp) bool {
 			historicPrices = append(historicPrices, historicPrice)
 			return false
 		},
 	)
 
-	medianPrices := []types.Price{}
+	medianPrices := []types.PriceStamp{}
 	keeper.IterateAllMedianPrices(
 		ctx,
-		func(medianPrice types.Price) bool {
+		func(medianPrice types.PriceStamp) bool {
 			medianPrices = append(medianPrices, medianPrice)
 			return false
 		},
 	)
 
-	medianDeviationPrices := []types.Price{}
+	medianDeviationPrices := []types.PriceStamp{}
 	keeper.IterateAllMedianDeviationPrices(
 		ctx,
-		func(medianDeviationPrice types.Price) bool {
+		func(medianDeviationPrice types.PriceStamp) bool {
 			medianDeviationPrices = append(medianDeviationPrices, medianDeviationPrice)
 			return false
 		},

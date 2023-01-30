@@ -908,7 +908,8 @@ func (m *QueryMediansResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryMediansResponse proto.InternalMessageInfo
 
-// QueryMedianDeviations is the request type for the Query/MedianDeviations RPC Response.
+// QueryMedianDeviations is the request type for the Query/MedianDeviations RPC
+// Response.
 type QueryMedianDeviations struct {
 	// denom defines the denomination to query for.
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`

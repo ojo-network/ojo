@@ -10,7 +10,7 @@ import (
 // Iterator stops when exhausting the source, or when the handler returns `true`.
 func (k Keeper) IterateAllHistoricPrices(
 	ctx sdk.Context,
-	handler func(types.Price) bool,
+	handler func(types.PriceStamp) bool,
 ) {
 	store := ctx.KVStore(k.storeKey)
 	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixHistoricPrice)
@@ -20,9 +20,9 @@ func (k Keeper) IterateAllHistoricPrices(
 		var decProto sdk.DecProto
 		k.cdc.MustUnmarshal(iter.Value(), &decProto)
 		denom, blockNum := types.ParseDenomAndBlockFromKey(iter.Key(), types.KeyPrefixHistoricPrice)
-		historicPrice := types.Price{
-			ExchangeRateTuple: types.ExchangeRateTuple{ExchangeRate: decProto.Dec, Denom: denom},
-			BlockNum:          blockNum,
+		historicPrice := types.PriceStamp{
+			ExchangeRate: &sdk.DecCoin{Denom: denom, Amount: decProto.Dec},
+			BlockNum:     blockNum,
 		}
 		if handler(historicPrice) {
 			break
@@ -30,11 +30,22 @@ func (k Keeper) IterateAllHistoricPrices(
 	}
 }
 
+// AllHistoricPrices is a helper function that collects and returns all
+// median prices using the IterateAllHistoricPrices iterator
+func (k Keeper) AllHistoricPrices(ctx sdk.Context) types.PriceStamps {
+	prices := types.PriceStamps{}
+	k.IterateAllHistoricPrices(ctx, func(median types.PriceStamp) (stop bool) {
+		prices = append(prices, median)
+		return false
+	})
+	return prices
+}
+
 // IterateAllMedianPrices iterates over all median prices.
 // Iterator stops when exhausting the source, or when the handler returns `true`.
 func (k Keeper) IterateAllMedianPrices(
 	ctx sdk.Context,
-	handler func(types.Price) bool,
+	handler func(types.PriceStamp) bool,
 ) {
 	store := ctx.KVStore(k.storeKey)
 	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixMedian)
@@ -44,9 +55,9 @@ func (k Keeper) IterateAllMedianPrices(
 		var decProto sdk.DecProto
 		k.cdc.MustUnmarshal(iter.Value(), &decProto)
 		denom, blockNum := types.ParseDenomAndBlockFromKey(iter.Key(), types.KeyPrefixMedian)
-		median := types.Price{
-			ExchangeRateTuple: types.ExchangeRateTuple{ExchangeRate: decProto.Dec, Denom: denom},
-			BlockNum:          blockNum,
+		median := types.PriceStamp{
+			ExchangeRate: &sdk.DecCoin{Denom: denom, Amount: decProto.Dec},
+			BlockNum:     blockNum,
 		}
 
 		if handler(median) {
@@ -55,11 +66,22 @@ func (k Keeper) IterateAllMedianPrices(
 	}
 }
 
+// AllMedianPrices is a helper function that collects and returns all
+// median prices using the IterateAllMedianPrices iterator
+func (k Keeper) AllMedianPrices(ctx sdk.Context) types.PriceStamps {
+	prices := types.PriceStamps{}
+	k.IterateAllMedianPrices(ctx, func(median types.PriceStamp) (stop bool) {
+		prices = append(prices, median)
+		return false
+	})
+	return prices
+}
+
 // IterateAllMedianDeviationPrices iterates over all median deviation prices.
 // Iterator stops when exhausting the source, or when the handler returns `true`.
 func (k Keeper) IterateAllMedianDeviationPrices(
 	ctx sdk.Context,
-	handler func(types.Price) bool,
+	handler func(types.PriceStamp) bool,
 ) {
 	store := ctx.KVStore(k.storeKey)
 	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixMedianDeviation)
@@ -69,13 +91,24 @@ func (k Keeper) IterateAllMedianDeviationPrices(
 		var decProto sdk.DecProto
 		k.cdc.MustUnmarshal(iter.Value(), &decProto)
 		denom, blockNum := types.ParseDenomAndBlockFromKey(iter.Key(), types.KeyPrefixMedianDeviation)
-		medianDeviation := types.Price{
-			ExchangeRateTuple: types.ExchangeRateTuple{ExchangeRate: decProto.Dec, Denom: denom},
-			BlockNum:          blockNum,
+		medianDeviation := types.PriceStamp{
+			ExchangeRate: &sdk.DecCoin{Denom: denom, Amount: decProto.Dec},
+			BlockNum:     blockNum,
 		}
 
 		if handler(medianDeviation) {
 			break
 		}
 	}
+}
+
+// AllMedianDeviationPrices is a helper function that collects and returns
+// all median prices using the IterateAllMedianDeviationPrices iterator
+func (k Keeper) AllMedianDeviationPrices(ctx sdk.Context) types.PriceStamps {
+	prices := types.PriceStamps{}
+	k.IterateAllMedianDeviationPrices(ctx, func(median types.PriceStamp) (stop bool) {
+		prices = append(prices, median)
+		return false
+	})
+	return prices
 }

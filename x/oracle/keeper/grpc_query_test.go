@@ -115,15 +115,15 @@ func (s *IntegrationTestSuite) TestQuerier_AggregatePrevotes() {
 }
 
 func (s *IntegrationTestSuite) TestQuerier_AggregateVote() {
-	var tuples types.ExchangeRateTuples
-	tuples = append(tuples, types.ExchangeRateTuple{
-		Denom:        appparams.DisplayDenom,
-		ExchangeRate: sdk.ZeroDec(),
+	var decCoins sdk.DecCoins
+	decCoins = append(decCoins, sdk.DecCoin{
+		Denom:  appparams.DisplayDenom,
+		Amount: sdk.ZeroDec(),
 	})
 
 	vote := types.AggregateExchangeRateVote{
-		ExchangeRateTuples: tuples,
-		Voter:              addr.String(),
+		ExchangeRates: decCoins,
+		Voter:         addr.String(),
 	}
 	s.app.OracleKeeper.SetAggregateExchangeRateVote(s.ctx, valAddr, vote)
 
@@ -132,8 +132,8 @@ func (s *IntegrationTestSuite) TestQuerier_AggregateVote() {
 	})
 	s.Require().NoError(err)
 	s.Require().Equal(types.AggregateExchangeRateVote{
-		ExchangeRateTuples: tuples,
-		Voter:              addr.String(),
+		ExchangeRates: decCoins,
+		Voter:         addr.String(),
 	}, res.AggregateVote)
 }
 

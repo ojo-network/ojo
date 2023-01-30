@@ -27,12 +27,12 @@ func (v AggregateExchangeRatePrevote) String() string {
 }
 
 func NewAggregateExchangeRateVote(
-	exchangeRateTuples ExchangeRateTuples,
+	decCoins sdk.DecCoins,
 	voter sdk.ValAddress,
 ) AggregateExchangeRateVote {
 	return AggregateExchangeRateVote{
-		ExchangeRateTuples: exchangeRateTuples,
-		Voter:              voter.String(),
+		ExchangeRates: decCoins,
+		Voter:         voter.String(),
 	}
 }
 
@@ -42,59 +42,33 @@ func (v AggregateExchangeRateVote) String() string {
 	return string(out)
 }
 
-// NewExchangeRateTuple creates a ExchangeRateTuple instance
-func NewExchangeRateTuple(denom string, exchangeRate sdk.Dec) ExchangeRateTuple {
-	return ExchangeRateTuple{
-		denom,
-		exchangeRate,
-	}
-}
-
-// String implement stringify
-func (v ExchangeRateTuple) String() string {
-	out, _ := yaml.Marshal(v)
-	return string(out)
-}
-
-// ExchangeRateTuples - array of ExchangeRateTuple
-type ExchangeRateTuples []ExchangeRateTuple
-
-// String implements fmt.Stringer interface
-func (tuples ExchangeRateTuples) String() string {
-	out, _ := yaml.Marshal(tuples)
-	return string(out)
-}
-
-// ParseExchangeRateTuples ExchangeRateTuple parser
-func ParseExchangeRateTuples(tuplesStr string) (ExchangeRateTuples, error) {
+// ParseExchangeRateDecCoins DecCoins parser
+func ParseExchangeRateDecCoins(tuplesStr string) (sdk.DecCoins, error) {
 	if len(tuplesStr) == 0 {
 		return nil, nil
 	}
 
-	tupleStrs := strings.Split(tuplesStr, ",")
-	tuples := make(ExchangeRateTuples, len(tupleStrs))
+	decCoinsStrs := strings.Split(tuplesStr, ",")
+	decCoins := make(sdk.DecCoins, len(decCoinsStrs))
 
 	duplicateCheckMap := make(map[string]bool)
-	for i, tupleStr := range tupleStrs {
-		denomAmountStr := strings.Split(tupleStr, ":")
+	for i, decCoinStr := range decCoinsStrs {
+		denomAmountStr := strings.Split(decCoinStr, ":")
 		if len(denomAmountStr) != 2 {
-			return nil, fmt.Errorf("invalid exchange rate %s", tupleStr)
+			return nil, fmt.Errorf("invalid exchange rate %s", decCoinStr)
 		}
 
-		decCoin, err := sdk.NewDecFromStr(denomAmountStr[1])
+		dec, err := sdk.NewDecFromStr(denomAmountStr[1])
 		if err != nil {
 			return nil, err
 		}
-		if !decCoin.IsPositive() {
+		if !dec.IsPositive() {
 			return nil, ErrInvalidOraclePrice
 		}
 
 		denom := strings.ToUpper(denomAmountStr[0])
 
-		tuples[i] = ExchangeRateTuple{
-			Denom:        denom,
-			ExchangeRate: decCoin,
-		}
+		decCoins[i] = sdk.NewDecCoinFromDec(denom, dec)
 
 		if _, ok := duplicateCheckMap[denom]; ok {
 			return nil, fmt.Errorf("duplicated denom %s", denom)
@@ -103,5 +77,5 @@ func ParseExchangeRateTuples(tuplesStr string) (ExchangeRateTuples, error) {
 		duplicateCheckMap[denom] = true
 	}
 
-	return tuples, nil
+	return decCoins, nil
 }

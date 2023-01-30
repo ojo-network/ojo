@@ -21,11 +21,11 @@ func (k Keeper) OrganizeBallotByDenom(
 		if ok {
 			power := claim.Power
 
-			for _, tuple := range vote.ExchangeRateTuples {
+			for _, decCoin := range vote.ExchangeRates {
 				tmpPower := power
-				votes[tuple.Denom] = append(
-					votes[tuple.Denom],
-					types.NewVoteForTally(tuple.ExchangeRate, tuple.Denom, voterAddr, tmpPower),
+				votes[decCoin.Denom] = append(
+					votes[decCoin.Denom],
+					types.NewVoteForTally(decCoin.Amount, decCoin.Denom, voterAddr, tmpPower),
 				)
 			}
 		}

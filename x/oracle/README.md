@@ -140,16 +140,16 @@ type AggregateExchangeRatePrevote struct {
 - AggregateExchangeRateVote: `0x05 | byte(valAddress length) | byte(valAddress) -> ProtocolBuffer(AggregateExchangeRateVote)`
 
 ```go
-type ExchangeRateTuple struct {
-    Denom           string  `json:"denom"`
-    ExchangeRate    sdk.Dec `json:"exchange_rate"`
+type DecCoin struct {
+    Denom     string  `json:"denom"`
+    Amount    sdk.Dec `json:"amount"`
 }
 
-type ExchangeRateTuples []ExchangeRateTuple
+type DecCoins []DecCoin
 
 type AggregateExchangeRateVote struct {
-    ExchangeRateTuples  ExchangeRateTuples  // ExchangeRates against USD
-    Voter               sdk.ValAddress      // voter val address of validator
+    ExchangeRates  sdk.DecCoins    // ExchangeRates against USD
+    Voter          sdk.ValAddress  // voter val address of validator
 }
 ```
 
