@@ -6,6 +6,7 @@ import (
 	evidencetypes "github.com/cosmos/cosmos-sdk/x/evidence/types"
 
 	appparams "github.com/ojo-network/ojo/app/params"
+	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
 
 // MaxMsgGasUsage defines the maximum gas allowed for an oracle transaction.
@@ -78,6 +79,9 @@ func IsOracleTx(msgs []sdk.Msg) bool {
 	}
 	for _, msg := range msgs {
 		switch msg.(type) {
+		case *oracletypes.MsgAggregateExchangeRatePrevote,
+			*oracletypes.MsgAggregateExchangeRateVote:
+			continue
 		default:
 			return false
 		}
