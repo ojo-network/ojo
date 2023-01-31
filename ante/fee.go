@@ -6,7 +6,6 @@ import (
 	evidencetypes "github.com/cosmos/cosmos-sdk/x/evidence/types"
 
 	appparams "github.com/ojo-network/ojo/app/params"
-	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
 
 // MaxMsgGasUsage defines the maximum gas allowed for an oracle transaction.
@@ -15,8 +14,8 @@ const MaxMsgGasUsage = uint64(140_000)
 // FeeAndPriority ensures tx has enough fee coins to pay for the gas at the CheckTx time
 // to early remove transactions from the mempool without enough attached fee.
 // The validator min fee check is ignored if the tx contains only oracle messages and
-// tx gas limit is <= MaxOracleMsgGasUsage. Essentially, validators can provide price
-// transactison for free as long as the gas per message is in the MaxOracleMsgGasUsage limit.
+// tx gas limit is <= MaxMsgGasUsage. Essentially, validators can provide price
+// transactison for free as long as the gas per message is in the MaxMsgGasUsage limit.
 func FeeAndPriority(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, int64, error) {
 	feeTx, ok := tx.(sdk.FeeTx)
 	if !ok {
@@ -29,7 +28,7 @@ func FeeAndPriority(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, int64, error) {
 	isOracle := IsOracleTx(msgs)
 	priority := getTxPriority(isOracle, msgs)
 	chargeFees := !isOracle || gasLimit > uint64(len(msgs))*MaxMsgGasUsage
-	// we also don't charge transaction fees for the first block, for the genesis transactions.
+	// We also don't charge fees for the genesis transactions.
 	if !chargeFees || ctx.BlockHeight() == 0 {
 		return sdk.Coins{}, priority, nil
 	}
@@ -79,9 +78,6 @@ func IsOracleTx(msgs []sdk.Msg) bool {
 	}
 	for _, msg := range msgs {
 		switch msg.(type) {
-		case *oracletypes.MsgAggregateExchangeRatePrevote,
-			*oracletypes.MsgAggregateExchangeRateVote:
-			continue
 		default:
 			return false
 		}
@@ -103,24 +99,10 @@ func AssertMinProtocolGasPrice(gasPrices sdk.DecCoins) error {
 
 // getTxPriority returns naive tx priority based on the lowest fee amount (regardless of the
 // denom) and oracle tx check.
-// Dirty optimization: since we already check if msgs are oracle or gravity messages, then we
-// don't recomupte it again: isOracleOrGravity flag takes a precedence over msgs check.
-func getTxPriority( /*fees, gasAmount*/ isOracle bool, msgs []sdk.Msg) int64 {
+// Dirty optimization: since we already check if msgs are oracle message, then we
+// don't recomupte it again: isOracle flag takes a precedence over msgs check.
+func getTxPriority(isOracle bool, msgs []sdk.Msg) int64 {
 	var priority int64
-	/* TODO: IBC tx prioritization is not stable and we will implement a more general
-	 * tx prioritization once that will be resolved
-	 * https://github.com/umee-network/umee/issues/1289
-	for _, c := range fees {
-		p := int64(math.MaxInt64)
-		gasPrice := c.Amount.QuoRaw(gasAmount)
-		if gasPrice.IsInt64() {
-			p = gasPrice.Int64()
-		}
-		if priority == 0 || p < priority {
-			priority = p
-		}
-	}
-	*/
 	if isOracle {
 		return 100
 	}
@@ -130,7 +112,7 @@ func getTxPriority( /*fees, gasAmount*/ isOracle bool, msgs []sdk.Msg) int64 {
 		case *evidencetypes.MsgSubmitEvidence:
 			p = 90
 		default:
-			// in case there is a non-prioritized mixed message, we return 0
+			// in case there is a non-prioritized message, return 0
 			return 0
 		}
 		if priority == 0 || p < priority {

@@ -48,7 +48,7 @@ func (spd *SpamPreventionDecorator) AnteHandle(
 }
 
 // CheckOracleSpam performs the check of whether or not we've seen an oracle
-// message from an oracle feeder in the current block or not. If we have, we
+// message from an oracle feeder in the current block. If we have, we
 // return an error which prohibits the transaction from being processed.
 func (spd *SpamPreventionDecorator) CheckOracleSpam(ctx sdk.Context, msgs []sdk.Msg) error {
 	spd.mu.Lock()
