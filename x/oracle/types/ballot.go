@@ -3,6 +3,7 @@ package types
 import (
 	"sort"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ojo-network/ojo/util/decmath"
@@ -55,7 +56,7 @@ func (pb ExchangeRateBallot) Power() int64 {
 func (pb ExchangeRateBallot) ExchangeRates() []sdk.Dec {
 	exchangeRates := []sdk.Dec{}
 	for _, vote := range pb {
-		if vote.ExchangeRate.BigInt().BitLen() <= sdk.MaxBitLen {
+		if vote.ExchangeRate.BigInt().BitLen() <= sdkmath.MaxBitLen {
 			exchangeRates = append(exchangeRates, vote.ExchangeRate)
 		}
 	}
