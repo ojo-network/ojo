@@ -24,9 +24,9 @@ func TestGenesisValidation(t *testing.T) {
 
 	// Invalid Rewardband
 	genState = DefaultGenesisState()
-	genState.Params.RewardBand = sdk.NewDec(2)
+	genState.Params.AcceptList[0].RewardBand = sdk.NewDec(2)
 	require.Error(t, ValidateGenesis(genState))
-	genState.Params.RewardBand = sdk.NewDec(-1)
+	genState.Params.AcceptList[0].RewardBand = sdk.NewDec(-1)
 	require.Error(t, ValidateGenesis(genState))
 
 	// Invalid RewardDistributionWindow

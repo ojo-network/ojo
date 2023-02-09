@@ -153,7 +153,6 @@ func RandomizedGenState(simState *module.SimulationState) {
 	oracleGenesis.Params = types.Params{
 		VotePeriod:               votePeriod,
 		VoteThreshold:            voteThreshold,
-		RewardBand:               rewardBand,
 		RewardDistributionWindow: rewardDistributionWindow,
 		AcceptList: types.DenomList{
 			{SymbolDenom: types.OjoSymbol, BaseDenom: types.OjoDenom},

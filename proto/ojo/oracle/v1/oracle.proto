@@ -19,30 +19,25 @@ message Params {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable) = false
   ];
-  string reward_band = 3 [
-    (gogoproto.moretags) = "yaml:\"reward_band\"",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
-  ];
-  uint64 reward_distribution_window = 4
+  uint64 reward_distribution_window = 3
       [ (gogoproto.moretags) = "yaml:\"reward_distribution_window\"" ];
-  repeated Denom accept_list = 5 [
+  repeated Denom accept_list = 4 [
     (gogoproto.moretags) = "yaml:\"accept_list\"",
     (gogoproto.castrepeated) = "DenomList",
     (gogoproto.nullable) = false
   ];
-  string slash_fraction = 6 [
+  string slash_fraction = 5 [
     (gogoproto.moretags) = "yaml:\"slash_fraction\"",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable) = false
   ];
-  uint64 slash_window = 7 [ (gogoproto.moretags) = "yaml:\"slash_window\"" ];
-  string min_valid_per_window = 8 [
+  uint64 slash_window = 6 [ (gogoproto.moretags) = "yaml:\"slash_window\"" ];
+  string min_valid_per_window = 7 [
     (gogoproto.moretags) = "yaml:\"min_valid_per_window\"",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable) = false
   ];
-  repeated Denom mandatory_list = 9 [
+  repeated Denom mandatory_list = 8 [
     (gogoproto.moretags) = "yaml:\"mandatory_list\"",
     (gogoproto.castrepeated) = "DenomList",
     (gogoproto.nullable) = false
@@ -71,6 +66,11 @@ message Denom {
   string base_denom = 1 [ (gogoproto.moretags) = "yaml:\"base_denom\"" ];
   string symbol_denom = 2 [ (gogoproto.moretags) = "yaml:\"symbol_denom\"" ];
   uint32 exponent = 3 [ (gogoproto.moretags) = "yaml:\"exponent\"" ];
+  string reward_band = 4 [
+    (gogoproto.moretags) = "yaml:\"reward_band\"",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable) = false
+  ];
 }
 
 // AggregateExchangeRatePrevote -
