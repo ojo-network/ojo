@@ -7,7 +7,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/tendermint/tendermint/libs/log"
@@ -76,7 +75,7 @@ func (k Keeper) GetExchangeRate(ctx sdk.Context, symbol string) (sdk.Dec, error)
 	symbol = strings.ToUpper(symbol)
 	b := store.Get(types.GetExchangeRateKey(symbol))
 	if b == nil {
-		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrUnknownDenom, symbol)
+		return sdk.ZeroDec(), types.ErrUnknownDenom.Wrap(symbol)
 	}
 
 	decProto := sdk.DecProto{}
@@ -100,7 +99,7 @@ func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, err
 		}
 	}
 	if len(symbol) == 0 {
-		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrUnknownDenom, denom)
+		return sdk.ZeroDec(), types.ErrUnknownDenom.Wrap(denom)
 	}
 
 	exchangeRate, err := k.GetExchangeRate(ctx, symbol)
@@ -211,7 +210,7 @@ func (k Keeper) GetAggregateExchangeRatePrevote(
 
 	bz := store.Get(types.GetAggregateExchangeRatePrevoteKey(voter))
 	if bz == nil {
-		return types.AggregateExchangeRatePrevote{}, sdkerrors.Wrap(types.ErrNoAggregatePrevote, voter.String())
+		return types.AggregateExchangeRatePrevote{}, types.ErrNoAggregatePrevote.Wrap(voter.String())
 	}
 
 	var aggregatePrevote types.AggregateExchangeRatePrevote
@@ -278,7 +277,7 @@ func (k Keeper) GetAggregateExchangeRateVote(
 
 	bz := store.Get(types.GetAggregateExchangeRateVoteKey(voter))
 	if bz == nil {
-		return types.AggregateExchangeRateVote{}, sdkerrors.Wrap(types.ErrNoAggregateVote, voter.String())
+		return types.AggregateExchangeRateVote{}, types.ErrNoAggregateVote.Wrap(voter.String())
 	}
 
 	var aggregateVote types.AggregateExchangeRateVote
@@ -339,7 +338,7 @@ func (k Keeper) ValidateFeeder(ctx sdk.Context, feederAddr sdk.AccAddress, valAd
 		return err
 	}
 	if !delegate.Equals(feederAddr) {
-		return sdkerrors.Wrap(types.ErrNoVotingPermission, feederAddr.String())
+		return types.ErrNoVotingPermission.Wrap(feederAddr.String())
 	}
 
 	return nil

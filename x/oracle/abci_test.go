@@ -6,7 +6,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/staking/teststaking"
@@ -23,10 +22,8 @@ import (
 )
 
 const (
-	displayDenom     string = appparams.DisplayDenom
-	bondDenom        string = appparams.BondDenom
-	preVoteBlockDiff int64  = 2
-	voteBlockDiff    int64  = 3
+	displayDenom string = appparams.DisplayDenom
+	bondDenom    string = appparams.BondDenom
 )
 
 type IntegrationTestSuite struct {
@@ -93,7 +90,9 @@ var (
 func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	app, ctx := s.app, s.ctx
 	originalBlockHeight := ctx.BlockHeight()
-	ctx = ctx.WithBlockHeight(6)
+	ctx = ctx.WithBlockHeight(1)
+	preVoteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx) / 2)
+	voteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx)/2 + 1)
 
 	var (
 		val1DecCoins sdk.DecCoins
@@ -165,7 +164,7 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		rate, err := app.OracleKeeper.GetExchangeRate(ctx, denom.SymbolDenom)
-		s.Require().ErrorIs(err, sdkerrors.Wrap(types.ErrUnknownDenom, denom.SymbolDenom))
+		s.Require().ErrorIs(err, types.ErrUnknownDenom.Wrap(denom.SymbolDenom))
 		s.Require().Equal(sdk.ZeroDec(), rate)
 	}
 
@@ -207,7 +206,7 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.MustNewDecFromStr("0.75"), rate)
 	rate, err = app.OracleKeeper.GetExchangeRate(ctx, "atom")
-	s.Require().ErrorIs(err, sdkerrors.Wrap(types.ErrUnknownDenom, "atom"))
+	s.Require().ErrorIs(err, types.ErrUnknownDenom.Wrap("atom"))
 	s.Require().Equal(sdk.ZeroDec(), rate)
 
 	ctx = ctx.WithBlockHeight(originalBlockHeight)
@@ -216,7 +215,9 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 	app, ctx := s.app, s.ctx
 	originalBlockHeight := ctx.BlockHeight()
-	ctx = ctx.WithBlockHeight(6)
+	ctx = ctx.WithBlockHeight(1)
+	preVoteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx) / 2)
+	voteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx)/2 + 1)
 
 	app.OracleKeeper.SetMandatoryList(ctx, types.DenomList{
 		{
