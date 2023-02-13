@@ -103,9 +103,18 @@ clean:
 ###############################################################################
 
 docker-build:
-	@docker build -f tests/e2e/docker/ojo.Dockerfile
+	@docker build -t ojo -f tests/e2e/docker/ojo.Dockerfile .
 
-.PHONY .docker-build
+docker-build-price-feeder:
+	@git clone https://github.com/ojo-network/price-feeder
+	@cd price-feeder; git checkout v0.1.0
+	@docker build -t ghcr.io/ojo-network/price-feeder -f tests/e2e/docker/price_feeder.Dockerfile price-feeder
+	@rm -rf price-feeder
+
+docker-push-price-feeder:
+	@docker push ghcr.io/ojo-network/price-feeder
+
+.PHONY: .docker-build .docker-build-price-feeder .docker-push-price-feeder
 
 ###############################################################################
 ##                                   Tests                                   ##

@@ -7,12 +7,12 @@ import "github.com/ojo-network/ojo/tests/grpc"
 // medians deviations are correct, updates the oracle params with
 // a gov prop, then checks the medians and median deviations again.
 func (s *IntegrationTestSuite) TestMedians() {
-	err := grpc.MedianCheck(s.umeeClient)
+	err := grpc.MedianCheck(s.ojoClient)
 	s.Require().NoError(err)
 }
 
 func (s *IntegrationTestSuite) TestUpdateOracleParams() {
-	params, err := s.umeeClient.QueryClient.QueryParams()
+	params, err := s.ojoClient.QueryClient.QueryParams()
 	s.Require().NoError(err)
 
 	s.Require().Equal(uint64(5), params.HistoricStampPeriod)
@@ -20,12 +20,12 @@ func (s *IntegrationTestSuite) TestUpdateOracleParams() {
 	s.Require().Equal(uint64(20), params.MedianStampPeriod)
 
 	err = grpc.SubmitAndPassProposal(
-		s.umeeClient,
+		s.ojoClient,
 		grpc.OracleParamChanges(10, 2, 20),
 	)
 	s.Require().NoError(err)
 
-	params, err = s.umeeClient.QueryClient.QueryParams()
+	params, err = s.ojoClient.QueryClient.QueryParams()
 	s.Require().NoError(err)
 
 	s.Require().Equal(uint64(10), params.HistoricStampPeriod)
