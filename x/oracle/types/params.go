@@ -39,17 +39,7 @@ const (
 // Default parameter values
 var (
 	DefaultVoteThreshold = sdk.NewDecWithPrec(50, 2) // 50%
-	DefaultRewardBand    = sdk.NewDecWithPrec(2, 2)  // 2% (-1, 1)
-	DefaultRewardBands   = RewardBandList{
-		{
-			SymbolDenom: OjoSymbol,
-			RewardBand:  DefaultRewardBand,
-		},
-		{
-			SymbolDenom: AtomSymbol,
-			RewardBand:  DefaultRewardBand,
-		},
-	}
+
 	DefaultAcceptList = DenomList{
 		{
 			BaseDenom:   OjoDenom,
@@ -75,6 +65,24 @@ var (
 
 var _ paramstypes.ParamSet = &Params{}
 
+// DefaultRewardBands returns a new default RewardBandList object.
+//
+// This function is necessary because we cannot use a constant,
+// and the reward band list is manipulated in our unit tests.
+func DefaultRewardBands() RewardBandList {
+	defaultRewardBand := sdk.NewDecWithPrec(2, 2) // 0.02
+	return RewardBandList{
+		{
+			SymbolDenom: OjoSymbol,
+			RewardBand:  defaultRewardBand,
+		},
+		{
+			SymbolDenom: AtomSymbol,
+			RewardBand:  defaultRewardBand,
+		},
+	}
+}
+
 // DefaultParams creates default oracle module parameters
 func DefaultParams() Params {
 	return Params{
@@ -90,7 +98,7 @@ func DefaultParams() Params {
 		MedianStampPeriod:        DefaultMedianStampPeriod,
 		MaximumPriceStamps:       DefaultMaximumPriceStamps,
 		MaximumMedianStamps:      DefaultMaximumMedianStamps,
-		RewardBands:              DefaultRewardBands,
+		RewardBands:              DefaultRewardBands(),
 	}
 }
 
