@@ -64,7 +64,7 @@ func (dl DenomList) ContainDenoms(d DenomList) bool {
 func (dl DenomList) GetRewardBand(rbl RewardBandList) (sdk.Dec, error) {
 	for _, d := range dl {
 		for _, rb := range rbl {
-			if strings.ToUpper(d.SymbolDenom) == strings.ToUpper(rb.SymbolDenom) {
+			if strings.EqualFold(d.SymbolDenom, rb.SymbolDenom) {
 				return rb.RewardBand, nil
 			}
 		}

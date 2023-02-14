@@ -13,7 +13,7 @@ func (rb RewardBand) String() string {
 }
 
 func (rb RewardBand) Equal(rb2 *RewardBand) bool {
-	if strings.ToUpper(rb.SymbolDenom) != strings.ToUpper(rb2.SymbolDenom) {
+	if !strings.EqualFold(rb.SymbolDenom, rb2.SymbolDenom) {
 		return false
 	}
 	if !rb.RewardBand.Equal(rb2.RewardBand) {
