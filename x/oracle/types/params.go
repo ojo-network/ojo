@@ -12,7 +12,7 @@ import (
 var (
 	KeyVotePeriod               = []byte("VotePeriod")
 	KeyVoteThreshold            = []byte("VoteThreshold")
-	KeyRewardBand               = []byte("RewardBand")
+	KeyRewardBands              = []byte("RewardBands")
 	KeyRewardDistributionWindow = []byte("RewardDistributionWindow")
 	KeyAcceptList               = []byte("AcceptList")
 	KeyMandatoryList            = []byte("MandatoryList")
@@ -114,9 +114,14 @@ func (p *Params) ParamSetPairs() paramstypes.ParamSetPairs {
 			validateVoteThreshold,
 		),
 		paramstypes.NewParamSetPair(
-			KeyRewardBand,
+			KeyRewardBands,
 			&p.RewardBands,
 			validateRewardBands,
+		),
+		paramstypes.NewParamSetPair(
+			KeyRewardDistributionWindow,
+			&p.RewardDistributionWindow,
+			validateRewardDistributionWindow,
 		),
 		paramstypes.NewParamSetPair(
 			KeyAcceptList,
@@ -213,7 +218,11 @@ func (p Params) Validate() error {
 		if len(denom.SymbolDenom) == 0 {
 			return fmt.Errorf("oracle parameter MandatoryList Denom must have SymbolDenom")
 		}
+	}
 
+	err := validateRewardBands(p.RewardBands)
+	if err != nil {
+		return err
 	}
 
 	// all denoms in mandatory list must be in accept list
@@ -311,6 +320,9 @@ func validateRewardBands(i interface{}) error {
 	for _, d := range v {
 		if err := validateRewardBand(d.RewardBand); err != nil {
 			return err
+		}
+		if len(d.SymbolDenom) == 0 {
+			return fmt.Errorf("oracle parameter RewardBand must have SymbolDenom")
 		}
 	}
 

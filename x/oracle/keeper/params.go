@@ -22,7 +22,7 @@ func (k Keeper) VoteThreshold(ctx sdk.Context) (res sdk.Dec) {
 // RewardBand returns the ratio of allowable exchange rate error that a validator
 // can be rewarded.
 func (k Keeper) RewardBand(ctx sdk.Context) (res sdk.Dec) {
-	k.paramSpace.Get(ctx, types.KeyRewardBand, &res)
+	k.paramSpace.Get(ctx, types.KeyRewardBands, &res)
 	return
 }
 
@@ -54,7 +54,8 @@ func (k Keeper) MandatoryList(ctx sdk.Context) (res types.DenomList) {
 // SetMandatoryList updates the mandatory list of assets supported by the x/oracle
 // module.
 func (k Keeper) SetMandatoryList(ctx sdk.Context,
-	mandatoryList types.DenomList) {
+	mandatoryList types.DenomList,
+) {
 	k.paramSpace.Set(ctx, types.KeyMandatoryList, mandatoryList)
 }
 

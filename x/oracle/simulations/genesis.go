@@ -83,6 +83,8 @@ func GenMaximumMedianStamps(r *rand.Rand) uint64 {
 
 // RandomizedGenState generates a random GenesisState for oracle
 func RandomizedGenState(simState *module.SimulationState) {
+	oracleGenesis := types.DefaultGenesisState()
+
 	var votePeriod uint64
 	simState.AppParams.GetOrGenerate(
 		simState.Cdc, votePeriodKey, &votePeriod, simState.Rand,
@@ -99,6 +101,20 @@ func RandomizedGenState(simState *module.SimulationState) {
 	simState.AppParams.GetOrGenerate(
 		simState.Cdc, rewardBandKey, &rewardBand, simState.Rand,
 		func(r *rand.Rand) { rewardBand = GenRewardBand(r) },
+	)
+
+	var rewardBands types.RewardBandList
+	simState.AppParams.GetOrGenerate(
+		simState.Cdc, rewardDistributionWindowKey, &rewardBands, simState.Rand,
+		func(r *rand.Rand) {
+			for _, denom := range oracleGenesis.Params.MandatoryList {
+				rb := types.RewardBand{
+					RewardBand:  GenRewardBand(r),
+					SymbolDenom: denom.SymbolDenom,
+				}
+				rewardBands = append(rewardBands, rb)
+			}
+		},
 	)
 
 	var rewardDistributionWindow uint64
@@ -149,10 +165,10 @@ func RandomizedGenState(simState *module.SimulationState) {
 		func(r *rand.Rand) { maximumMedianStamps = GenMaximumMedianStamps(r) },
 	)
 
-	oracleGenesis := types.DefaultGenesisState()
 	oracleGenesis.Params = types.Params{
 		VotePeriod:               votePeriod,
 		VoteThreshold:            voteThreshold,
+		RewardBands:              rewardBands,
 		RewardDistributionWindow: rewardDistributionWindow,
 		AcceptList: types.DenomList{
 			{SymbolDenom: types.OjoSymbol, BaseDenom: types.OjoDenom},
