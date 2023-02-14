@@ -224,13 +224,11 @@ func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 			BaseDenom:   bondDenom,
 			SymbolDenom: appparams.DisplayDenom,
 			Exponent:    uint32(6),
-			RewardBand:  types.DefaultRewardBand,
 		},
 		{
 			BaseDenom:   "ibc/C4CFF46FD6DE35CA4CF4CE031E643C8FDC9BA4B99AE598E9B0ED98FE3A2319F9",
 			SymbolDenom: "atom",
 			Exponent:    uint32(6),
-			RewardBand:  types.DefaultRewardBand,
 		},
 	})
 

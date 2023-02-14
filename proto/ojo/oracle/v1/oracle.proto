@@ -19,25 +19,30 @@ message Params {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable) = false
   ];
-  uint64 reward_distribution_window = 3
+  repeated RewardBand reward_bands = 3 [
+    (gogoproto.moretags) = "yaml:\"reward_bands\"",
+    (gogoproto.castrepeated) = "RewardBandList",
+    (gogoproto.nullable) = false
+  ];
+  uint64 reward_distribution_window = 4
       [ (gogoproto.moretags) = "yaml:\"reward_distribution_window\"" ];
-  repeated Denom accept_list = 4 [
+  repeated Denom accept_list = 5 [
     (gogoproto.moretags) = "yaml:\"accept_list\"",
     (gogoproto.castrepeated) = "DenomList",
     (gogoproto.nullable) = false
   ];
-  string slash_fraction = 5 [
+  string slash_fraction = 6 [
     (gogoproto.moretags) = "yaml:\"slash_fraction\"",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable) = false
   ];
-  uint64 slash_window = 6 [ (gogoproto.moretags) = "yaml:\"slash_window\"" ];
-  string min_valid_per_window = 7 [
+  uint64 slash_window = 7 [ (gogoproto.moretags) = "yaml:\"slash_window\"" ];
+  string min_valid_per_window = 8 [
     (gogoproto.moretags) = "yaml:\"min_valid_per_window\"",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable) = false
   ];
-  repeated Denom mandatory_list = 8 [
+  repeated Denom mandatory_list = 9 [
     (gogoproto.moretags) = "yaml:\"mandatory_list\"",
     (gogoproto.castrepeated) = "DenomList",
     (gogoproto.nullable) = false
@@ -66,7 +71,14 @@ message Denom {
   string base_denom = 1 [ (gogoproto.moretags) = "yaml:\"base_denom\"" ];
   string symbol_denom = 2 [ (gogoproto.moretags) = "yaml:\"symbol_denom\"" ];
   uint32 exponent = 3 [ (gogoproto.moretags) = "yaml:\"exponent\"" ];
-  string reward_band = 4 [
+}
+
+message RewardBand {
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+  option (gogoproto.goproto_stringer) = false;
+  string symbol_denom = 1 [ (gogoproto.moretags) = "yaml:\"symbol_denom\"" ];
+  string reward_band = 2 [
     (gogoproto.moretags) = "yaml:\"reward_band\"",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable) = false

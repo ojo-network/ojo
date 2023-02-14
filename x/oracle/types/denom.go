@@ -61,10 +61,12 @@ func (dl DenomList) ContainDenoms(d DenomList) bool {
 
 // GetRewardBand returns the reward band of a given asset in the DenomList.
 // It will return an error if it can not find it.
-func (dl DenomList) GetRewardBand(denom string) (sdk.Dec, error) {
-	for _, v := range dl {
-		if v.SymbolDenom == denom {
-			return v.RewardBand, nil
+func (dl DenomList) GetRewardBand(rbl RewardBandList) (sdk.Dec, error) {
+	for _, d := range dl {
+		for _, rb := range rbl {
+			if strings.ToUpper(d.SymbolDenom) == strings.ToUpper(rb.SymbolDenom) {
+				return rb.RewardBand, nil
+			}
 		}
 	}
 	return sdk.ZeroDec(), ErrNoRewardBand

@@ -70,7 +70,7 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 			denomList = params.MandatoryList
 		}
 		// Get the current denom's reward band
-		rewardBand, err := denomList.GetRewardBand(ballotDenom.Denom)
+		rewardBand, err := denomList.GetRewardBand(params.RewardBands)
 		if err != nil {
 			return err
 		}

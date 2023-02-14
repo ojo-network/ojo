@@ -81,7 +81,6 @@ func (s *IntegrationTestSuite) TestSlashAndResetMissCounters() {
 			s.Require().Equal(tc.jailedAfter, validator.Jailed)
 		})
 	}
-
 }
 
 func (s *IntegrationTestSuite) TestPossibleWinsPerSlashWindow() {
@@ -129,5 +128,4 @@ func (s *IntegrationTestSuite) TestPossibleWinsPerSlashWindow() {
 			s.Require().Equal(tc.possibleWinsPerSlashWindow, actual)
 		})
 	}
-
 }

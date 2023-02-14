@@ -40,18 +40,26 @@ const (
 var (
 	DefaultVoteThreshold = sdk.NewDecWithPrec(50, 2) // 50%
 	DefaultRewardBand    = sdk.NewDecWithPrec(2, 2)  // 2% (-1, 1)
-	DefaultAcceptList    = DenomList{
+	DefaultRewardBands   = RewardBandList{
+		{
+			SymbolDenom: OjoSymbol,
+			RewardBand:  DefaultRewardBand,
+		},
+		{
+			SymbolDenom: AtomSymbol,
+			RewardBand:  DefaultRewardBand,
+		},
+	}
+	DefaultAcceptList = DenomList{
 		{
 			BaseDenom:   OjoDenom,
 			SymbolDenom: OjoSymbol,
 			Exponent:    OjoExponent,
-			RewardBand:  DefaultRewardBand,
 		},
 		{
 			BaseDenom:   AtomDenom,
 			SymbolDenom: AtomSymbol,
 			Exponent:    AtomExponent,
-			RewardBand:  DefaultRewardBand,
 		},
 	}
 	DefaultMandatoryList = DenomList{
@@ -59,7 +67,6 @@ var (
 			BaseDenom:   AtomDenom,
 			SymbolDenom: AtomSymbol,
 			Exponent:    AtomExponent,
-			RewardBand:  DefaultRewardBand,
 		},
 	}
 	DefaultSlashFraction     = sdk.NewDecWithPrec(1, 4) // 0.01%
@@ -83,6 +90,7 @@ func DefaultParams() Params {
 		MedianStampPeriod:        DefaultMedianStampPeriod,
 		MaximumPriceStamps:       DefaultMaximumPriceStamps,
 		MaximumMedianStamps:      DefaultMaximumMedianStamps,
+		RewardBands:              DefaultRewardBands,
 	}
 }
 
@@ -106,9 +114,9 @@ func (p *Params) ParamSetPairs() paramstypes.ParamSetPairs {
 			validateVoteThreshold,
 		),
 		paramstypes.NewParamSetPair(
-			KeyRewardDistributionWindow,
-			&p.RewardDistributionWindow,
-			validateRewardDistributionWindow,
+			KeyRewardBand,
+			&p.RewardBands,
+			validateRewardBands,
 		),
 		paramstypes.NewParamSetPair(
 			KeyAcceptList,
@@ -195,9 +203,6 @@ func (p Params) Validate() error {
 		}
 		if len(denom.SymbolDenom) == 0 {
 			return fmt.Errorf("oracle parameter AcceptList Denom must have SymbolDenom")
-		}
-		if denom.RewardBand.GT(sdk.OneDec()) || denom.RewardBand.IsNegative() {
-			return fmt.Errorf("oracle parameter RewardBand must be between [0, 1]")
 		}
 	}
 
@@ -292,6 +297,18 @@ func validateDenomList(i interface{}) error {
 		if len(d.SymbolDenom) == 0 {
 			return fmt.Errorf("oracle parameter AcceptList Denom must have SymbolDenom")
 		}
+	}
+
+	return nil
+}
+
+func validateRewardBands(i interface{}) error {
+	v, ok := i.(RewardBandList)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	for _, d := range v {
 		if err := validateRewardBand(d.RewardBand); err != nil {
 			return err
 		}
