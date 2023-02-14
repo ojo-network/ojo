@@ -3,7 +3,6 @@ package types
 import (
 	"strings"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gopkg.in/yaml.v3"
 )
 
@@ -57,17 +56,4 @@ func (dl DenomList) ContainDenoms(d DenomList) bool {
 	}
 
 	return true
-}
-
-// GetRewardBand returns the reward band of a given asset in the DenomList.
-// It will return an error if it can not find it.
-func (dl DenomList) GetRewardBand(rbl RewardBandList) (sdk.Dec, error) {
-	for _, d := range dl {
-		for _, rb := range rbl {
-			if strings.EqualFold(d.SymbolDenom, rb.SymbolDenom) {
-				return rb.RewardBand, nil
-			}
-		}
-	}
-	return sdk.ZeroDec(), ErrNoRewardBand
 }

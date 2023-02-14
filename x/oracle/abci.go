@@ -61,16 +61,10 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 		}
 
 		// Increment Mandatory Win count if Denom in Mandatory list
-		isMandatory := params.MandatoryList.Contains(ballotDenom.Denom)
-		incrementWin := isMandatory
+		incrementWin := params.MandatoryList.Contains(ballotDenom.Denom)
 
-		// Get the currently active denom list
-		denomList := params.AcceptList
-		if isMandatory {
-			denomList = params.MandatoryList
-		}
 		// Get the current denom's reward band
-		rewardBand, err := denomList.GetRewardBand(params.RewardBands)
+		rewardBand, err := params.RewardBands.GetBandFromDenom(ballotDenom.Denom)
 		if err != nil {
 			return err
 		}
