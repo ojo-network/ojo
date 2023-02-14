@@ -73,6 +73,7 @@ message Denom {
   uint32 exponent = 3 [ (gogoproto.moretags) = "yaml:\"exponent\"" ];
 }
 
+// RewardBand - the object to hold the reward band configuration for a given denom.
 message RewardBand {
   option (gogoproto.equal) = false;
   option (gogoproto.goproto_getters) = false;
