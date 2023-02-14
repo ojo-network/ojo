@@ -11,8 +11,11 @@ import (
 
 const (
 	ojo_container_name = "ojo"
+	ojo_tmrpc_port     = "26657"
+	ojo_grpc_port      = "9090"
 
 	price_feeder_container_name = "price-feeder"
+	price_feeder_server_port    = "8080"
 )
 
 // Orchestrator is responsible for managing docker resources,
@@ -24,6 +27,8 @@ type Orchestrator struct {
 	ojoResource *dockertest.Resource
 	ojoRPC      *rpchttp.HTTP
 	ojoChain    *Chain
+
+	priceFeederResource *dockertest.Resource
 }
 
 func (o *Orchestrator) InitDockerResources(t *testing.T) error {
@@ -35,7 +40,11 @@ func (o *Orchestrator) InitDockerResources(t *testing.T) error {
 		return err
 	}
 
-	t.Log("-> initializing Ojo node")
+	t.Log("-> initializing Ojo validator")
+	o.initOjod()
+
+	t.Log("-> initializing price-feeder")
+
 	return nil
 }
 

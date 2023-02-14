@@ -1,14 +1,14 @@
 package orchestrator
 
 type Chain struct {
-	chainId        string
-	val01_mnemonic string
+	chainId  string
+	mnemonic string
 }
 
 func NewChain(chainId string) *Chain {
 	mnemonic, _ := createMnemonic()
 	return &Chain{
-		chainId:        chainId,
-		val01_mnemonic: mnemonic,
+		chainId:  chainId,
+		mnemonic: mnemonic,
 	}
 }
