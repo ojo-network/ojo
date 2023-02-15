@@ -240,6 +240,5 @@ func deliver(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, ak simulation.
 		CoinsSpentInMsg: coins,
 	}
 
-	// note: leverage operations are more expensive!
 	return ojosim.GenAndDeliver(bk, o, appparams.DefaultGasLimit*50)
 }
