@@ -34,3 +34,7 @@ func (s *IntegrationTestSuite) TestUpdateOracleParams() {
 
 	s.Require().NoError(err)
 }
+
+func (s *IntegrationTestSuite) TestOrchestrator() {
+	s.Require().NotNil(s.orchestrator)
+}

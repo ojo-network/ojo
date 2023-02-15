@@ -8,6 +8,7 @@ import (
 
 	"github.com/ory/dockertest/v3"
 
+	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
 	tmconfig "github.com/tendermint/tendermint/config"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 )
@@ -31,11 +32,11 @@ func (o *Orchestrator) initOjod() error {
 				fmt.Sprintf("OJO_CHAIN_ID=%s", o.ojoChain.chainId),
 				fmt.Sprintf("MNEMONIC=%s", o.ojoChain.mnemonic),
 			},
-			Mounts: []string{fmt.Sprintf("%s/:/app/.ojod/config", configDir)},
+			Mounts: []string{fmt.Sprintf("%s/:/ojo/.ojo/config", configDir)},
 			Entrypoint: []string{
 				"sh",
 				"-c",
-				"chmod +x .ojod/config/ojo_bootstrap.sh && .ojod/config/ojo_bootstrap.sh",
+				"chmod +x .ojo/config/ojo_bootstrap.sh && .ojo/config/ojo_bootstrap.sh",
 			},
 		},
 		noRestart,
@@ -70,6 +71,12 @@ func (o *Orchestrator) initOjoConfigs() (dir string, err error) {
 	config.P2P.AddrBookStrict = false
 	config.P2P.Seeds = ""
 	tmconfig.WriteConfigFile(configPath, config)
+
+	appCfgPath := filepath.Join(dir, "app.toml")
+	appConfig := srvconfig.DefaultConfig()
+	appConfig.API.Enable = true
+	appConfig.MinGasPrices = minGasPrice
+	srvconfig.WriteConfigFile(appCfgPath, appConfig)
 
 	return
 }

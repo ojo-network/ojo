@@ -1,7 +1,13 @@
 # Builder
-FROM golang:1.19-bullseye AS builder
+FROM golang:1.19-alpine AS builder
 
-WORKDIR /app
+RUN apk add --no-cache \
+    ca-certificates \
+    build-base \
+    linux-headers \
+    git
+
+WORKDIR /ojo
 
 COPY go.mod go.sum ./
 RUN go mod download
@@ -13,7 +19,10 @@ RUN make build
 FROM alpine
 RUN apk add bash
 
-COPY --from=builder /app/build/ojod /bin/ojod
+COPY --from=builder /ojo/build/ojod /bin/ojod
+
+ENV HOME /ojo
+WORKDIR $HOME
 
 EXPOSE 26656 26657 1317 9090
-ENTRYPOINT ["ojod"]
+ENTRYPOINT ["ojod start"]

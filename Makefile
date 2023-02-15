@@ -121,6 +121,7 @@ docker-push-price-feeder:
 ###############################################################################
 
 PACKAGES_UNIT=$(shell go list ./...)
+PACKAGES_E2E=$(shell go list ./... | grep '/e2e')
 TEST_PACKAGES=./...
 TEST_TARGETS := test-unit test-unit-cover test-race
 TEST_COVERAGE_PROFILE=coverage.txt
@@ -142,11 +143,15 @@ else
 	@go test -mod=readonly $(ARGS) $(TEST_PACKAGES)
 endif
 
+test-e2e:
+	$(MAKE) docker-build
+	@go test -mod=readonly -race $(PACKAGES_E2E) -v
+
 cover-html: test-unit-cover
 	@echo "--> Opening in the browser"
 	@go tool cover -html=$(TEST_COVERAGE_PROFILE)
 
-.PHONY: cover-html run-tests $(TEST_TARGETS)
+.PHONY: cover-html run-tests test-e2e $(TEST_TARGETS)
 
 ###############################################################################
 ###                                Linting                                  ###

@@ -2,10 +2,13 @@ package orchestrator
 
 import (
 	"testing"
+	"time"
 
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
+	"github.com/stretchr/testify/require"
 
+	appparams "github.com/ojo-network/ojo/app/params"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 )
 
@@ -16,6 +19,10 @@ const (
 
 	price_feeder_container_name = "price-feeder"
 	price_feeder_server_port    = "8080"
+)
+
+var (
+	minGasPrice = appparams.ProtocolMinGasPrice.String()
 )
 
 // Orchestrator is responsible for managing docker resources,
@@ -40,8 +47,23 @@ func (o *Orchestrator) InitDockerResources(t *testing.T) error {
 		return err
 	}
 
-	t.Log("-> initializing Ojo validator")
+	t.Log("-> initializing ojo validator")
 	o.initOjod()
+
+	t.Log("-> verifying ojo node is creating blocks")
+	require.Eventually(
+		t,
+		func() bool {
+			blockHeight, err := o.ojoBlockHeight()
+			if err != nil {
+				return false
+			}
+			return blockHeight >= 3
+		},
+		time.Minute,
+		time.Second*2,
+		"ojo node failed to produce blocks",
+	)
 
 	t.Log("-> initializing price-feeder")
 
