@@ -1,27 +1,39 @@
+version: 1
 build:
-  binary: "ojod"
-  main: "./cmd/ojod"
+  main: ./cmd/ojod
+  binary: ojod
+  proto:
+    path: proto
+    third_party_paths:
+    - third_party/proto
+    - proto_vendor
+accounts:
+- name: alice
+  coins:
+  - 39000000000000uojo
+  mnemonic: entry garbage bike poem grunt negative easily annual miss happy license
+    blur false fringe program picture inner tape dismiss eagle include quality drill
+    master
+- name: bob
+  coins:
+  - 5500000000000uojo
+- name: faucet
+  coins:
+  - 5500000000000uojo
+faucet:
+  name: faucet
+  coins:
+  - 5500000000000uojo
+  coins_max:
+  - 1000000000uojo
+  host: 0.0.0.0:4500
+  port: 4500
 genesis:
-  chain_id: "ojo-testnet"
   app_state:
     staking:
       params:
-        bond_denom: "uojo"
-accounts:
-  - name: alice
-    coins: ["39000000000000uojo"]
-    mnemonic: "entry garbage bike poem grunt negative easily annual miss happy license blur false fringe program picture inner tape dismiss eagle include quality drill master"
-  - name: bob
-    coins: ["5500000000000uojo"]
-  - name: faucet
-    coins: ["5500000000000uojo"]
-validator:
-  name: alice
-  staked: "33500000000000uojo"
-servers:
-  dev-ui-address: "localhost:12345"
-faucet:
-  port: 4500
-  name: "faucet"
-  coins: ["5500000000000uojo"]
-  coins_max: ["1000000000uojo"]
+        bond_denom: uojo
+  chain_id: ojo-testnet
+validators:
+- name: alice
+  bonded: 33500000000000uojo
