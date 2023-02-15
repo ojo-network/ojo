@@ -24,7 +24,7 @@ func ParamChanges(_ *rand.Rand) []simtypes.ParamChange {
 				return fmt.Sprintf("\"%s\"", GenVoteThreshold(r))
 			},
 		),
-		simulation.NewSimParamChange(types.ModuleName, string(types.KeyRewardBand),
+		simulation.NewSimParamChange(types.ModuleName, string(types.KeyRewardBands),
 			func(r *rand.Rand) string {
 				return fmt.Sprintf("\"%s\"", GenRewardBand(r))
 			},

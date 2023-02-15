@@ -387,7 +387,7 @@ func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 			blockHeight += historicStampPeriod
 			ctx = ctx.WithBlockHeight(blockHeight)
 
-			var decCoins = sdk.DecCoins{}
+			decCoins := sdk.DecCoins{}
 			for denom, prices := range exchangeRates {
 				decCoins = append(decCoins, sdk.DecCoin{
 					Denom:  denom,

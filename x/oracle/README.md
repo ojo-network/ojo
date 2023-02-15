@@ -62,7 +62,9 @@ Validators must first pre-commit to a set of exchange rates, then in the subsequ
 
 ### Reward Band
 
-Let `M` be the median, `𝜎` be the standard deviation of the votes in the ballot, and `R` be the RewardBand parameter. The band around the median is set to be `𝜀 = max(𝜎, R/2)`. All valid (i.e. bonded and non-jailed) validators that submitted an exchange rate vote in the interval `[M - 𝜀, M + 𝜀]` should be included in the set of winners.
+Each asset has a unique RewardBand when it's being added to the Oracle Parameters. For some assets this needs to be smaller or larger in order to account for expected price flux / stability.
+
+Let `M` be the median, `𝜎` be the standard deviation of the votes in the ballot, and `R` be the RewardBand for a given asset. The band around the median is set to be `𝜀 = max(𝜎, R/2)`. All valid (i.e. bonded and non-jailed) validators that submitted an exchange rate vote in the interval `[M - 𝜀, M + 𝜀]` should be included in the set of winners.
 
 ### Reward Pool
 

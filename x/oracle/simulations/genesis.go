@@ -15,7 +15,7 @@ import (
 const (
 	votePeriodKey               = "vote_period"
 	voteThresholdKey            = "vote_threshold"
-	rewardBandKey               = "reward_band"
+	rewardBandsKey              = "reward_bands"
 	rewardDistributionWindowKey = "reward_distribution_window"
 	slashFractionKey            = "slash_fraction"
 	slashWindowKey              = "slash_window"
@@ -83,6 +83,8 @@ func GenMaximumMedianStamps(r *rand.Rand) uint64 {
 
 // RandomizedGenState generates a random GenesisState for oracle
 func RandomizedGenState(simState *module.SimulationState) {
+	oracleGenesis := types.DefaultGenesisState()
+
 	var votePeriod uint64
 	simState.AppParams.GetOrGenerate(
 		simState.Cdc, votePeriodKey, &votePeriod, simState.Rand,
@@ -95,10 +97,25 @@ func RandomizedGenState(simState *module.SimulationState) {
 		func(r *rand.Rand) { voteThreshold = GenVoteThreshold(r) },
 	)
 
-	var rewardBand sdk.Dec
+	var rewardBands types.RewardBandList
 	simState.AppParams.GetOrGenerate(
-		simState.Cdc, rewardBandKey, &rewardBand, simState.Rand,
-		func(r *rand.Rand) { rewardBand = GenRewardBand(r) },
+		simState.Cdc, rewardBandsKey, &rewardBands, simState.Rand,
+		func(r *rand.Rand) {
+			for _, denom := range oracleGenesis.Params.MandatoryList {
+				rb := types.RewardBand{
+					RewardBand:  GenRewardBand(r),
+					SymbolDenom: denom.SymbolDenom,
+				}
+				rewardBands = append(rewardBands, rb)
+			}
+			for _, denom := range oracleGenesis.Params.AcceptList {
+				rb := types.RewardBand{
+					RewardBand:  GenRewardBand(r),
+					SymbolDenom: denom.SymbolDenom,
+				}
+				rewardBands = append(rewardBands, rb)
+			}
+		},
 	)
 
 	var rewardDistributionWindow uint64
@@ -149,11 +166,10 @@ func RandomizedGenState(simState *module.SimulationState) {
 		func(r *rand.Rand) { maximumMedianStamps = GenMaximumMedianStamps(r) },
 	)
 
-	oracleGenesis := types.DefaultGenesisState()
 	oracleGenesis.Params = types.Params{
 		VotePeriod:               votePeriod,
 		VoteThreshold:            voteThreshold,
-		RewardBand:               rewardBand,
+		RewardBands:              rewardBands,
 		RewardDistributionWindow: rewardDistributionWindow,
 		AcceptList: types.DenomList{
 			{SymbolDenom: types.OjoSymbol, BaseDenom: types.OjoDenom},
