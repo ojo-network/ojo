@@ -9,28 +9,49 @@ import (
 	"github.com/ory/dockertest/v3"
 
 	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
+	appparams "github.com/ojo-network/ojo/app/params"
 	tmconfig "github.com/tendermint/tendermint/config"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 )
 
-func (o *Orchestrator) initOjod() error {
-	var err error
+const (
+	ojo_container_name = "ojo"
+	ojo_tmrpc_port     = "26657"
+	ojo_grpc_port      = "9090"
+	ojo_chain_id       = "ojo-test-1"
+)
 
-	configDir, err := o.initOjoConfigs()
+var (
+	ojoMinGasPrice = appparams.ProtocolMinGasPrice.String()
+)
+
+type Validator struct {
+	mnemonic       string
+	chainID        string
+	dockerResource *dockertest.Resource
+	rpc            *rpchttp.HTTP
+}
+
+func (o *Orchestrator) CreateOjoValidator() (val *Validator, err error) {
+	val.chainID = ojo_chain_id
+	val.mnemonic, err = createMnemonic()
 	if err != nil {
-		return err
+		return
 	}
 
-	o.ojoChain = NewChain("test-ojo")
+	configDir, err := initOjoConfigs()
+	if err != nil {
+		return
+	}
 
-	o.ojoResource, err = o.dockerPool.RunWithOptions(
+	val.dockerResource, err = o.dockerPool.RunWithOptions(
 		&dockertest.RunOptions{
 			Name:       ojo_container_name,
 			Repository: ojo_container_name,
 			NetworkID:  o.dockerNetwork.Network.ID,
 			Env: []string{
-				fmt.Sprintf("OJO_CHAIN_ID=%s", o.ojoChain.chainId),
-				fmt.Sprintf("MNEMONIC=%s", o.ojoChain.mnemonic),
+				fmt.Sprintf("OJO_CHAIN_ID=%s", val.chainID),
+				fmt.Sprintf("MNEMONIC=%s", val.mnemonic),
 			},
 			Mounts: []string{fmt.Sprintf("%s/:/ojo/.ojo/config", configDir)},
 			Entrypoint: []string{
@@ -42,14 +63,14 @@ func (o *Orchestrator) initOjod() error {
 		noRestart,
 	)
 	if err != nil {
-		return err
+		return
 	}
 
-	err = o.setTendermintEndpoint()
-	return err
+	err = val.setTendermintEndpoint()
+	return
 }
 
-func (o *Orchestrator) initOjoConfigs() (dir string, err error) {
+func initOjoConfigs() (dir string, err error) {
 	dir, err = os.MkdirTemp("", "e2e-configs")
 	if err != nil {
 		return
@@ -75,23 +96,23 @@ func (o *Orchestrator) initOjoConfigs() (dir string, err error) {
 	appCfgPath := filepath.Join(dir, "app.toml")
 	appConfig := srvconfig.DefaultConfig()
 	appConfig.API.Enable = true
-	appConfig.MinGasPrices = minGasPrice
+	appConfig.MinGasPrices = ojoMinGasPrice
 	srvconfig.WriteConfigFile(appCfgPath, appConfig)
 
 	return
 }
 
-func (o *Orchestrator) ojoBlockHeight() (int64, error) {
-	status, err := o.ojoRPC.Status(context.Background())
+func (val *Validator) BlockHeight() (int64, error) {
+	status, err := val.rpc.Status(context.Background())
 	if err != nil {
 		return 0, err
 	}
 	return status.SyncInfo.LatestBlockHeight, nil
 }
 
-func (o *Orchestrator) setTendermintEndpoint() (err error) {
-	path := o.ojoResource.GetHostPort(fmt.Sprintf("%s/tcp", ojo_tmrpc_port))
+func (val *Validator) setTendermintEndpoint() (err error) {
+	path := val.dockerResource.GetHostPort(fmt.Sprintf("%s/tcp", ojo_tmrpc_port))
 	endpoint := fmt.Sprintf("tcp://%s", path)
-	o.ojoRPC, err = rpchttp.New(endpoint, "/websocket")
+	val.rpc, err = rpchttp.New(endpoint, "/websocket")
 	return
 }

@@ -7,22 +7,6 @@ import (
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
 	"github.com/stretchr/testify/require"
-
-	appparams "github.com/ojo-network/ojo/app/params"
-	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
-)
-
-const (
-	ojo_container_name = "ojo"
-	ojo_tmrpc_port     = "26657"
-	ojo_grpc_port      = "9090"
-
-	price_feeder_container_name = "price-feeder"
-	price_feeder_server_port    = "8080"
-)
-
-var (
-	minGasPrice = appparams.ProtocolMinGasPrice.String()
 )
 
 // Orchestrator is responsible for managing docker resources,
@@ -31,11 +15,8 @@ type Orchestrator struct {
 	dockerPool    *dockertest.Pool
 	dockerNetwork *dockertest.Network
 
-	ojoResource *dockertest.Resource
-	ojoRPC      *rpchttp.HTTP
-	ojoChain    *Chain
-
-	priceFeederResource *dockertest.Resource
+	validators  []*Validator
+	PriceFeeder *PriceFeeder
 }
 
 func (o *Orchestrator) InitDockerResources(t *testing.T) error {
@@ -48,13 +29,17 @@ func (o *Orchestrator) InitDockerResources(t *testing.T) error {
 	}
 
 	t.Log("-> initializing ojo validator")
-	o.initOjod()
+	new_validator, err := o.CreateOjoValidator()
+	if err != nil {
+		return err
+	}
+	o.validators = append(o.validators, new_validator)
 
 	t.Log("-> verifying ojo node is creating blocks")
 	require.Eventually(
 		t,
 		func() bool {
-			blockHeight, err := o.ojoBlockHeight()
+			blockHeight, err := new_validator.BlockHeight()
 			if err != nil {
 				return false
 			}
@@ -66,6 +51,7 @@ func (o *Orchestrator) InitDockerResources(t *testing.T) error {
 	)
 
 	t.Log("-> initializing price-feeder")
+	//o.NewPriceFeeder()
 
 	return nil
 }
