@@ -22,7 +22,7 @@ var (
 	KeyHistoricStampPeriod      = []byte("HistoricStampPeriod")
 	KeyMedianStampPeriod        = []byte("MedianStampPeriod")
 	KeyMaximumPriceStamps       = []byte("MaximumPriceStamps")
-	KeyMaximumMedianStamps      = []byte("MedianStampAmount")
+	KeyMaximumMedianStamps      = []byte("MaximumMedianStamps")
 )
 
 // Default parameter values
@@ -170,7 +170,7 @@ func (p Params) String() string {
 // Validate performs basic validation on oracle parameters.
 func (p Params) Validate() error {
 	if p.VotePeriod == 0 {
-		return fmt.Errorf("oracle parameter VotePeriod must be > 0, is %d", p.VotePeriod)
+		return fmt.Errorf("oracle parameter VotePeriod must be > 0")
 	}
 	if p.VoteThreshold.LTE(sdk.NewDecWithPrec(33, 2)) {
 		return fmt.Errorf("oracle parameter VoteThreshold must be greater than 33 percent")
@@ -212,7 +212,14 @@ func (p Params) Validate() error {
 		if len(denom.SymbolDenom) == 0 {
 			return fmt.Errorf("oracle parameter MandatoryList Denom must have SymbolDenom")
 		}
+	}
 
+	if p.HistoricStampPeriod > p.MedianStampPeriod {
+		return fmt.Errorf("oracle parameter MedianStampPeriod must be greater than or equal with HistoricStampPeriod")
+	}
+
+	if p.HistoricStampPeriod%p.VotePeriod != 0 || p.MedianStampPeriod%p.VotePeriod != 0 {
+		return fmt.Errorf("oracle parameters HistoricStampPeriod and MedianStampPeriod must be exact multiples of VotePeriod")
 	}
 
 	// all denoms in mandatory list must be in accept list

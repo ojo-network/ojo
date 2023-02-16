@@ -204,6 +204,8 @@ func (m *AggregateExchangeRateVote) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_AggregateExchangeRateVote proto.InternalMessageInfo
 
+// PriceStamp defines a stamp of a denom's exchange rate
+// at the block number it was calculated in.
 type PriceStamp struct {
 	ExchangeRate *types.DecCoin `protobuf:"bytes,1,opt,name=exchange_rate,json=exchangeRate,proto3" json:"exchange_rate,omitempty"`
 	BlockNum     uint64         `protobuf:"varint,2,opt,name=block_num,json=blockNum,proto3" json:"block_num,omitempty"`

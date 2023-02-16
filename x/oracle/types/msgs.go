@@ -1,17 +1,21 @@
 package types
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/tendermint/tendermint/crypto/tmhash"
 
 	"github.com/ojo-network/ojo/util/checkers"
+	"gopkg.in/yaml.v3"
 )
 
 var (
 	_ sdk.Msg = &MsgDelegateFeedConsent{}
 	_ sdk.Msg = &MsgAggregateExchangeRatePrevote{}
 	_ sdk.Msg = &MsgAggregateExchangeRateVote{}
+	_ sdk.Msg = &MsgGovUpdateParams{}
 )
 
 func NewMsgAggregateExchangeRatePrevote(
@@ -164,6 +168,112 @@ func (msg MsgDelegateFeedConsent) ValidateBasic() error {
 	_, err = sdk.AccAddressFromBech32(msg.Delegate)
 	if err != nil {
 		return sdkerrors.ErrInvalidAddress.Wrapf("invalid delegate address (%s)", err)
+	}
+
+	return nil
+}
+
+// NewMsgUpdateParams will creates a new MsgUpdateParams instance
+func NewMsgUpdateParams(authority, title, description string, changes Params) *MsgGovUpdateParams {
+	return &MsgGovUpdateParams{
+		Title:       title,
+		Description: description,
+		Authority:   authority,
+		Changes:     changes,
+	}
+}
+
+// Type implements Msg interface
+func (msg MsgGovUpdateParams) Type() string { return sdk.MsgTypeURL(&msg) }
+
+// String implements the Stringer interface.
+func (msg MsgGovUpdateParams) String() string {
+	out, _ := yaml.Marshal(msg)
+	return string(out)
+}
+
+// GetSignBytes implements Msg
+func (msg MsgGovUpdateParams) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(&msg)
+	return sdk.MustSortJSON(bz)
+}
+
+// GetSigners implements Msg
+func (msg MsgGovUpdateParams) GetSigners() []sdk.AccAddress {
+	return checkers.Signers(msg.Authority)
+}
+
+// ValidateBasic implements Msg
+func (msg MsgGovUpdateParams) ValidateBasic() error {
+	if err := checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority); err != nil {
+		return err
+	}
+
+	for _, key := range msg.Keys {
+		switch key {
+		case string(KeyVotePeriod):
+			if msg.Changes.VotePeriod == 0 {
+				return fmt.Errorf("oracle parameter VotePeriod must be > 0")
+			}
+
+		case string(KeyVoteThreshold):
+			if msg.Changes.VoteThreshold.LTE(sdk.NewDecWithPrec(33, 2)) {
+				return fmt.Errorf("oracle parameter VoteThreshold must be greater than 33 percent")
+			}
+
+		case string(KeyRewardBand):
+			if msg.Changes.RewardBand.GT(sdk.OneDec()) || msg.Changes.RewardBand.IsNegative() {
+				return fmt.Errorf("oracle parameter RewardBand must be between [0, 1]")
+			}
+
+		case string(KeyRewardDistributionWindow):
+			if msg.Changes.RewardDistributionWindow == 0 {
+				return fmt.Errorf("oracle parameter RewardDistributionWindow must be > 0")
+			}
+
+		case string(KeyAcceptList):
+			for _, denom := range msg.Changes.AcceptList {
+				if len(denom.BaseDenom) == 0 {
+					return fmt.Errorf("oracle parameter AcceptList Denom must have BaseDenom")
+				}
+				if len(denom.SymbolDenom) == 0 {
+					return fmt.Errorf("oracle parameter AcceptList Denom must have SymbolDenom")
+				}
+			}
+
+		case string(KeyMandatoryList):
+			for _, denom := range msg.Changes.MandatoryList {
+				if len(denom.BaseDenom) == 0 {
+					return fmt.Errorf("oracle parameter MandatoryList Denom must have BaseDenom")
+				}
+				if len(denom.SymbolDenom) == 0 {
+					return fmt.Errorf("oracle parameter MandatoryList Denom must have SymbolDenom")
+				}
+			}
+
+		case string(KeySlashFraction):
+			if msg.Changes.SlashFraction.GT(sdk.OneDec()) || msg.Changes.SlashFraction.IsNegative() {
+				return fmt.Errorf("oracle parameter SlashFraction must be between [0, 1]")
+			}
+
+		case string(KeySlashWindow):
+			if msg.Changes.SlashWindow == 0 {
+				return fmt.Errorf("oracle parameter SlashWindow must be > 0")
+			}
+
+		case string(KeyMinValidPerWindow):
+			if msg.Changes.MinValidPerWindow.GT(sdk.OneDec()) || msg.Changes.MinValidPerWindow.IsNegative() {
+				return fmt.Errorf("oracle parameter MinValidPerWindow must be between [0, 1]")
+			}
+
+		case string(KeyHistoricStampPeriod):
+		case string(KeyMedianStampPeriod):
+		case string(KeyMaximumPriceStamps):
+		case string(KeyMaximumMedianStamps):
+
+		default:
+			return fmt.Errorf("%s is not an existing orcale param key", key)
+		}
 	}
 
 	return nil

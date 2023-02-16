@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
@@ -135,4 +136,83 @@ func (ms msgServer) DelegateFeedConsent(
 	})
 
 	return &types.MsgDelegateFeedConsentResponse{}, err
+}
+
+func (ms msgServer) GovUpdateParams(
+	goCtx context.Context,
+	msg *types.MsgGovUpdateParams,
+) (*types.MsgGovUpdateParamsResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	for _, key := range msg.Keys {
+		switch key {
+		case string(types.KeyVotePeriod):
+			ms.SetVotePeriod(ctx, msg.Changes.VotePeriod)
+
+		case string(types.KeyVoteThreshold):
+			ms.SetVoteThreshold(ctx, msg.Changes.VoteThreshold)
+
+		case string(types.KeyRewardBand):
+			ms.SetRewardBand(ctx, msg.Changes.RewardBand)
+
+		case string(types.KeyRewardDistributionWindow):
+			if msg.Changes.RewardDistributionWindow < ms.Keeper.VotePeriod(ctx) {
+				return nil, fmt.Errorf("oracle parameter RewardDistributionWindow must be greater than or equal with VotePeriod")
+			}
+			ms.SetRewardDistributionWindow(ctx, msg.Changes.RewardDistributionWindow)
+
+		case string(types.KeyAcceptList):
+			if !msg.Changes.AcceptList.ContainDenoms(ms.Keeper.MandatoryList(ctx)) {
+				return nil, fmt.Errorf("denom in MandatoryList not present in AcceptList")
+			}
+			ms.SetAcceptList(ctx, msg.Changes.AcceptList)
+
+		case string(types.KeyMandatoryList):
+			if !ms.Keeper.AcceptList(ctx).ContainDenoms(msg.Changes.MandatoryList) {
+				return nil, fmt.Errorf("denom in MandatoryList not present in AcceptList")
+			}
+			ms.SetMandatoryList(ctx, msg.Changes.MandatoryList)
+
+		case string(types.KeySlashFraction):
+			ms.SetSlashFraction(ctx, msg.Changes.SlashFraction)
+
+		case string(types.KeySlashWindow):
+			if msg.Changes.SlashWindow < ms.Keeper.VotePeriod(ctx) {
+				return nil, fmt.Errorf("oracle parameter SlashWindow must be greater than or equal with VotePeriod")
+			}
+			ms.SetSlashWindow(ctx, msg.Changes.SlashWindow)
+
+		case string(types.KeyMinValidPerWindow):
+			ms.SetMinValidPerWindow(ctx, msg.Changes.MinValidPerWindow)
+
+		case string(types.KeyHistoricStampPeriod):
+			if msg.Changes.HistoricStampPeriod > ms.Keeper.MedianStampPeriod(ctx) {
+				return nil, fmt.Errorf("oracle parameter HistoricStampPeriod must be less than or equal with MedianStampPeriod")
+			}
+			if msg.Changes.HistoricStampPeriod%ms.Keeper.VotePeriod(ctx) != 0 {
+				return nil, fmt.Errorf("oracle parameters HistoricStampPeriod must be exact multiples of VotePeriod")
+			}
+			ms.SetHistoricStampPeriod(ctx, msg.Changes.HistoricStampPeriod)
+
+		case string(types.KeyMedianStampPeriod):
+			if msg.Changes.MedianStampPeriod < ms.Keeper.HistoricStampPeriod(ctx) {
+				return nil, fmt.Errorf("oracle parameter MedianStampPeriod must be greater than or equal with HistoricStampPeriod")
+			}
+			if msg.Changes.MedianStampPeriod%ms.Keeper.VotePeriod(ctx) != 0 {
+				return nil, fmt.Errorf("oracle parameters MedianStampPeriod must be exact multiples of VotePeriod")
+			}
+			ms.SetMedianStampPeriod(ctx, msg.Changes.MedianStampPeriod)
+
+		case string(types.KeyMaximumPriceStamps):
+			ms.SetMaximumPriceStamps(ctx, msg.Changes.MaximumPriceStamps)
+
+		case string(types.KeyMaximumMedianStamps):
+			ms.SetMaximumMedianStamps(ctx, msg.Changes.MaximumMedianStamps)
+
+		default:
+			return nil, fmt.Errorf("%s is not an existing orcale param key", key)
+		}
+	}
+
+	return &types.MsgGovUpdateParamsResponse{}, nil
 }
