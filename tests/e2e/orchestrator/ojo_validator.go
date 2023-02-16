@@ -33,6 +33,7 @@ type Validator struct {
 }
 
 func (o *Orchestrator) CreateOjoValidator() (val *Validator, err error) {
+	val = &Validator{}
 	val.chainID = ojo_chain_id
 	val.mnemonic, err = createMnemonic()
 	if err != nil {

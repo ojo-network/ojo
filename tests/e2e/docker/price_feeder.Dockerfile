@@ -21,7 +21,7 @@ RUN apk add bash
 WORKDIR /app
 
 COPY --from=builder /app/build/price-feeder /bin/price-feeder
-COPY --from=builder /app/price-feeder.sample.toml /app/price-feeder.toml
+COPY --from=builder /app/price-feeder.example.toml /app/price-feeder.toml
 
 EXPOSE 7171
 
