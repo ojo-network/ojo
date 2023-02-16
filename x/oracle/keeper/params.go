@@ -33,7 +33,7 @@ func (k Keeper) SetVoteThreshold(ctx sdk.Context, voteThreshold sdk.Dec) {
 // RewardBand returns the ratio of allowable exchange rate error that a validator
 // can be rewarded.
 func (k Keeper) RewardBand(ctx sdk.Context) (res sdk.Dec) {
-	k.paramSpace.Get(ctx, types.KeyRewardBand, &res)
+	k.paramSpace.Get(ctx, types.KeyRewardBands, &res)
 	return
 }
 

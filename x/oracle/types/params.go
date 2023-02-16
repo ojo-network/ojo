@@ -12,7 +12,7 @@ import (
 var (
 	KeyVotePeriod               = []byte("VotePeriod")
 	KeyVoteThreshold            = []byte("VoteThreshold")
-	KeyRewardBand               = []byte("RewardBand")
+	KeyRewardBands              = []byte("RewardBands")
 	KeyRewardDistributionWindow = []byte("RewardDistributionWindow")
 	KeyAcceptList               = []byte("AcceptList")
 	KeyMandatoryList            = []byte("MandatoryList")
@@ -39,8 +39,8 @@ const (
 // Default parameter values
 var (
 	DefaultVoteThreshold = sdk.NewDecWithPrec(50, 2) // 50%
-	DefaultRewardBand    = sdk.NewDecWithPrec(2, 2)  // 2% (-1, 1)
-	DefaultAcceptList    = DenomList{
+
+	DefaultAcceptList = DenomList{
 		{
 			BaseDenom:   OjoDenom,
 			SymbolDenom: OjoSymbol,
@@ -65,12 +65,29 @@ var (
 
 var _ paramstypes.ParamSet = &Params{}
 
+// DefaultRewardBands returns a new default RewardBandList object.
+//
+// This function is necessary because we cannot use a constant,
+// and the reward band list is manipulated in our unit tests.
+func DefaultRewardBands() RewardBandList {
+	defaultRewardBand := sdk.NewDecWithPrec(2, 2) // 0.02
+	return RewardBandList{
+		{
+			SymbolDenom: OjoSymbol,
+			RewardBand:  defaultRewardBand,
+		},
+		{
+			SymbolDenom: AtomSymbol,
+			RewardBand:  defaultRewardBand,
+		},
+	}
+}
+
 // DefaultParams creates default oracle module parameters
 func DefaultParams() Params {
 	return Params{
 		VotePeriod:               DefaultVotePeriod,
 		VoteThreshold:            DefaultVoteThreshold,
-		RewardBand:               DefaultRewardBand,
 		RewardDistributionWindow: DefaultRewardDistributionWindow,
 		AcceptList:               DefaultAcceptList,
 		MandatoryList:            DefaultMandatoryList,
@@ -81,6 +98,7 @@ func DefaultParams() Params {
 		MedianStampPeriod:        DefaultMedianStampPeriod,
 		MaximumPriceStamps:       DefaultMaximumPriceStamps,
 		MaximumMedianStamps:      DefaultMaximumMedianStamps,
+		RewardBands:              DefaultRewardBands(),
 	}
 }
 
@@ -104,9 +122,9 @@ func (p *Params) ParamSetPairs() paramstypes.ParamSetPairs {
 			validateVoteThreshold,
 		),
 		paramstypes.NewParamSetPair(
-			KeyRewardBand,
-			&p.RewardBand,
-			validateRewardBand,
+			KeyRewardBands,
+			&p.RewardBands,
+			validateRewardBands,
 		),
 		paramstypes.NewParamSetPair(
 			KeyRewardDistributionWindow,
@@ -176,10 +194,6 @@ func (p Params) Validate() error {
 		return fmt.Errorf("oracle parameter VoteThreshold must be greater than 33 percent")
 	}
 
-	if p.RewardBand.GT(sdk.OneDec()) || p.RewardBand.IsNegative() {
-		return fmt.Errorf("oracle parameter RewardBand must be between [0, 1]")
-	}
-
 	if p.RewardDistributionWindow < p.VotePeriod {
 		return fmt.Errorf("oracle parameter RewardDistributionWindow must be greater than or equal with VotePeriod")
 	}
@@ -220,6 +234,10 @@ func (p Params) Validate() error {
 
 	if p.HistoricStampPeriod%p.VotePeriod != 0 || p.MedianStampPeriod%p.VotePeriod != 0 {
 		return fmt.Errorf("oracle parameters HistoricStampPeriod and MedianStampPeriod must be exact multiples of VotePeriod")
+
+	err := validateRewardBands(p.RewardBands)
+	if err != nil {
+		return err
 	}
 
 	// all denoms in mandatory list must be in accept list
@@ -302,6 +320,24 @@ func validateDenomList(i interface{}) error {
 		}
 		if len(d.SymbolDenom) == 0 {
 			return fmt.Errorf("oracle parameter AcceptList Denom must have SymbolDenom")
+		}
+	}
+
+	return nil
+}
+
+func validateRewardBands(i interface{}) error {
+	v, ok := i.(RewardBandList)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	for _, d := range v {
+		if err := validateRewardBand(d.RewardBand); err != nil {
+			return err
+		}
+		if len(d.SymbolDenom) == 0 {
+			return fmt.Errorf("oracle parameter RewardBand must have SymbolDenom")
 		}
 	}
 
