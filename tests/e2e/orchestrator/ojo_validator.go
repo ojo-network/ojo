@@ -3,14 +3,10 @@ package orchestrator
 import (
 	"context"
 	"fmt"
-	"os"
-	"path/filepath"
 
 	"github.com/ory/dockertest/v3"
 
-	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
 	appparams "github.com/ojo-network/ojo/app/params"
-	tmconfig "github.com/tendermint/tendermint/config"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 )
 
@@ -26,25 +22,23 @@ var (
 )
 
 type Validator struct {
+	name           string
 	mnemonic       string
 	chainID        string
 	dockerResource *dockertest.Resource
 	rpc            *rpchttp.HTTP
 }
 
-func (o *Orchestrator) CreateOjoValidator() (val *Validator, err error) {
-	val = &Validator{}
-	val.chainID = ojo_chain_id
+func (o *Orchestrator) initOjoVal(index int) (val *Validator, err error) {
+	val = &Validator{
+		name:    fmt.Sprintf("ojoVal%d", index),
+		chainID: ojo_chain_id,
+	}
 	val.mnemonic, err = createMnemonic()
-	if err != nil {
-		return
-	}
+	return
+}
 
-	configDir, err := initOjoConfigs()
-	if err != nil {
-		return
-	}
-
+func (o *Orchestrator) startOjoVal(val *Validator, configDir string) (err error) {
 	val.dockerResource, err = o.dockerPool.RunWithOptions(
 		&dockertest.RunOptions{
 			Name:       ojo_container_name,
@@ -67,39 +61,13 @@ func (o *Orchestrator) CreateOjoValidator() (val *Validator, err error) {
 		return
 	}
 
-	err = val.setTendermintEndpoint()
-	return
+	return val.setTendermintEndpoint()
 }
 
-func initOjoConfigs() (dir string, err error) {
-	dir, err = os.MkdirTemp("", "e2e-configs")
-	if err != nil {
-		return
-	}
-
-	_, err = copyFile(
-		filepath.Join("./config/", "ojo_bootstrap.sh"),
-		filepath.Join(dir, "ojo_bootstrap.sh"),
-	)
-	if err != nil {
-		return
-	}
-
-	configPath := filepath.Join(dir, "config.toml")
-	config := tmconfig.DefaultConfig()
-	config.P2P.ListenAddress = "tcp://0.0.0.0:26656"
-	config.RPC.ListenAddress = fmt.Sprintf("tcp://0.0.0.0:%s", ojo_tmrpc_port)
-	config.StateSync.Enable = false
-	config.P2P.AddrBookStrict = false
-	config.P2P.Seeds = ""
-	tmconfig.WriteConfigFile(configPath, config)
-
-	appCfgPath := filepath.Join(dir, "app.toml")
-	appConfig := srvconfig.DefaultConfig()
-	appConfig.API.Enable = true
-	appConfig.MinGasPrices = ojoMinGasPrice
-	srvconfig.WriteConfigFile(appCfgPath, appConfig)
-
+func (val *Validator) setTendermintEndpoint() (err error) {
+	path := val.dockerResource.GetHostPort(fmt.Sprintf("%s/tcp", ojo_tmrpc_port))
+	endpoint := fmt.Sprintf("tcp://%s", path)
+	val.rpc, err = rpchttp.New(endpoint, "/websocket")
 	return
 }
 
@@ -109,11 +77,4 @@ func (val *Validator) BlockHeight() (int64, error) {
 		return 0, err
 	}
 	return status.SyncInfo.LatestBlockHeight, nil
-}
-
-func (val *Validator) setTendermintEndpoint() (err error) {
-	path := val.dockerResource.GetHostPort(fmt.Sprintf("%s/tcp", ojo_tmrpc_port))
-	endpoint := fmt.Sprintf("tcp://%s", path)
-	val.rpc, err = rpchttp.New(endpoint, "/websocket")
-	return
 }

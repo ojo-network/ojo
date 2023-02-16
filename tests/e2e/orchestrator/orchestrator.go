@@ -29,7 +29,7 @@ func (o *Orchestrator) InitDockerResources(t *testing.T) error {
 	}
 
 	t.Log("-> initializing ojo validator")
-	new_validator, err := o.CreateOjoValidator()
+	new_validator, err := o.CreateOjoValidator(0)
 	if err != nil {
 		return err
 	}
