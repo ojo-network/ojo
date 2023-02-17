@@ -68,10 +68,9 @@ Let `M` be the median, `𝜎` be the standard deviation of the votes in the ball
 
 ### Reward Pool
 
-The Oracle module's reward pool is composed of any tokens present in its module account. This pool is funded by the `x/leverage` module as portion of interest accrued on borrowed tokens. If there are no tokens present in the Oracle module reward pool during a reward period, no tokens are distributed for that period.
+The Oracle module's reward pool is composed of any tokens present in its module account. If there are no tokens present in the Oracle module reward pool during a reward period, no tokens are distributed for that period.
 
-From the Oracle module's perspective, tokens of varied denominations from the `AcceptList` simply appear in the module account at a regular interval.
-The interval is the `x/Leverage` module's `InterestEpoch` parameter, e.g. every 100 blocks, which is generally not equal to the Oracle's `VotePeriod` or other parameters.
+This reward pool will be filled initially by token inflation, then in a future upgrade will be funded by payment for the Ojo Validator services.
 
 The reward pool is not distributed all at once, but instead over a period of time, determined by the param `RewardDistributionWindow`, currently set to `5256000`.
 
