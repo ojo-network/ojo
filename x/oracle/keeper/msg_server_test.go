@@ -183,6 +183,11 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 							SymbolDenom: oracletypes.AtomSymbol,
 							Exponent:    6,
 						},
+						{
+							BaseDenom:   "base",
+							SymbolDenom: "symbol",
+							Exponent:    6,
+						},
 					},
 				},
 			},
@@ -198,6 +203,11 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 				Keys:        []string{"MandatoryList"},
 				Changes: types.Params{
 					MandatoryList: types.DenomList{
+						{
+							BaseDenom:   oracletypes.OjoDenom,
+							SymbolDenom: oracletypes.OjoSymbol,
+							Exponent:    6,
+						},
 						{
 							BaseDenom:   oracletypes.AtomDenom,
 							SymbolDenom: oracletypes.AtomSymbol,
@@ -230,6 +240,56 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 			"denom in MandatoryList not present in AcceptList",
 		},
 		{
+			"valid reward band list",
+			&types.MsgGovUpdateParams{
+				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
+				Keys:        []string{"RewardBands"},
+				Changes: types.Params{
+					RewardBands: types.RewardBandList{
+						{
+							SymbolDenom: types.OjoSymbol,
+							RewardBand:  sdk.NewDecWithPrec(2, 2),
+						},
+						{
+							SymbolDenom: types.AtomSymbol,
+							RewardBand:  sdk.NewDecWithPrec(2, 2),
+						},
+						{
+							SymbolDenom: "symbol",
+							RewardBand:  sdk.NewDecWithPrec(2, 2),
+						},
+					},
+				},
+			},
+			false,
+			"",
+		},
+		{
+			"invalid reward band list",
+			&types.MsgGovUpdateParams{
+				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
+				Keys:        []string{"RewardBands"},
+				Changes: types.Params{
+					RewardBands: types.RewardBandList{
+						{
+							SymbolDenom: types.OjoSymbol,
+							RewardBand:  sdk.NewDecWithPrec(2, 0),
+						},
+						{
+							SymbolDenom: types.AtomSymbol,
+							RewardBand:  sdk.NewDecWithPrec(2, 2),
+						},
+					},
+				},
+			},
+			true,
+			"oracle parameter RewardBand must be between [0, 1]",
+		},
+		{
 			"multiple valid params",
 			&types.MsgGovUpdateParams{
 				Authority:   govAccAddr,
@@ -238,7 +298,6 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 				Keys: []string{
 					"VotePeriod",
 					"VoteThreshold",
-					"RewardBand",
 					"RewardDistributionWindow",
 					"SlashFraction",
 					"SlashWindow",
@@ -251,7 +310,6 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 				Changes: types.Params{
 					VotePeriod:               10,
 					VoteThreshold:            sdk.NewDecWithPrec(40, 2),
-					RewardBand:               sdk.NewDecWithPrec(3, 2),
 					RewardDistributionWindow: types.BlocksPerWeek,
 					SlashFraction:            sdk.NewDecWithPrec(2, 4),
 					SlashWindow:              types.BlocksPerDay,
@@ -322,16 +380,59 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 				switch tc.name {
 				case "valid accept list":
 					acceptList := s.app.OracleKeeper.AcceptList(s.ctx)
-					s.Require().Len(acceptList, 2)
+					s.Require().Equal(acceptList, types.DenomList{
+						{
+							BaseDenom:   oracletypes.OjoDenom,
+							SymbolDenom: oracletypes.OjoSymbol,
+							Exponent:    6,
+						},
+						{
+							BaseDenom:   oracletypes.AtomDenom,
+							SymbolDenom: oracletypes.AtomSymbol,
+							Exponent:    6,
+						},
+						{
+							BaseDenom:   "base",
+							SymbolDenom: "symbol",
+							Exponent:    6,
+						},
+					})
 
 				case "valid mandatory list":
 					mandatoryList := s.app.OracleKeeper.MandatoryList(s.ctx)
-					s.Require().Len(mandatoryList, 1)
+					s.Require().Equal(mandatoryList, types.DenomList{
+						{
+							BaseDenom:   oracletypes.OjoDenom,
+							SymbolDenom: oracletypes.OjoSymbol,
+							Exponent:    6,
+						},
+						{
+							BaseDenom:   oracletypes.AtomDenom,
+							SymbolDenom: oracletypes.AtomSymbol,
+							Exponent:    6,
+						},
+					})
+
+				case "valid reward band list":
+					rewardBand := s.app.OracleKeeper.RewardBands(s.ctx)
+					s.Require().Equal(rewardBand, types.RewardBandList{
+						{
+							SymbolDenom: types.OjoSymbol,
+							RewardBand:  sdk.NewDecWithPrec(2, 2),
+						},
+						{
+							SymbolDenom: types.AtomSymbol,
+							RewardBand:  sdk.NewDecWithPrec(2, 2),
+						},
+						{
+							SymbolDenom: "symbol",
+							RewardBand:  sdk.NewDecWithPrec(2, 2),
+						},
+					})
 
 				case "multiple valid params":
 					votePeriod := s.app.OracleKeeper.VotePeriod(s.ctx)
 					voteThreshold := s.app.OracleKeeper.VoteThreshold(s.ctx)
-					rewardBand := s.app.OracleKeeper.RewardBand(s.ctx)
 					rewardDistributionWindow := s.app.OracleKeeper.RewardDistributionWindow(s.ctx)
 					slashFraction := s.app.OracleKeeper.SlashFraction(s.ctx)
 					slashWindow := s.app.OracleKeeper.SlashWindow(s.ctx)
@@ -342,7 +443,6 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 					maximumMedianStamps := s.app.OracleKeeper.MaximumMedianStamps(s.ctx)
 					s.Require().Equal(votePeriod, uint64(10))
 					s.Require().Equal(voteThreshold, sdk.NewDecWithPrec(40, 2))
-					s.Require().Equal(rewardBand, sdk.NewDecWithPrec(3, 2))
 					s.Require().Equal(rewardDistributionWindow, types.BlocksPerWeek)
 					s.Require().Equal(slashFraction, sdk.NewDecWithPrec(2, 4))
 					s.Require().Equal(slashWindow, types.BlocksPerDay)

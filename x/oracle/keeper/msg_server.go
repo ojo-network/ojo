@@ -152,8 +152,8 @@ func (ms msgServer) GovUpdateParams(
 		case string(types.KeyVoteThreshold):
 			ms.SetVoteThreshold(ctx, msg.Changes.VoteThreshold)
 
-		case string(types.KeyRewardBand):
-			ms.SetRewardBand(ctx, msg.Changes.RewardBand)
+		case string(types.KeyRewardBands):
+			ms.SetRewardBand(ctx, msg.Changes.RewardBands)
 
 		case string(types.KeyRewardDistributionWindow):
 			if msg.Changes.RewardDistributionWindow < ms.Keeper.VotePeriod(ctx) {

@@ -234,6 +234,7 @@ func (p Params) Validate() error {
 
 	if p.HistoricStampPeriod%p.VotePeriod != 0 || p.MedianStampPeriod%p.VotePeriod != 0 {
 		return fmt.Errorf("oracle parameters HistoricStampPeriod and MedianStampPeriod must be exact multiples of VotePeriod")
+	}
 
 	err := validateRewardBands(p.RewardBands)
 	if err != nil {

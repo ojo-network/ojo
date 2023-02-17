@@ -221,9 +221,14 @@ func (msg MsgGovUpdateParams) ValidateBasic() error {
 				return fmt.Errorf("oracle parameter VoteThreshold must be greater than 33 percent")
 			}
 
-		case string(KeyRewardBand):
-			if msg.Changes.RewardBand.GT(sdk.OneDec()) || msg.Changes.RewardBand.IsNegative() {
-				return fmt.Errorf("oracle parameter RewardBand must be between [0, 1]")
+		case string(KeyRewardBands):
+			for _, v := range msg.Changes.RewardBands {
+				if v.RewardBand.GT(sdk.OneDec()) || v.RewardBand.IsNegative() {
+					return fmt.Errorf("oracle parameter RewardBand must be between [0, 1]")
+				}
+				if len(v.SymbolDenom) == 0 {
+					return fmt.Errorf("oracle parameter RewardBand must have SymbolDenom")
+				}
 			}
 
 		case string(KeyRewardDistributionWindow):
