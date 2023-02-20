@@ -228,7 +228,7 @@ func (s *IntegrationTestSuite) initValidatorConfigs() {
 		valConfig.P2P.ListenAddress = fmt.Sprintf("tcp://0.0.0.0:%s", ojoP2pPort)
 		valConfig.P2P.AddrBookStrict = false
 		valConfig.P2P.ExternalAddress = fmt.Sprintf("%s:%s", val.instanceName(), ojoP2pPort)
-		valConfig.RPC.ListenAddress = "tcp://0.0.0.0:26657"
+		valConfig.RPC.ListenAddress = fmt.Sprintf("tcp://0.0.0.0:%s", ojoTmrpcPort)
 		valConfig.StateSync.Enable = false
 		valConfig.LogLevel = "info"
 
@@ -290,7 +290,8 @@ func (s *IntegrationTestSuite) runValidators() {
 		s.T().Logf("started ojo validator container: %s", resource.Container.ID)
 	}
 
-	rpcClient, err := rpchttp.New("tcp://localhost:26657", "/websocket")
+	rpcUrl := fmt.Sprintf("tcp://localhost:%s", ojoTmrpcPort)
+	rpcClient, err := rpchttp.New(rpcUrl, "/websocket")
 	s.Require().NoError(err)
 
 	s.Require().Eventually(
