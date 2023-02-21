@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
@@ -55,12 +54,5 @@ func ValidateProposal(title, description, authority string) error {
 		)
 	}
 
-	return nil
-}
-
-func ValidateAddr(addr, name string) error {
-	if _, err := sdk.AccAddressFromBech32(addr); err != nil {
-		return sdkerrors.ErrInvalidAddress.Wrapf("invalid %s address: %s", name, err)
-	}
 	return nil
 }
