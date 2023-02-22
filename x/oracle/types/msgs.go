@@ -174,11 +174,12 @@ func (msg MsgDelegateFeedConsent) ValidateBasic() error {
 }
 
 // NewMsgUpdateParams will creates a new MsgUpdateParams instance
-func NewMsgUpdateParams(authority, title, description string, changes Params) *MsgGovUpdateParams {
+func NewMsgUpdateParams(authority, title, description string, keys []string, changes Params) *MsgGovUpdateParams {
 	return &MsgGovUpdateParams{
 		Title:       title,
 		Description: description,
 		Authority:   authority,
+		Keys:        keys,
 		Changes:     changes,
 	}
 }
