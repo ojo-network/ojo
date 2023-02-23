@@ -2,9 +2,12 @@ package types
 
 import (
 	"fmt"
+	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/cosmos/cosmos-sdk/x/gov/types"
+	gov1b1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	"github.com/tendermint/tendermint/crypto/tmhash"
 
 	"github.com/ojo-network/ojo/util/checkers"
@@ -206,7 +209,11 @@ func (msg MsgGovUpdateParams) GetSigners() []sdk.AccAddress {
 
 // ValidateBasic implements Msg
 func (msg MsgGovUpdateParams) ValidateBasic() error {
-	if err := checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority); err != nil {
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return sdkerrors.Wrap(err, "invalid authority address")
+	}
+
+	if err := validateProposal(msg.Title, msg.Description); err != nil {
 		return err
 	}
 
@@ -280,6 +287,26 @@ func (msg MsgGovUpdateParams) ValidateBasic() error {
 		default:
 			return fmt.Errorf("%s is not an existing orcale param key", key)
 		}
+	}
+
+	return nil
+}
+
+func validateProposal(title, description string) error {
+	if len(strings.TrimSpace(title)) == 0 {
+		return sdkerrors.Wrap(types.ErrInvalidProposalContent, "proposal title cannot be blank")
+	}
+	if len(title) > gov1b1.MaxTitleLength {
+		return sdkerrors.Wrapf(types.ErrInvalidProposalContent, "proposal title is longer than max length of %d",
+			gov1b1.MaxTitleLength)
+	}
+
+	if len(description) == 0 {
+		return sdkerrors.Wrap(types.ErrInvalidProposalContent, "proposal description cannot be blank")
+	}
+	if len(description) > gov1b1.MaxDescriptionLength {
+		return sdkerrors.Wrapf(types.ErrInvalidProposalContent, "proposal description is longer than max length of %d",
+			gov1b1.MaxDescriptionLength)
 	}
 
 	return nil
