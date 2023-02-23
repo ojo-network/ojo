@@ -278,7 +278,7 @@ func (msg MsgGovUpdateParams) ValidateBasic() error {
 		case string(KeyMaximumMedianStamps):
 
 		default:
-			return fmt.Errorf("%s is not an existing orcale param key", key)
+			return fmt.Errorf("%s is not an existing oracle param key", key)
 		}
 	}
 
