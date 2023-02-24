@@ -204,7 +204,9 @@ func (msg MsgGovUpdateParams) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
 }
 
-// ValidateBasic implements Msg
+// ValidateBasic implements Msg and validates params for each param key
+// specified in the proposal. If one param is invalid, the whole proposal
+// will fail to go through.
 func (msg MsgGovUpdateParams) ValidateBasic() error {
 	if err := checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority); err != nil {
 		return err
@@ -239,21 +241,15 @@ func (msg MsgGovUpdateParams) ValidateBasic() error {
 
 		case string(KeyAcceptList):
 			for _, denom := range msg.Changes.AcceptList {
-				if len(denom.BaseDenom) == 0 {
-					return fmt.Errorf("oracle parameter AcceptList Denom must have BaseDenom")
-				}
-				if len(denom.SymbolDenom) == 0 {
-					return fmt.Errorf("oracle parameter AcceptList Denom must have SymbolDenom")
+				if err := denom.Validate(); err != nil {
+					return err
 				}
 			}
 
 		case string(KeyMandatoryList):
 			for _, denom := range msg.Changes.MandatoryList {
-				if len(denom.BaseDenom) == 0 {
-					return fmt.Errorf("oracle parameter MandatoryList Denom must have BaseDenom")
-				}
-				if len(denom.SymbolDenom) == 0 {
-					return fmt.Errorf("oracle parameter MandatoryList Denom must have SymbolDenom")
+				if err := denom.Validate(); err != nil {
+					return err
 				}
 			}
 

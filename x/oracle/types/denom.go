@@ -1,6 +1,7 @@
 package types
 
 import (
+	"fmt"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -17,6 +18,17 @@ func (d Denom) Equal(d1 *Denom) bool {
 	return d.BaseDenom == d1.BaseDenom &&
 		d.SymbolDenom == d1.SymbolDenom &&
 		d.Exponent == d1.Exponent
+}
+
+// Validate
+func (d Denom) Validate() error {
+	if len(d.BaseDenom) == 0 {
+		return fmt.Errorf("denom must have BaseDenom")
+	}
+	if len(d.SymbolDenom) == 0 {
+		return fmt.Errorf("denom must have SymbolDenom")
+	}
+	return nil
 }
 
 // DenomList is array of Denom

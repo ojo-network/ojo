@@ -211,20 +211,14 @@ func (p Params) Validate() error {
 	}
 
 	for _, denom := range p.AcceptList {
-		if len(denom.BaseDenom) == 0 {
-			return fmt.Errorf("oracle parameter AcceptList Denom must have BaseDenom")
-		}
-		if len(denom.SymbolDenom) == 0 {
-			return fmt.Errorf("oracle parameter AcceptList Denom must have SymbolDenom")
+		if err := denom.Validate(); err != nil {
+			return err
 		}
 	}
 
 	for _, denom := range p.MandatoryList {
-		if len(denom.BaseDenom) == 0 {
-			return fmt.Errorf("oracle parameter MandatoryList Denom must have BaseDenom")
-		}
-		if len(denom.SymbolDenom) == 0 {
-			return fmt.Errorf("oracle parameter MandatoryList Denom must have SymbolDenom")
+		if err := denom.Validate(); err != nil {
+			return err
 		}
 	}
 
