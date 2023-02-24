@@ -8,17 +8,17 @@ import (
 
 // GovQueryClient returns the govtypes.QueryClient
 // initialized with the clients grpc connection
-func (c *Client) GovQueryClient() govtypes.QueryClient {
-	return govtypes.NewQueryClient(c.grpcConn)
+func (qc *QueryClient) GovQueryClient() govtypes.QueryClient {
+	return govtypes.NewQueryClient(qc.grpcConn)
 }
 
 // QueryProposal sends a grpc query with the given proposalID
 // and returns the govtypes.Proposal object
-func (c *Client) QueryProposal(proposalID uint64) (*govtypes.Proposal, error) {
+func (qc *QueryClient) QueryProposal(proposalID uint64) (*govtypes.Proposal, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), queryTimeout)
 	defer cancel()
 
-	queryResponse, err := c.GovQueryClient().Proposal(ctx, &govtypes.QueryProposalRequest{ProposalId: proposalID})
+	queryResponse, err := qc.GovQueryClient().Proposal(ctx, &govtypes.QueryProposalRequest{ProposalId: proposalID})
 	if err != nil {
 		return nil, err
 	}

@@ -19,9 +19,9 @@ const (
 	gasAdjustment = 1
 )
 
-// Client is a wrapper around the cosmos sdk client context and transaction
+// TxClient is a wrapper around the cosmos sdk client context and transaction
 // factory for signing and broadcasting transactions
-type Client struct {
+type TxClient struct {
 	ChainID       string
 	TMRPCEndpoint string
 
@@ -39,42 +39,42 @@ func NewTxClient(
 	tmrpcEndpoint string,
 	accountName string,
 	accountMnemonic string,
-) (c *Client, err error) {
-	c = &Client{
+) (tc *TxClient, err error) {
+	tc = &TxClient{
 		ChainID:       chainID,
 		TMRPCEndpoint: tmrpcEndpoint,
 	}
 
-	c.keyringRecord, c.keyringKeyring, err = CreateAccountFromMnemonic(accountName, accountMnemonic)
+	tc.keyringRecord, tc.keyringKeyring, err = CreateAccountFromMnemonic(accountName, accountMnemonic)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.createClientContext()
+	err = tc.createClientContext()
 	if err != nil {
 		return nil, err
 	}
-	c.createTxFactory()
+	tc.createTxFactory()
 
-	return c, err
+	return tc, err
 }
 
-func (c *Client) createClientContext() error {
+func (tc *TxClient) createClientContext() error {
 	encoding := ojoapp.MakeEncodingConfig()
-	fromAddress, _ := c.keyringRecord.GetAddress()
+	fromAddress, _ := tc.keyringRecord.GetAddress()
 
-	tmHTTPClient, err := tmjsonclient.DefaultHTTPClient(c.TMRPCEndpoint)
+	tmHTTPClient, err := tmjsonclient.DefaultHTTPClient(tc.TMRPCEndpoint)
 	if err != nil {
 		return err
 	}
 
-	tmRPCClient, err := rpchttp.NewWithClient(c.TMRPCEndpoint, "/websocket", tmHTTPClient)
+	tmRPCClient, err := rpchttp.NewWithClient(tc.TMRPCEndpoint, "/websocket", tmHTTPClient)
 	if err != nil {
 		return err
 	}
 
-	c.ClientContext = &client.Context{
-		ChainID:           c.ChainID,
+	tc.ClientContext = &client.Context{
+		ChainID:           tc.ChainID,
 		InterfaceRegistry: encoding.InterfaceRegistry,
 		Output:            os.Stderr,
 		BroadcastMode:     flags.BroadcastBlock,
@@ -83,12 +83,12 @@ func (c *Client) createClientContext() error {
 		Codec:             encoding.Codec,
 		LegacyAmino:       encoding.Amino,
 		Input:             os.Stdin,
-		NodeURI:           c.TMRPCEndpoint,
+		NodeURI:           tc.TMRPCEndpoint,
 		Client:            tmRPCClient,
-		Keyring:           c.keyringKeyring,
+		Keyring:           tc.keyringKeyring,
 		FromAddress:       fromAddress,
-		FromName:          c.keyringRecord.Name,
-		From:              c.keyringRecord.Name,
+		FromName:          tc.keyringRecord.Name,
+		From:              tc.keyringRecord.Name,
 		OutputFormat:      "json",
 		UseLedger:         false,
 		Simulate:          false,
@@ -99,18 +99,18 @@ func (c *Client) createClientContext() error {
 	return nil
 }
 
-func (c *Client) createTxFactory() {
+func (tc *TxClient) createTxFactory() {
 	factory := tx.Factory{}.
-		WithAccountRetriever(c.ClientContext.AccountRetriever).
-		WithChainID(c.ChainID).
-		WithTxConfig(c.ClientContext.TxConfig).
+		WithAccountRetriever(tc.ClientContext.AccountRetriever).
+		WithChainID(tc.ChainID).
+		WithTxConfig(tc.ClientContext.TxConfig).
 		WithGasAdjustment(gasAdjustment).
-		WithKeybase(c.ClientContext.Keyring).
+		WithKeybase(tc.ClientContext.Keyring).
 		WithSignMode(signing.SignMode_SIGN_MODE_DIRECT).
 		WithSimulateAndExecute(true)
-	c.txFactory = &factory
+	tc.txFactory = &factory
 }
 
-func (c *Client) BroadcastTx(msgs ...sdk.Msg) (*sdk.TxResponse, error) {
+func (c *TxClient) BroadcastTx(msgs ...sdk.Msg) (*sdk.TxResponse, error) {
 	return BroadcastTx(*c.ClientContext, *c.txFactory, msgs...)
 }

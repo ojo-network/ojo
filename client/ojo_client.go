@@ -11,8 +11,8 @@ import (
 // OjoClient is a helper for initializing a keychain, a cosmos-sdk client context,
 // and sending transactions/queries to a specific Ojo node
 type OjoClient struct {
-	QueryClient *query.Client
-	TxClient    *tx.Client
+	QueryClient *query.QueryClient
+	TxClient    *tx.TxClient
 }
 
 // NewOjoClient returns a new instance of the OjoClient with initialized
