@@ -362,7 +362,7 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 				Changes:     types.Params{},
 			},
 			true,
-			"test is not an existing orcale param key",
+			"test is not an existing oracle param key",
 		},
 	}
 

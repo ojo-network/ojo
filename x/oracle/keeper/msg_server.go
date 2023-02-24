@@ -210,7 +210,7 @@ func (ms msgServer) GovUpdateParams(
 			ms.SetMaximumMedianStamps(ctx, msg.Changes.MaximumMedianStamps)
 
 		default:
-			return nil, fmt.Errorf("%s is not an existing orcale param key", key)
+			return nil, fmt.Errorf("%s is not an existing oracle param key", key)
 		}
 	}
 
