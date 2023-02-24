@@ -28,6 +28,8 @@ import (
 	appparams "github.com/ojo-network/ojo/app/params"
 )
 
+// validator holds all the necessary information to run a validator node
+// using the dockertest module.
 type validator struct {
 	chain        *chain
 	index        int

@@ -7,6 +7,8 @@ import (
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
 
+// listenFofPrices listens for price updates at the correct blocks based
+// on the oracle params and updates the price store accordingly
 func listenForPrices(
 	ojoClient *client.OjoClient,
 	params oracletypes.Params,

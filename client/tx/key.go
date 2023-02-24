@@ -13,6 +13,7 @@ const (
 	keyringAppName    = "testnet"
 )
 
+// CreateAccountFromMnemonic creates a new account from a mnemonic
 func CreateAccountFromMnemonic(name, mnemonic string) (*keyring.Record, keyring.Keyring, error) {
 	encodingConfig := ojoapp.MakeEncodingConfig()
 	cdc := encodingConfig.Codec

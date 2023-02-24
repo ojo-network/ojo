@@ -6,6 +6,7 @@ import (
 	proposal "github.com/cosmos/cosmos-sdk/x/params/types/proposal"
 )
 
+// TxVoteYes sends a transaction to vote yes on a proposal
 func (c *Client) TxVoteYes(proposalID uint64) (*sdk.TxResponse, error) {
 	voter, err := c.keyringRecord.GetAddress()
 	if err != nil {
@@ -25,6 +26,7 @@ func (c *Client) TxVoteYes(proposalID uint64) (*sdk.TxResponse, error) {
 	return c.BroadcastTx(msg)
 }
 
+// TxSubmitProposal sends a transaction to submit a proposal
 func (c *Client) TxSubmitProposal(
 	changes []proposal.ParamChange,
 ) (*sdk.TxResponse, error) {

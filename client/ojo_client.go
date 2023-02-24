@@ -15,22 +15,26 @@ type OjoClient struct {
 	TxClient    *tx.Client
 }
 
+// NewOjoClient returns a new instance of the OjoClient with initialized
+// query and transaction clients
 func NewOjoClient(
 	chainID string,
 	tmrpcEndpoint string,
 	grpcEndpoint string,
 	accountName string,
 	accountMnemonic string,
-) (uc *OjoClient, err error) {
-	uc = &OjoClient{}
-	uc.QueryClient, err = query.NewQueryClient(grpcEndpoint)
+) (oc *OjoClient, err error) {
+	oc = &OjoClient{}
+	oc.QueryClient, err = query.NewQueryClient(grpcEndpoint)
 	if err != nil {
 		return nil, err
 	}
-	uc.TxClient, err = tx.NewTxClient(chainID, tmrpcEndpoint, accountName, accountMnemonic)
-	return uc, err
+	oc.TxClient, err = tx.NewTxClient(chainID, tmrpcEndpoint, accountName, accountMnemonic)
+	return oc, err
 }
 
+// NewChainHeight returns a new instance of the ChainHeight struct
+// using the OjoClient's transaction sdk.client
 func (oc *OjoClient) NewChainHeight(ctx context.Context, logger zerolog.Logger) (*ChainHeight, error) {
 	return NewChainHeight(ctx, oc.TxClient.ClientContext.Client, logger)
 }

@@ -7,6 +7,9 @@ import (
 	"github.com/ojo-network/ojo/util/decmath"
 )
 
+// PriceStore is the in memory store for prices
+// recorded by the price_listener with helper methods
+// for calculating and verifying medians and median deviations
 type PriceStore struct {
 	historicStamps   map[string][]sdk.Dec
 	medians          map[string]sdk.Dec

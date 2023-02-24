@@ -7,10 +7,13 @@ import (
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
 
+// OracleQueryClient returns the oracletypes.QueryClient
+// initialized with the clients grpc connection
 func (c *Client) OracleQueryClient() oracletypes.QueryClient {
 	return oracletypes.NewQueryClient(c.grpcConn)
 }
 
+// QueryParams returns the params from the oracle module
 func (c *Client) QueryParams() (oracletypes.Params, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), queryTimeout)
 	defer cancel()
@@ -22,6 +25,7 @@ func (c *Client) QueryParams() (oracletypes.Params, error) {
 	return queryResponse.Params, nil
 }
 
+// QueryExchangeRates returns the exchange rates from the oracle module
 func (c *Client) QueryExchangeRates() ([]sdk.DecCoin, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), queryTimeout)
 	defer cancel()
@@ -33,6 +37,7 @@ func (c *Client) QueryExchangeRates() ([]sdk.DecCoin, error) {
 	return queryResponse.ExchangeRates, nil
 }
 
+// QueryMedians returns the medians from the oracle module
 func (c *Client) QueryMedians() (sdk.DecCoins, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), queryTimeout)
 	defer cancel()

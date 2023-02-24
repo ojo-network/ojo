@@ -19,6 +19,8 @@ const (
 	gasAdjustment = 1
 )
 
+// Client is a wrapper around the cosmos sdk client context and transaction
+// factory for signing and broadcasting transactions
 type Client struct {
 	ChainID       string
 	TMRPCEndpoint string

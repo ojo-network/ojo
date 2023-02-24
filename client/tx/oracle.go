@@ -5,6 +5,8 @@ import (
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
 
+// TxDelegateFeedConsent delegates the feed consent to the given feeder
+// from the OjoClient's validator
 func (c *Client) TxDelegateFeedConsent(
 	feeder sdk.AccAddress,
 ) (*sdk.TxResponse, error) {

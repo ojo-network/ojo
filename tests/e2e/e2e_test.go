@@ -13,6 +13,8 @@ func (s *IntegrationTestSuite) TestMedians() {
 	s.Require().NoError(err)
 }
 
+// TestUpdateOracleParams updates the oracle params with a gov prop
+// and then verifies the new params are returned by the params query.
 func (s *IntegrationTestSuite) TestUpdateOracleParams() {
 	params, err := s.ojoClient.QueryClient.QueryParams()
 	s.Require().NoError(err)

@@ -9,6 +9,7 @@ import (
 	"github.com/ojo-network/ojo/client"
 )
 
+// SubmitAndPassProposal submits a proposal and votes yes on it
 func SubmitAndPassProposal(ojoClient *client.OjoClient, changes []proposal.ParamChange) error {
 	resp, err := ojoClient.TxClient.TxSubmitProposal(changes)
 	if err != nil {
