@@ -186,6 +186,9 @@ func (ms msgServer) GovUpdateParams(
 			ms.SetMinValidPerWindow(ctx, msg.Changes.MinValidPerWindow)
 
 		case string(types.KeyHistoricStampPeriod):
+			if msg.Changes.HistoricStampPeriod < 1 {
+				return nil, fmt.Errorf("oracle parameters HistoricStampPeriod must be greater than 0")
+			}
 			if msg.Changes.HistoricStampPeriod > ms.Keeper.MedianStampPeriod(ctx) {
 				return nil, fmt.Errorf("oracle parameter HistoricStampPeriod must be less than or equal with MedianStampPeriod")
 			}
@@ -195,6 +198,9 @@ func (ms msgServer) GovUpdateParams(
 			ms.SetHistoricStampPeriod(ctx, msg.Changes.HistoricStampPeriod)
 
 		case string(types.KeyMedianStampPeriod):
+			if msg.Changes.MedianStampPeriod < 1 {
+				return nil, fmt.Errorf("oracle parameters MedianStampPeriod must be greater than 0")
+			}
 			if msg.Changes.MedianStampPeriod < ms.Keeper.HistoricStampPeriod(ctx) {
 				return nil, fmt.Errorf("oracle parameter MedianStampPeriod must be greater than or equal with HistoricStampPeriod")
 			}
@@ -204,9 +210,15 @@ func (ms msgServer) GovUpdateParams(
 			ms.SetMedianStampPeriod(ctx, msg.Changes.MedianStampPeriod)
 
 		case string(types.KeyMaximumPriceStamps):
+			if msg.Changes.MaximumPriceStamps < 1 {
+				return nil, fmt.Errorf("oracle parameters MaximumPriceStamps must be greater than 0")
+			}
 			ms.SetMaximumPriceStamps(ctx, msg.Changes.MaximumPriceStamps)
 
 		case string(types.KeyMaximumMedianStamps):
+			if msg.Changes.MaximumMedianStamps < 1 {
+				return nil, fmt.Errorf("oracle parameters MaximumMedianStamps must be greater than 0")
+			}
 			ms.SetMaximumMedianStamps(ctx, msg.Changes.MaximumMedianStamps)
 
 		default:

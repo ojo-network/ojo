@@ -210,16 +210,12 @@ func (p Params) Validate() error {
 		return fmt.Errorf("oracle parameter MinValidPerWindow must be between [0, 1]")
 	}
 
-	for _, denom := range p.AcceptList {
-		if err := denom.Validate(); err != nil {
-			return err
-		}
+	if err := validateDenomList(p.AcceptList); err != nil {
+		return err
 	}
 
-	for _, denom := range p.MandatoryList {
-		if err := denom.Validate(); err != nil {
-			return err
-		}
+	if err := validateDenomList(p.MandatoryList); err != nil {
+		return err
 	}
 
 	if p.HistoricStampPeriod > p.MedianStampPeriod {
@@ -230,8 +226,7 @@ func (p Params) Validate() error {
 		return fmt.Errorf("oracle parameters HistoricStampPeriod and MedianStampPeriod must be exact multiples of VotePeriod")
 	}
 
-	err := validateRewardBands(p.RewardBands)
-	if err != nil {
+	if err := validateRewardBands(p.RewardBands); err != nil {
 		return err
 	}
 
@@ -250,7 +245,7 @@ func validateVotePeriod(i interface{}) error {
 	}
 
 	if v == 0 {
-		return fmt.Errorf("vote period must be positive: %d", v)
+		return fmt.Errorf("oracle parameter VotePeriod must be > 0")
 	}
 
 	return nil
@@ -263,11 +258,11 @@ func validateVoteThreshold(i interface{}) error {
 	}
 
 	if v.LT(sdk.NewDecWithPrec(33, 2)) {
-		return fmt.Errorf("vote threshold must be bigger than 33%%: %s", v)
+		return fmt.Errorf("oracle parameter VoteThreshold must be between [0.33, 1.00]")
 	}
 
 	if v.GT(sdk.OneDec()) {
-		return fmt.Errorf("vote threshold too large: %s", v)
+		return fmt.Errorf("oracle parameter VoteThreshold must be between [0.33, 1.00]")
 	}
 
 	return nil
@@ -280,11 +275,11 @@ func validateRewardBand(i interface{}) error {
 	}
 
 	if v.IsNegative() {
-		return fmt.Errorf("reward band must be positive: %s", v)
+		return fmt.Errorf("oracle parameter RewardBand must be between [0, 1]")
 	}
 
 	if v.GT(sdk.OneDec()) {
-		return fmt.Errorf("reward band is too large: %s", v)
+		return fmt.Errorf("oracle parameter RewardBand must be between [0, 1]")
 	}
 
 	return nil
@@ -297,7 +292,7 @@ func validateRewardDistributionWindow(i interface{}) error {
 	}
 
 	if v == 0 {
-		return fmt.Errorf("reward distribution window must be positive: %d", v)
+		return fmt.Errorf("oracle parameter RewardDistributionWindow must be > 0")
 	}
 
 	return nil
@@ -346,11 +341,11 @@ func validateSlashFraction(i interface{}) error {
 	}
 
 	if v.IsNegative() {
-		return fmt.Errorf("slash fraction must be positive: %s", v)
+		return fmt.Errorf("oracle parameter SlashFraction must be between [0, 1]")
 	}
 
 	if v.GT(sdk.OneDec()) {
-		return fmt.Errorf("slash fraction is too large: %s", v)
+		return fmt.Errorf("oracle parameter SlashFraction must be between [0, 1]")
 	}
 
 	return nil
@@ -363,7 +358,7 @@ func validateSlashWindow(i interface{}) error {
 	}
 
 	if v == 0 {
-		return fmt.Errorf("slash window must be positive: %d", v)
+		return fmt.Errorf("oracle parameter SlashWindow must be > 0")
 	}
 
 	return nil
@@ -376,11 +371,11 @@ func validateMinValidPerWindow(i interface{}) error {
 	}
 
 	if v.IsNegative() {
-		return fmt.Errorf("min valid per window must be positive: %s", v)
+		return fmt.Errorf("oracle parameter MinValidPerWindow must be between [0, 1]")
 	}
 
 	if v.GT(sdk.OneDec()) {
-		return fmt.Errorf("min valid per window is too large: %s", v)
+		return fmt.Errorf("oracle parameter MinValidPerWindow must be between [0, 1]")
 	}
 
 	return nil
@@ -393,7 +388,7 @@ func validateHistoricStampPeriod(i interface{}) error {
 	}
 
 	if v < 1 {
-		return fmt.Errorf("historic stamp period must be positive: %d", v)
+		return fmt.Errorf("oracle parameter HistoricStampPeriod must be > 0")
 	}
 
 	return nil
@@ -406,7 +401,7 @@ func validateMedianStampPeriod(i interface{}) error {
 	}
 
 	if v < 1 {
-		return fmt.Errorf("median stamp period must be positive: %d", v)
+		return fmt.Errorf("oracle parameter MedianStampPeriod must be > 0")
 	}
 
 	return nil
@@ -419,7 +414,7 @@ func validateMaximumPriceStamps(i interface{}) error {
 	}
 
 	if v < 1 {
-		return fmt.Errorf("maximum price stamps must be positive: %d", v)
+		return fmt.Errorf("oracle parameter MaximumPriceStamps must be > 0")
 	}
 
 	return nil
@@ -432,7 +427,7 @@ func validateMaximumMedianStamps(i interface{}) error {
 	}
 
 	if v < 1 {
-		return fmt.Errorf("maximum median stamps must be positive: %d", v)
+		return fmt.Errorf("oracle parameter MaximumMedianStamps must be > 0")
 	}
 
 	return nil

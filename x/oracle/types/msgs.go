@@ -215,63 +215,69 @@ func (msg MsgGovUpdateParams) ValidateBasic() error {
 	for _, key := range msg.Keys {
 		switch key {
 		case string(KeyVotePeriod):
-			if msg.Changes.VotePeriod == 0 {
-				return fmt.Errorf("oracle parameter VotePeriod must be > 0")
+			if err := validateVotePeriod(msg.Changes.VotePeriod); err != nil {
+				return err
 			}
 
 		case string(KeyVoteThreshold):
-			if msg.Changes.VoteThreshold.LTE(sdk.NewDecWithPrec(33, 2)) {
-				return fmt.Errorf("oracle parameter VoteThreshold must be greater than 33 percent")
+			if err := validateVoteThreshold(msg.Changes.VoteThreshold); err != nil {
+				return err
 			}
 
 		case string(KeyRewardBands):
-			for _, v := range msg.Changes.RewardBands {
-				if v.RewardBand.GT(sdk.OneDec()) || v.RewardBand.IsNegative() {
-					return fmt.Errorf("oracle parameter RewardBand must be between [0, 1]")
-				}
-				if len(v.SymbolDenom) == 0 {
-					return fmt.Errorf("oracle parameter RewardBand must have SymbolDenom")
-				}
+			if err := validateRewardBands(msg.Changes.RewardBands); err != nil {
+				return err
 			}
 
 		case string(KeyRewardDistributionWindow):
-			if msg.Changes.RewardDistributionWindow == 0 {
-				return fmt.Errorf("oracle parameter RewardDistributionWindow must be > 0")
+			if err := validateRewardDistributionWindow(msg.Changes.RewardDistributionWindow); err != nil {
+				return err
 			}
 
 		case string(KeyAcceptList):
-			for _, denom := range msg.Changes.AcceptList {
-				if err := denom.Validate(); err != nil {
-					return err
-				}
+			if err := validateDenomList(msg.Changes.AcceptList); err != nil {
+				return err
 			}
 
 		case string(KeyMandatoryList):
-			for _, denom := range msg.Changes.MandatoryList {
-				if err := denom.Validate(); err != nil {
-					return err
-				}
+			if err := validateDenomList(msg.Changes.MandatoryList); err != nil {
+				return err
 			}
 
 		case string(KeySlashFraction):
-			if msg.Changes.SlashFraction.GT(sdk.OneDec()) || msg.Changes.SlashFraction.IsNegative() {
-				return fmt.Errorf("oracle parameter SlashFraction must be between [0, 1]")
+			if err := validateSlashFraction(msg.Changes.SlashFraction); err != nil {
+				return err
 			}
 
 		case string(KeySlashWindow):
-			if msg.Changes.SlashWindow == 0 {
-				return fmt.Errorf("oracle parameter SlashWindow must be > 0")
+			if err := validateSlashWindow(msg.Changes.SlashWindow); err != nil {
+				return err
 			}
 
 		case string(KeyMinValidPerWindow):
-			if msg.Changes.MinValidPerWindow.GT(sdk.OneDec()) || msg.Changes.MinValidPerWindow.IsNegative() {
-				return fmt.Errorf("oracle parameter MinValidPerWindow must be between [0, 1]")
+			if err := validateMinValidPerWindow(msg.Changes.MinValidPerWindow); err != nil {
+				return err
 			}
 
 		case string(KeyHistoricStampPeriod):
+			if err := validateHistoricStampPeriod(msg.Changes.HistoricStampPeriod); err != nil {
+				return err
+			}
+
 		case string(KeyMedianStampPeriod):
+			if err := validateMedianStampPeriod(msg.Changes.MedianStampPeriod); err != nil {
+				return err
+			}
+
 		case string(KeyMaximumPriceStamps):
+			if err := validateMaximumPriceStamps(msg.Changes.MaximumPriceStamps); err != nil {
+				return err
+			}
+
 		case string(KeyMaximumMedianStamps):
+			if err := validateMaximumMedianStamps(msg.Changes.MaximumMedianStamps); err != nil {
+				return err
+			}
 
 		default:
 			return fmt.Errorf("%s is not an existing oracle param key", key)

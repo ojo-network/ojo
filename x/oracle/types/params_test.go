@@ -17,7 +17,7 @@ func TestValidateVotePeriod(t *testing.T) {
 	require.ErrorContains(t, err, "invalid parameter type: string")
 
 	err = validateVotePeriod(uint64(0))
-	require.ErrorContains(t, err, "vote period must be positive: 0")
+	require.ErrorContains(t, err, "oracle parameter VotePeriod must be > 0")
 
 	err = validateVotePeriod(uint64(10))
 	require.Nil(t, err)
@@ -28,10 +28,10 @@ func TestValidateVoteThreshold(t *testing.T) {
 	require.ErrorContains(t, err, "invalid parameter type: string")
 
 	err = validateVoteThreshold(sdk.MustNewDecFromStr("0.31"))
-	require.ErrorContains(t, err, "vote threshold must be bigger than 33%: 0.310000000000000000")
+	require.ErrorContains(t, err, "oracle parameter VoteThreshold must be between [0.33, 1.00]")
 
 	err = validateVoteThreshold(sdk.MustNewDecFromStr("40.0"))
-	require.ErrorContains(t, err, "vote threshold too large: 40.000000000000000000")
+	require.ErrorContains(t, err, "oracle parameter VoteThreshold must be between [0.33, 1.00]")
 
 	err = validateVoteThreshold(sdk.MustNewDecFromStr("0.35"))
 	require.Nil(t, err)
@@ -42,10 +42,10 @@ func TestValidateRewardBand(t *testing.T) {
 	require.ErrorContains(t, err, "invalid parameter type: string")
 
 	err = validateRewardBand(sdk.MustNewDecFromStr("-0.31"))
-	require.ErrorContains(t, err, "reward band must be positive: -0.310000000000000000")
+	require.ErrorContains(t, err, "oracle parameter RewardBand must be between [0, 1]")
 
 	err = validateRewardBand(sdk.MustNewDecFromStr("40.0"))
-	require.ErrorContains(t, err, "reward band is too large: 40.000000000000000000")
+	require.ErrorContains(t, err, "oracle parameter RewardBand must be between [0, 1]")
 
 	err = validateRewardBand(sdk.OneDec())
 	require.Nil(t, err)
@@ -56,7 +56,7 @@ func TestValidateRewardDistributionWindow(t *testing.T) {
 	require.ErrorContains(t, err, "invalid parameter type: string")
 
 	err = validateRewardDistributionWindow(uint64(0))
-	require.ErrorContains(t, err, "reward distribution window must be positive: 0")
+	require.ErrorContains(t, err, "oracle parameter RewardDistributionWindow must be > 0")
 
 	err = validateRewardDistributionWindow(uint64(10))
 	require.Nil(t, err)
@@ -87,10 +87,10 @@ func TestValidateSlashFraction(t *testing.T) {
 	require.ErrorContains(t, err, "invalid parameter type: string")
 
 	err = validateSlashFraction(sdk.MustNewDecFromStr("-0.31"))
-	require.ErrorContains(t, err, "slash fraction must be positive: -0.310000000000000000")
+	require.ErrorContains(t, err, "oracle parameter SlashFraction must be between [0, 1]")
 
 	err = validateSlashFraction(sdk.MustNewDecFromStr("40.0"))
-	require.ErrorContains(t, err, "slash fraction is too large: 40.000000000000000000")
+	require.ErrorContains(t, err, "oracle parameter SlashFraction must be between [0, 1]")
 
 	err = validateSlashFraction(sdk.OneDec())
 	require.Nil(t, err)
@@ -101,7 +101,7 @@ func TestValidateSlashWindow(t *testing.T) {
 	require.ErrorContains(t, err, "invalid parameter type: string")
 
 	err = validateSlashWindow(uint64(0))
-	require.ErrorContains(t, err, "slash window must be positive: 0")
+	require.ErrorContains(t, err, "oracle parameter SlashWindow must be > 0")
 
 	err = validateSlashWindow(uint64(10))
 	require.Nil(t, err)
@@ -112,10 +112,10 @@ func TestValidateMinValidPerWindow(t *testing.T) {
 	require.ErrorContains(t, err, "invalid parameter type: string")
 
 	err = validateMinValidPerWindow(sdk.MustNewDecFromStr("-0.31"))
-	require.ErrorContains(t, err, "min valid per window must be positive: -0.310000000000000000")
+	require.ErrorContains(t, err, "oracle parameter MinValidPerWindow must be between [0, 1]")
 
 	err = validateMinValidPerWindow(sdk.MustNewDecFromStr("40.0"))
-	require.ErrorContains(t, err, "min valid per window is too large: 40.000000000000000000")
+	require.ErrorContains(t, err, "oracle parameter MinValidPerWindow must be between [0, 1]")
 
 	err = validateMinValidPerWindow(sdk.OneDec())
 	require.Nil(t, err)
