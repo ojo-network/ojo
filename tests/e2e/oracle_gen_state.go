@@ -17,7 +17,7 @@ var (
 		{BaseDenom: "ibc/7", SymbolDenom: "stATOM", Exponent: 6},
 		{BaseDenom: "ibc/8", SymbolDenom: "stOSMO", Exponent: 6},
 		{BaseDenom: "ibc/9", SymbolDenom: "OSMO", Exponent: 6},
-		{BaseDenom: "ibc/9", SymbolDenom: "IST", Exponent: 6},
+		{BaseDenom: "ibc/10", SymbolDenom: "IST", Exponent: 6},
 	}
 
 	oracleRewardBands = []oracletypes.RewardBand{
