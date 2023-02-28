@@ -8,6 +8,17 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var (
+	oneDec           = sdk.OneDec()
+	minVoteThreshold = sdk.NewDecWithPrec(33, 2) // 0.33
+)
+
+// maxium number of decimals allowed for VoteThreshold
+const (
+	MaxVoteThresholdPrecision  = 2
+	MaxVoteThresholdMultiplier = 100 // must be 10^MaxVoteThresholdPrecision
+)
+
 // Parameter keys
 var (
 	KeyVotePeriod               = []byte("VotePeriod")
@@ -260,14 +271,14 @@ func validateVoteThreshold(i interface{}) error {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
 
-	if v.LT(sdk.NewDecWithPrec(33, 2)) {
-		return fmt.Errorf("vote threshold must be bigger than 33%%: %s", v)
+	if v.LTE(minVoteThreshold) || v.GT(oneDec) {
+		return fmt.Errorf("threshold must be bigger than %s and <= 1", minVoteThreshold)
 	}
-
-	if v.GT(sdk.OneDec()) {
-		return fmt.Errorf("vote threshold too large: %s", v)
+	val := v.MulInt64(100).TruncateInt64()
+	v2 := sdk.NewDecWithPrec(val, MaxVoteThresholdPrecision)
+	if !v2.Equal(v) {
+		return fmt.Errorf("threshold precision must be maximum 2 decimals")
 	}
-
 	return nil
 }
 
