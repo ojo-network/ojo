@@ -10,6 +10,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const extraWaitTime = 3 * time.Second // at least one full block
+
 // SubmitAndPassProposal submits a proposal and votes yes on it
 func SubmitAndPassProposal(ojoClient *client.OjoClient, changes []proposal.ParamChange) error {
 	resp, err := ojoClient.TxClient.TxSubmitProposal(changes)
@@ -48,7 +50,7 @@ func SubmitAndPassProposal(ojoClient *client.OjoClient, changes []proposal.Param
 	}
 
 	now := time.Now()
-	sleepDuration := prop.VotingEndTime.Sub(now) + 3*time.Second
+	sleepDuration := prop.VotingEndTime.Sub(now) + extraWaitTime
 	log.Info().Msgf("sleeping %s until end of voting period + 1 block", sleepDuration)
 	time.Sleep(sleepDuration)
 
