@@ -6,6 +6,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+const (
+	gasMultiplier = 3 / 2
+)
+
 // BroadcastTx attempts to generate, sign and broadcast a transaction with the
 // given set of messages. It will also simulate gas requirements if necessary.
 // It will return an error upon failure.
@@ -25,7 +29,7 @@ func BroadcastTx(clientCtx client.Context, txf tx.Factory, msgs ...sdk.Msg) (*sd
 	}
 
 	// make sure gas in enough to execute the txs
-	txf = txf.WithGas(adjusted * 3 / 2)
+	txf = txf.WithGas(adjusted * gasMultiplier)
 
 	unsignedTx, err := txf.BuildUnsignedTx(msgs...)
 	if err != nil {
