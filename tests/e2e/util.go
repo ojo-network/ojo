@@ -7,6 +7,7 @@ import (
 	sdktx "github.com/cosmos/cosmos-sdk/types/tx"
 )
 
+// decodeTx decodes a transaction from its raw bytes.
 func decodeTx(txBytes []byte) (*sdktx.Tx, error) {
 	var raw sdktx.TxRaw
 
