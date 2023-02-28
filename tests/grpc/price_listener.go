@@ -5,6 +5,7 @@ import (
 
 	"github.com/ojo-network/ojo/client"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
+	"github.com/rs/zerolog/log"
 )
 
 // listenFofPrices listens for price updates at the correct blocks based
@@ -29,7 +30,7 @@ func listenForPrices(
 		height := <-chainHeight.HeightChanged
 		if isPeriodFirstBlock(height, params.HistoricStampPeriod) {
 			exchangeRates, err := ojoClient.QueryClient.QueryExchangeRates()
-			fmt.Printf("block %d stamp: %+v\n", height, exchangeRates)
+			log.Info().Msgf("block %d stamp: %+v", height, exchangeRates)
 			if err != nil {
 				return nil, err
 			}

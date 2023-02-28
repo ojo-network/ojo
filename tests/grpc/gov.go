@@ -7,6 +7,7 @@ import (
 
 	proposal "github.com/cosmos/cosmos-sdk/x/params/types/proposal"
 	"github.com/ojo-network/ojo/client"
+	"github.com/rs/zerolog/log"
 )
 
 // SubmitAndPassProposal submits a proposal and votes yes on it
@@ -48,7 +49,7 @@ func SubmitAndPassProposal(ojoClient *client.OjoClient, changes []proposal.Param
 
 	now := time.Now()
 	sleepDuration := prop.VotingEndTime.Sub(now) + 3*time.Second
-	fmt.Printf("sleeping %s until end of voting period + 1 block\n", sleepDuration)
+	log.Info().Msgf("sleeping %s until end of voting period + 1 block", sleepDuration)
 	time.Sleep(sleepDuration)
 
 	prop, err = ojoClient.QueryClient.QueryProposal(proposalIDInt)
