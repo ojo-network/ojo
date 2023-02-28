@@ -59,6 +59,14 @@ func TestIntegrationTestSuite(t *testing.T) {
 	suite.Run(t, new(IntegrationTestSuite))
 }
 
+// SetupSuite initializes and runs all the resources needed for the
+// e2e integration test suite
+// 1. creates a temporary directory for the chain data and initializes keys for all validators
+// 2. initializes the genesis files for all validators
+// 3. starts up each validator in its own docker container with the 3rd validator holding the majority of the stake
+// 4. initializes the ojo client used to send transactions and queries to the validators
+// 5. delegates voting power from the majority share validator to another one for the price feeder
+// 6. starts up the price feeder in its own docker container
 func (s *IntegrationTestSuite) SetupSuite() {
 	s.T().Log("setting up e2e integration test suite...")
 	appparams.SetAddressPrefixes()
