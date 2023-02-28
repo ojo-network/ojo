@@ -335,7 +335,7 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 				},
 			},
 			true,
-			"oracle parameter VoteThreshold must be between [0.33, 1.00]",
+			"threshold must be bigger than 0.330000000000000000 and <= 1",
 		},
 		{
 			"invalid slash window",
