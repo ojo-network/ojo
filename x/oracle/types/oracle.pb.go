@@ -122,6 +122,7 @@ func (m *Denom) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Denom proto.InternalMessageInfo
 
+// RewardBand - the object to hold the reward band configuration for a given denom.
 type RewardBand struct {
 	SymbolDenom string                                 `protobuf:"bytes,1,opt,name=symbol_denom,json=symbolDenom,proto3" json:"symbol_denom,omitempty" yaml:"symbol_denom"`
 	RewardBand  github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,2,opt,name=reward_band,json=rewardBand,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"reward_band" yaml:"reward_band"`

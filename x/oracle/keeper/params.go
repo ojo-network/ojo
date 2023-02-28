@@ -12,6 +12,11 @@ func (k Keeper) VotePeriod(ctx sdk.Context) (res uint64) {
 	return
 }
 
+// SetVotePeriod updates the number of blocks during which voting takes place.
+func (k Keeper) SetVotePeriod(ctx sdk.Context, votePeriod uint64) {
+	k.paramSpace.Set(ctx, types.KeyVotePeriod, votePeriod)
+}
+
 // VoteThreshold returns the minimum percentage of votes that must be received
 // for a ballot to pass.
 func (k Keeper) VoteThreshold(ctx sdk.Context) (res sdk.Dec) {
@@ -27,9 +32,15 @@ func (k Keeper) SetVoteThreshold(ctx sdk.Context, voteThreshold sdk.Dec) {
 
 // RewardBand returns the ratio of allowable exchange rate error that a validator
 // can be rewarded.
-func (k Keeper) RewardBand(ctx sdk.Context) (res sdk.Dec) {
+func (k Keeper) RewardBands(ctx sdk.Context) (res types.RewardBandList) {
 	k.paramSpace.Get(ctx, types.KeyRewardBands, &res)
 	return
+}
+
+// VoteThreshold updates the ratio of allowable exchange rate error that a validator
+// can be rewarded.
+func (k Keeper) SetRewardBand(ctx sdk.Context, rewardBands types.RewardBandList) {
+	k.paramSpace.Set(ctx, types.KeyRewardBands, rewardBands)
 }
 
 // RewardDistributionWindow returns the number of vote periods during which
@@ -37,6 +48,12 @@ func (k Keeper) RewardBand(ctx sdk.Context) (res sdk.Dec) {
 func (k Keeper) RewardDistributionWindow(ctx sdk.Context) (res uint64) {
 	k.paramSpace.Get(ctx, types.KeyRewardDistributionWindow, &res)
 	return
+}
+
+// SetRewardDistributionWindow updates the number of vote periods during which
+// seigniorage reward comes in and then is distributed.
+func (k Keeper) SetRewardDistributionWindow(ctx sdk.Context, rewardDistributionWindow uint64) {
+	k.paramSpace.Set(ctx, types.KeyRewardDistributionWindow, rewardDistributionWindow)
 }
 
 // AcceptList returns the denom list that can be activated
@@ -59,28 +76,41 @@ func (k Keeper) MandatoryList(ctx sdk.Context) (res types.DenomList) {
 
 // SetMandatoryList updates the mandatory list of assets supported by the x/oracle
 // module.
-func (k Keeper) SetMandatoryList(ctx sdk.Context,
-	mandatoryList types.DenomList,
-) {
+func (k Keeper) SetMandatoryList(ctx sdk.Context, mandatoryList types.DenomList) {
 	k.paramSpace.Set(ctx, types.KeyMandatoryList, mandatoryList)
 }
 
-// SlashFraction returns oracle voting penalty rate
+// SlashFraction returns the oracle voting penalty rate.
 func (k Keeper) SlashFraction(ctx sdk.Context) (res sdk.Dec) {
 	k.paramSpace.Get(ctx, types.KeySlashFraction, &res)
 	return
 }
 
-// SlashWindow returns the number of total blocks in a slash window
+// SetSlashFraction updates the oracle voting penalty rate.
+func (k Keeper) SetSlashFraction(ctx sdk.Context, slashFraction sdk.Dec) {
+	k.paramSpace.Set(ctx, types.KeySlashFraction, slashFraction)
+}
+
+// SlashWindow returns the number of total blocks in a slash window.
 func (k Keeper) SlashWindow(ctx sdk.Context) (res uint64) {
 	k.paramSpace.Get(ctx, types.KeySlashWindow, &res)
 	return
 }
 
-// MinValidPerWindow returns oracle slashing threshold
+// SetSlashWindow updates the number of total blocks in a slash window.
+func (k Keeper) SetSlashWindow(ctx sdk.Context, slashWindow uint64) {
+	k.paramSpace.Set(ctx, types.KeySlashWindow, slashWindow)
+}
+
+// MinValidPerWindow returns the oracle slashing threshold.
 func (k Keeper) MinValidPerWindow(ctx sdk.Context) (res sdk.Dec) {
 	k.paramSpace.Get(ctx, types.KeyMinValidPerWindow, &res)
 	return
+}
+
+// MinValidPerWindow updates the oracle slashing threshold.
+func (k Keeper) SetMinValidPerWindow(ctx sdk.Context, minValidPerWindow sdk.Dec) {
+	k.paramSpace.Set(ctx, types.KeyMinValidPerWindow, minValidPerWindow)
 }
 
 // GetParams returns the total set of oracle parameters.
