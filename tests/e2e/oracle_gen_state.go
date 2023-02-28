@@ -2,6 +2,7 @@ package e2e
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	appparams "github.com/ojo-network/ojo/app/params"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
 
@@ -34,3 +35,14 @@ var (
 		{SymbolDenom: "IST", RewardBand: sdk.MustNewDecFromStr("1.0")},
 	}
 )
+
+var (
+	minGasPrice            = appparams.ProtocolMinGasPrice.String()
+	majorityValidatorStake = initStakeAmount("100000000000")
+	minorityValidatorStake = initStakeAmount("500000000000")
+)
+
+func initStakeAmount(amount string) sdk.Coin {
+	stakeAmount, _ := sdk.NewIntFromString(amount)
+	return sdk.NewCoin(appparams.BondDenom, stakeAmount)
+}

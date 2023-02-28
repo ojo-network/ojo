@@ -43,15 +43,6 @@ const (
 	initBalanceStr = "510000000000" + appparams.BondDenom
 )
 
-var (
-	minGasPrice     = appparams.ProtocolMinGasPrice.String()
-	stakeAmount, _  = sdk.NewIntFromString("100000000000")
-	stakeAmountCoin = sdk.NewCoin(appparams.BondDenom, stakeAmount)
-
-	stakeAmount2, _  = sdk.NewIntFromString("500000000000")
-	stakeAmountCoin2 = sdk.NewCoin(appparams.BondDenom, stakeAmount2)
-)
-
 type IntegrationTestSuite struct {
 	suite.Suite
 
@@ -179,9 +170,9 @@ func (s *IntegrationTestSuite) initGenesis() {
 	for i, val := range s.chain.validators {
 		var createValmsg sdk.Msg
 		if i == 2 {
-			createValmsg, err = val.buildCreateValidatorMsg(stakeAmountCoin2)
+			createValmsg, err = val.buildCreateValidatorMsg(majorityValidatorStake)
 		} else {
-			createValmsg, err = val.buildCreateValidatorMsg(stakeAmountCoin)
+			createValmsg, err = val.buildCreateValidatorMsg(minorityValidatorStake)
 		}
 		s.Require().NoError(err)
 
