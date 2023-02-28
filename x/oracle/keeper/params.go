@@ -24,7 +24,7 @@ func (k Keeper) VoteThreshold(ctx sdk.Context) (res sdk.Dec) {
 	return
 }
 
-// VoteThreshold updates the minimum percentage of votes that must be received
+// SetVoteThreshold updates the minimum percentage of votes that must be received
 // for a ballot to pass.
 func (k Keeper) SetVoteThreshold(ctx sdk.Context, voteThreshold sdk.Dec) {
 	k.paramSpace.Set(ctx, types.KeyVoteThreshold, voteThreshold)

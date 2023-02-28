@@ -24,17 +24,36 @@ func TestValidateVotePeriod(t *testing.T) {
 }
 
 func TestValidateVoteThreshold(t *testing.T) {
-	err := validateVoteThreshold("invalidSdkType")
-	require.ErrorContains(t, err, "invalid parameter type: string")
+	tcs := []struct {
+		name   string
+		t      sdk.Dec
+		errMsg string
+	}{
+		{"fail: negative", sdk.MustNewDecFromStr("-1"), "threshold must be"},
+		{"fail: zero", sdk.ZeroDec(), "threshold must be"},
+		{"fail: less than 0.33", sdk.MustNewDecFromStr("0.3"), "threshold must be"},
+		{"fail: equal 0.33", sdk.MustNewDecFromStr("0.33"), "threshold must be"},
+		{"fail: more than 1", sdk.MustNewDecFromStr("1.1"), "threshold must be"},
+		{"fail: more than 1", sdk.MustNewDecFromStr("10"), "threshold must be"},
+		{"fail: max precision 2", sdk.MustNewDecFromStr("0.333"), "maximum 2 decimals"},
+		{"fail: max precision 2", sdk.MustNewDecFromStr("0.401"), "maximum 2 decimals"},
+		{"fail: max precision 2", sdk.MustNewDecFromStr("0.409"), "maximum 2 decimals"},
+		{"fail: max precision 2", sdk.MustNewDecFromStr("0.4009"), "maximum 2 decimals"},
+		{"fail: max precision 2", sdk.MustNewDecFromStr("0.999"), "maximum 2 decimals"},
 
-	err = validateVoteThreshold(sdk.MustNewDecFromStr("0.31"))
-	require.ErrorContains(t, err, "oracle parameter VoteThreshold must be between [0.33, 1.00]")
+		{"ok: 1", sdk.MustNewDecFromStr("1"), ""},
+		{"ok: 0.34", sdk.MustNewDecFromStr("0.34"), ""},
+		{"ok: 0.99", sdk.MustNewDecFromStr("0.99"), ""},
+	}
 
-	err = validateVoteThreshold(sdk.MustNewDecFromStr("40.0"))
-	require.ErrorContains(t, err, "oracle parameter VoteThreshold must be between [0.33, 1.00]")
-
-	err = validateVoteThreshold(sdk.MustNewDecFromStr("0.35"))
-	require.Nil(t, err)
+	for _, tc := range tcs {
+		err := validateVoteThreshold(tc.t)
+		if tc.errMsg == "" {
+			require.NoError(t, err, "test_case", tc.name)
+		} else {
+			require.ErrorContains(t, err, tc.errMsg, tc.name)
+		}
+	}
 }
 
 func TestValidateRewardBand(t *testing.T) {
