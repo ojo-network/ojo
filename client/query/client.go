@@ -15,24 +15,24 @@ const (
 )
 
 // QueryClient is an object that can be used to send queries to the Ojo node
-type QueryClient struct {
+type Client struct {
 	grpcEndpoint string
 	grpcConn     *grpc.ClientConn
 }
 
 // NewQueryClient returns a new instance of the QueryClient
-func NewQueryClient(grpcEndpoint string) (*QueryClient, error) {
-	qc := &QueryClient{grpcEndpoint: grpcEndpoint}
-	err := qc.dialGrpcConn()
+func NewClient(grpcEndpoint string) (*Client, error) {
+	c := &Client{grpcEndpoint: grpcEndpoint}
+	err := c.dialGrpcConn()
 	if err != nil {
 		return nil, err
 	}
-	return qc, nil
+	return c, nil
 }
 
-func (qc *QueryClient) dialGrpcConn() (err error) {
-	qc.grpcConn, err = grpc.Dial(
-		qc.grpcEndpoint,
+func (c *Client) dialGrpcConn() (err error) {
+	c.grpcConn, err = grpc.Dial(
+		c.grpcEndpoint,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithContextDialer(dialerFunc),
 	)

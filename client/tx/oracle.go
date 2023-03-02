@@ -7,10 +7,10 @@ import (
 
 // TxDelegateFeedConsent delegates the feed consent to the given feeder
 // from the OjoClient's validator
-func (tc *TxClient) TxDelegateFeedConsent(
+func (c *Client) TxDelegateFeedConsent(
 	feeder sdk.AccAddress,
 ) (*sdk.TxResponse, error) {
-	addr, err := tc.keyringRecord.GetAddress()
+	addr, err := c.keyringRecord.GetAddress()
 	if err != nil {
 		return nil, err
 	}
@@ -21,5 +21,5 @@ func (tc *TxClient) TxDelegateFeedConsent(
 		validator,
 		feeder,
 	)
-	return tc.BroadcastTx(msg)
+	return c.BroadcastTx(msg)
 }

@@ -11,8 +11,8 @@ import (
 // OjoClient is a helper for initializing a keychain, a cosmos-sdk client context,
 // and sending transactions/queries to a specific Ojo node
 type OjoClient struct {
-	QueryClient *query.QueryClient
-	TxClient    *tx.TxClient
+	QueryClient *query.Client
+	TxClient    *tx.Client
 }
 
 // NewOjoClient returns a new instance of the OjoClient with initialized
@@ -25,11 +25,11 @@ func NewOjoClient(
 	accountMnemonic string,
 ) (oc *OjoClient, err error) {
 	oc = &OjoClient{}
-	oc.QueryClient, err = query.NewQueryClient(grpcEndpoint)
+	oc.QueryClient, err = query.NewClient(grpcEndpoint)
 	if err != nil {
 		return nil, err
 	}
-	oc.TxClient, err = tx.NewTxClient(chainID, tmrpcEndpoint, accountName, accountMnemonic)
+	oc.TxClient, err = tx.NewClient(chainID, tmrpcEndpoint, accountName, accountMnemonic)
 	return oc, err
 }
 

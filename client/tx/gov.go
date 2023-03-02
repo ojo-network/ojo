@@ -7,8 +7,8 @@ import (
 )
 
 // TxVoteYes sends a transaction to vote yes on a proposal
-func (tc *TxClient) TxVoteYes(proposalID uint64) (*sdk.TxResponse, error) {
-	voter, err := tc.keyringRecord.GetAddress()
+func (c *Client) TxVoteYes(proposalID uint64) (*sdk.TxResponse, error) {
+	voter, err := c.keyringRecord.GetAddress()
 	if err != nil {
 		return nil, err
 	}
@@ -23,11 +23,11 @@ func (tc *TxClient) TxVoteYes(proposalID uint64) (*sdk.TxResponse, error) {
 		proposalID,
 		voteType,
 	)
-	return tc.BroadcastTx(msg)
+	return c.BroadcastTx(msg)
 }
 
 // TxSubmitProposal sends a transaction to submit a proposal
-func (tc *TxClient) TxSubmitProposal(
+func (c *Client) TxSubmitProposal(
 	changes []proposal.ParamChange,
 ) (*sdk.TxResponse, error) {
 
@@ -42,7 +42,7 @@ func (tc *TxClient) TxSubmitProposal(
 		return nil, err
 	}
 
-	fromAddr, err := tc.keyringRecord.GetAddress()
+	fromAddr, err := c.keyringRecord.GetAddress()
 	if err != nil {
 		return nil, err
 	}
@@ -52,5 +52,5 @@ func (tc *TxClient) TxSubmitProposal(
 		return nil, err
 	}
 
-	return tc.BroadcastTx(msg)
+	return c.BroadcastTx(msg)
 }
