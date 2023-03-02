@@ -205,7 +205,8 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 
 	// write the updated genesis file to each validator
 	for _, val := range o.chain.validators {
-		writeFile(filepath.Join(val.configDir(), "config", "genesis.json"), bz)
+		err := writeFile(filepath.Join(val.configDir(), "config", "genesis.json"), bz)
+		require.NoError(t, err)
 	}
 }
 
@@ -361,7 +362,7 @@ func (o *Orchestrator) runPriceFeeder(t *testing.T) {
 	endpoint := fmt.Sprintf("http://%s/api/v1/prices", o.priceFeederResource.GetHostPort(priceFeederServerPort))
 	require.Eventually(t,
 		func() bool {
-			resp, err := http.Get(endpoint)
+			resp, err := http.Get(endpoint) //nolint
 			if err != nil {
 				t.Log("Price feeder endpoint not available", err)
 				return false
