@@ -285,8 +285,8 @@ func (o *Orchestrator) runValidators(t *testing.T) {
 		t.Logf("started ojo validator container: %s", resource.Container.ID)
 	}
 
-	rpcUrl := fmt.Sprintf("tcp://localhost:%s", ojoTmrpcPort)
-	rpcClient, err := rpchttp.New(rpcUrl, "/websocket")
+	rpcURL := fmt.Sprintf("tcp://localhost:%s", ojoTmrpcPort)
+	rpcClient, err := rpchttp.New(rpcURL, "/websocket")
 	require.NoError(t, err)
 
 	require.Eventually(t,

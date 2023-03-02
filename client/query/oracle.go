@@ -38,11 +38,11 @@ func (c *Client) QueryExchangeRates() ([]sdk.DecCoin, error) {
 }
 
 // QueryMedians returns the medians from the oracle module
-func (qc *Client) QueryMedians() (sdk.DecCoins, error) {
+func (c *Client) QueryMedians() (sdk.DecCoins, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), queryTimeout)
 	defer cancel()
 
-	queryResponse, err := qc.OracleQueryClient().Medians(ctx, &oracletypes.QueryMedians{})
+	queryResponse, err := c.OracleQueryClient().Medians(ctx, &oracletypes.QueryMedians{})
 	if err != nil {
 		return nil, err
 	}
