@@ -1,4 +1,4 @@
-package e2e
+package orchestrator
 
 import (
 	"github.com/cosmos/go-bip39"
