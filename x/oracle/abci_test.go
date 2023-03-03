@@ -34,7 +34,7 @@ type IntegrationTestSuite struct {
 }
 
 const (
-	initialPower = int64(100)
+	initialPower = int64(1000)
 )
 
 func (s *IntegrationTestSuite) SetupTest() {
@@ -47,23 +47,32 @@ func (s *IntegrationTestSuite) SetupTest() {
 
 	oracle.InitGenesis(ctx, app.OracleKeeper, *types.DefaultGenesisState())
 
+	// validate setup... app.Setup creates one validator, with 1uumee self delegation
+	setupVals := app.StakingKeeper.GetBondedValidatorsByPower(ctx)
+	s.Require().Len(setupVals, 1)
+	s.Require().Equal(int64(1), setupVals[0].GetConsensusPower(app.StakingKeeper.PowerReduction(ctx)))
+
 	sh := teststaking.NewHelper(s.T(), ctx, *app.StakingKeeper)
 	sh.Denom = bondDenom
 
-	// mint and send coins to validator
-	require.NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
+	// mint and send coins to validators
+	require.NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins.MulInt(sdk.NewIntFromUint64(3))))
 	require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr1, initCoins))
-	require.NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
 	require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr2, initCoins))
+	require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr3, initCoins))
 
 	// mint and send coins to oracle module to fill up reward pool
 	require.NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
 	require.NoError(app.BankKeeper.SendCoinsFromModuleToModule(ctx, minttypes.ModuleName, types.ModuleName, initCoins))
 
-	sh.CreateValidatorWithValPower(valAddr1, valPubKey1, 70, true)
-	sh.CreateValidatorWithValPower(valAddr2, valPubKey2, 30, true)
+	// self delegate 999 in total ... 1 val with 1uumee is already created in app.Setup
+	sh.CreateValidatorWithValPower(valAddr1, valPubKey1, 599, true)
+	sh.CreateValidatorWithValPower(valAddr2, valPubKey2, 398, true)
+	sh.CreateValidatorWithValPower(valAddr3, valPubKey3, 2, true)
 
 	staking.EndBlocker(ctx, *app.StakingKeeper)
+
+	app.OracleKeeper.SetVoteThreshold(ctx, sdk.MustNewDecFromStr("0.4"))
 
 	s.app = app
 	s.ctx = ctx
@@ -71,7 +80,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 
 // Test addresses
 var (
-	valPubKeys = simapp.CreateTestPubKeys(2)
+	valPubKeys = simapp.CreateTestPubKeys(3)
 
 	valPubKey1 = valPubKeys[0]
 	pubKey1    = secp256k1.GenPrivKey().PubKey()
@@ -83,13 +92,30 @@ var (
 	addr2      = sdk.AccAddress(pubKey2.Address())
 	valAddr2   = sdk.ValAddress(pubKey2.Address())
 
+	valPubKey3 = valPubKeys[2]
+	pubKey3    = secp256k1.GenPrivKey().PubKey()
+	addr3      = sdk.AccAddress(pubKey3.Address())
+	valAddr3   = sdk.ValAddress(pubKey3.Address())
+
 	initTokens = sdk.TokensFromConsensusPower(initialPower, sdk.DefaultPowerReduction)
 	initCoins  = sdk.NewCoins(sdk.NewCoin(bondDenom, initTokens))
 )
 
+func createVotes(hash string, val sdk.ValAddress, rates sdk.DecCoins, blockHeight uint64) (types.AggregateExchangeRatePrevote, types.AggregateExchangeRateVote) {
+	preVote := types.AggregateExchangeRatePrevote{
+		Hash:        hash,
+		Voter:       val.String(),
+		SubmitBlock: uint64(blockHeight),
+	}
+	vote := types.AggregateExchangeRateVote{
+		ExchangeRates: rates,
+		Voter:         val.String(),
+	}
+	return preVote, vote
+}
+
 func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	app, ctx := s.app, s.ctx
-	originalBlockHeight := ctx.BlockHeight()
 	ctx = ctx.WithBlockHeight(1)
 	preVoteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx) / 2)
 	voteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx)/2 + 1)
@@ -97,10 +123,7 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	var (
 		val1DecCoins sdk.DecCoins
 		val2DecCoins sdk.DecCoins
-		val1PreVotes types.AggregateExchangeRatePrevote
-		val2PreVotes types.AggregateExchangeRatePrevote
-		val1Votes    types.AggregateExchangeRateVote
-		val2Votes    types.AggregateExchangeRateVote
+		val3DecCoins sdk.DecCoins
 	)
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		val1DecCoins = append(val1DecCoins, sdk.DecCoin{
@@ -111,50 +134,42 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 			Denom:  denom.SymbolDenom,
 			Amount: sdk.MustNewDecFromStr("0.5"),
 		})
+		val3DecCoins = append(val3DecCoins, sdk.DecCoin{
+			Denom:  denom.SymbolDenom,
+			Amount: sdk.MustNewDecFromStr("0.6"),
+		})
 	}
 
-	val1PreVotes = types.AggregateExchangeRatePrevote{
-		Hash:        "hash1",
-		Voter:       valAddr1.String(),
-		SubmitBlock: uint64(ctx.BlockHeight()),
-	}
-	val2PreVotes = types.AggregateExchangeRatePrevote{
-		Hash:        "hash2",
-		Voter:       valAddr2.String(),
-		SubmitBlock: uint64(ctx.BlockHeight()),
-	}
-
-	val1Votes = types.AggregateExchangeRateVote{
-		ExchangeRates: val1DecCoins,
-		Voter:         valAddr1.String(),
-	}
-	val2Votes = types.AggregateExchangeRateVote{
-		ExchangeRates: val2DecCoins,
-		Voter:         valAddr2.String(),
-	}
+	h := uint64(ctx.BlockHeight())
+	val1PreVotes, val1Votes := createVotes("hash1", valAddr1, val1DecCoins, h)
+	val2PreVotes, val2Votes := createVotes("hash2", valAddr2, val2DecCoins, h)
+	val3PreVotes, val3Votes := createVotes("hash3", valAddr3, val3DecCoins, h)
 
 	// total voting power per denom is 100%
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr1, val1PreVotes)
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
+	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr3, val3PreVotes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		rate, err := app.OracleKeeper.GetExchangeRate(ctx, denom.SymbolDenom)
 		s.Require().NoError(err)
-		s.Require().Equal(sdk.MustNewDecFromStr("0.75"), rate)
+		s.Require().Equal(sdk.MustNewDecFromStr("0.6"), rate)
 	}
 
-	// update prevotes' block
+	// Test: only val2 votes (has 39% vote power).
+	// Total voting power per denom must be bigger or equal than 40% (see SetupTest).
+	// So if only val2 votes, we won't have any prices next block.
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
-	val1PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
-	val2PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
+	h = uint64(ctx.BlockHeight())
+	val2PreVotes.SubmitBlock = h
 
-	// total voting power per denom is 30%
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
@@ -168,30 +183,41 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 		s.Require().Equal(sdk.ZeroDec(), rate)
 	}
 
-	// update prevotes' block
+	// Test: val2 and val3 votes.
+	// now we will have 40% of the power, so now we should have prices
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
-	val1PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
-	val2PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
+	h = uint64(ctx.BlockHeight())
+	val2PreVotes.SubmitBlock = h
+	val3PreVotes.SubmitBlock = h
 
-	// ojo has 100% power, and atom has 30%
-	val1DecCoins = sdk.DecCoins{
-		sdk.DecCoin{
-			Denom:  "ojo",
-			Amount: sdk.MustNewDecFromStr("1.0"),
-		},
+	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
+	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr3, val3PreVotes)
+	oracle.EndBlocker(ctx, app.OracleKeeper)
+
+	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
+	oracle.EndBlocker(ctx, app.OracleKeeper)
+
+	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
+		rate, err := app.OracleKeeper.GetExchangeRate(ctx, denom.SymbolDenom)
+		s.Require().NoError(err)
+		s.Require().Equal(sdk.MustNewDecFromStr("0.55"), rate)
 	}
-	val2DecCoins = sdk.DecCoins{
-		sdk.DecCoin{
-			Denom:  "ojo",
-			Amount: sdk.MustNewDecFromStr("0.5"),
-		},
-		sdk.DecCoin{
-			Denom:  "atom",
-			Amount: sdk.MustNewDecFromStr("0.5"),
-		},
+
+	// Test: val1 and val2 vote again
+	// umee has 69.9% power, and atom has 30%, so we should have price for umee, but not for atom
+	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
+	h = uint64(ctx.BlockHeight())
+	val1PreVotes.SubmitBlock = h
+	val2PreVotes.SubmitBlock = h
+
+	val1Votes.ExchangeRates = sdk.DecCoins{
+		sdk.NewDecCoinFromDec("ojo", sdk.MustNewDecFromStr("1.0")),
 	}
-	val1Votes.ExchangeRates = val1DecCoins
-	val2Votes.ExchangeRates = val2DecCoins
+	val2Votes.ExchangeRates = sdk.DecCoins{
+		sdk.NewDecCoinFromDec("atom", sdk.MustNewDecFromStr("0.5")),
+	}
 
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr1, val1PreVotes)
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
@@ -204,12 +230,10 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 
 	rate, err := app.OracleKeeper.GetExchangeRate(ctx, "ojo")
 	s.Require().NoError(err)
-	s.Require().Equal(sdk.MustNewDecFromStr("0.75"), rate)
+	s.Require().Equal(sdk.MustNewDecFromStr("1.0"), rate)
 	rate, err = app.OracleKeeper.GetExchangeRate(ctx, "atom")
 	s.Require().ErrorIs(err, types.ErrUnknownDenom.Wrap("atom"))
 	s.Require().Equal(sdk.ZeroDec(), rate)
-
-	ctx = ctx.WithBlockHeight(originalBlockHeight)
 }
 
 func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
@@ -235,114 +259,122 @@ func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 	var (
 		val1DecCoins sdk.DecCoins
 		val2DecCoins sdk.DecCoins
-		val1PreVotes types.AggregateExchangeRatePrevote
-		val2PreVotes types.AggregateExchangeRatePrevote
-		val1Votes    types.AggregateExchangeRateVote
-		val2Votes    types.AggregateExchangeRateVote
+		val3DecCoins sdk.DecCoins
 	)
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		val1DecCoins = append(val1DecCoins, sdk.DecCoin{
 			Denom:  denom.SymbolDenom,
-			Amount: sdk.MustNewDecFromStr("1.0"),
+			Amount: sdk.MustNewDecFromStr("0.6"),
 		})
 		val2DecCoins = append(val2DecCoins, sdk.DecCoin{
 			Denom:  denom.SymbolDenom,
-			Amount: sdk.MustNewDecFromStr("0.5"),
+			Amount: sdk.MustNewDecFromStr("0.6"),
+		})
+		val3DecCoins = append(val3DecCoins, sdk.DecCoin{
+			Denom:  denom.SymbolDenom,
+			Amount: sdk.MustNewDecFromStr("0.6"),
 		})
 	}
 
-	val1PreVotes = types.AggregateExchangeRatePrevote{
-		Hash:        "hash1",
-		Voter:       valAddr1.String(),
-		SubmitBlock: uint64(ctx.BlockHeight()),
-	}
-	val2PreVotes = types.AggregateExchangeRatePrevote{
-		Hash:        "hash2",
-		Voter:       valAddr2.String(),
-		SubmitBlock: uint64(ctx.BlockHeight()),
-	}
+	h := uint64(ctx.BlockHeight())
+	val1PreVotes, val1Votes := createVotes("hash1", valAddr1, val1DecCoins, h)
+	val2PreVotes, val2Votes := createVotes("hash2", valAddr2, val2DecCoins, h)
+	val3PreVotes, val3Votes := createVotes("hash3", valAddr3, val3DecCoins, h)
 
-	val1Votes = types.AggregateExchangeRateVote{
-		ExchangeRates: val1DecCoins,
-		Voter:         valAddr1.String(),
-	}
-	val2Votes = types.AggregateExchangeRateVote{
-		ExchangeRates: val2DecCoins,
-		Voter:         valAddr2.String(),
-	}
-
-	// validator 1 and 2 vote on both currencies so both have 0 misses
+	// validator 1, 2, and 3 vote on both currencies so all have 0 misses
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr1, val1PreVotes)
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
+	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr3, val3PreVotes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 31), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1).Rewards[0])
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 31), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr2).Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 237), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1).Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 237), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr2).Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 237), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr3).Rewards[0])
 
 	// update prevotes' block
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
 	val1PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
 	val2PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
+	val3PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
 
-	// validator 1 votes on both currencies to end up with 0 misses
+	// validator 1 and 3 votes on both currencies to end up with 0 misses
 	// validator 2 votes on 1 currency to end up with 1 misses
 	val1DecCoins = sdk.DecCoins{
 		sdk.DecCoin{
 			Denom:  "ojo",
-			Amount: sdk.MustNewDecFromStr("1.0"),
+			Amount: sdk.MustNewDecFromStr("0.6"),
 		},
 		sdk.DecCoin{
 			Denom:  "atom",
-			Amount: sdk.MustNewDecFromStr("0.5"),
+			Amount: sdk.MustNewDecFromStr("0.6"),
 		},
 	}
 	val2DecCoins = sdk.DecCoins{
 		sdk.DecCoin{
 			Denom:  "ojo",
-			Amount: sdk.MustNewDecFromStr("0.5"),
+			Amount: sdk.MustNewDecFromStr("0.6"),
+		},
+	}
+	val3DecCoins = sdk.DecCoins{
+		sdk.DecCoin{
+			Denom:  "ojo",
+			Amount: sdk.MustNewDecFromStr("0.6"),
+		},
+		sdk.DecCoin{
+			Denom:  "atom",
+			Amount: sdk.MustNewDecFromStr("0.6"),
 		},
 	}
 	val1Votes.ExchangeRates = val1DecCoins
 	val2Votes.ExchangeRates = val2DecCoins
+	val3Votes.ExchangeRates = val3DecCoins
 
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr1, val1PreVotes)
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
+	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr3, val3PreVotes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 62), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1).Rewards[0])
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 60), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr2).Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 474), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1).Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 459), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr2).Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 474), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr3).Rewards[0])
 
 	// update prevotes' block
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
 	val1PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
 	val2PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
 
-	// validator 1 and 2 miss both currencies so validator 1 has 2 misses and
+	// validator 1, 2, and 3 miss both currencies so validator 1 and 3 has 2 misses and
 	// validator 2 has 3 misses
 	val1Votes.ExchangeRates = sdk.DecCoins{}
 	val2Votes.ExchangeRates = sdk.DecCoins{}
+	val3Votes.ExchangeRates = sdk.DecCoins{}
 
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr1, val1PreVotes)
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
+	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr3, val3PreVotes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 93), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1).Rewards[0])
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 89), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr2).Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 711), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1).Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 681), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr2).Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 711), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr3).Rewards[0])
 
 	ctx = ctx.WithBlockHeight(originalBlockHeight)
 }
