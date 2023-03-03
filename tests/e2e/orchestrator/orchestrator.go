@@ -362,7 +362,7 @@ func (o *Orchestrator) runPriceFeeder(t *testing.T) {
 	endpoint := fmt.Sprintf("http://%s/api/v1/prices", o.priceFeederResource.GetHostPort(priceFeederServerPort))
 	require.Eventually(t,
 		func() bool {
-			resp, err := http.Get(endpoint) //nolint:gosec
+			resp, err := http.Get(endpoint)
 			if err != nil {
 				t.Log("Price feeder endpoint not available", err)
 				return false
