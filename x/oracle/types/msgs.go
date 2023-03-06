@@ -1,17 +1,21 @@
 package types
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/tendermint/tendermint/crypto/tmhash"
 
 	"github.com/ojo-network/ojo/util/checkers"
+	"gopkg.in/yaml.v3"
 )
 
 var (
 	_ sdk.Msg = &MsgDelegateFeedConsent{}
 	_ sdk.Msg = &MsgAggregateExchangeRatePrevote{}
 	_ sdk.Msg = &MsgAggregateExchangeRateVote{}
+	_ sdk.Msg = &MsgGovUpdateParams{}
 )
 
 func NewMsgAggregateExchangeRatePrevote(
@@ -164,6 +168,120 @@ func (msg MsgDelegateFeedConsent) ValidateBasic() error {
 	_, err = sdk.AccAddressFromBech32(msg.Delegate)
 	if err != nil {
 		return sdkerrors.ErrInvalidAddress.Wrapf("invalid delegate address (%s)", err)
+	}
+
+	return nil
+}
+
+// NewMsgUpdateParams will creates a new MsgUpdateParams instance
+func NewMsgUpdateParams(authority, title, description string, keys []string, changes Params) *MsgGovUpdateParams {
+	return &MsgGovUpdateParams{
+		Title:       title,
+		Description: description,
+		Authority:   authority,
+		Keys:        keys,
+		Changes:     changes,
+	}
+}
+
+// Type implements Msg interface
+func (msg MsgGovUpdateParams) Type() string { return sdk.MsgTypeURL(&msg) }
+
+// String implements the Stringer interface.
+func (msg MsgGovUpdateParams) String() string {
+	out, _ := yaml.Marshal(msg)
+	return string(out)
+}
+
+// GetSignBytes implements Msg
+func (msg MsgGovUpdateParams) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(&msg)
+	return sdk.MustSortJSON(bz)
+}
+
+// GetSigners implements Msg
+func (msg MsgGovUpdateParams) GetSigners() []sdk.AccAddress {
+	return checkers.Signers(msg.Authority)
+}
+
+// ValidateBasic implements Msg and validates params for each param key
+// specified in the proposal. If one param is invalid, the whole proposal
+// will fail to go through.
+func (msg MsgGovUpdateParams) ValidateBasic() error {
+	if err := checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority); err != nil {
+		return err
+	}
+
+	for _, key := range msg.Keys {
+		switch key {
+		case string(KeyVotePeriod):
+			if err := validateVotePeriod(msg.Changes.VotePeriod); err != nil {
+				return err
+			}
+
+		case string(KeyVoteThreshold):
+			if err := validateVoteThreshold(msg.Changes.VoteThreshold); err != nil {
+				return err
+			}
+
+		case string(KeyRewardBands):
+			if err := validateRewardBands(msg.Changes.RewardBands); err != nil {
+				return err
+			}
+
+		case string(KeyRewardDistributionWindow):
+			if err := validateRewardDistributionWindow(msg.Changes.RewardDistributionWindow); err != nil {
+				return err
+			}
+
+		case string(KeyAcceptList):
+			if err := validateDenomList(msg.Changes.AcceptList); err != nil {
+				return err
+			}
+
+		case string(KeyMandatoryList):
+			if err := validateDenomList(msg.Changes.MandatoryList); err != nil {
+				return err
+			}
+
+		case string(KeySlashFraction):
+			if err := validateSlashFraction(msg.Changes.SlashFraction); err != nil {
+				return err
+			}
+
+		case string(KeySlashWindow):
+			if err := validateSlashWindow(msg.Changes.SlashWindow); err != nil {
+				return err
+			}
+
+		case string(KeyMinValidPerWindow):
+			if err := validateMinValidPerWindow(msg.Changes.MinValidPerWindow); err != nil {
+				return err
+			}
+
+		case string(KeyHistoricStampPeriod):
+			if err := validateHistoricStampPeriod(msg.Changes.HistoricStampPeriod); err != nil {
+				return err
+			}
+
+		case string(KeyMedianStampPeriod):
+			if err := validateMedianStampPeriod(msg.Changes.MedianStampPeriod); err != nil {
+				return err
+			}
+
+		case string(KeyMaximumPriceStamps):
+			if err := validateMaximumPriceStamps(msg.Changes.MaximumPriceStamps); err != nil {
+				return err
+			}
+
+		case string(KeyMaximumMedianStamps):
+			if err := validateMaximumMedianStamps(msg.Changes.MaximumMedianStamps); err != nil {
+				return err
+			}
+
+		default:
+			return fmt.Errorf("%s is not an existing oracle param key", key)
+		}
 	}
 
 	return nil
