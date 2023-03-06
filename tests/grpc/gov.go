@@ -1,0 +1,91 @@
+package grpc
+
+import (
+	"fmt"
+	"strconv"
+	"time"
+
+	proposal "github.com/cosmos/cosmos-sdk/x/params/types/proposal"
+	"github.com/ojo-network/ojo/client"
+	"github.com/rs/zerolog/log"
+)
+
+const extraWaitTime = 3 * time.Second // at least one full block
+
+// SubmitAndPassProposal submits a proposal and votes yes on it
+func SubmitAndPassProposal(ojoClient *client.OjoClient, changes []proposal.ParamChange) error {
+	resp, err := ojoClient.TxClient.TxSubmitProposal(changes)
+	if err != nil {
+		return err
+	}
+
+	var proposalID string
+	for _, event := range resp.Logs[0].Events {
+		if event.Type == "submit_proposal" {
+			for _, attribute := range event.Attributes {
+				if attribute.Key == "proposal_id" {
+					proposalID = attribute.Value
+				}
+			}
+		}
+	}
+
+	if proposalID == "" {
+		return fmt.Errorf("failed to parse proposalID from %s", resp)
+	}
+
+	proposalIDInt, err := strconv.ParseUint(proposalID, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	_, err = ojoClient.TxClient.TxVoteYes(proposalIDInt)
+	if err != nil {
+		return err
+	}
+
+	prop, err := ojoClient.QueryClient.QueryProposal(proposalIDInt)
+	if err != nil {
+		return err
+	}
+
+	now := time.Now()
+	sleepDuration := prop.VotingEndTime.Sub(now) + extraWaitTime
+	log.Info().Msgf("sleeping %s until end of voting period + 1 block", sleepDuration)
+	time.Sleep(sleepDuration)
+
+	prop, err = ojoClient.QueryClient.QueryProposal(proposalIDInt)
+	if err != nil {
+		return err
+	}
+
+	propStatus := prop.Status.String()
+	if propStatus != "PROPOSAL_STATUS_PASSED" {
+		return fmt.Errorf("proposal %d failed to pass with status: %s", proposalIDInt, propStatus)
+	}
+	return nil
+}
+
+func OracleParamChanges(
+	historicStampPeriod uint64,
+	maximumPriceStamps uint64,
+	medianStampPeriod uint64,
+) []proposal.ParamChange {
+	return []proposal.ParamChange{
+		{
+			Subspace: "oracle",
+			Key:      "HistoricStampPeriod",
+			Value:    fmt.Sprintf("\"%d\"", historicStampPeriod),
+		},
+		{
+			Subspace: "oracle",
+			Key:      "MaximumPriceStamps",
+			Value:    fmt.Sprintf("\"%d\"", maximumPriceStamps),
+		},
+		{
+			Subspace: "oracle",
+			Key:      "MedianStampPeriod",
+			Value:    fmt.Sprintf("\"%d\"", medianStampPeriod),
+		},
+	}
+}

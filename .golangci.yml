@@ -48,6 +48,9 @@ linters:
 
 issues:
   exclude-rules:
+    - path: tests/*
+      linters:
+        - gosec
     - path: _test\.go
       linters:
         - gosec
