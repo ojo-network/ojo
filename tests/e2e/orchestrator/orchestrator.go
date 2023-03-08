@@ -149,6 +149,7 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 	oracleGenState.Params.MedianStampPeriod = 20
 	oracleGenState.Params.MaximumMedianStamps = 2
 	oracleGenState.Params.AcceptList = oracleAcceptList
+	oracleGenState.Params.MandatoryList = oracleMandatoryList
 	oracleGenState.Params.RewardBands = oracleRewardBands
 
 	bz, err := cdc.MarshalJSON(&oracleGenState)
