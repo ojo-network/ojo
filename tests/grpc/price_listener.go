@@ -52,7 +52,7 @@ func listenForPrices(
 
 	// Saves the last median for each denom
 	for _, median := range medians {
-		priceStore.medians[median.Denom] = median.Amount
+		priceStore.medians[median.ExchangeRate.Denom] = median.ExchangeRate.Amount
 	}
 
 	medianDeviations, err := ojoClient.QueryClient.QueryMedianDeviations()
@@ -62,7 +62,7 @@ func listenForPrices(
 
 	// Saves the last median deviation for each denom
 	for _, medianDeviation := range medianDeviations {
-		priceStore.medianDeviations[medianDeviation.Denom] = medianDeviation.Amount
+		priceStore.medianDeviations[medianDeviation.ExchangeRate.Denom] = medianDeviation.ExchangeRate.Amount
 	}
 
 	return priceStore, nil
