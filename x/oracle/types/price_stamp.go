@@ -59,3 +59,18 @@ func (p *PriceStamps) Sort() *PriceStamps {
 	)
 	return &priceStamps
 }
+
+func (p *PriceStamps) NewestPrices() *PriceStamps {
+	blockNum := p.NewestBlockNum()
+	return p.FilterByBlock(blockNum)
+}
+
+func (p *PriceStamps) NewestBlockNum() uint64 {
+	blockNum := uint64(0)
+	for _, price := range *p {
+		if price.BlockNum > blockNum {
+			blockNum = price.BlockNum
+		}
+	}
+	return blockNum
+}
