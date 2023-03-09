@@ -22,6 +22,10 @@ We also need to ensure that we're able to create vesting accounts for the initia
 - `ClaimAirdrop(fromAddress, toAddress)` - Allows an airdrop recipient to claim the 2nd portion of the airdrop specified in the `CreateAirdropAccount` message.
   - This transaction will create a new Delayed Vesting Account at `toAddress` with the amount of tokens in `tokensToReceive`. This account will vest as long as `vestingLength` above. This transaction fails if `amountExpectedToDelegate` is not met from the `fromAddress` account. Emits an event once the airdrop has been claimed.
 
+### Parameters
+
+- `ExpiryBlock` - The block at which all unclaimed AirdropAccounts will instead mint tokens into the community pool. After this block, all unclaimed airdrop accounts will no longer be able to be claimed.
+
 ### Proposed API
 
 - `QueryAirdropAccount` - Returns an existing airdrop account, along with whether or not it has already been claimed.
@@ -44,6 +48,7 @@ We want to make sure users are unable to:
 * Keep other users from blocking their ability to claim their airdrop.
 * Authorize an airdrop claim for an account other than their own.
 * Create airdrop accounts after genesis.
+* Claim airdrops that have expired.
 
 > Will these changes require a breaking (major) release?
 
