@@ -19,7 +19,8 @@ We also need to ensure that we're able to create vesting accounts for the initia
 ### Msgs
 
 - `CreateAirdropAccount(address, tokensToReceive, amountExpectedToDelegate, vestingLength)` - Create an airdrop account which will unlock into a vesting account, if all the tokens in amountExpectedToDelegate are delegated. This transaction can only occur at genesis.
-- `ClaimAirdrop(fromAddress, toAddress)` - Allows an airdrop recipient to claim the 2nd portion of the airdrop specified in the `CreateAirdropAccount` message. This transaction will create a new Delayed Vesting Account at `toAddress` with the amount of tokens in `tokensToReceive`. This account will vest as long as `vestingLength` above. This transaction fails if `amountExpectedToDelegate` is not met from the `fromAddress` account. Emits an event once the airdrop has been claimed.
+- `ClaimAirdrop(fromAddress, toAddress)` - Allows an airdrop recipient to claim the 2nd portion of the airdrop specified in the `CreateAirdropAccount` message.
+  - This transaction will create a new Delayed Vesting Account at `toAddress` with the amount of tokens in `tokensToReceive`. This account will vest as long as `vestingLength` above. This transaction fails if `amountExpectedToDelegate` is not met from the `fromAddress` account. Emits an event once the airdrop has been claimed.
 
 ### Proposed API
 
