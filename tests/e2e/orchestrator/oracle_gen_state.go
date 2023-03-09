@@ -21,6 +21,10 @@ var (
 		{BaseDenom: "ibc/10", SymbolDenom: "IST", Exponent: 6},
 	}
 
+	oracleMandatoryList = []oracletypes.Denom{
+		{BaseDenom: "ibc/1", SymbolDenom: "ATOM", Exponent: 6},
+	}
+
 	oracleRewardBands = []oracletypes.RewardBand{
 		{SymbolDenom: "UMEE", RewardBand: sdk.MustNewDecFromStr("1.0")},
 		{SymbolDenom: "ATOM", RewardBand: sdk.MustNewDecFromStr("1.0")},
@@ -38,8 +42,8 @@ var (
 
 var (
 	minGasPrice            = appparams.ProtocolMinGasPrice.String()
-	majorityValidatorStake = initStakeAmount("100000000000")
-	minorityValidatorStake = initStakeAmount("500000000000")
+	minorityValidatorStake = initStakeAmount("100000000000")
+	majorityValidatorStake = initStakeAmount("500000000000")
 )
 
 func initStakeAmount(amount string) sdk.Coin {
