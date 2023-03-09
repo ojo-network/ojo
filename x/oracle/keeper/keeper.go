@@ -11,6 +11,7 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/tendermint/tendermint/libs/log"
 
+	"github.com/ojo-network/ojo/util/metrics"
 	"github.com/ojo-network/ojo/x/oracle/types"
 )
 
@@ -121,6 +122,7 @@ func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, exchangeRate sdk.
 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: exchangeRate})
 	denom = strings.ToUpper(denom)
 	store.Set(types.GetExchangeRateKey(denom), bz)
+	go metrics.RecordExchangeRate(denom, exchangeRate)
 }
 
 // SetExchangeRateWithEvent sets an consensus
