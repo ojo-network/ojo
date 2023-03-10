@@ -150,21 +150,25 @@ func Tally(
 	rewardSpread = sdk.MaxDec(rewardSpread, standardDeviation)
 
 	for _, tallyVote := range ballot {
-		// Filter ballot winners. For voters, we filter out the tally vote iff:
-		// (median - rewardSpread) <= ExchangeRate <= (median + rewardSpread)
-		if (tallyVote.ExchangeRate.GTE(median.Sub(rewardSpread)) &&
-			tallyVote.ExchangeRate.LTE(median.Add(rewardSpread))) ||
-			!tallyVote.ExchangeRate.IsPositive() {
-
-			key := tallyVote.Voter.String()
-			claim := validatorClaimMap[key]
-
-			if incrementWin {
-				claim.MandatoryWinCount++
-			}
-
-			validatorClaimMap[key] = claim
+		// Filter ballot winners. For voters, we filter out the tally vote if:
+		// (median - rewardSpread) < ExchangeRate < (median + rewardSpread)
+		if tallyVote.ExchangeRate.LTE(median.Sub(rewardSpread)) {
+			// miss counter below threshold
+			continue
 		}
+		if tallyVote.ExchangeRate.GTE(median.Add(rewardSpread)) {
+			// miss counter above threshold
+			continue
+		}
+
+		key := tallyVote.Voter.String()
+		claim := validatorClaimMap[key]
+
+		if incrementWin {
+			claim.MandatoryWinCount++
+		}
+
+		validatorClaimMap[key] = claim
 	}
 
 	return median, nil
