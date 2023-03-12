@@ -160,6 +160,7 @@ func Tally(
 			// miss counter above threshold
 			continue
 		}
+		// Problem: this does not work together with no vote
 
 		key := tallyVote.Voter.String()
 		claim := validatorClaimMap[key]
