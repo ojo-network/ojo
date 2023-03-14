@@ -1,5 +1,8 @@
 # Design Doc 002: Airdrop Module
 
+## Changelog
+
+- Mar 14, 2023: Initial feature description (@adamewozniak)
 ## Status
 
 Draft
