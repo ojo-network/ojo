@@ -18,17 +18,20 @@ We also need to ensure that we're able to create vesting accounts for the initia
 
 ### Msgs
 
-- `CreateAirdropAccount(address, tokensToReceive, amountExpectedToDelegate, vestingLength)` - Create an airdrop account which will unlock into a vesting account, if all the tokens in amountExpectedToDelegate are delegated. This transaction can only occur at genesis.
-- `ClaimAirdrop(fromAddress, toAddress)` - Allows an airdrop recipient to claim the 2nd portion of the airdrop specified in the `CreateAirdropAccount` message.
-  - This transaction will create a new Delayed Vesting Account at `toAddress` with the amount of tokens in `tokensToReceive`. This account will vest as long as `vestingLength` above. This transaction fails if `amountExpectedToDelegate` is not met from the `fromAddress` account. Emits an event once the airdrop has been claimed.
+- `CreateAirdropAccount(address, tokensToReceive, vestingLength)` - Create a linearly vesting account with `tokensToReceive` in it, as well as an airdrop account with these records. If the amount of `tokensToReceive * DelegationFactor` are staked, the additional tokens can be claimed into a second vesting account. This transaction can only occur at genesis.
 
-### Parameters
+- `ClaimAirdrop(fromAddress, toAddress)` - Allows an airdrop recipient to claim the 2nd portion of the airdrop specified in the `CreateAirdropAccount` message.
+  - This transaction will create a new Delayed Vesting Account at `toAddress` with the amount of tokens determined by `tokensToReceive * AirdropFactor`. This account will vest as long as `vestingLength` above. This transaction fails if the amount of tokens staked by the `fromAddress` account is less than `tokensToReceive * DelegationFactor`. Emits an event once the airdrop has been claimed.
+
+### Constants
 
 - `ExpiryBlock` - The block at which all unclaimed AirdropAccounts will instead mint tokens into the community pool. After this block, all unclaimed airdrop accounts will no longer be able to be claimed.
+- `DelegationFactor` - The percentage of the initial airdrop that users must delegate in order to receive their second portion. E.g., if we want to require users to stake their entire initial airdrop to receive a second portion, this will be `1`.
+- `AidropFactor` - The multiplier for the amount of tokens users will receive once they claim their airdrop. E.g., if we want to require users to stake half of their airdrop to receive a second equal half, this will be `2`.
 
 ### Proposed API
 
-- `QueryAirdropAccount` - Returns an existing airdrop account, along with whether or not it has already been claimed.
+- `QueryAirdropAccount` - Returns an existing airdrop account, along with whether or not the user is eligible to claim, and whether or not the airdrop has been claimed. If the airdrop has been claimed, the account to which the tokens were sent should be returned as well.
 
 ### Outcomes
 
