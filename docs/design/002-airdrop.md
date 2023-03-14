@@ -18,7 +18,7 @@ We also need to ensure that we're able to create vesting accounts for the initia
 
 ### Msgs
 
-- `CreateAirdropAccount(address, tokensToReceive, vestingLength)` - Create a linearly vesting account with `tokensToReceive` in it, as well as an airdrop account with these records. If the amount of `tokensToReceive * DelegationFactor` are staked, the additional tokens can be claimed into a second vesting account. This transaction can only occur at genesis.
+- `CreateAirdropAccount(address, tokensToReceive, vestingLength)` - Create a linearly vesting account with `tokensToReceive` in it, as well as an airdrop account with these records. If the amount of `tokensToReceive * DelegationRequirement` are staked, the additional tokens can be claimed into a second vesting account. This transaction can only occur at genesis.
 
 - `ClaimAirdrop(fromAddress, toAddress)` - Allows an airdrop recipient to claim the 2nd portion of the airdrop specified in the `CreateAirdropAccount` message.
   - This transaction will create a new Delayed Vesting Account at `toAddress` with the amount of tokens determined by `tokensToReceive * AirdropFactor`. This account will vest as long as `vestingLength` above. This transaction fails if the amount of tokens staked by the `fromAddress` account is less than `tokensToReceive * DelegationRequirement`. Emits an event once the airdrop has been claimed.
