@@ -52,15 +52,7 @@ func (s *IntegrationTestSuite) TestUpdateVotingPeriod() {
 
 	s.Require().Equal(&oldDuration, params.VotingPeriod)
 
-	s.orchestrator.ExecCommand([]string{
-		"ojod", "tx", "gov", "submit-proposal",
-		"/root/proposals/voting_period.json",
-		"--from", "val",
-		"--keyring-backend", "test",
-		"--chain-id", s.orchestrator.ChainID(),
-		"--gas", "auto",
-		"-b", "block",
-	})
+	s.orchestrator.SubmitProposal("/root/proposals/voting_period.json")
 
 	params, err = s.orchestrator.OjoClient.QueryClient.QueryVotingParams()
 	s.Require().NoError(err)
@@ -68,4 +60,8 @@ func (s *IntegrationTestSuite) TestUpdateVotingPeriod() {
 	s.Require().Equal(&newDuration, params.VotingPeriod)
 
 	s.Require().NoError(err)
+}
+
+func (s *IntegrationTestSuite) TestLegacyProposal() {
+	s.orchestrator.SubmitLegacyParamChangeProposal("/root/proposals/max_vals.json")
 }

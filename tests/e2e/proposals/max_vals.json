@@ -5,7 +5,7 @@
     {
       "subspace": "staking",
       "key": "MaxValidators",
-      "value": "200"
+      "value": 200
     }
   ],
   "deposit": "10000000uojo"

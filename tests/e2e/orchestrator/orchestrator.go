@@ -105,8 +105,28 @@ func (o *Orchestrator) TearDownResources(t *testing.T) {
 	}
 }
 
-func (o *Orchestrator) ChainID() string {
-	return o.chain.id
+func (o *Orchestrator) SubmitProposal(filePath string) {
+	o.ExecCommand([]string{
+		"ojod", "tx", "gov", "submit-proposal",
+		filePath,
+		"--from", "val",
+		"--keyring-backend", "test",
+		"--chain-id", o.chain.id,
+		"--gas", "auto",
+		"-b", "block",
+	})
+}
+
+func (o *Orchestrator) SubmitLegacyParamChangeProposal(filePath string) {
+	o.ExecCommand([]string{
+		"ojod", "tx", "gov", "submit-legacy-proposal", "param-change",
+		filePath,
+		"--from", "val",
+		"--keyring-backend", "test",
+		"--chain-id", o.chain.id,
+		"--gas", "auto",
+		"-b", "block",
+	})
 }
 
 func (o *Orchestrator) initNodes(t *testing.T) {
