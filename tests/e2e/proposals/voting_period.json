@@ -7,8 +7,8 @@
       "changes": [
         {
           "subspace": "gov",
-          "key": "VotingParams.VotingPeriod",
-          "value": "10s"
+          "key": "voting_params",
+          "value": "{\"voting_period\":\"10s\"}"
         }
       ]
     }

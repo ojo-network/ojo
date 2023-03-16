@@ -52,7 +52,8 @@ func (s *IntegrationTestSuite) TestUpdateVotingPeriod() {
 
 	s.Require().Equal(&oldDuration, params.VotingPeriod)
 
-	s.orchestrator.SubmitProposal("/root/proposals/voting_period.json")
+	// s.orchestrator.SubmitProposal("/root/proposals/voting_period.json")
+	s.orchestrator.SubmitLegacyParamChangeProposal("/root/proposals/voting_period_legacy.json")
 
 	params, err = s.orchestrator.OjoClient.QueryClient.QueryVotingParams()
 	s.Require().NoError(err)

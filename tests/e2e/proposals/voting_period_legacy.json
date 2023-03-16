@@ -1,0 +1,12 @@
+{
+  "title": "Increase maximum validator size from 100 to 200",
+  "description": "If successful, this proposal will increase maximum validator size from 100 to 200",
+  "changes": [
+    {
+      "subspace": "gov",
+      "key": "VotingParams",
+      "value": "{\"voting_period\":\"10s\"}"
+    }
+  ],
+  "deposit": "10000000uojo"
+}
