@@ -1,0 +1,19 @@
+{
+  "title": "Update Voting Period",
+  "description": "Update the voting period",
+  "changes": [
+    {
+      "subspace": "gov",
+      "key": "VotingParams",
+      "value": {
+        "voting_period": "10s"
+      }
+    }
+  ],
+  "deposit": [
+    {
+      "denom": "uojo",
+      "amount": "10000000"
+    }
+  ]
+}

@@ -355,6 +355,7 @@ func (o *Orchestrator) runPriceFeeder(t *testing.T) {
 				fmt.Sprintf("RPC_GRPC_ENDPOINT=%s", grpcEndpoint),
 				fmt.Sprintf("RPC_TMRPC_ENDPOINT=%s", tmrpcEndpoint),
 			},
+			Cmd: []string{"--skip-provider-check"},
 		},
 		noRestart,
 	)

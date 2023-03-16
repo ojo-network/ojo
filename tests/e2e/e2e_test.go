@@ -1,6 +1,8 @@
 package e2e
 
 import (
+	"time"
+
 	"github.com/ojo-network/ojo/tests/grpc"
 )
 
@@ -35,6 +37,27 @@ func (s *IntegrationTestSuite) TestUpdateOracleParams() {
 	s.Require().Equal(uint64(10), params.HistoricStampPeriod)
 	s.Require().Equal(uint64(2), params.MaximumPriceStamps)
 	s.Require().Equal(uint64(20), params.MedianStampPeriod)
+
+	s.Require().NoError(err)
+}
+
+// TestUpdateVotingPeriod updates the voting period with a gov prop
+// and then verifies the new voting period is returned by the params query.
+func (s *IntegrationTestSuite) TestUpdateVotingPeriod() {
+	oldDuration := 5 * time.Second
+	newDuration := 10 * time.Second
+
+	params, err := s.orchestrator.OjoClient.QueryClient.QueryVotingParams()
+	s.Require().NoError(err)
+
+	s.Require().Equal(&oldDuration, params.VotingPeriod)
+
+	// use the CLI to pass the gov prop
+
+	params, err = s.orchestrator.OjoClient.QueryClient.QueryVotingParams()
+	s.Require().NoError(err)
+
+	s.Require().Equal(&newDuration, params.VotingPeriod)
 
 	s.Require().NoError(err)
 }

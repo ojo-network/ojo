@@ -24,3 +24,14 @@ func (c *Client) QueryProposal(proposalID uint64) (*govtypes.Proposal, error) {
 	}
 	return queryResponse.Proposal, nil
 }
+
+func (c *Client) QueryVotingParams() (*govtypes.VotingParams, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), queryTimeout)
+	defer cancel()
+
+	queryResponse, err := c.GovQueryClient().Params(ctx, &govtypes.QueryParamsRequest{ParamsType: govtypes.ParamVoting})
+	if err != nil {
+		return nil, err
+	}
+	return queryResponse.VotingParams, nil
+}

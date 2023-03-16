@@ -1,0 +1,17 @@
+{
+  "title": "Increase maximum validator size from 100 to 200",
+  "description": "If successful, this proposal will increase maximum validator size from 100 to 200",
+  "changes": [
+    {
+      "subspace": "staking",
+      "key": "MaxValidators",
+      "value": "200"
+    }
+  ],
+  "deposit": [
+    {
+      "denom": "uojo",
+      "amount": "10000000"
+    }
+  ]
+}
