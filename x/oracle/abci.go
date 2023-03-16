@@ -13,6 +13,7 @@ import (
 // EndBlocker is called at the end of every block
 func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 	defer telemetry.ModuleMeasureSince(types.ModuleName, time.Now(), telemetry.MetricKeyEndBlocker)
+	missCounterLogs := types.MissCounterLogs{}
 
 	params := k.GetParams(ctx)
 	if k.IsPeriodLastBlock(ctx, params.VotePeriod) {
