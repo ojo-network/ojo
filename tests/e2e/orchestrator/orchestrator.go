@@ -51,8 +51,8 @@ type Orchestrator struct {
 	dkrPool             *dockertest.Pool
 	dkrNet              *dockertest.Network
 	priceFeederResource *dockertest.Resource
-	valResources        []*dockertest.Resource
-	OjoClient           *client.OjoClient
+	//valResources        []*dockertest.Resource
+	OjoClient *client.OjoClient
 }
 
 // SetupSuite initializes and runs all the resources needed for the
@@ -93,8 +93,8 @@ func (o *Orchestrator) TearDownResources(t *testing.T) {
 
 	require.NoError(t, o.dkrPool.Purge(o.priceFeederResource))
 
-	for _, vc := range o.valResources {
-		require.NoError(t, o.dkrPool.Purge(vc))
+	for _, val := range o.chain.validators {
+		require.NoError(t, o.dkrPool.Purge(val.dockerResource))
 	}
 
 	require.NoError(t, o.dkrPool.RemoveNetwork(o.dkrNet))
@@ -259,8 +259,8 @@ func (o *Orchestrator) initValidatorConfigs(t *testing.T) {
 func (o *Orchestrator) runValidators(t *testing.T) {
 	t.Log("starting ojo validator containers...")
 
-	o.valResources = make([]*dockertest.Resource, len(o.chain.validators))
-	for i, val := range o.chain.validators {
+	// o.valResources = make([]*dockertest.Resource, len(o.chain.validators))
+	for _, val := range o.chain.validators {
 		runOpts := &dockertest.RunOptions{
 			Name:      val.instanceName(),
 			NetworkID: o.dkrNet.Network.ID,
@@ -283,7 +283,7 @@ func (o *Orchestrator) runValidators(t *testing.T) {
 		resource, err := o.dkrPool.RunWithOptions(runOpts, noRestart)
 		require.NoError(t, err)
 
-		o.valResources[i] = resource
+		val.dockerResource = resource
 		t.Logf("started ojo validator container: %s", resource.Container.ID)
 	}
 
