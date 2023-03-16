@@ -8,10 +8,5 @@
       "value": "200"
     }
   ],
-  "deposit": [
-    {
-      "denom": "uojo",
-      "amount": "10000000"
-    }
-  ]
+  "deposit": "10000000uojo"
 }

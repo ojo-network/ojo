@@ -52,7 +52,15 @@ func (s *IntegrationTestSuite) TestUpdateVotingPeriod() {
 
 	s.Require().Equal(&oldDuration, params.VotingPeriod)
 
-	// use the CLI to pass the gov prop
+	s.orchestrator.ExecCommand([]string{
+		"ojod", "tx", "gov", "submit-proposal",
+		"/root/proposals/voting_period.json",
+		"--from", "val",
+		"--keyring-backend", "test",
+		"--chain-id", s.orchestrator.ChainID(),
+		"--gas", "auto",
+		"-b", "block",
+	})
 
 	params, err = s.orchestrator.OjoClient.QueryClient.QueryVotingParams()
 	s.Require().NoError(err)

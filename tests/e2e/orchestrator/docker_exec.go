@@ -6,19 +6,20 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
 )
 
-func execCommand(dkrPool *dockertest.Pool, val *validator, cmd []string) error {
+func (o *Orchestrator) ExecCommand(cmd []string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
-	exec, err := dkrPool.Client.CreateExec(docker.CreateExecOptions{
+	validator := o.chain.validators[0]
+
+	exec, err := o.dkrPool.Client.CreateExec(docker.CreateExecOptions{
 		Context:      ctx,
 		AttachStdout: true,
 		AttachStderr: true,
-		Container:    val.dockerResource.Container.ID,
+		Container:    validator.dockerResource.Container.ID,
 		User:         "root",
 		Cmd:          cmd,
 	})
@@ -31,7 +32,7 @@ func execCommand(dkrPool *dockertest.Pool, val *validator, cmd []string) error {
 		errBuf bytes.Buffer
 	)
 
-	err = dkrPool.Client.StartExec(exec.ID, docker.StartExecOptions{
+	err = o.dkrPool.Client.StartExec(exec.ID, docker.StartExecOptions{
 		Context:      ctx,
 		Detach:       false,
 		OutputStream: &outBuf,

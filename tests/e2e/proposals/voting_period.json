@@ -1,16 +1,19 @@
 {
-  "title": "Update Voting Period",
-  "description": "Update the voting period",
-  "changes": [
+  "messages": [
     {
-      "subspace": "gov",
-      "key": "VotingParams",
-      "value": {
-        "voting_period": "10s"
-      }
+      "@type": "/cosmos.params.v1beta1.ParameterChangeProposal",
+      "title": "Update Voting Period",
+      "description": "Update the voting period",
+      "changes": [
+        {
+          "subspace": "gov",
+          "key": "VotingParams.VotingPeriod",
+          "value": "10s"
+        }
+      ]
     }
   ],
-  "deposit": [
+  "initial_deposit": [
     {
       "denom": "uojo",
       "amount": "10000000"

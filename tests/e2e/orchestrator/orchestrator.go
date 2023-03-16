@@ -105,6 +105,10 @@ func (o *Orchestrator) TearDownResources(t *testing.T) {
 	}
 }
 
+func (o *Orchestrator) ChainID() string {
+	return o.chain.id
+}
+
 func (o *Orchestrator) initNodes(t *testing.T) {
 	require.NoError(t, o.chain.createAndInitValidators(3))
 
@@ -259,13 +263,16 @@ func (o *Orchestrator) initValidatorConfigs(t *testing.T) {
 func (o *Orchestrator) runValidators(t *testing.T) {
 	t.Log("starting ojo validator containers...")
 
-	// o.valResources = make([]*dockertest.Resource, len(o.chain.validators))
+	proposalsDirectory, err := proposalsDirectory()
+	require.NoError(t, err)
+
 	for _, val := range o.chain.validators {
 		runOpts := &dockertest.RunOptions{
 			Name:      val.instanceName(),
 			NetworkID: o.dkrNet.Network.ID,
 			Mounts: []string{
 				fmt.Sprintf("%s/:/root/.ojo", val.configDir()),
+				fmt.Sprintf("%s/:/root/proposals", proposalsDirectory),
 			},
 			Repository: ojoContainerRepo,
 		}
@@ -416,4 +423,19 @@ func noRestart(config *docker.HostConfig) {
 	config.RestartPolicy = docker.RestartPolicy{
 		Name: "no",
 	}
+}
+
+func proposalsDirectory() (string, error) {
+	workingDir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+
+	adjacentDirPath := filepath.Join(workingDir, "proposals")
+	absoluteAdjacentDirPath, err := filepath.Abs(adjacentDirPath)
+	if err != nil {
+		return "", err
+	}
+
+	return absoluteAdjacentDirPath, nil
 }
