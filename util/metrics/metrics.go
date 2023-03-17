@@ -5,6 +5,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+// RecordMissCounter records the miss counter gauge for a validator
 func RecordMissCounter(operator sdk.ValAddress, missCounter uint64) {
 	metrics.SetGaugeWithLabels(
 		[]string{"miss_counter"},
@@ -13,6 +14,7 @@ func RecordMissCounter(operator sdk.ValAddress, missCounter uint64) {
 	)
 }
 
+// RecordExchangeRate records the exchange rate gauge for a denom
 func RecordExchangeRate(denom string, exchangeRate sdk.Dec) {
 	metrics.SetGaugeWithLabels(
 		[]string{"exchange_rate"},
@@ -21,6 +23,7 @@ func RecordExchangeRate(denom string, exchangeRate sdk.Dec) {
 	)
 }
 
+// RecordAggregateExchangeRate records the median price gauge for a denom
 func RecordMedianPrice(denom string, price sdk.Dec) {
 	metrics.SetGaugeWithLabels(
 		[]string{"median_price"},
@@ -29,6 +32,7 @@ func RecordMedianPrice(denom string, price sdk.Dec) {
 	)
 }
 
+// RecordAggregateExchangeRate records the median deviation price gauge for a denom
 func RecordMedianDeviationPrice(denom string, price sdk.Dec) {
 	metrics.SetGaugeWithLabels(
 		[]string{"median_deviation_price"},

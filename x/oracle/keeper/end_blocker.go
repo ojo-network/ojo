@@ -32,6 +32,7 @@ func (k *Keeper) IsPeriodLastBlock(ctx sdk.Context, blocksPerPeriod uint64) bool
 	return (uint64(ctx.BlockHeight())+1)%blocksPerPeriod == 0
 }
 
+// RecordEndBlockMetrics records miss counter and price metrics at the end of the block
 func (k *Keeper) RecordEndBlockMetrics(ctx sdk.Context) {
 	if !k.telemetryEnabled {
 		return
