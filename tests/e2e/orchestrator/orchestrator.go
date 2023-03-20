@@ -355,7 +355,7 @@ func (o *Orchestrator) runPriceFeeder(t *testing.T) {
 				fmt.Sprintf("RPC_GRPC_ENDPOINT=%s", grpcEndpoint),
 				fmt.Sprintf("RPC_TMRPC_ENDPOINT=%s", tmrpcEndpoint),
 			},
-			Cmd: []string{"--skip-provider-check", "--bad-flag"},
+			Cmd: []string{"--skip-provider-check"},
 		},
 		noRestart,
 	)
@@ -403,7 +403,7 @@ func (o *Orchestrator) runPriceFeeder(t *testing.T) {
 	}
 
 	if !isHealthy {
-		o.dkrPool.Client.Logs(docker.LogsOptions{
+		err := o.dkrPool.Client.Logs(docker.LogsOptions{
 			Container:    o.priceFeederResource.Container.ID,
 			OutputStream: os.Stdout,
 			ErrorStream:  os.Stderr,
@@ -411,6 +411,9 @@ func (o *Orchestrator) runPriceFeeder(t *testing.T) {
 			Stderr:       true,
 			Tail:         "false",
 		})
+		if err != nil {
+			t.Log("Error retrieving price feeder logs", err)
+		}
 
 		t.Fatal("price-feeder not healthy")
 	}
