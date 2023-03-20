@@ -39,7 +39,7 @@ const (
 	ojoTmrpcPort     = "26657"
 	ojoGrpcPort      = "9090"
 
-	priceFeederContainerRepo = "ghcr.io/umee-network/price-feeder-e2e"
+	priceFeederContainerRepo = "ghcr.io/ojo-network/price-feeder-ojo"
 	priceFeederServerPort    = "7171/tcp"
 
 	initBalanceStr = "510000000000" + appparams.BondDenom
@@ -355,6 +355,7 @@ func (o *Orchestrator) runPriceFeeder(t *testing.T) {
 				fmt.Sprintf("RPC_GRPC_ENDPOINT=%s", grpcEndpoint),
 				fmt.Sprintf("RPC_TMRPC_ENDPOINT=%s", tmrpcEndpoint),
 			},
+			Cmd: []string{"--skip-provider-check"},
 		},
 		noRestart,
 	)
