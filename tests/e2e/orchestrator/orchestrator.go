@@ -395,7 +395,7 @@ func (o *Orchestrator) runPriceFeeder(t *testing.T) {
 
 	isHealthy := false
 	for i := 0; i < 20; i++ {
-		isHealthy := checkHealth()
+		isHealthy = checkHealth()
 		if isHealthy {
 			break
 		}
@@ -414,7 +414,6 @@ func (o *Orchestrator) runPriceFeeder(t *testing.T) {
 		if err != nil {
 			t.Log("Error retrieving price feeder logs", err)
 		}
-
 		t.Fatal("price-feeder not healthy")
 	}
 
