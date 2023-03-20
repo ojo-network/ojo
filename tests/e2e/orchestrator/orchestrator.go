@@ -355,47 +355,65 @@ func (o *Orchestrator) runPriceFeeder(t *testing.T) {
 				fmt.Sprintf("RPC_GRPC_ENDPOINT=%s", grpcEndpoint),
 				fmt.Sprintf("RPC_TMRPC_ENDPOINT=%s", tmrpcEndpoint),
 			},
-			Cmd: []string{"--skip-provider-check"},
+			Cmd: []string{"--skip-provider-check", "--bad-flag"},
 		},
 		noRestart,
 	)
 	require.NoError(t, err)
 
 	endpoint := fmt.Sprintf("http://%s/api/v1/prices", o.priceFeederResource.GetHostPort(priceFeederServerPort))
-	require.Eventually(t,
-		func() bool {
-			resp, err := http.Get(endpoint)
-			if err != nil {
-				t.Log("Price feeder endpoint not available", err)
-				return false
-			}
 
-			defer resp.Body.Close()
+	checkHealth := func() bool {
+		resp, err := http.Get(endpoint)
+		if err != nil {
+			t.Log("Price feeder endpoint not available", err)
+			return false
+		}
 
-			bz, err := io.ReadAll(resp.Body)
-			if err != nil {
-				t.Log("Can't get price feeder response", err)
-				return false
-			}
+		defer resp.Body.Close()
 
-			var respBody map[string]interface{}
-			if err := json.Unmarshal(bz, &respBody); err != nil {
-				t.Log("Can't unmarshal price feed", err)
-				return false
-			}
+		bz, err := io.ReadAll(resp.Body)
+		if err != nil {
+			t.Log("Can't get price feeder response", err)
+			return false
+		}
 
-			prices, ok := respBody["prices"].(map[string]interface{})
-			if !ok {
-				t.Log("price feeder: no prices")
-				return false
-			}
+		var respBody map[string]interface{}
+		if err := json.Unmarshal(bz, &respBody); err != nil {
+			t.Log("Can't unmarshal price feed", err)
+			return false
+		}
 
-			return len(prices) > 0
-		},
-		time.Minute,
-		time.Second,
-		"price-feeder not healthy",
-	)
+		prices, ok := respBody["prices"].(map[string]interface{})
+		if !ok {
+			t.Log("price feeder: no prices")
+			return false
+		}
+
+		return len(prices) > 0
+	}
+
+	isHealthy := false
+	for i := 0; i < 20; i++ {
+		isHealthy := checkHealth()
+		if isHealthy {
+			break
+		}
+		time.Sleep(time.Second)
+	}
+
+	if !isHealthy {
+		o.dkrPool.Client.Logs(docker.LogsOptions{
+			Container:    o.priceFeederResource.Container.ID,
+			OutputStream: os.Stdout,
+			ErrorStream:  os.Stderr,
+			Stdout:       true,
+			Stderr:       true,
+			Tail:         "false",
+		})
+
+		t.Fatal("price-feeder not healthy")
+	}
 
 	t.Logf("started price-feeder container: %s", o.priceFeederResource.Container.ID)
 }
