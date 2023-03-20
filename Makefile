@@ -105,15 +105,7 @@ clean:
 docker-build:
 	@docker build -t ojo .
 
-docker-build-price-feeder:
-	@git clone https://github.com/ojo-network/price-feeder
-	@docker build -t ghcr.io/umee-network/price-feeder-e2e -f price-feeder/Dockerfile price-feeder
-	@rm -rf price-feeder
-
-docker-push-price-feeder:
-	@docker push ghcr.io/umee-network/price-feeder-e2e
-
-.PHONY: .docker-build .docker-build-price-feeder .docker-push-price-feeder
+.PHONY: .docker-build
 
 ###############################################################################
 ##                                   Tests                                   ##

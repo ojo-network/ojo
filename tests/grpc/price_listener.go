@@ -45,7 +45,7 @@ func listenForPrices(
 		return nil, err
 	}
 
-	expectedNumMedians := int(params.MaximumMedianStamps) * len(params.AcceptList)
+	expectedNumMedians := int(params.MaximumMedianStamps) * len(params.MandatoryList)
 	if len(medians) != expectedNumMedians {
 		return nil, fmt.Errorf("amount of medians %d does not match the expected amount %d", len(medians), expectedNumMedians)
 	}
