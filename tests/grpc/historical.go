@@ -23,9 +23,9 @@ func MedianCheck(val1Client *client.OjoClient) error {
 		return err
 	}
 
-	denomAcceptList := []string{}
-	for _, acceptItem := range params.AcceptList {
-		denomAcceptList = append(denomAcceptList, strings.ToUpper(acceptItem.SymbolDenom))
+	denomMandatoryList := []string{}
+	for _, mandatoryItem := range params.MandatoryList {
+		denomMandatoryList = append(denomMandatoryList, strings.ToUpper(mandatoryItem.SymbolDenom))
 	}
 
 	chainHeight, err := val1Client.NewChainHeight(ctx, zerolog.Nop())
@@ -36,7 +36,7 @@ func MedianCheck(val1Client *client.OjoClient) error {
 	var exchangeRates sdk.DecCoins
 	for i := 0; i < 40; i++ {
 		exchangeRates, err = val1Client.QueryClient.QueryExchangeRates()
-		if err == nil && len(exchangeRates) == len(denomAcceptList) {
+		if err == nil && len(exchangeRates) == len(denomMandatoryList) {
 			break
 		}
 		<-chainHeight.HeightChanged
@@ -45,7 +45,8 @@ func MedianCheck(val1Client *client.OjoClient) error {
 	if err != nil {
 		return err
 	}
-	if len(exchangeRates) != len(denomAcceptList) {
+	if len(exchangeRates) != len(denomMandatoryList) {
+		// TODO - update the output to display which denoms are missing https://github.com/ojo-network/ojo/issues/130
 		return errors.New("couldn't fetch exchange rates matching denom accept list")
 	}
 
