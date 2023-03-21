@@ -5,10 +5,17 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+const (
+	miss_counter_label           = "miss_counter"
+	exchange_rate_label          = "exchange_rate"
+	median_price_label           = "median_price"
+	median_deviation_price_label = "median_deviation_price"
+)
+
 // RecordMissCounter records the miss counter gauge for a validator
 func RecordMissCounter(operator sdk.ValAddress, missCounter uint64) {
 	metrics.SetGaugeWithLabels(
-		[]string{"miss_counter"},
+		[]string{miss_counter_label},
 		float32(missCounter),
 		[]metrics.Label{{Name: "address", Value: operator.String()}},
 	)
@@ -17,7 +24,7 @@ func RecordMissCounter(operator sdk.ValAddress, missCounter uint64) {
 // RecordExchangeRate records the exchange rate gauge for a denom
 func RecordExchangeRate(denom string, exchangeRate sdk.Dec) {
 	metrics.SetGaugeWithLabels(
-		[]string{"exchange_rate"},
+		[]string{exchange_rate_label},
 		float32(exchangeRate.MustFloat64()),
 		[]metrics.Label{{Name: "denom", Value: denom}},
 	)
@@ -26,7 +33,7 @@ func RecordExchangeRate(denom string, exchangeRate sdk.Dec) {
 // RecordAggregateExchangeRate records the median price gauge for a denom
 func RecordMedianPrice(denom string, price sdk.Dec) {
 	metrics.SetGaugeWithLabels(
-		[]string{"median_price"},
+		[]string{median_price_label},
 		float32(price.MustFloat64()),
 		[]metrics.Label{{Name: "denom", Value: denom}},
 	)
@@ -35,7 +42,7 @@ func RecordMedianPrice(denom string, price sdk.Dec) {
 // RecordAggregateExchangeRate records the median deviation price gauge for a denom
 func RecordMedianDeviationPrice(denom string, price sdk.Dec) {
 	metrics.SetGaugeWithLabels(
-		[]string{"median_deviation_price"},
+		[]string{median_deviation_price_label},
 		float32(price.MustFloat64()),
 		[]metrics.Label{{Name: "denom", Value: denom}},
 	)
