@@ -291,27 +291,39 @@ func (o *Orchestrator) runValidators(t *testing.T) {
 	rpcClient, err := rpchttp.New(rpcURL, "/websocket")
 	require.NoError(t, err)
 
-	require.Eventually(t,
-		func() bool {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-			defer cancel()
+	checkHealth := func() bool {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		defer cancel()
 
-			status, err := rpcClient.Status(ctx)
-			if err != nil {
-				return false
-			}
+		status, err := rpcClient.Status(ctx)
+		if err != nil {
+			return false
+		}
 
-			// let the node produce a few blocks
-			if status.SyncInfo.CatchingUp || status.SyncInfo.LatestBlockHeight < 3 {
-				return false
-			}
+		// let the node produce a few blocks
+		if status.SyncInfo.CatchingUp || status.SyncInfo.LatestBlockHeight < 3 {
+			return false
+		}
 
-			return true
-		},
-		2*time.Minute,
-		time.Second,
-		"Ojo node failed to produce blocks",
-	)
+		return true
+	}
+
+	isHealthy := false
+	for i := 0; i < 40; i++ {
+		isHealthy = checkHealth()
+		if isHealthy {
+			break
+		}
+		time.Sleep(time.Second)
+	}
+
+	if !isHealthy {
+		err := o.outputLogs(o.valResources[0])
+		if err != nil {
+			t.Log("Error retrieving Ojo node logs", err)
+		}
+		t.Fatal("Ojo node failed to produce blocks")
+	}
 }
 
 func (o *Orchestrator) delegatePriceFeederVoting(t *testing.T) {
@@ -403,14 +415,7 @@ func (o *Orchestrator) runPriceFeeder(t *testing.T) {
 	}
 
 	if !isHealthy {
-		err := o.dkrPool.Client.Logs(docker.LogsOptions{
-			Container:    o.priceFeederResource.Container.ID,
-			OutputStream: os.Stdout,
-			ErrorStream:  os.Stderr,
-			Stdout:       true,
-			Stderr:       true,
-			Tail:         "false",
-		})
+		err := o.outputLogs(o.priceFeederResource)
 		if err != nil {
 			t.Log("Error retrieving price feeder logs", err)
 		}
@@ -430,6 +435,17 @@ func (o *Orchestrator) initOjoClient(t *testing.T) {
 		o.chain.validators[2].mnemonic,
 	)
 	require.NoError(t, err)
+}
+
+func (o *Orchestrator) outputLogs(resource *dockertest.Resource) error {
+	return o.dkrPool.Client.Logs(docker.LogsOptions{
+		Container:    resource.Container.ID,
+		OutputStream: os.Stdout,
+		ErrorStream:  os.Stderr,
+		Stdout:       true,
+		Stderr:       true,
+		Tail:         "false",
+	})
 }
 
 func noRestart(config *docker.HostConfig) {
