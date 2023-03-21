@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	cosmossdk.io/errors v1.0.0-beta.7
-	cosmossdk.io/math v1.0.0-beta.6
+	cosmossdk.io/math v1.0.0-rc.0
 	github.com/cosmos/cosmos-proto v1.0.0-beta.1
 	github.com/cosmos/cosmos-sdk v0.46.7
 	github.com/cosmos/go-bip39 v1.0.0
