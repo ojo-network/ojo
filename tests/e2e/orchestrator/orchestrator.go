@@ -34,13 +34,15 @@ import (
 )
 
 const (
-	ojoContainerRepo = "ojo"
-	ojoP2pPort       = "26656"
-	ojoTmrpcPort     = "26657"
-	ojoGrpcPort      = "9090"
+	ojoContainerRepo  = "ojo"
+	ojoP2pPort        = "26656"
+	ojoTmrpcPort      = "26657"
+	ojoGrpcPort       = "9090"
+	ojoMaxStartupTime = 40 // seconds
 
-	priceFeederContainerRepo = "ghcr.io/ojo-network/price-feeder-ojo"
-	priceFeederServerPort    = "7171/tcp"
+	priceFeederContainerRepo  = "ghcr.io/ojo-network/price-feeder-ojo"
+	priceFeederServerPort     = "7171/tcp"
+	priceFeederMaxStartupTime = 20 //seconds
 
 	initBalanceStr = "510000000000" + appparams.BondDenom
 )
@@ -309,7 +311,7 @@ func (o *Orchestrator) runValidators(t *testing.T) {
 	}
 
 	isHealthy := false
-	for i := 0; i < 40; i++ {
+	for i := 0; i < ojoMaxStartupTime; i++ {
 		isHealthy = checkHealth()
 		if isHealthy {
 			break
@@ -406,7 +408,7 @@ func (o *Orchestrator) runPriceFeeder(t *testing.T) {
 	}
 
 	isHealthy := false
-	for i := 0; i < 20; i++ {
+	for i := 0; i < priceFeederMaxStartupTime; i++ {
 		isHealthy = checkHealth()
 		if isHealthy {
 			break
