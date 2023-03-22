@@ -11,6 +11,7 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/tendermint/tendermint/libs/log"
 
+	"github.com/ojo-network/ojo/util/metrics"
 	"github.com/ojo-network/ojo/x/oracle/types"
 )
 
@@ -27,7 +28,8 @@ type Keeper struct {
 	distrKeeper   types.DistributionKeeper
 	StakingKeeper types.StakingKeeper
 
-	distrName string
+	distrName        string
+	telemetryEnabled bool
 }
 
 // NewKeeper constructs a new keeper for oracle
@@ -40,6 +42,7 @@ func NewKeeper(
 	distrKeeper types.DistributionKeeper,
 	stakingKeeper types.StakingKeeper,
 	distrName string,
+	telemetryEnabled bool,
 ) Keeper {
 	// ensure oracle module account is set
 	if addr := accountKeeper.GetModuleAddress(types.ModuleName); addr == nil {
@@ -52,14 +55,15 @@ func NewKeeper(
 	}
 
 	return Keeper{
-		cdc:           cdc,
-		storeKey:      storeKey,
-		paramSpace:    paramspace,
-		accountKeeper: accountKeeper,
-		bankKeeper:    bankKeeper,
-		distrKeeper:   distrKeeper,
-		StakingKeeper: stakingKeeper,
-		distrName:     distrName,
+		cdc:              cdc,
+		storeKey:         storeKey,
+		paramSpace:       paramspace,
+		accountKeeper:    accountKeeper,
+		bankKeeper:       bankKeeper,
+		distrKeeper:      distrKeeper,
+		StakingKeeper:    stakingKeeper,
+		distrName:        distrName,
+		telemetryEnabled: telemetryEnabled,
 	}
 }
 
@@ -118,6 +122,7 @@ func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, exchangeRate sdk.
 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: exchangeRate})
 	denom = strings.ToUpper(denom)
 	store.Set(types.GetExchangeRateKey(denom), bz)
+	go metrics.RecordExchangeRate(denom, exchangeRate)
 }
 
 // SetExchangeRateWithEvent sets an consensus
