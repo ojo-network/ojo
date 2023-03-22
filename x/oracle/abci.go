@@ -28,6 +28,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 	}
 
 	k.PruneAllPrices(ctx)
+	go k.RecordEndBlockMetrics(ctx)
 
 	return nil
 }
