@@ -42,7 +42,7 @@ const (
 
 	priceFeederContainerRepo  = "ghcr.io/ojo-network/price-feeder-ojo"
 	priceFeederServerPort     = "7171/tcp"
-	priceFeederMaxStartupTime = 20 //seconds
+	priceFeederMaxStartupTime = 20 // seconds
 
 	initBalanceStr = "510000000000" + appparams.BondDenom
 )
