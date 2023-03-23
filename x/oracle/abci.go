@@ -60,6 +60,15 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 
 	// Iterate through ballots and update exchange rates; drop if not enough votes have been achieved.
 	for _, ballotDenom := range ballotDenomSlice {
+		// Increment Mandatory Win count if Denom in Mandatory list
+		incrementWin := params.MandatoryList.Contains(ballotDenom.Denom)
+
+		// If the asset is not in the mandatory or accept list, continue
+		if !incrementWin && !params.AcceptList.Contains(ballotDenom.Denom) {
+			ctx.Logger().Info("Unsupported denom, dropping ballot", "denom", ballotDenom)
+			continue
+		}
+
 		// Calculate the portion of votes received as an integer, scaled up using the
 		// same multiplier as the `threshold` computed above
 		support := ballotDenom.Ballot.Power() * types.MaxVoteThresholdMultiplier / totalBondedPower
@@ -67,9 +76,6 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 			ctx.Logger().Info("Ballot voting power is under vote threshold, dropping ballot", "denom", ballotDenom)
 			continue
 		}
-
-		// Increment Mandatory Win count if Denom in Mandatory list
-		incrementWin := params.MandatoryList.Contains(ballotDenom.Denom)
 
 		// Get the current denom's reward band
 		rewardBand, err := params.RewardBands.GetBandFromDenom(ballotDenom.Denom)

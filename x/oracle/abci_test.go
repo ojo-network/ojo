@@ -140,6 +140,15 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 		})
 	}
 
+	// add junk coin and ensure ballot still is counted
+	junkCoin := sdk.DecCoin{
+		Denom:  "JUNK",
+		Amount: sdk.MustNewDecFromStr("0.05"),
+	}
+	val1DecCoins = append(val1DecCoins, junkCoin)
+	val2DecCoins = append(val2DecCoins, junkCoin)
+	val3DecCoins = append(val3DecCoins, junkCoin)
+
 	h := uint64(ctx.BlockHeight())
 	val1PreVotes, val1Votes := createVotes("hash1", valAddr1, val1DecCoins, h)
 	val2PreVotes, val2Votes := createVotes("hash2", valAddr2, val2DecCoins, h)
@@ -155,7 +164,8 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
-	oracle.EndBlocker(ctx, app.OracleKeeper)
+	err := oracle.EndBlocker(ctx, app.OracleKeeper)
+	s.Require().NoError(err)
 
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		rate, err := app.OracleKeeper.GetExchangeRate(ctx, denom.SymbolDenom)
