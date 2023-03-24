@@ -48,7 +48,6 @@ jobs:
         if: env.GIT_DIFF
         with:
           file: ./coverage.txt
-          fail_ci_if_error: true
 
   build-ojod:
     uses: ./.github/workflows/build.yml
