@@ -34,6 +34,11 @@ func (ms msgServer) AggregateExchangeRatePrevote(
 		return nil, err
 	}
 
+	val := ms.StakingKeeper.Validator(ctx, valAddr)
+	if !val.IsBonded() {
+		return nil, types.ErrNoValidatorPower
+	}
+
 	if err := ms.ValidateFeeder(ctx, feederAddr, valAddr); err != nil {
 		return nil, err
 	}
