@@ -89,7 +89,7 @@ func (k Keeper) CurrentValidatorRewardSet(
 ) {
 	store := ctx.KVStore(k.storeKey)
 
-	// make sure we have one zero byte to correctly seperate blocknum
+	// make sure we have one zero byte to correctly separate blocknum
 	prefix := util.ConcatBytes(1, types.KeyPrefixValidatorRewardSet)
 	iter := sdk.KVStoreReversePrefixIteratorPaginated(store, prefix, 1, 1)
 	defer iter.Close()
