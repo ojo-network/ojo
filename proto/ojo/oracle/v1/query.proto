@@ -88,6 +88,15 @@ service Query {
     option (google.api.http).get =
         "/ojo/historacle/v1/denoms/median_deviations";
   }
+
+  // ValidatorRewardSet returns the set of validators that is
+  // earning rewards for voting on exchange rates based on their
+  // misscounter in a given Slash Window
+  rpc ValidatorRewardSet(QueryValidatorRewardSet)
+      returns (QueryValidatorRewardSetResponse) {
+    option (google.api.http).get =
+        "/ojo/oracle/v1/valdiators/validator_reward_set";
+  }
 }
 
 // QueryExchangeRates is the request type for the Query/ExchangeRate RPC
@@ -273,4 +282,12 @@ message QueryMedianDeviations {
 message QueryMedianDeviationsResponse {
   // medians defines a list of the median deviations for all stamped denoms.
   repeated PriceStamp medianDeviations = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryValidatorRewardSet is the request type for the Query/ValidatorRewardSet RPC method.
+message QueryValidatorRewardSet {}
+
+// QueryValidatorRewardSetResponse is the response type for the Query/ValidatorRewardSet RPC method.
+message QueryValidatorRewardSetResponse {
+  ValidatorRewardSet validators = 1 [(gogoproto.nullable) = false];
 }

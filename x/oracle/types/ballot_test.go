@@ -332,10 +332,15 @@ func TestExchangeRateBallotSwap(t *testing.T) {
 func TestClaimMapToSlice(t *testing.T) {
 	valAddress := GenerateRandomValAddr(1)
 	claim := NewClaim(10, 4, valAddress[0])
-	claimSlice := ClaimMapToSlice(map[string]Claim{
-		"testClaim":    claim,
-		"anotherClaim": claim,
-	})
+	claimSlice := ClaimMapToSlice(
+		map[string]Claim{
+			"testClaim":    claim,
+			"anotherClaim": claim,
+		},
+		map[string]bool{
+			claim.Recipient.String(): true,
+		},
+	)
 	require.Equal(t, []Claim{claim, claim}, claimSlice)
 }
 

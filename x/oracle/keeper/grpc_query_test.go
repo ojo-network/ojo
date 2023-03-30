@@ -289,6 +289,22 @@ func (s *IntegrationTestSuite) TestQuerier_MedianDeviations() {
 	s.Require().Equal(res.MedianDeviations, expected)
 }
 
+func (s *IntegrationTestSuite) TestQuerier_ValidatorRewardSet() {
+	app, ctx := s.app, s.ctx
+	originalBlockHeight := ctx.BlockHeight()
+
+	slashWindowBlock := int64(app.OracleKeeper.SlashWindow(ctx))
+	ctx = ctx.WithBlockHeight(slashWindowBlock)
+	app.OracleKeeper.SetValidatorRewardSet(ctx)
+
+	ctx = ctx.WithBlockHeight(slashWindowBlock + 20)
+	valRewardSetResp, err := s.queryClient.ValidatorRewardSet(ctx.Context(), &types.QueryValidatorRewardSet{})
+	s.Require().NoError(err)
+	s.Require().Equal(3, len(valRewardSetResp.Validators.ValidatorMap))
+
+	ctx = ctx.WithBlockHeight(originalBlockHeight)
+}
+
 func (s *IntegrationTestSuite) TestEmptyRequest() {
 	q := keeper.NewQuerier(keeper.Keeper{})
 	const emptyRequestErrorMsg = "empty request"

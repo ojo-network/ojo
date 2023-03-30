@@ -33,6 +33,7 @@ var (
 	KeyPrefixMedian                       = []byte{0x06} // prefix for each key to a price median
 	KeyPrefixMedianDeviation              = []byte{0x07} // prefix for each key to a price median standard deviation
 	KeyPrefixHistoricPrice                = []byte{0x08} // prefix for each key to a historic price
+	KeyPrefixValidatorRewardSet           = []byte{0x09} // prefix for each key to a validator reward set
 )
 
 // GetExchangeRateKey - stored by *denom*
@@ -79,6 +80,11 @@ func KeyMedianDeviation(denom string, blockNum uint64) (key []byte) {
 // KeyHistoricPrice - stored by *denom* and *block*
 func KeyHistoricPrice(denom string, blockNum uint64) (key []byte) {
 	return util.ConcatBytes(0, KeyPrefixHistoricPrice, []byte(denom), util.UintWithNullPrefix(blockNum))
+}
+
+// KeyValidatorRewardSet - stored by *block*
+func KeyValidatorRewardSet(blockNum uint64) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixValidatorRewardSet, util.UintWithNullPrefix(blockNum))
 }
 
 // ParseDenomAndBlockFromKey returns the denom and block contained in the *key*
