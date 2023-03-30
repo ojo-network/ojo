@@ -82,8 +82,7 @@ func (k Keeper) SetValidatorRewardSet(ctx sdk.Context) {
 	store.Set(types.KeyValidatorRewardSet(uint64(ctx.BlockHeight())), bz)
 }
 
-// CurrentValidatorRewardSet returns the list of validators that can earn rewards in
-// the current Slash Window.
+// CurrentValidatorRewardSet returns the latest ValidatorRewardSet in the store.
 func (k Keeper) CurrentValidatorRewardSet(
 	ctx sdk.Context,
 	handler func(types.ValidatorRewardSet) bool,
