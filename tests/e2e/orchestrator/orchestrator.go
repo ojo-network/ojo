@@ -34,13 +34,15 @@ import (
 )
 
 const (
-	ojoContainerRepo = "ojo"
-	ojoP2pPort       = "26656"
-	ojoTmrpcPort     = "26657"
-	ojoGrpcPort      = "9090"
+	ojoContainerRepo  = "ojo"
+	ojoP2pPort        = "26656"
+	ojoTmrpcPort      = "26657"
+	ojoGrpcPort       = "9090"
+	ojoMaxStartupTime = 40 // seconds
 
-	priceFeederContainerRepo = "ghcr.io/ojo-network/price-feeder-ojo"
-	priceFeederServerPort    = "7171/tcp"
+	priceFeederContainerRepo  = "ghcr.io/ojo-network/price-feeder-ojo"
+	priceFeederServerPort     = "7171/tcp"
+	priceFeederMaxStartupTime = 20 // seconds
 
 	initBalanceStr = "510000000000" + appparams.BondDenom
 )
@@ -291,27 +293,39 @@ func (o *Orchestrator) runValidators(t *testing.T) {
 	rpcClient, err := rpchttp.New(rpcURL, "/websocket")
 	require.NoError(t, err)
 
-	require.Eventually(t,
-		func() bool {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-			defer cancel()
+	checkHealth := func() bool {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		defer cancel()
 
-			status, err := rpcClient.Status(ctx)
-			if err != nil {
-				return false
-			}
+		status, err := rpcClient.Status(ctx)
+		if err != nil {
+			return false
+		}
 
-			// let the node produce a few blocks
-			if status.SyncInfo.CatchingUp || status.SyncInfo.LatestBlockHeight < 3 {
-				return false
-			}
+		// let the node produce a few blocks
+		if status.SyncInfo.CatchingUp || status.SyncInfo.LatestBlockHeight < 3 {
+			return false
+		}
 
-			return true
-		},
-		2*time.Minute,
-		time.Second,
-		"Ojo node failed to produce blocks",
-	)
+		return true
+	}
+
+	isHealthy := false
+	for i := 0; i < ojoMaxStartupTime; i++ {
+		isHealthy = checkHealth()
+		if isHealthy {
+			break
+		}
+		time.Sleep(time.Second)
+	}
+
+	if !isHealthy {
+		err := o.outputLogs(o.valResources[0])
+		if err != nil {
+			t.Log("Error retrieving Ojo node logs", err)
+		}
+		t.Fatal("Ojo node failed to produce blocks")
+	}
 }
 
 func (o *Orchestrator) delegatePriceFeederVoting(t *testing.T) {
@@ -362,40 +376,53 @@ func (o *Orchestrator) runPriceFeeder(t *testing.T) {
 	require.NoError(t, err)
 
 	endpoint := fmt.Sprintf("http://%s/api/v1/prices", o.priceFeederResource.GetHostPort(priceFeederServerPort))
-	require.Eventually(t,
-		func() bool {
-			resp, err := http.Get(endpoint)
-			if err != nil {
-				t.Log("Price feeder endpoint not available", err)
-				return false
-			}
 
-			defer resp.Body.Close()
+	checkHealth := func() bool {
+		resp, err := http.Get(endpoint)
+		if err != nil {
+			t.Log("Price feeder endpoint not available", err)
+			return false
+		}
 
-			bz, err := io.ReadAll(resp.Body)
-			if err != nil {
-				t.Log("Can't get price feeder response", err)
-				return false
-			}
+		defer resp.Body.Close()
 
-			var respBody map[string]interface{}
-			if err := json.Unmarshal(bz, &respBody); err != nil {
-				t.Log("Can't unmarshal price feed", err)
-				return false
-			}
+		bz, err := io.ReadAll(resp.Body)
+		if err != nil {
+			t.Log("Can't get price feeder response", err)
+			return false
+		}
 
-			prices, ok := respBody["prices"].(map[string]interface{})
-			if !ok {
-				t.Log("price feeder: no prices")
-				return false
-			}
+		var respBody map[string]interface{}
+		if err := json.Unmarshal(bz, &respBody); err != nil {
+			t.Log("Can't unmarshal price feed", err)
+			return false
+		}
 
-			return len(prices) > 0
-		},
-		time.Minute,
-		time.Second,
-		"price-feeder not healthy",
-	)
+		prices, ok := respBody["prices"].(map[string]interface{})
+		if !ok {
+			t.Log("price feeder: no prices")
+			return false
+		}
+
+		return len(prices) > 0
+	}
+
+	isHealthy := false
+	for i := 0; i < priceFeederMaxStartupTime; i++ {
+		isHealthy = checkHealth()
+		if isHealthy {
+			break
+		}
+		time.Sleep(time.Second)
+	}
+
+	if !isHealthy {
+		err := o.outputLogs(o.priceFeederResource)
+		if err != nil {
+			t.Log("Error retrieving price feeder logs", err)
+		}
+		t.Fatal("price-feeder not healthy")
+	}
 
 	t.Logf("started price-feeder container: %s", o.priceFeederResource.Container.ID)
 }
@@ -410,6 +437,17 @@ func (o *Orchestrator) initOjoClient(t *testing.T) {
 		o.chain.validators[2].mnemonic,
 	)
 	require.NoError(t, err)
+}
+
+func (o *Orchestrator) outputLogs(resource *dockertest.Resource) error {
+	return o.dkrPool.Client.Logs(docker.LogsOptions{
+		Container:    resource.Container.ID,
+		OutputStream: os.Stdout,
+		ErrorStream:  os.Stderr,
+		Stdout:       true,
+		Stderr:       true,
+		Tail:         "false",
+	})
 }
 
 func noRestart(config *docker.HostConfig) {
