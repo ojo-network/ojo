@@ -44,7 +44,6 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 	// Build claim map over all validators in active set
 	validatorClaimMap := make(map[string]types.Claim)
 	powerReduction := k.StakingKeeper.PowerReduction(ctx)
-
 	// Calculate total validator power
 	var totalBondedPower int64
 	for _, v := range k.StakingKeeper.GetBondedValidatorsByPower(ctx) {
