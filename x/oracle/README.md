@@ -58,6 +58,8 @@ Validators must first pre-commit to a set of exchange rates, then in the subsequ
 
   Voters that have managed to vote within a narrow band around the median are rewarded with a portion of the collected seigniorage.
 
+  The set of validators that can earned rewards is updated every `SlashWindow` by taking all the active validators at the end of the `SlashWindow` and updating the `ValidatorRewardSet`. Any validators that join in the middle of a `SlashWindow` will not be able to earn ballot rewards until the next `SlashWindow`.
+
   The reward portion is determined by the [MissCounter](#misscounter) amount for the voted on exchange rates accrued by each validator in the `SlashWindow`, where the validator with smallest [MissCounter](#misscounter) collects the most reward and the rest are rewarded logarithimically favoring fewer miss counts. See `k.RewardBallotWinners()` for more details.
 
 ### Reward Band
