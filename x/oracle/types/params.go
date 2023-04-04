@@ -42,8 +42,8 @@ const (
 	DefaultSlashWindow              = BlocksPerWeek            // window for a week
 	DefaultRewardDistributionWindow = BlocksPerYear            // window for a year
 	DefaultHistoricStampPeriod      = BlocksPerMinute * 3      // window for 3 minutes
-	DefaultMaximumPriceStamps       = 36                       // retain for 3 hours
-	DefaultMedianStampPeriod        = BlocksPerHour * 2        // window for 2 hours
+	DefaultMaximumPriceStamps       = 60                       // retain for 3 hours
+	DefaultMedianStampPeriod        = BlocksPerHour * 3        // window for 3 hours
 	DefaultMaximumMedianStamps      = 24                       // retain for 3 days
 )
 

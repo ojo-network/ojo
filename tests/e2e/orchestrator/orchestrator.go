@@ -146,9 +146,9 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 	var oracleGenState oracletypes.GenesisState
 	require.NoError(t, cdc.UnmarshalJSON(appGenState[oracletypes.ModuleName], &oracleGenState))
 
-	oracleGenState.Params.HistoricStampPeriod = 5
+	oracleGenState.Params.HistoricStampPeriod = 3
 	oracleGenState.Params.MaximumPriceStamps = 4
-	oracleGenState.Params.MedianStampPeriod = 20
+	oracleGenState.Params.MedianStampPeriod = 12
 	oracleGenState.Params.MaximumMedianStamps = 2
 	oracleGenState.Params.AcceptList = oracleAcceptList
 	oracleGenState.Params.MandatoryList = oracleMandatoryList
