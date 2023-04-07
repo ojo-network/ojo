@@ -329,19 +329,21 @@ func TestExchangeRateBallotSwap(t *testing.T) {
 	require.Equal(t, pb[0], voteTallies[1])
 }
 
-func TestClaimMapToSlice(t *testing.T) {
-	valAddress := GenerateRandomValAddr(1)
-	claim := NewClaim(10, 4, valAddress[0])
-	claimSlice := ClaimMapToSlice(
+func TestClaimMapToSlices(t *testing.T) {
+	valAddresses := GenerateRandomValAddr(2)
+	claim1 := NewClaim(10, 4, valAddresses[0])
+	claim2 := NewClaim(10, 4, valAddresses[1])
+	claimSlice, rewardSlice := ClaimMapToSlices(
 		map[string]Claim{
-			"testClaim":    claim,
-			"anotherClaim": claim,
+			"testClaim":    claim1,
+			"anotherClaim": claim2,
 		},
 		map[string]bool{
-			claim.Recipient.String(): true,
+			claim1.Recipient.String(): true,
 		},
 	)
-	require.Equal(t, []Claim{claim, claim}, claimSlice)
+	require.Equal(t, []Claim{claim1, claim2}, claimSlice)
+	require.Equal(t, []Claim{claim1}, rewardSlice)
 }
 
 func TestExchangeRateBallotSort(t *testing.T) {

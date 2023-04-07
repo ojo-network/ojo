@@ -124,7 +124,7 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 
 	// update miss counting & slashing
 	voteTargetsLen := len(params.MandatoryList)
-	claimSlice := types.ClaimMapToSlice(validatorClaimMap, validatorRewardSet.ValidatorMap)
+	claimSlice, rewardSlice := types.ClaimMapToSlices(validatorClaimMap, validatorRewardSet.ValidatorMap)
 	for _, claim := range claimSlice {
 		misses := uint64(voteTargetsLen - int(claim.MandatoryWinCount))
 		if misses == 0 {
@@ -141,7 +141,7 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 		int64(params.VotePeriod),
 		int64(params.RewardDistributionWindow),
 		voteTargetDenoms,
-		claimSlice,
+		rewardSlice,
 	)
 
 	// Clear the ballot

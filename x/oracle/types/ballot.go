@@ -146,14 +146,21 @@ func NewClaim(power, mandatoryWinCount int64, recipient sdk.ValAddress) Claim {
 	}
 }
 
-// ClaimMapToSlice returns an array of sorted exchange rate ballots. It will
-// filter out validators not in includeMap.
-func ClaimMapToSlice(claims map[string]Claim, includeMap map[string]bool) []Claim {
+// ClaimMapToSlices returns an array of sorted exchange rate ballots and a second
+// array woth validators not in the includeMap filtered out.
+func ClaimMapToSlices(claims map[string]Claim, includeMap map[string]bool) ([]Claim, []Claim) {
 	c := make([]Claim, len(claims))
+	r := make([]Claim, len(includeMap))
 	i := 0
+	j := 0
 	for _, claim := range claims {
-		if _, ok := includeMap[claim.Recipient.String()]; !ok {
-			continue
+		if _, ok := includeMap[claim.Recipient.String()]; ok {
+			r[j] = Claim{
+				Power:             claim.Power,
+				MandatoryWinCount: claim.MandatoryWinCount,
+				Recipient:         claim.Recipient,
+			}
+			j++
 		}
 		c[i] = Claim{
 			Power:             claim.Power,
@@ -165,5 +172,8 @@ func ClaimMapToSlice(claims map[string]Claim, includeMap map[string]bool) []Clai
 	sort.Slice(c, func(i, j int) bool {
 		return c[i].Recipient.String() < c[j].Recipient.String()
 	})
-	return c
+	sort.Slice(r, func(i, j int) bool {
+		return r[i].Recipient.String() < r[j].Recipient.String()
+	})
+	return c, r
 }
