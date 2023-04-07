@@ -108,7 +108,7 @@ func (o *Orchestrator) TearDownResources(t *testing.T) {
 }
 
 func (o *Orchestrator) initNodes(t *testing.T) {
-	require.NoError(t, o.chain.createAndInitValidators(3))
+	require.NoError(t, o.chain.createAndInitValidators(2))
 
 	// initialize a genesis file for the first validator
 	val0ConfigDir := o.chain.validators[0].configDir()
@@ -329,7 +329,7 @@ func (o *Orchestrator) runValidators(t *testing.T) {
 }
 
 func (o *Orchestrator) delegatePriceFeederVoting(t *testing.T) {
-	delegateAddr, err := o.chain.validators[1].keyInfo.GetAddress()
+	delegateAddr, err := o.chain.validators[0].keyInfo.GetAddress()
 	require.NoError(t, err)
 	_, err = o.OjoClient.TxClient.TxDelegateFeedConsent(delegateAddr)
 	require.NoError(t, err)
@@ -338,11 +338,11 @@ func (o *Orchestrator) delegatePriceFeederVoting(t *testing.T) {
 func (o *Orchestrator) runPriceFeeder(t *testing.T) {
 	t.Log("starting price-feeder container...")
 
-	votingVal := o.chain.validators[2]
+	votingVal := o.chain.validators[1]
 	votingValAddr, err := votingVal.keyInfo.GetAddress()
 	require.NoError(t, err)
 
-	delegateVal := o.chain.validators[1]
+	delegateVal := o.chain.validators[0]
 	delegateValAddr, err := delegateVal.keyInfo.GetAddress()
 	require.NoError(t, err)
 
@@ -369,7 +369,7 @@ func (o *Orchestrator) runPriceFeeder(t *testing.T) {
 				fmt.Sprintf("RPC_GRPC_ENDPOINT=%s", grpcEndpoint),
 				fmt.Sprintf("RPC_TMRPC_ENDPOINT=%s", tmrpcEndpoint),
 			},
-			Cmd: []string{"--skip-provider-check"},
+			Cmd: []string{"--skip-provider-check", "--log-level=debug"},
 		},
 		noRestart,
 	)
@@ -434,7 +434,7 @@ func (o *Orchestrator) initOjoClient(t *testing.T) {
 		fmt.Sprintf("tcp://localhost:%s", ojoTmrpcPort),
 		fmt.Sprintf("tcp://localhost:%s", ojoGrpcPort),
 		"val1",
-		o.chain.validators[2].mnemonic,
+		o.chain.validators[1].mnemonic,
 	)
 	require.NoError(t, err)
 }
