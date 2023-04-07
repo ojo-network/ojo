@@ -113,7 +113,7 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 		}
 	}
 
-	// Get validators that can earn rewards in this Slash Window
+	// Get the validators which can earn rewards in this Slash Window.
 	validatorRewardSet := types.ValidatorRewardSet{
 		ValidatorMap: make(map[string]bool),
 	}
