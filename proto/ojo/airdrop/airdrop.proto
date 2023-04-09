@@ -1,0 +1,23 @@
+syntax = "proto3";
+package ojo.airdrop.v1;
+
+option go_package = "github.com/ojo-network/ojo/x/airdrop/types";
+
+option (gogoproto.goproto_getters_all) = false;
+
+message Params {
+  // The block at which all unclaimed AirdropAccounts will instead mint tokens
+  // into the community pool. After this block, all unclaimed airdrop accounts
+  // will no longer be able to be claimed.
+  uint64 expiry_blocks = 1;
+
+  // The percentage of the initial airdrop that users must delegate in order to
+  // receive their second portion.
+  // E.g., if we want to require users to stake their entire initial airdrop, this will be 1.
+  uint64 delegation_requirement = 2;
+  
+  // The multiplier for the amount of tokens users will receive once they claim their airdrop.
+  // E.g., if we want users to receive an equal second half, this will be 2.
+  uint64 airdrop_factor = 3;
+
+}

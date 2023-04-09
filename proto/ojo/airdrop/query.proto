@@ -1,0 +1,27 @@
+syntax = "proto3";
+package ojo.oracle.v1;
+
+option go_package = "github.com/ojo-network/ojo/x/oracle/types";
+
+service Query {
+
+  // QueryAirdropAccount returns an existing airdrop account, along with whether or not
+  // the user is eligible to claim, and whether or not the airdrop has been claimed.
+  // If the airdrop has been claimed, the account to which the tokens were sent should be
+  //returned as well.
+  rpc QueryAirdropAccount(QueryAirdropAccountRequest) returns (QueryAirdropAccountResponse) {
+    option (google.api.http).get = "/ojo/airdrop/{address}";
+  }
+}
+
+// QueryAirdropAccountRequest is the request type for the QueryAirdropAccount RPC method.
+message QueryAirdropAccountRequest {
+  string address = 1;
+}
+
+// QueryAirdropAccountResponse is the response type for the QueryAirdropAccount RPC method.
+message QueryAirdropAccountResponse {
+  bool eligible = 1;
+  bool claimed = 2;
+  string claim_address = 3;
+}
