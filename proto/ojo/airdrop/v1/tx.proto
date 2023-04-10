@@ -32,6 +32,7 @@ message MsgCreateAirdropAccount {
   uint64 vestingLength = 3;
 }
 
+// MsgCreateAirdropAccountResponse defines the CreateAirdropAccount response type.
 message MsgCreateAirdropAccountResponse {}
 
 // MsgClaimAirdrop defines the MsgClaimAirdrop message type.
@@ -43,4 +44,6 @@ message MsgClaimAirdrop {
   string toAddress = 2;
 }
 
+
+// MsgClaimAirdropResponse defines the ClaimAirdrop response type.
 message MsgClaimAirdropResponse {}

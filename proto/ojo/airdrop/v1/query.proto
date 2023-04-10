@@ -5,6 +5,7 @@ import "google/api/annotations.proto";
 
 option go_package = "github.com/ojo-network/ojo/x/airdrop/types";
 
+// Query defines the gRPC querier service for the airdrop module
 service Query {
   // QueryAirdropAccount returns an existing airdrop account, along with whether or not
   // the user is eligible to claim, and whether or not the airdrop has been claimed.
