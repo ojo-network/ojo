@@ -32,7 +32,9 @@ message MsgCreateAirdropAccount {
   uint64 vestingLength = 3;
 }
 
-// MsgCreateAirdropAccountResponse defines the MsgClaimAirdrop message type.
+message MsgCreateAirdropAccountResponse {}
+
+// MsgClaimAirdrop defines the MsgClaimAirdrop message type.
 message MsgClaimAirdrop {
   option (gogoproto.equal) = false;
   option (gogoproto.goproto_getters) = false;
@@ -40,3 +42,5 @@ message MsgClaimAirdrop {
   string fromAddress = 1;
   string toAddress = 2;
 }
+
+message MsgClaimAirdropResponse {}

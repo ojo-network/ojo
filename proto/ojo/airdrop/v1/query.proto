@@ -1,6 +1,8 @@
 syntax = "proto3";
 package ojo.airdrop.v1;
 
+import "google/api/annotations.proto";
+
 option go_package = "github.com/ojo-network/ojo/x/airdrop/types";
 
 service Query {
