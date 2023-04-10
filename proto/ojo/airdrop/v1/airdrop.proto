@@ -1,11 +1,15 @@
 syntax = "proto3";
 package ojo.airdrop.v1;
 
+import "gogoproto/gogo.proto";
+
 option go_package = "github.com/ojo-network/ojo/x/airdrop/types";
 
 option (gogoproto.goproto_getters_all) = false;
 
 message Params {
+  option (gogoproto.equal) = true;
+
   // The block at which all unclaimed AirdropAccounts will instead mint tokens
   // into the community pool. After this block, all unclaimed airdrop accounts
   // will no longer be able to be claimed.

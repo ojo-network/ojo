@@ -1,0 +1,42 @@
+syntax = "proto3";
+package ojo.airdrop.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/ojo-network/ojo/x/airdrop/types";
+
+// Msg defines the airdrop Msg service.
+service Msg {
+  // CreateAirdropAccount creates a linearly vesting account with tokensToReceive in it, as 
+  // well as an airdrop account with these records. If the amount of
+  // tokensToReceive * DelegationRequirement are staked, the additional tokens can be claimed
+  // into a second vesting account. This transaction can only occur at genesis.
+  rpc CreateAirdropAccount(MsgCreateAirdropAccount) returns (MsgCreateAirdropAccountResponse);
+
+  // ClaimAirdrop allows an airdrop recipient to claim the 2nd portion of the airdrop specified in the 
+  // CreateAirdropAccount message. This transaction will create a new Delayed Vesting Account 
+  // at toAddress with the amount of tokens determined by tokensToReceive * AirdropFactor.
+  // This account will vest as long as vestingLength above. This transaction fails if the amount
+  // of tokens staked by the fromAddress account is less than tokensToReceive * DelegationRequirement.
+  // Emits an event once the airdrop has been claimed.
+  rpc ClaimAirdrop(MsgClaimAirdrop) returns (MsgClaimAirdropResponse);
+}
+
+// MsgCreateAirdropAccountResponse defines the CreateAirdropAccount message type.
+message MsgCreateAirdropAccount {
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string address = 1;
+  uint64 tokensToReceive = 2;
+  uint64 vestingLength = 3;
+}
+
+// MsgCreateAirdropAccountResponse defines the MsgClaimAirdrop message type.
+message MsgClaimAirdrop {
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string fromAddress = 1;
+  string toAddress = 2;
+}

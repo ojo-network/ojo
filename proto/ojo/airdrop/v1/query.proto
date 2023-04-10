@@ -1,10 +1,9 @@
 syntax = "proto3";
-package ojo.oracle.v1;
+package ojo.airdrop.v1;
 
-option go_package = "github.com/ojo-network/ojo/x/oracle/types";
+option go_package = "github.com/ojo-network/ojo/x/airdrop/types";
 
 service Query {
-
   // QueryAirdropAccount returns an existing airdrop account, along with whether or not
   // the user is eligible to claim, and whether or not the airdrop has been claimed.
   // If the airdrop has been claimed, the account to which the tokens were sent should be
