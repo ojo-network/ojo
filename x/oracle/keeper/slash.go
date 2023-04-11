@@ -67,7 +67,7 @@ func (k Keeper) PossibleWinsPerSlashWindow(ctx sdk.Context) int64 {
 }
 
 // SetValidatorRewardSet will take all the current validators and store them
-// in the ValidatorRewardSet to earn rewwards in the current Slash Window.
+// in the ValidatorRewardSet to earn rewards in the current Slash Window.
 func (k Keeper) SetValidatorRewardSet(ctx sdk.Context) {
 	validatorRewardSet := types.ValidatorRewardSet{
 		ValidatorMap: make(map[string]bool),
