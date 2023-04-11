@@ -180,10 +180,16 @@ func TestParamsEqual(t *testing.T) {
 	err = p6.Validate()
 	require.Error(t, err)
 
-	// small distribution window
+	// slash window not a multiple of vote period
 	p7 := DefaultParams()
-	p7.RewardDistributionWindow = 0
+	p7.SlashWindow = 7
 	err = p7.Validate()
+	require.Error(t, err)
+
+	// small distribution window
+	p8 := DefaultParams()
+	p8.RewardDistributionWindow = 0
+	err = p8.Validate()
 	require.Error(t, err)
 
 	// empty name
