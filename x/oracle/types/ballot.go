@@ -147,7 +147,7 @@ func NewClaim(power, mandatoryWinCount int64, recipient sdk.ValAddress) Claim {
 }
 
 // ClaimMapToSlices returns an array of sorted exchange rate ballots and a second
-// array woth validators not in the includeMap filtered out.
+// array with validators not in the includeMap filtered out.
 func ClaimMapToSlices(claims map[string]Claim, includeMap map[string]bool) ([]Claim, []Claim) {
 	c := make([]Claim, len(claims))
 	r := make([]Claim, len(includeMap))
