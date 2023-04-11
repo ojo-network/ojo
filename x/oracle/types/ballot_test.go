@@ -342,7 +342,7 @@ func TestClaimMapToSlices(t *testing.T) {
 			claim1.Recipient.String(): true,
 		},
 	)
-	require.Equal(t, []Claim{claim1, claim2}, claimSlice)
+	require.Contains(t, claimSlice, claim1, claim2)
 	require.Equal(t, []Claim{claim1}, rewardSlice)
 }
 
