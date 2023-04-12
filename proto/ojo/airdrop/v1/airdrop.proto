@@ -10,8 +10,6 @@ option (gogoproto.goproto_getters_all) = false;
 
 // Params defines the parameters for the airdrop module.
 message Params {
-  option (gogoproto.equal) = true;
-
   // The block at which all unclaimed AirdropAccounts will instead mint tokens
   // into the community pool. After this block, all unclaimed airdrop accounts
   // will no longer be able to be claimed.
