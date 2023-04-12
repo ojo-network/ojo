@@ -249,14 +249,12 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 	app, ctx := s.app, s.ctx
 	originalBlockHeight := ctx.BlockHeight()
-	ctx = ctx.WithBlockHeight(0)
 	preVoteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx) / 2)
 	voteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx)/2 + 1)
 
 	// start test in new slash window
 	ctx = ctx.WithBlockHeight(int64(app.OracleKeeper.SlashWindow(ctx)))
 	oracle.EndBlocker(ctx, app.OracleKeeper)
-	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + 1)
 
 	app.OracleKeeper.SetMandatoryList(ctx, types.DenomList{
 		{
