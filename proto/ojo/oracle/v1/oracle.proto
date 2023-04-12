@@ -122,3 +122,10 @@ message PriceStamp {
   cosmos.base.v1beta1.DecCoin exchange_rate = 1;
   uint64 block_num = 2;
 }
+
+// ValidatorRewardSet is the set of validators that is earning
+// rewards for voting on exchange rates based on their misscounter
+// in a given Slash Window. This set gets updated every Slash Window.
+message ValidatorRewardSet {
+  map<string, bool> validator_map = 1 [ (gogoproto.moretags) = "yaml:\"validator_map\"" ];
+}

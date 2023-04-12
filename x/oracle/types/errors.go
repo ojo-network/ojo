@@ -30,4 +30,5 @@ var (
 	ErrNoMedian              = errors.Register(ModuleName, 20, "no median for this denom at this block")
 	ErrNoMedianDeviation     = errors.Register(ModuleName, 21, "no median deviation for this denom at this block")
 	ErrNoRewardBand          = errors.Register(ModuleName, 22, "unable to find the reward band the given asset")
+	ErrNoValidatorRewardSet  = errors.Register(ModuleName, 23, "unable to find the latest validator reward set")
 )

@@ -15,14 +15,21 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 	defer telemetry.ModuleMeasureSince(types.ModuleName, time.Now(), telemetry.MetricKeyEndBlocker)
 
 	params := k.GetParams(ctx)
+
+	// Set all current active validators into the ValidatorRewardSet at
+	// the beginning of a new Slash Window.
+	if k.IsPeriodLastBlock(ctx, params.SlashWindow+1) {
+		k.SetValidatorRewardSet(ctx)
+	}
+
 	if k.IsPeriodLastBlock(ctx, params.VotePeriod) {
 		if err := CalcPrices(ctx, params, k); err != nil {
 			return err
 		}
 	}
 
-	// Slash oracle providers who missed voting over the threshold and
-	// reset miss counters of all validators at the last block of slash window
+	// Slash oracle providers who missed voting over the threshold and reset
+	// miss counters of all validators at the last block of slash window.
 	if k.IsPeriodLastBlock(ctx, params.SlashWindow) {
 		k.SlashAndResetMissCounters(ctx)
 	}
@@ -106,9 +113,18 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 		}
 	}
 
+	// Get the validators which can earn rewards in this Slash Window.
+	validatorRewardSet := types.ValidatorRewardSet{
+		ValidatorMap: make(map[string]bool),
+	}
+	k.CurrentValidatorRewardSet(ctx, func(valRewardSet types.ValidatorRewardSet) bool {
+		validatorRewardSet = valRewardSet
+		return false
+	})
+
 	// update miss counting & slashing
 	voteTargetsLen := len(params.MandatoryList)
-	claimSlice := types.ClaimMapToSlice(validatorClaimMap)
+	claimSlice, rewardSlice := types.ClaimMapToSlices(validatorClaimMap, validatorRewardSet.ValidatorMap)
 	for _, claim := range claimSlice {
 		misses := uint64(voteTargetsLen - int(claim.MandatoryWinCount))
 		if misses == 0 {
@@ -125,7 +141,7 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 		int64(params.VotePeriod),
 		int64(params.RewardDistributionWindow),
 		voteTargetDenoms,
-		claimSlice,
+		rewardSlice,
 	)
 
 	// Clear the ballot
