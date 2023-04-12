@@ -38,13 +38,13 @@ var (
 
 // Default parameter values
 const (
-	DefaultVotePeriod               = BlocksPerMinute / 2 // 30 seconds
-	DefaultSlashWindow              = BlocksPerWeek       // window for a week
-	DefaultRewardDistributionWindow = BlocksPerYear       // window for a year
-	DefaultHistoricStampPeriod      = BlocksPerMinute * 5 // window for 5 minutes
-	DefaultMaximumPriceStamps       = 36                  // retain for 3 hours
-	DefaultMedianStampPeriod        = BlocksPerHour * 3   // window for 3 hours
-	DefaultMaximumMedianStamps      = 24                  // retain for 3 days
+	DefaultVotePeriod               = BlocksPerMinute * 3 / 10 // 18 seconds
+	DefaultSlashWindow              = BlocksPerWeek            // window for a week
+	DefaultRewardDistributionWindow = BlocksPerYear            // window for a year
+	DefaultHistoricStampPeriod      = BlocksPerMinute * 3      // window for 3 minutes
+	DefaultMaximumPriceStamps       = 60                       // retain for 3 hours
+	DefaultMedianStampPeriod        = BlocksPerHour * 3        // window for 3 hours
+	DefaultMaximumMedianStamps      = 24                       // retain for 3 days
 )
 
 // Default parameter values
