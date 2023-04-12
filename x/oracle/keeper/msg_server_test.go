@@ -115,7 +115,7 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 		ctx,
 		valAddr,
 		types.NewAggregateExchangeRatePrevote(
-			hash, valAddr, 1,
+			hash, valAddr, 7,
 		))
 	_, err = s.msgServer.AggregateExchangeRateVote(sdk.WrapSDKContext(ctx), voteMsg)
 	s.Require().NoError(err)
@@ -130,7 +130,7 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 		ctx,
 		valAddr,
 		types.NewAggregateExchangeRatePrevote(
-			hashInvalidRate, valAddr, 1,
+			hashInvalidRate, valAddr, 7,
 		))
 	_, err = s.msgServer.AggregateExchangeRateVote(sdk.WrapSDKContext(ctx), voteMsgInvalidRate)
 	s.Require().NoError(err)

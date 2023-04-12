@@ -82,7 +82,7 @@ func (s *IntegrationTestSuite) TestQuerier_MissCounter() {
 func (s *IntegrationTestSuite) TestQuerier_SlashWindow() {
 	res, err := s.queryClient.SlashWindow(s.ctx.Context(), &types.QuerySlashWindow{})
 	s.Require().NoError(err)
-	s.Require().Equal(uint64(1), res.WindowProgress)
+	s.Require().Equal(uint64(3), res.WindowProgress)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_AggregatePrevote() {
