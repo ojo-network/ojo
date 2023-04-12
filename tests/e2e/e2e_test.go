@@ -19,9 +19,9 @@ func (s *IntegrationTestSuite) TestUpdateOracleParams() {
 	params, err := s.orchestrator.OjoClient.QueryClient.QueryParams()
 	s.Require().NoError(err)
 
-	s.Require().Equal(uint64(5), params.HistoricStampPeriod)
+	s.Require().Equal(uint64(3), params.HistoricStampPeriod)
 	s.Require().Equal(uint64(4), params.MaximumPriceStamps)
-	s.Require().Equal(uint64(20), params.MedianStampPeriod)
+	s.Require().Equal(uint64(12), params.MedianStampPeriod)
 
 	err = grpc.SubmitAndPassProposal(
 		s.orchestrator.OjoClient,
