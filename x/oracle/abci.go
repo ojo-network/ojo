@@ -50,7 +50,7 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 		addr := v.GetOperator()
 		power := v.GetConsensusPower(powerReduction)
 		totalBondedPower += power
-		validatorClaimMap[addr.String()] = types.NewClaim(power, 0, addr)
+		validatorClaimMap[addr.String()] = types.NewClaim(power, 0, 0, addr)
 	}
 
 	// voteTargets defines the symbol (ticker) denoms that we require votes on
@@ -90,7 +90,7 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 			return err
 		}
 
-		// Get median of exchange rates
+		// Get weighted median of exchange rates
 		exchangeRate, err := Tally(ballotDenom.Ballot, rewardBand, validatorClaimMap, incrementWin)
 		if err != nil {
 			return err
@@ -158,24 +158,24 @@ func Tally(
 	validatorClaimMap map[string]types.Claim,
 	incrementWin bool,
 ) (sdk.Dec, error) {
-	median, err := ballot.Median()
+	weightedMedian, err := ballot.WeightedMedian()
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
-	standardDeviation, err := ballot.StandardDeviation(median)
+	standardDeviation, err := ballot.StandardDeviation()
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
 
-	// rewardSpread is the MAX((median * (rewardBand/2)), standardDeviation)
-	rewardSpread := median.Mul(rewardBand.QuoInt64(2))
+	// rewardSpread is the MAX((weightedMedian * (rewardBand/2)), standardDeviation)
+	rewardSpread := weightedMedian.Mul(rewardBand.QuoInt64(2))
 	rewardSpread = sdk.MaxDec(rewardSpread, standardDeviation)
 
 	for _, tallyVote := range ballot {
 		// Filter ballot winners. For voters, we filter out the tally vote iff:
-		// (median - rewardSpread) <= ExchangeRate <= (median + rewardSpread)
-		if (tallyVote.ExchangeRate.GTE(median.Sub(rewardSpread)) &&
-			tallyVote.ExchangeRate.LTE(median.Add(rewardSpread))) ||
+		// (weightedMedian - rewardSpread) <= ExchangeRate <= (weightedMedian + rewardSpread)
+		if (tallyVote.ExchangeRate.GTE(weightedMedian.Sub(rewardSpread)) &&
+			tallyVote.ExchangeRate.LTE(weightedMedian.Add(rewardSpread))) ||
 			!tallyVote.ExchangeRate.IsPositive() {
 
 			key := tallyVote.Voter.String()
@@ -184,10 +184,10 @@ func Tally(
 			if incrementWin {
 				claim.MandatoryWinCount++
 			}
-
+			claim.Weight += tallyVote.Power
 			validatorClaimMap[key] = claim
 		}
 	}
 
-	return median, nil
+	return weightedMedian, nil
 }

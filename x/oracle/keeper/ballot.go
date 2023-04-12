@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"sort"
+
 	"github.com/ojo-network/ojo/x/oracle/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -32,6 +34,11 @@ func (k Keeper) OrganizeBallotByDenom(
 
 	k.IterateAggregateExchangeRateVotes(ctx, aggregateHandler)
 
+	// sort created ballots
+	for denom, ballot := range votes {
+		sort.Sort(ballot)
+		votes[denom] = ballot
+	}
 	return types.BallotMapToSlice(votes)
 }
 
