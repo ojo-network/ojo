@@ -10,7 +10,7 @@ service Query {
   // QueryAirdropAccount returns an existing airdrop account, along with whether or not
   // the user is eligible to claim, and whether or not the airdrop has been claimed.
   // If the airdrop has been claimed, the account to which the tokens were sent should be
-  //returned as well.
+  // returned as well.
   rpc QueryAirdropAccount(QueryAirdropAccountRequest) returns (QueryAirdropAccountResponse) {
     option (google.api.http).get = "/ojo/airdrop/{address}";
   }

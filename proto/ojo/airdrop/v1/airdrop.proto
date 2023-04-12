@@ -2,6 +2,7 @@ syntax = "proto3";
 package ojo.airdrop.v1;
 
 import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/ojo-network/ojo/x/airdrop/types";
 
@@ -19,10 +20,9 @@ message Params {
   // The percentage of the initial airdrop that users must delegate in order to
   // receive their second portion.
   // E.g., if we want to require users to stake their entire initial airdrop, this will be 1.
-  uint64 delegation_requirement = 2;
+  cosmos.base.v1beta1.DecProto delegation_requirement = 2;
   
   // The multiplier for the amount of tokens users will receive once they claim their airdrop.
   // E.g., if we want users to receive an equal second half, this will be 2.
-  uint64 airdrop_factor = 3;
-
+  cosmos.base.v1beta1.DecProto airdrop_factor = 3;
 }

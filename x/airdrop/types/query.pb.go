@@ -180,7 +180,7 @@ type QueryClient interface {
 	// QueryAirdropAccount returns an existing airdrop account, along with whether or not
 	// the user is eligible to claim, and whether or not the airdrop has been claimed.
 	// If the airdrop has been claimed, the account to which the tokens were sent should be
-	//returned as well.
+	// returned as well.
 	QueryAirdropAccount(ctx context.Context, in *QueryAirdropAccountRequest, opts ...grpc.CallOption) (*QueryAirdropAccountResponse, error)
 }
 
@@ -206,7 +206,7 @@ type QueryServer interface {
 	// QueryAirdropAccount returns an existing airdrop account, along with whether or not
 	// the user is eligible to claim, and whether or not the airdrop has been claimed.
 	// If the airdrop has been claimed, the account to which the tokens were sent should be
-	//returned as well.
+	// returned as well.
 	QueryAirdropAccount(context.Context, *QueryAirdropAccountRequest) (*QueryAirdropAccountResponse, error)
 }
 
