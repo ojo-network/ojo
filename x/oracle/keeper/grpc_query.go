@@ -307,3 +307,26 @@ func (q querier) MedianDeviations(
 
 	return &types.QueryMedianDeviationsResponse{MedianDeviations: *medianDeviations.Sort()}, nil
 }
+
+// ValidatorRewardSet queries the list of validators that can earn rewards in
+// the current Slash Window.
+func (q querier) ValidatorRewardSet(
+	goCtx context.Context,
+	req *types.QueryValidatorRewardSet,
+) (*types.QueryValidatorRewardSetResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	validatorRewardSet := types.ValidatorRewardSet{}
+	q.CurrentValidatorRewardSet(ctx, func(valSet types.ValidatorRewardSet) bool {
+		validatorRewardSet = valSet
+		return false
+	})
+
+	return &types.QueryValidatorRewardSetResponse{
+		Validators: validatorRewardSet,
+	}, nil
+}

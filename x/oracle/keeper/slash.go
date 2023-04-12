@@ -2,6 +2,9 @@ package keeper
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/ojo-network/ojo/util"
+	"github.com/ojo-network/ojo/x/oracle/types"
 )
 
 // SlashAndResetMissCounters iterates over all the current missed counters and
@@ -61,4 +64,43 @@ func (k Keeper) PossibleWinsPerSlashWindow(ctx sdk.Context) int64 {
 	numberOfAssets := int64(len(k.GetParams(ctx).AcceptList))
 
 	return (votePeriodsPerWindow * numberOfAssets)
+}
+
+// SetValidatorRewardSet will take all the current validators and store them
+// in the ValidatorRewardSet to earn rewards in the current Slash Window.
+func (k Keeper) SetValidatorRewardSet(ctx sdk.Context) {
+	validatorRewardSet := types.ValidatorRewardSet{
+		ValidatorMap: make(map[string]bool),
+	}
+	for _, v := range k.StakingKeeper.GetBondedValidatorsByPower(ctx) {
+		addr := v.GetOperator()
+		validatorRewardSet.ValidatorMap[addr.String()] = true
+	}
+
+	store := ctx.KVStore(k.storeKey)
+	bz := k.cdc.MustMarshal(&validatorRewardSet)
+	store.Set(types.KeyValidatorRewardSet(uint64(ctx.BlockHeight())), bz)
+}
+
+// CurrentValidatorRewardSet returns the latest ValidatorRewardSet in the store.
+func (k Keeper) CurrentValidatorRewardSet(
+	ctx sdk.Context,
+	handler func(types.ValidatorRewardSet) bool,
+) {
+	store := ctx.KVStore(k.storeKey)
+
+	// make sure we have one zero byte to correctly separate blocknum
+	prefix := util.ConcatBytes(1, types.KeyPrefixValidatorRewardSet)
+	iter := sdk.KVStoreReversePrefixIteratorPaginated(store, prefix, 1, 1)
+	defer iter.Close()
+
+	for ; iter.Valid(); iter.Next() {
+		validatorRewardSet := types.ValidatorRewardSet{
+			ValidatorMap: make(map[string]bool),
+		}
+		k.cdc.MustUnmarshal(iter.Value(), &validatorRewardSet)
+		if handler(validatorRewardSet) {
+			break
+		}
+	}
 }
