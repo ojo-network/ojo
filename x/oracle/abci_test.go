@@ -116,7 +116,7 @@ func createVotes(hash string, val sdk.ValAddress, rates sdk.DecCoins, blockHeigh
 
 func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	app, ctx := s.app, s.ctx
-	ctx = ctx.WithBlockHeight(1)
+	ctx = ctx.WithBlockHeight(0)
 	preVoteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx) / 2)
 	voteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx)/2 + 1)
 
@@ -249,7 +249,7 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 	app, ctx := s.app, s.ctx
 	originalBlockHeight := ctx.BlockHeight()
-	ctx = ctx.WithBlockHeight(1)
+	ctx = ctx.WithBlockHeight(0)
 	preVoteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx) / 2)
 	voteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx)/2 + 1)
 
@@ -290,7 +290,6 @@ func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 	val1PreVotes, val1Votes := createVotes("hash1", valAddr1, val1DecCoins, h)
 	val2PreVotes, val2Votes := createVotes("hash2", valAddr2, val2DecCoins, h)
 	val3PreVotes, val3Votes := createVotes("hash3", valAddr3, val3DecCoins, h)
-
 	// validator 1, 2, and 3 vote on both currencies so all have 0 misses
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr1, val1PreVotes)
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
@@ -303,9 +302,9 @@ func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 237), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1).Rewards[0])
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 237), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr2).Rewards[0])
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 237), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr3).Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 142), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1).Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 142), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr2).Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 142), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr3).Rewards[0])
 
 	// update prevotes' block
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
@@ -356,9 +355,9 @@ func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 474), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1).Rewards[0])
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 459), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr2).Rewards[0])
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 474), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr3).Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 284), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1).Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 275), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr2).Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 284), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr3).Rewards[0])
 
 	// update prevotes' block
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
@@ -382,9 +381,9 @@ func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 711), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1).Rewards[0])
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 681), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr2).Rewards[0])
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 711), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr3).Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 426), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1).Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 408), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr2).Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 426), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr3).Rewards[0])
 
 	ctx = ctx.WithBlockHeight(originalBlockHeight)
 }
@@ -408,8 +407,8 @@ func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 	app, ctx := s.app, s.ctx
 	blockHeight := ctx.BlockHeight()
 
-	var historicStampPeriod int64 = 5
-	var medianStampPeriod int64 = 20
+	var historicStampPeriod int64 = 3
+	var medianStampPeriod int64 = 12
 	var maximumPriceStamps int64 = 4
 	var maximumMedianStamps int64 = 3
 
