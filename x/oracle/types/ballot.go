@@ -181,6 +181,7 @@ func ClaimMapToSlices(claims map[string]Claim, rewardMap map[string]bool) ([]Cla
 		if _, ok := rewardMap[claim.Recipient.String()]; ok {
 			r[j] = Claim{
 				Power:             claim.Power,
+				Weight:            claim.Weight,
 				MandatoryWinCount: claim.MandatoryWinCount,
 				Recipient:         claim.Recipient,
 			}

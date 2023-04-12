@@ -369,8 +369,8 @@ func TestStandardDeviationUnsorted(t *testing.T) {
 
 func TestClaimMapToSlices(t *testing.T) {
 	valAddresses := GenerateRandomValAddr(2)
-	claim1 := NewClaim(10, 4, valAddresses[0])
-	claim2 := NewClaim(10, 4, valAddresses[1])
+	claim1 := NewClaim(10, 1, 4, valAddresses[0])
+	claim2 := NewClaim(10, 1, 4, valAddresses[1])
 	claimSlice, rewardSlice := ClaimMapToSlices(
 		map[string]Claim{
 			"testClaim":    claim1,
