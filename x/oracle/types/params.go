@@ -217,7 +217,7 @@ func (p Params) Validate() error {
 		return fmt.Errorf("oracle parameter SlashWindow must be greater than or equal with VotePeriod")
 	}
 
-	if p.SlashWindow%p.VotePeriod != 0 {
+	if p.SlashWindow % p.VotePeriod != 0 {
 		return fmt.Errorf("oracle parameter SlashWindow must be an exact multiple of VotePeriod")
 	}
 
