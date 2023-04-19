@@ -72,32 +72,83 @@ func (m *Params) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Params proto.InternalMessageInfo
 
+type AirdropAccount struct {
+	// The address of the account that was created at genesis with the initial airdrop.
+	OriginAddress string `protobuf:"bytes,1,opt,name=origin_address,json=originAddress,proto3" json:"origin_address,omitempty"`
+	// The amount of tokens that were airdropped to the genesis account.
+	OriginAmount *types.DecProto `protobuf:"bytes,2,opt,name=origin_amount,json=originAmount,proto3" json:"origin_amount,omitempty"`
+	// The address of the account that the user has claimed the 2nd half of their airdrop to.
+	ClaimAddress *types.DecProto `protobuf:"bytes,3,opt,name=claim_address,json=claimAddress,proto3" json:"claim_address,omitempty"`
+	// The amount of tokens claimed in the 2nd half of the airdrop.
+	ClaimAmount *types.DecProto `protobuf:"bytes,4,opt,name=claim_amount,json=claimAmount,proto3" json:"claim_amount,omitempty"`
+}
+
+func (m *AirdropAccount) Reset()         { *m = AirdropAccount{} }
+func (m *AirdropAccount) String() string { return proto.CompactTextString(m) }
+func (*AirdropAccount) ProtoMessage()    {}
+func (*AirdropAccount) Descriptor() ([]byte, []int) {
+	return fileDescriptor_295074f7d14bf8dc, []int{1}
+}
+func (m *AirdropAccount) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *AirdropAccount) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_AirdropAccount.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *AirdropAccount) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AirdropAccount.Merge(m, src)
+}
+func (m *AirdropAccount) XXX_Size() int {
+	return m.Size()
+}
+func (m *AirdropAccount) XXX_DiscardUnknown() {
+	xxx_messageInfo_AirdropAccount.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AirdropAccount proto.InternalMessageInfo
+
 func init() {
 	proto.RegisterType((*Params)(nil), "ojo.airdrop.v1.Params")
+	proto.RegisterType((*AirdropAccount)(nil), "ojo.airdrop.v1.AirdropAccount")
 }
 
 func init() { proto.RegisterFile("ojo/airdrop/v1/airdrop.proto", fileDescriptor_295074f7d14bf8dc) }
 
 var fileDescriptor_295074f7d14bf8dc = []byte{
-	// 287 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x90, 0xbf, 0x4e, 0xc3, 0x30,
-	0x10, 0xc6, 0x63, 0x40, 0x1d, 0x02, 0xed, 0x10, 0x01, 0xaa, 0x2a, 0xb0, 0x2a, 0x58, 0x2a, 0x24,
-	0x6c, 0x05, 0xde, 0xa0, 0xaa, 0x10, 0x63, 0x55, 0x31, 0xb1, 0x54, 0x8e, 0x7b, 0x04, 0xa7, 0x4d,
-	0x2e, 0xd8, 0x6e, 0x68, 0xdf, 0x82, 0xc7, 0x2a, 0x5b, 0x47, 0x46, 0x48, 0x5e, 0x04, 0xe5, 0x4f,
-	0xe9, 0xca, 0xf6, 0xe9, 0x3b, 0xff, 0xfc, 0xd3, 0x9d, 0x7b, 0x81, 0x11, 0x72, 0xa1, 0xf4, 0x4c,
-	0x63, 0xca, 0x33, 0x7f, 0x17, 0x59, 0xaa, 0xd1, 0xa2, 0xd7, 0xc1, 0x08, 0xd9, 0xae, 0xca, 0xfc,
-	0xde, 0x69, 0x88, 0x21, 0x56, 0x23, 0x5e, 0xa6, 0xfa, 0x55, 0x8f, 0x4a, 0x34, 0x31, 0x1a, 0x1e,
-	0x08, 0x03, 0x3c, 0xf3, 0x03, 0xb0, 0xc2, 0xe7, 0x12, 0x55, 0x52, 0xcf, 0xaf, 0x3e, 0x89, 0xdb,
-	0x1a, 0x0b, 0x2d, 0x62, 0xe3, 0x5d, 0xbb, 0x6d, 0x58, 0xa5, 0x4a, 0xaf, 0xa7, 0xc1, 0x02, 0xe5,
-	0xdc, 0x74, 0x49, 0x9f, 0x0c, 0x8e, 0x26, 0x27, 0x75, 0x39, 0xac, 0x3a, 0xef, 0xc9, 0x3d, 0x9f,
-	0xc1, 0x02, 0x42, 0x61, 0x15, 0x26, 0x53, 0x0d, 0x6f, 0x4b, 0xa5, 0x21, 0x86, 0xc4, 0x76, 0x0f,
-	0xfa, 0x64, 0x70, 0x7c, 0x77, 0xc9, 0x6a, 0x21, 0x2b, 0x85, 0xac, 0x11, 0xb2, 0x11, 0xc8, 0x71,
-	0xa9, 0x9b, 0x9c, 0xed, 0xe1, 0xc9, 0x9e, 0xf5, 0x46, 0x6e, 0xa7, 0xd9, 0x64, 0xfa, 0x22, 0xa4,
-	0x45, 0xdd, 0x3d, 0xfc, 0xcf, 0x6f, 0xed, 0x06, 0x7a, 0xa8, 0x98, 0xe1, 0xe3, 0xe6, 0x87, 0x3a,
-	0x9b, 0x9c, 0x92, 0x6d, 0x4e, 0xc9, 0x77, 0x4e, 0xc9, 0x47, 0x41, 0x9d, 0x6d, 0x41, 0x9d, 0xaf,
-	0x82, 0x3a, 0xcf, 0x37, 0xa1, 0xb2, 0xaf, 0xcb, 0x80, 0x49, 0x8c, 0x39, 0x46, 0x78, 0x9b, 0x80,
-	0x7d, 0x47, 0x3d, 0x2f, 0x33, 0x5f, 0xfd, 0x9d, 0xd9, 0xae, 0x53, 0x30, 0x41, 0xab, 0x3a, 0xce,
-	0xfd, 0x6f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x23, 0x58, 0x4a, 0x59, 0x82, 0x01, 0x00, 0x00,
+	// 369 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x92, 0x41, 0x8b, 0xda, 0x40,
+	0x18, 0x86, 0x13, 0x2b, 0x42, 0xc7, 0x24, 0x87, 0xd0, 0x16, 0x91, 0x76, 0x10, 0x4b, 0x41, 0x0a,
+	0xcd, 0x90, 0xf6, 0x0f, 0x54, 0x91, 0xd2, 0xa3, 0x84, 0x9e, 0x7a, 0x09, 0x93, 0xc9, 0x6c, 0x76,
+	0xd4, 0xe4, 0xcb, 0x4e, 0x46, 0x57, 0x8f, 0xfb, 0x0f, 0xf6, 0x67, 0xb9, 0x37, 0x8f, 0x7b, 0xdc,
+	0xd5, 0x3f, 0xb2, 0x24, 0x93, 0xe8, 0x35, 0xb7, 0x8f, 0x77, 0xe6, 0x79, 0xdf, 0xef, 0x85, 0x0f,
+	0x7d, 0x86, 0x25, 0x10, 0x2a, 0x64, 0x2c, 0x21, 0x27, 0x5b, 0xbf, 0x19, 0xbd, 0x5c, 0x82, 0x02,
+	0xd7, 0x81, 0x25, 0x78, 0x8d, 0xb4, 0xf5, 0x87, 0x1f, 0x12, 0x48, 0xa0, 0x7a, 0x22, 0xe5, 0xa4,
+	0x7f, 0x0d, 0x31, 0x83, 0x22, 0x85, 0x82, 0x44, 0xb4, 0xe0, 0x64, 0xeb, 0x47, 0x5c, 0x51, 0x9f,
+	0x30, 0x10, 0x99, 0x7e, 0x1f, 0x3f, 0x99, 0xa8, 0xb7, 0xa0, 0x92, 0xa6, 0x85, 0xfb, 0x15, 0xd9,
+	0x7c, 0x97, 0x0b, 0xb9, 0x0f, 0xa3, 0x35, 0xb0, 0x55, 0x31, 0x30, 0x47, 0xe6, 0xa4, 0x1b, 0x58,
+	0x5a, 0x9c, 0x55, 0x9a, 0xfb, 0x0f, 0x7d, 0x8a, 0xf9, 0x9a, 0x27, 0x54, 0x09, 0xc8, 0x42, 0xc9,
+	0xef, 0x36, 0x42, 0xf2, 0x94, 0x67, 0x6a, 0xd0, 0x19, 0x99, 0x93, 0xfe, 0xcf, 0x2f, 0x9e, 0x0e,
+	0xf4, 0xca, 0x40, 0xaf, 0x0e, 0xf4, 0xe6, 0x9c, 0x2d, 0xca, 0xb8, 0xe0, 0xe3, 0x15, 0x0e, 0xae,
+	0xac, 0x3b, 0x47, 0x4e, 0xdd, 0x24, 0xbc, 0xa1, 0x4c, 0x81, 0x1c, 0xbc, 0x6b, 0xe3, 0x66, 0xd7,
+	0xd0, 0x9f, 0x8a, 0x19, 0x3f, 0x74, 0x90, 0x33, 0xd5, 0xca, 0x94, 0x31, 0xd8, 0x64, 0xca, 0xfd,
+	0x86, 0x1c, 0x90, 0x22, 0x11, 0x59, 0x48, 0xe3, 0x58, 0xf2, 0x42, 0x97, 0x7a, 0x1f, 0xd8, 0x5a,
+	0x9d, 0x6a, 0xd1, 0x9d, 0x21, 0xbb, 0xf9, 0x96, 0x96, 0x5c, 0xbb, 0x32, 0x56, 0x6d, 0x52, 0x21,
+	0xa5, 0x07, 0x5b, 0x53, 0x91, 0x5e, 0x92, 0x5a, 0x55, 0xb0, 0x2a, 0xa6, 0xd9, 0xe3, 0x37, 0xb2,
+	0x6a, 0x0f, 0xbd, 0x46, 0xb7, 0x8d, 0x45, 0x5f, 0x5b, 0x54, 0xc4, 0xec, 0xef, 0xe1, 0x15, 0x1b,
+	0x87, 0x13, 0x36, 0x8f, 0x27, 0x6c, 0xbe, 0x9c, 0xb0, 0xf9, 0x78, 0xc6, 0xc6, 0xf1, 0x8c, 0x8d,
+	0xe7, 0x33, 0x36, 0xfe, 0x7f, 0x4f, 0x84, 0xba, 0xdd, 0x44, 0x1e, 0x83, 0x94, 0xc0, 0x12, 0x7e,
+	0x64, 0x5c, 0xdd, 0x83, 0x5c, 0x95, 0x33, 0xd9, 0x5d, 0x4e, 0x4d, 0xed, 0x73, 0x5e, 0x44, 0xbd,
+	0xea, 0x40, 0x7e, 0xbd, 0x05, 0x00, 0x00, 0xff, 0xff, 0x34, 0xdc, 0x7b, 0xd7, 0x86, 0x02, 0x00,
+	0x00,
 }
 
 func (m *Params) Marshal() (dAtA []byte, err error) {
@@ -152,6 +203,72 @@ func (m *Params) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *AirdropAccount) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *AirdropAccount) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *AirdropAccount) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.ClaimAmount != nil {
+		{
+			size, err := m.ClaimAmount.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintAirdrop(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.ClaimAddress != nil {
+		{
+			size, err := m.ClaimAddress.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintAirdrop(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.OriginAmount != nil {
+		{
+			size, err := m.OriginAmount.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintAirdrop(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.OriginAddress) > 0 {
+		i -= len(m.OriginAddress)
+		copy(dAtA[i:], m.OriginAddress)
+		i = encodeVarintAirdrop(dAtA, i, uint64(len(m.OriginAddress)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintAirdrop(dAtA []byte, offset int, v uint64) int {
 	offset -= sovAirdrop(v)
 	base := offset
@@ -178,6 +295,31 @@ func (m *Params) Size() (n int) {
 	}
 	if m.AirdropFactor != nil {
 		l = m.AirdropFactor.Size()
+		n += 1 + l + sovAirdrop(uint64(l))
+	}
+	return n
+}
+
+func (m *AirdropAccount) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.OriginAddress)
+	if l > 0 {
+		n += 1 + l + sovAirdrop(uint64(l))
+	}
+	if m.OriginAmount != nil {
+		l = m.OriginAmount.Size()
+		n += 1 + l + sovAirdrop(uint64(l))
+	}
+	if m.ClaimAddress != nil {
+		l = m.ClaimAddress.Size()
+		n += 1 + l + sovAirdrop(uint64(l))
+	}
+	if m.ClaimAmount != nil {
+		l = m.ClaimAmount.Size()
 		n += 1 + l + sovAirdrop(uint64(l))
 	}
 	return n
@@ -306,6 +448,196 @@ func (m *Params) Unmarshal(dAtA []byte) error {
 				m.AirdropFactor = &types.DecProto{}
 			}
 			if err := m.AirdropFactor.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipAirdrop(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthAirdrop
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *AirdropAccount) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowAirdrop
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: AirdropAccount: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: AirdropAccount: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field OriginAddress", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowAirdrop
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthAirdrop
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthAirdrop
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.OriginAddress = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field OriginAmount", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowAirdrop
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthAirdrop
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthAirdrop
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.OriginAmount == nil {
+				m.OriginAmount = &types.DecProto{}
+			}
+			if err := m.OriginAmount.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ClaimAddress", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowAirdrop
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthAirdrop
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthAirdrop
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.ClaimAddress == nil {
+				m.ClaimAddress = &types.DecProto{}
+			}
+			if err := m.ClaimAddress.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ClaimAmount", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowAirdrop
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthAirdrop
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthAirdrop
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.ClaimAmount == nil {
+				m.ClaimAmount = &types.DecProto{}
+			}
+			if err := m.ClaimAmount.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
