@@ -24,17 +24,3 @@ message Params {
   // E.g., if we want users to receive an equal second half, this will be 2.
   cosmos.base.v1beta1.DecProto airdrop_factor = 3;
 }
-
-message AirdropAccount {
-  // The address of the account that was created at genesis with the initial airdrop.
-  string origin_address = 1;
-
-  // The amount of tokens that were airdropped to the genesis account.
-  cosmos.base.v1beta1.DecProto origin_amount = 2;
-
-  // The address of the account that the user has claimed the 2nd half of their airdrop to.
-  cosmos.base.v1beta1.DecProto claim_address = 3;
-
-  // The amount of tokens claimed in the 2nd half of the airdrop.
-  cosmos.base.v1beta1.DecProto claim_amount = 4;
-}
