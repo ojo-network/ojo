@@ -1,4 +1,4 @@
-package oracle
+package airdrop
 
 import (
 	"context"
@@ -18,10 +18,9 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
-	"github.com/ojo-network/ojo/x/airdrop/client/cli"
 	"github.com/ojo-network/ojo/x/airdrop/keeper"
+	simulation "github.com/ojo-network/ojo/x/airdrop/simulations"
 	"github.com/ojo-network/ojo/x/airdrop/types"
-	simulation "github.com/ojo-network/ojo/x/oracle/simulations"
 )
 
 var (
@@ -35,7 +34,7 @@ type AppModuleBasic struct {
 	cdc codec.Codec
 }
 
-// RegisterLegacyAminoCodec registers the x/oracle module's types with a legacy
+// RegisterLegacyAminoCodec registers the x/airdrop module's types with a legacy
 // Amino codec.
 func (AppModuleBasic) RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	// TODO
@@ -46,7 +45,7 @@ func NewAppModuleBasic(cdc codec.Codec) AppModuleBasic {
 	return AppModuleBasic{cdc: cdc}
 }
 
-// Name returns the x/oracle module's name.
+// Name returns the x/airdrop module's name.
 func (AppModuleBasic) Name() string {
 	return types.ModuleName
 }
@@ -55,17 +54,17 @@ func (AppModuleBasic) ConsensusVersion() uint64 {
 	return 1
 }
 
-// RegisterInterfaces registers the x/oracle module's interface types.
+// RegisterInterfaces registers the x/airdrop module's interface types.
 func (AppModuleBasic) RegisterInterfaces(reg cdctypes.InterfaceRegistry) {
 	types.RegisterInterfaces(reg)
 }
 
-// DefaultGenesis returns the x/oracle module's default genesis state.
+// DefaultGenesis returns the x/airdrop module's default genesis state.
 func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	return cdc.MustMarshalJSON(types.DefaultGenesisState())
 }
 
-// ValidateGenesis performs genesis state validation for the x/oracle module.
+// ValidateGenesis performs genesis state validation for the x/airdrop module.
 func (AppModuleBasic) ValidateGenesis(
 	cdc codec.JSONCodec,
 	_ client.TxEncodingConfig,
@@ -83,7 +82,7 @@ func (AppModuleBasic) ValidateGenesis(
 // gRPC service.
 func (AppModuleBasic) RegisterRESTRoutes(_ client.Context, _ *mux.Router) {}
 
-// RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the x/oracle
+// RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the x/airdrop
 // module.
 func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
 	if err := types.RegisterQueryHandlerClient(context.Background(), mux, types.NewQueryClient(clientCtx)); err != nil {
@@ -91,17 +90,17 @@ func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *r
 	}
 }
 
-// GetTxCmd returns the x/oracle module's root tx command.
+// GetTxCmd returns the x/airdrop module's root tx command.
 func (AppModuleBasic) GetTxCmd() *cobra.Command {
-	return cli.GetTxCmd()
+	return nil
 }
 
-// GetQueryCmd returns the x/oracle module's root query command.
+// GetQueryCmd returns the x/airdrop module's root query command.
 func (AppModuleBasic) GetQueryCmd() *cobra.Command {
-	return cli.GetQueryCmd()
+	return nil
 }
 
-// AppModule implements the AppModule interface for the x/oracle module.
+// AppModule implements the AppModule interface for the x/airdrop module.
 type AppModule struct {
 	AppModuleBasic
 
@@ -124,17 +123,17 @@ func NewAppModule(
 	}
 }
 
-// Name returns the x/oracle module's name.
+// Name returns the x/airdrop module's name.
 func (am AppModule) Name() string {
 	return am.AppModuleBasic.Name()
 }
 
-// Deprecated: Route returns the message routing key for the x/oracle module.
+// Deprecated: Route returns the message routing key for the x/airdrop module.
 func (am AppModule) Route() sdk.Route {
 	return sdk.Route{}
 }
 
-// QuerierRoute returns the x/oracle module's query routing key.
+// QuerierRoute returns the x/airdrop module's query routing key.
 func (AppModule) QuerierRoute() string { return types.QuerierRoute }
 
 // LegacyQuerierHandler returns a no-op legacy querier.
@@ -150,10 +149,10 @@ func (am AppModule) RegisterServices(cfg module.Configurator) {
 	types.RegisterQueryServer(cfg.QueryServer(), keeper.NewQuerier(am.keeper))
 }
 
-// RegisterInvariants registers the x/oracle module's invariants.
+// RegisterInvariants registers the x/airdrop module's invariants.
 func (am AppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
 
-// InitGenesis performs the x/oracle module's genesis initialization. It returns
+// InitGenesis performs the x/airdrop module's genesis initialization. It returns
 // no validator updates.
 func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, gs json.RawMessage) []abci.ValidatorUpdate {
 	var genState types.GenesisState
@@ -165,17 +164,17 @@ func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, gs json.Ra
 	return []abci.ValidatorUpdate{}
 }
 
-// ExportGenesis returns the x/oracle module's exported genesis state as raw
+// ExportGenesis returns the x/airdrop module's exported genesis state as raw
 // JSON bytes.
 func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.RawMessage {
 	genState := ExportGenesis(ctx, am.keeper)
 	return cdc.MustMarshalJSON(genState)
 }
 
-// BeginBlock executes all ABCI BeginBlock logic respective to the x/oracle module.
+// BeginBlock executes all ABCI BeginBlock logic respective to the x/airdrop module.
 func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 
-// EndBlock executes all ABCI EndBlock logic respective to the x/oracle module.
+// EndBlock executes all ABCI EndBlock logic respective to the x/airdrop module.
 // It returns no validator updates.
 func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
 	if err := EndBlocker(ctx, am.keeper); err != nil {

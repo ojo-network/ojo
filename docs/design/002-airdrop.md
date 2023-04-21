@@ -30,7 +30,7 @@ We also need to ensure that we're able to create vesting accounts for the initia
 
 - `ExpiryBlock` - The block at which all unclaimed AirdropAccounts will instead mint tokens into the community pool. After this block, all unclaimed airdrop accounts will no longer be able to be claimed.
 - `DelegationRequirement` - The percentage of the initial airdrop that users must delegate in order to receive their second portion. E.g., if we want to require users to stake their entire initial airdrop, this will be `1`.
-- `AirdropFactor` - The multiplier for the amount of tokens users will receive once they claim their airdrop. E.g., if we want users to receive an equal second half, this will be `2`.
+- `AirdropFactor` - The multiplier for the amount of tokens users will receive once they claim their airdrop. E.g., if we want users to receive an equal second half, this will be `1`.
 
 ### Proposed API
 

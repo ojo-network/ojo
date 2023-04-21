@@ -2,7 +2,7 @@ syntax = "proto3";
 package ojo.airdrop.v1;
 
 import "gogoproto/gogo.proto";
-import "cosmos/base/v1beta1/coin.proto";
+import "cosmos_proto/cosmos.proto";
 
 option go_package = "github.com/ojo-network/ojo/x/airdrop/types";
 
@@ -13,16 +13,23 @@ message Params {
   // The block at which all unclaimed AirdropAccounts will instead mint tokens
   // into the community pool. After this block, all unclaimed airdrop accounts
   // will no longer be able to be claimed.
-  uint64 expiry_blocks = 1;
+  uint64 expiry_block = 1;
 
   // The percentage of the initial airdrop that users must delegate in order to
   // receive their second portion.
   // E.g., if we want to require users to stake their entire initial airdrop, this will be 1.
-  cosmos.base.v1beta1.DecProto delegation_requirement = 2;
+  // cosmos.base.v1beta1.Dec delegation_requirement = 1;
+  string delegation_requirement = 2 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "Dec"
+  ];
   
   // The multiplier for the amount of tokens users will receive once they claim their airdrop.
   // E.g., if we want users to receive an equal second half, this will be 2.
-  cosmos.base.v1beta1.DecProto airdrop_factor = 3;
+  string airdrop_factor = 3 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "Dec"
+  ];
 }
 
 message AirdropAccount {
@@ -30,11 +37,20 @@ message AirdropAccount {
   string origin_address = 1;
 
   // The amount of tokens that were airdropped to the genesis account.
-  cosmos.base.v1beta1.DecProto origin_amount = 2;
+  string origin_amount = 2 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "Dec"
+  ];
 
   // The address of the account that the user has claimed the 2nd half of their airdrop to.
-  cosmos.base.v1beta1.DecProto claim_address = 3;
+  string claim_address = 3 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "Dec"
+  ];
 
   // The amount of tokens claimed in the 2nd half of the airdrop.
-  cosmos.base.v1beta1.DecProto claim_amount = 4;
+  string claim_amount = 4 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "Dec"
+  ];
 }
