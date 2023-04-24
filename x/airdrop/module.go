@@ -19,7 +19,6 @@ import (
 
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/ojo-network/ojo/x/airdrop/keeper"
-	simulation "github.com/ojo-network/ojo/x/airdrop/simulations"
 	"github.com/ojo-network/ojo/x/airdrop/types"
 )
 
@@ -186,28 +185,30 @@ func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.Val
 
 // GenerateGenesisState creates a randomized GenState of the distribution module.
 func (AppModule) GenerateGenesisState(simState *module.SimulationState) {
-	simulation.RandomizedGenState(simState)
+	// TODO
+	// simulation.RandomizedGenState(simState)
 }
 
-// WeightedOperations returns the all the oracle module operations with their respective weights.
+// WeightedOperations returns the all the airdrop module operations with their respective weights.
 func (am AppModule) WeightedOperations(simState module.SimulationState) []simtypes.WeightedOperation {
-	return simulation.WeightedOperations(
-		simState.AppParams, simState.Cdc, am.accountKeeper, am.bankKeeper, am.keeper,
-	)
+	// TODO
+	return []simtypes.WeightedOperation{}
 }
 
-// ProposalContents returns all the oracle content functions used to
+// ProposalContents returns all the airdrop content functions used to
 // simulate governance proposals.
 func (am AppModule) ProposalContents(_ module.SimulationState) []simtypes.WeightedProposalContent {
 	return nil
 }
 
-// RandomizedParams creates randomized oracle param changes for the simulator.
+// RandomizedParams creates randomized airdrop param changes for the simulator.
 func (AppModule) RandomizedParams(r *rand.Rand) []simtypes.ParamChange {
-	return simulation.ParamChanges(r)
+	// TODO
+	return []simtypes.ParamChange{}
 }
 
-// RegisterStoreDecoder registers a decoder for oracle module's types
+// RegisterStoreDecoder registers a decoder for airdrop module's types
 func (am AppModule) RegisterStoreDecoder(sdr sdk.StoreDecoderRegistry) {
-	sdr[types.StoreKey] = simulation.NewDecodeStore(am.cdc)
+	// TODO
+	// sdr[types.StoreKey] = simulation.NewDecodeStore(am.cdc)
 }

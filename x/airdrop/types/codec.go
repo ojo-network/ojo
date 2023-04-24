@@ -29,8 +29,8 @@ func init() {
 // RegisterLegacyAminoCodec registers the necessary x/airdrop interfaces and concrete types
 // on the provided LegacyAmino codec. These types are used for Amino JSON serialization.
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
-	cdc.RegisterConcrete(&MsgCreateAirdropAccount{}, "ojo/airdrop/MsgAggregateExchangeRatePrevote", nil)
-	cdc.RegisterConcrete(&MsgClaimAirdrop{}, "ojo/oracle/MsgAggregateExchangeRateVote", nil)
+	cdc.RegisterConcrete(&MsgCreateAirdropAccount{}, "ojo/airdrop/MsgCreateAirdropAccount", nil)
+	cdc.RegisterConcrete(&MsgClaimAirdrop{}, "ojo/airdrop/MsgClaimAirdrop", nil)
 }
 
 // RegisterInterfaces registers the x/oracle interfaces types with the interface registry

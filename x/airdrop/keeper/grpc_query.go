@@ -8,12 +8,12 @@ import (
 
 var _ types.QueryServer = querier{}
 
-// Querier implements a QueryServer for the x/oracle module.
+// Querier implements a QueryServer for the x/airdrop module.
 type querier struct {
 	Keeper
 }
 
-// NewQuerier returns an implementation of the oracle QueryServer interface
+// NewQuerier returns an implementation of the airdrop QueryServer interface
 // for the provided Keeper.
 func NewQuerier(keeper Keeper) types.QueryServer {
 	return &querier{Keeper: keeper}

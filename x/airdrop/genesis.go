@@ -7,13 +7,13 @@ import (
 	"github.com/ojo-network/ojo/x/airdrop/types"
 )
 
-// InitGenesis initializes the x/oracle module's state from a provided genesis
+// InitGenesis initializes the x/airdrop module's state from a provided genesis
 // state.
 func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, genState types.GenesisState) {
 
 }
 
-// ExportGenesis returns the x/oracle module's exported genesis.
+// ExportGenesis returns the x/airdrop module's exported genesis.
 func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) *types.GenesisState {
 	return nil
 }

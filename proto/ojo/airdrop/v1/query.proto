@@ -10,7 +10,7 @@ option go_package = "github.com/ojo-network/ojo/x/airdrop/types";
 service Query {
   // Params queries all parameters.
   rpc Params(ParamsRequest) returns (ParamsResponse) {
-    option (google.api.http).get = "/ojo/oracle/v1/params";
+    option (google.api.http).get = "/ojo/airdrop/v1/params";
   }
 
   // AirdropAccount returns an existing airdrop account, along with whether or not
@@ -18,7 +18,7 @@ service Query {
   // If the airdrop has been claimed, the account to which the tokens were sent should be
   // returned as well.
   rpc AirdropAccount(AirdropAccountRequest) returns (AirdropAccountResponse) {
-    option (google.api.http).get = "/ojo/airdrop/{address}";
+    option (google.api.http).get = "/ojo/airdrop/v1/{address}";
   }
 }
 
