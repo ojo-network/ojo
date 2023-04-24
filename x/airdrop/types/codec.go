@@ -33,7 +33,7 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgClaimAirdrop{}, "ojo/airdrop/MsgClaimAirdrop", nil)
 }
 
-// RegisterInterfaces registers the x/oracle interfaces types with the interface registry
+// RegisterInterfaces registers the x/airdrop interfaces types with the interface registry
 func RegisterInterfaces(registry codectypes.InterfaceRegistry) {
 	registry.RegisterImplementations((*sdk.Msg)(nil),
 		&MsgCreateAirdropAccount{},

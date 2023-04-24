@@ -23,4 +23,5 @@ func (s *IntegrationTestSuite) TestGetAirdropAccount(t *testing.T) {
 	s.Require().Error(err)
 
 	s.Require().Equal(airdropAccount2.OriginAddress, airdropAccount.OriginAddress)
+	s.Require().Equal(airdropAccount2.OriginAmount, airdropAccount.OriginAmount)
 }
