@@ -16,8 +16,8 @@ import (
 
 	ojoapp "github.com/ojo-network/ojo/app"
 	appparams "github.com/ojo-network/ojo/app/params"
-	"github.com/ojo-network/ojo/x/oracle/keeper"
-	"github.com/ojo-network/ojo/x/oracle/types"
+	"github.com/ojo-network/ojo/x/airdrop/keeper"
+	"github.com/ojo-network/ojo/x/airdrop/types"
 )
 
 const (
@@ -64,7 +64,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	})
 
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
-	types.RegisterQueryServer(queryHelper, keeper.NewQuerier(app.OracleKeeper))
+	types.RegisterQueryServer(queryHelper, keeper.NewQuerier(app.AirdropKeeper))
 
 	sh := teststaking.NewHelper(s.T(), ctx, *app.StakingKeeper)
 	sh.Denom = bondDenom
@@ -84,5 +84,5 @@ func (s *IntegrationTestSuite) SetupTest() {
 	s.app = app
 	s.ctx = ctx
 	s.queryClient = types.NewQueryClient(queryHelper)
-	s.msgServer = keeper.NewMsgServerImpl(app.OracleKeeper)
+	s.msgServer = keeper.NewMsgServerImpl(app.AirdropKeeper)
 }

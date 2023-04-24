@@ -32,6 +32,7 @@ message Params {
   ];
 }
 
+// AirDropAccount defines an account that was created at genesis with an initial airdrop.
 message AirdropAccount {
   // The address of the account that was created at genesis with the initial airdrop.
   string origin_address = 1;
