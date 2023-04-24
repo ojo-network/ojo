@@ -3,7 +3,7 @@ package airdrop
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/ojo-network/ojo/x/oracle/keeper"
+	"github.com/ojo-network/ojo/x/airdrop/keeper"
 )
 
 // EndBlocker is called at the end of every block

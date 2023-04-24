@@ -3,8 +3,8 @@ package airdrop
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/ojo-network/ojo/x/oracle/keeper"
-	"github.com/ojo-network/ojo/x/oracle/types"
+	"github.com/ojo-network/ojo/x/airdrop/keeper"
+	"github.com/ojo-network/ojo/x/airdrop/types"
 )
 
 // InitGenesis initializes the x/oracle module's state from a provided genesis

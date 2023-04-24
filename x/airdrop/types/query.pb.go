@@ -28,23 +28,22 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-// QueryAirdropAccountRequest is the request type for the QueryAirdropAccount RPC method.
-type QueryAirdropAccountRequest struct {
-	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+// ParamsRequest is the request type for the Query/Params RPC method.
+type ParamsRequest struct {
 }
 
-func (m *QueryAirdropAccountRequest) Reset()         { *m = QueryAirdropAccountRequest{} }
-func (m *QueryAirdropAccountRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryAirdropAccountRequest) ProtoMessage()    {}
-func (*QueryAirdropAccountRequest) Descriptor() ([]byte, []int) {
+func (m *ParamsRequest) Reset()         { *m = ParamsRequest{} }
+func (m *ParamsRequest) String() string { return proto.CompactTextString(m) }
+func (*ParamsRequest) ProtoMessage()    {}
+func (*ParamsRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_8e174292c6e21a38, []int{0}
 }
-func (m *QueryAirdropAccountRequest) XXX_Unmarshal(b []byte) error {
+func (m *ParamsRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryAirdropAccountRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *ParamsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryAirdropAccountRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_ParamsRequest.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -54,44 +53,128 @@ func (m *QueryAirdropAccountRequest) XXX_Marshal(b []byte, deterministic bool) (
 		return b[:n], nil
 	}
 }
-func (m *QueryAirdropAccountRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryAirdropAccountRequest.Merge(m, src)
+func (m *ParamsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ParamsRequest.Merge(m, src)
 }
-func (m *QueryAirdropAccountRequest) XXX_Size() int {
+func (m *ParamsRequest) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryAirdropAccountRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryAirdropAccountRequest.DiscardUnknown(m)
+func (m *ParamsRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ParamsRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryAirdropAccountRequest proto.InternalMessageInfo
+var xxx_messageInfo_ParamsRequest proto.InternalMessageInfo
 
-func (m *QueryAirdropAccountRequest) GetAddress() string {
+// ParamsResponse is the response type for the Query/Params RPC method.
+type ParamsResponse struct {
+	// params defines the parameters of the module.
+	Params *Params `protobuf:"bytes,1,opt,name=params,proto3" json:"params,omitempty"`
+}
+
+func (m *ParamsResponse) Reset()         { *m = ParamsResponse{} }
+func (m *ParamsResponse) String() string { return proto.CompactTextString(m) }
+func (*ParamsResponse) ProtoMessage()    {}
+func (*ParamsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_8e174292c6e21a38, []int{1}
+}
+func (m *ParamsResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ParamsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ParamsResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ParamsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ParamsResponse.Merge(m, src)
+}
+func (m *ParamsResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *ParamsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_ParamsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ParamsResponse proto.InternalMessageInfo
+
+func (m *ParamsResponse) GetParams() *Params {
+	if m != nil {
+		return m.Params
+	}
+	return nil
+}
+
+// AirdropAccountRequest is the request type for the QueryAirdropAccount RPC method.
+type AirdropAccountRequest struct {
+	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+}
+
+func (m *AirdropAccountRequest) Reset()         { *m = AirdropAccountRequest{} }
+func (m *AirdropAccountRequest) String() string { return proto.CompactTextString(m) }
+func (*AirdropAccountRequest) ProtoMessage()    {}
+func (*AirdropAccountRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_8e174292c6e21a38, []int{2}
+}
+func (m *AirdropAccountRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *AirdropAccountRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_AirdropAccountRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *AirdropAccountRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AirdropAccountRequest.Merge(m, src)
+}
+func (m *AirdropAccountRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *AirdropAccountRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_AirdropAccountRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AirdropAccountRequest proto.InternalMessageInfo
+
+func (m *AirdropAccountRequest) GetAddress() string {
 	if m != nil {
 		return m.Address
 	}
 	return ""
 }
 
-// QueryAirdropAccountResponse is the response type for the QueryAirdropAccount RPC method.
-type QueryAirdropAccountResponse struct {
+// AirdropAccountResponse is the response type for the QueryAirdropAccount RPC method.
+type AirdropAccountResponse struct {
 	Eligible     bool   `protobuf:"varint,1,opt,name=eligible,proto3" json:"eligible,omitempty"`
 	Claimed      bool   `protobuf:"varint,2,opt,name=claimed,proto3" json:"claimed,omitempty"`
 	ClaimAddress string `protobuf:"bytes,3,opt,name=claim_address,json=claimAddress,proto3" json:"claim_address,omitempty"`
 }
 
-func (m *QueryAirdropAccountResponse) Reset()         { *m = QueryAirdropAccountResponse{} }
-func (m *QueryAirdropAccountResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryAirdropAccountResponse) ProtoMessage()    {}
-func (*QueryAirdropAccountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_8e174292c6e21a38, []int{1}
+func (m *AirdropAccountResponse) Reset()         { *m = AirdropAccountResponse{} }
+func (m *AirdropAccountResponse) String() string { return proto.CompactTextString(m) }
+func (*AirdropAccountResponse) ProtoMessage()    {}
+func (*AirdropAccountResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_8e174292c6e21a38, []int{3}
 }
-func (m *QueryAirdropAccountResponse) XXX_Unmarshal(b []byte) error {
+func (m *AirdropAccountResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryAirdropAccountResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *AirdropAccountResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryAirdropAccountResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_AirdropAccountResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -101,33 +184,33 @@ func (m *QueryAirdropAccountResponse) XXX_Marshal(b []byte, deterministic bool) 
 		return b[:n], nil
 	}
 }
-func (m *QueryAirdropAccountResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryAirdropAccountResponse.Merge(m, src)
+func (m *AirdropAccountResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AirdropAccountResponse.Merge(m, src)
 }
-func (m *QueryAirdropAccountResponse) XXX_Size() int {
+func (m *AirdropAccountResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryAirdropAccountResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryAirdropAccountResponse.DiscardUnknown(m)
+func (m *AirdropAccountResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_AirdropAccountResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryAirdropAccountResponse proto.InternalMessageInfo
+var xxx_messageInfo_AirdropAccountResponse proto.InternalMessageInfo
 
-func (m *QueryAirdropAccountResponse) GetEligible() bool {
+func (m *AirdropAccountResponse) GetEligible() bool {
 	if m != nil {
 		return m.Eligible
 	}
 	return false
 }
 
-func (m *QueryAirdropAccountResponse) GetClaimed() bool {
+func (m *AirdropAccountResponse) GetClaimed() bool {
 	if m != nil {
 		return m.Claimed
 	}
 	return false
 }
 
-func (m *QueryAirdropAccountResponse) GetClaimAddress() string {
+func (m *AirdropAccountResponse) GetClaimAddress() string {
 	if m != nil {
 		return m.ClaimAddress
 	}
@@ -135,34 +218,41 @@ func (m *QueryAirdropAccountResponse) GetClaimAddress() string {
 }
 
 func init() {
-	proto.RegisterType((*QueryAirdropAccountRequest)(nil), "ojo.airdrop.v1.QueryAirdropAccountRequest")
-	proto.RegisterType((*QueryAirdropAccountResponse)(nil), "ojo.airdrop.v1.QueryAirdropAccountResponse")
+	proto.RegisterType((*ParamsRequest)(nil), "ojo.airdrop.v1.ParamsRequest")
+	proto.RegisterType((*ParamsResponse)(nil), "ojo.airdrop.v1.ParamsResponse")
+	proto.RegisterType((*AirdropAccountRequest)(nil), "ojo.airdrop.v1.AirdropAccountRequest")
+	proto.RegisterType((*AirdropAccountResponse)(nil), "ojo.airdrop.v1.AirdropAccountResponse")
 }
 
 func init() { proto.RegisterFile("ojo/airdrop/v1/query.proto", fileDescriptor_8e174292c6e21a38) }
 
 var fileDescriptor_8e174292c6e21a38 = []byte{
-	// 309 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x92, 0xca, 0xcf, 0xca, 0xd7,
-	0x4f, 0xcc, 0x2c, 0x4a, 0x29, 0xca, 0x2f, 0xd0, 0x2f, 0x33, 0xd4, 0x2f, 0x2c, 0x4d, 0x2d, 0xaa,
-	0xd4, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0xe2, 0xcb, 0xcf, 0xca, 0xd7, 0x83, 0xca, 0xe9, 0x95,
-	0x19, 0x4a, 0xc9, 0xa4, 0xe7, 0xe7, 0xa7, 0xe7, 0xa4, 0xea, 0x27, 0x16, 0x64, 0xea, 0x27, 0xe6,
-	0xe5, 0xe5, 0x97, 0x24, 0x96, 0x64, 0xe6, 0xe7, 0x15, 0x43, 0x54, 0x2b, 0x99, 0x71, 0x49, 0x05,
-	0x82, 0x34, 0x3b, 0x42, 0x34, 0x38, 0x26, 0x27, 0xe7, 0x97, 0xe6, 0x95, 0x04, 0xa5, 0x16, 0x96,
-	0xa6, 0x16, 0x97, 0x08, 0x49, 0x70, 0xb1, 0x27, 0xa6, 0xa4, 0x14, 0xa5, 0x16, 0x17, 0x4b, 0x30,
-	0x2a, 0x30, 0x6a, 0x70, 0x06, 0xc1, 0xb8, 0x4a, 0x15, 0x5c, 0xd2, 0x58, 0xf5, 0x15, 0x17, 0xe4,
-	0xe7, 0x15, 0xa7, 0x0a, 0x49, 0x71, 0x71, 0xa4, 0xe6, 0x64, 0xa6, 0x67, 0x26, 0xe5, 0xa4, 0x82,
-	0x75, 0x72, 0x04, 0xc1, 0xf9, 0x20, 0x43, 0x93, 0x73, 0x12, 0x33, 0x73, 0x53, 0x53, 0x24, 0x98,
-	0xc0, 0x52, 0x30, 0xae, 0x90, 0x32, 0x17, 0x2f, 0x98, 0x19, 0x0f, 0xb3, 0x94, 0x19, 0x6c, 0x29,
-	0x0f, 0x58, 0xd0, 0x11, 0x22, 0x66, 0x34, 0x83, 0x91, 0x8b, 0x15, 0x6c, 0xb5, 0x50, 0x1f, 0x23,
-	0x97, 0x30, 0x16, 0x47, 0x08, 0x69, 0xe9, 0xa1, 0x06, 0x81, 0x1e, 0x6e, 0x1f, 0x4a, 0x69, 0x13,
-	0xa5, 0x16, 0xe2, 0x2b, 0x25, 0xb9, 0xa6, 0xcb, 0x4f, 0x26, 0x33, 0x49, 0x08, 0x89, 0xe9, 0x23,
-	0x87, 0x7f, 0x35, 0xd4, 0xb5, 0xb5, 0x4e, 0x2e, 0x27, 0x1e, 0xc9, 0x31, 0x5e, 0x78, 0x24, 0xc7,
-	0xf8, 0xe0, 0x91, 0x1c, 0xe3, 0x84, 0xc7, 0x72, 0x0c, 0x17, 0x1e, 0xcb, 0x31, 0xdc, 0x78, 0x2c,
-	0xc7, 0x10, 0xa5, 0x95, 0x9e, 0x59, 0x92, 0x51, 0x9a, 0xa4, 0x97, 0x9c, 0x9f, 0x0b, 0xd2, 0xab,
-	0x9b, 0x97, 0x5a, 0x52, 0x9e, 0x5f, 0x94, 0x0d, 0x36, 0xa7, 0x02, 0x6e, 0x52, 0x49, 0x65, 0x41,
-	0x6a, 0x71, 0x12, 0x1b, 0x38, 0x66, 0x8c, 0x01, 0x01, 0x00, 0x00, 0xff, 0xff, 0xd5, 0xdc, 0x86,
-	0x33, 0xe5, 0x01, 0x00, 0x00,
+	// 385 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x84, 0x52, 0xd1, 0x4a, 0xe3, 0x40,
+	0x14, 0x6d, 0xba, 0x6c, 0xb7, 0x3b, 0xbb, 0xed, 0xc2, 0x40, 0xbb, 0x21, 0xb4, 0xc3, 0x92, 0x65,
+	0x17, 0x11, 0x4c, 0x68, 0xfd, 0x01, 0x2b, 0x7e, 0x80, 0xf6, 0xd1, 0x17, 0x99, 0x26, 0x63, 0x4c,
+	0x4d, 0x73, 0xd3, 0x99, 0x49, 0xb5, 0x88, 0x08, 0x7e, 0x81, 0xe0, 0x4f, 0xf9, 0x58, 0xf0, 0xc5,
+	0x47, 0x69, 0xfd, 0x00, 0x3f, 0x41, 0x32, 0x93, 0x14, 0x5b, 0x2c, 0xbe, 0xe5, 0xde, 0x73, 0xcf,
+	0x39, 0x39, 0x27, 0x41, 0x16, 0x0c, 0xc1, 0xa5, 0x21, 0xf7, 0x39, 0x24, 0xee, 0xa4, 0xe3, 0x8e,
+	0x53, 0xc6, 0xa7, 0x4e, 0xc2, 0x41, 0x02, 0xae, 0xc3, 0x10, 0x9c, 0x1c, 0x73, 0x26, 0x1d, 0xab,
+	0x15, 0x00, 0x04, 0x11, 0x73, 0x69, 0x12, 0xba, 0x34, 0x8e, 0x41, 0x52, 0x19, 0x42, 0x2c, 0xf4,
+	0xb5, 0xd5, 0x5a, 0x53, 0x2a, 0x88, 0x0a, 0xb5, 0x7f, 0xa1, 0xda, 0x21, 0xe5, 0x74, 0x24, 0xfa,
+	0x6c, 0x9c, 0x32, 0x21, 0xed, 0x3d, 0x54, 0x2f, 0x16, 0x22, 0x81, 0x58, 0x30, 0xec, 0xa0, 0x4a,
+	0xa2, 0x36, 0xa6, 0xf1, 0xc7, 0xd8, 0xfa, 0xd1, 0x6d, 0x3a, 0xab, 0xfe, 0x4e, 0x7e, 0x9f, 0x5f,
+	0xd9, 0x1d, 0xd4, 0xe8, 0x69, 0xb0, 0xe7, 0x79, 0x90, 0xc6, 0x32, 0x97, 0xc6, 0x26, 0xfa, 0x46,
+	0x7d, 0x9f, 0x33, 0xa1, 0x95, 0xbe, 0xf7, 0x8b, 0xd1, 0x16, 0xa8, 0xb9, 0x4e, 0xc9, 0xcd, 0x2d,
+	0x54, 0x65, 0x51, 0x18, 0x84, 0x83, 0x88, 0x29, 0x52, 0xb5, 0xbf, 0x9c, 0x33, 0x3d, 0x2f, 0xa2,
+	0xe1, 0x88, 0xf9, 0x66, 0x59, 0x41, 0xc5, 0x88, 0xff, 0xa2, 0x9a, 0x7a, 0x3c, 0x29, 0xfc, 0xbe,
+	0x28, 0xbf, 0x9f, 0x6a, 0xd9, 0xd3, 0xbb, 0xee, 0xab, 0x81, 0xbe, 0x1e, 0x65, 0xb5, 0xe2, 0x53,
+	0x54, 0xd1, 0x19, 0x70, 0x7b, 0x43, 0x36, 0x9d, 0xc0, 0x22, 0x9b, 0x60, 0xfd, 0xb6, 0x76, 0xfb,
+	0xf6, 0xf1, 0xe5, 0xbe, 0xfc, 0x1b, 0x37, 0xdc, 0xac, 0x74, 0xe0, 0xd4, 0x8b, 0x58, 0xd6, 0xb9,
+	0x6e, 0x06, 0xdf, 0xa0, 0xfa, 0x6a, 0x4c, 0xfc, 0x6f, 0x5d, 0xf0, 0xc3, 0xe6, 0xac, 0xff, 0x9f,
+	0x9d, 0xe5, 0xfe, 0x44, 0xf9, 0x9b, 0xb8, 0xe9, 0xbe, 0xff, 0xe8, 0x57, 0x79, 0x0b, 0xd7, 0xfb,
+	0x07, 0x0f, 0x73, 0x62, 0xcc, 0xe6, 0xc4, 0x78, 0x9e, 0x13, 0xe3, 0x6e, 0x41, 0x4a, 0xb3, 0x05,
+	0x29, 0x3d, 0x2d, 0x48, 0xe9, 0x78, 0x3b, 0x08, 0xe5, 0x59, 0x3a, 0x70, 0x3c, 0x18, 0x65, 0xdc,
+	0x9d, 0x98, 0xc9, 0x0b, 0xe0, 0xe7, 0x4a, 0xe7, 0x72, 0xa9, 0x24, 0xa7, 0x09, 0x13, 0x83, 0x8a,
+	0xfa, 0x75, 0x76, 0xdf, 0x02, 0x00, 0x00, 0xff, 0xff, 0x6a, 0x4f, 0x8f, 0x42, 0xa4, 0x02, 0x00,
+	0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -177,11 +267,13 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type QueryClient interface {
-	// QueryAirdropAccount returns an existing airdrop account, along with whether or not
+	// Params queries all parameters.
+	Params(ctx context.Context, in *ParamsRequest, opts ...grpc.CallOption) (*ParamsResponse, error)
+	// AirdropAccount returns an existing airdrop account, along with whether or not
 	// the user is eligible to claim, and whether or not the airdrop has been claimed.
 	// If the airdrop has been claimed, the account to which the tokens were sent should be
 	// returned as well.
-	QueryAirdropAccount(ctx context.Context, in *QueryAirdropAccountRequest, opts ...grpc.CallOption) (*QueryAirdropAccountResponse, error)
+	AirdropAccount(ctx context.Context, in *AirdropAccountRequest, opts ...grpc.CallOption) (*AirdropAccountResponse, error)
 }
 
 type queryClient struct {
@@ -192,9 +284,18 @@ func NewQueryClient(cc grpc1.ClientConn) QueryClient {
 	return &queryClient{cc}
 }
 
-func (c *queryClient) QueryAirdropAccount(ctx context.Context, in *QueryAirdropAccountRequest, opts ...grpc.CallOption) (*QueryAirdropAccountResponse, error) {
-	out := new(QueryAirdropAccountResponse)
-	err := c.cc.Invoke(ctx, "/ojo.airdrop.v1.Query/QueryAirdropAccount", in, out, opts...)
+func (c *queryClient) Params(ctx context.Context, in *ParamsRequest, opts ...grpc.CallOption) (*ParamsResponse, error) {
+	out := new(ParamsResponse)
+	err := c.cc.Invoke(ctx, "/ojo.airdrop.v1.Query/Params", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) AirdropAccount(ctx context.Context, in *AirdropAccountRequest, opts ...grpc.CallOption) (*AirdropAccountResponse, error) {
+	out := new(AirdropAccountResponse)
+	err := c.cc.Invoke(ctx, "/ojo.airdrop.v1.Query/AirdropAccount", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -203,39 +304,62 @@ func (c *queryClient) QueryAirdropAccount(ctx context.Context, in *QueryAirdropA
 
 // QueryServer is the server API for Query service.
 type QueryServer interface {
-	// QueryAirdropAccount returns an existing airdrop account, along with whether or not
+	// Params queries all parameters.
+	Params(context.Context, *ParamsRequest) (*ParamsResponse, error)
+	// AirdropAccount returns an existing airdrop account, along with whether or not
 	// the user is eligible to claim, and whether or not the airdrop has been claimed.
 	// If the airdrop has been claimed, the account to which the tokens were sent should be
 	// returned as well.
-	QueryAirdropAccount(context.Context, *QueryAirdropAccountRequest) (*QueryAirdropAccountResponse, error)
+	AirdropAccount(context.Context, *AirdropAccountRequest) (*AirdropAccountResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
 type UnimplementedQueryServer struct {
 }
 
-func (*UnimplementedQueryServer) QueryAirdropAccount(ctx context.Context, req *QueryAirdropAccountRequest) (*QueryAirdropAccountResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method QueryAirdropAccount not implemented")
+func (*UnimplementedQueryServer) Params(ctx context.Context, req *ParamsRequest) (*ParamsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Params not implemented")
+}
+func (*UnimplementedQueryServer) AirdropAccount(ctx context.Context, req *AirdropAccountRequest) (*AirdropAccountResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AirdropAccount not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
 	s.RegisterService(&_Query_serviceDesc, srv)
 }
 
-func _Query_QueryAirdropAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryAirdropAccountRequest)
+func _Query_Params_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ParamsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(QueryServer).QueryAirdropAccount(ctx, in)
+		return srv.(QueryServer).Params(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ojo.airdrop.v1.Query/QueryAirdropAccount",
+		FullMethod: "/ojo.airdrop.v1.Query/Params",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).QueryAirdropAccount(ctx, req.(*QueryAirdropAccountRequest))
+		return srv.(QueryServer).Params(ctx, req.(*ParamsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_AirdropAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AirdropAccountRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).AirdropAccount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ojo.airdrop.v1.Query/AirdropAccount",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).AirdropAccount(ctx, req.(*AirdropAccountRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -245,15 +369,19 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*QueryServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "QueryAirdropAccount",
-			Handler:    _Query_QueryAirdropAccount_Handler,
+			MethodName: "Params",
+			Handler:    _Query_Params_Handler,
+		},
+		{
+			MethodName: "AirdropAccount",
+			Handler:    _Query_AirdropAccount_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "ojo/airdrop/v1/query.proto",
 }
 
-func (m *QueryAirdropAccountRequest) Marshal() (dAtA []byte, err error) {
+func (m *ParamsRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -263,12 +391,70 @@ func (m *QueryAirdropAccountRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryAirdropAccountRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *ParamsRequest) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryAirdropAccountRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *ParamsRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *ParamsResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ParamsResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ParamsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Params != nil {
+		{
+			size, err := m.Params.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *AirdropAccountRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *AirdropAccountRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *AirdropAccountRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -283,7 +469,7 @@ func (m *QueryAirdropAccountRequest) MarshalToSizedBuffer(dAtA []byte) (int, err
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryAirdropAccountResponse) Marshal() (dAtA []byte, err error) {
+func (m *AirdropAccountResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -293,12 +479,12 @@ func (m *QueryAirdropAccountResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryAirdropAccountResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *AirdropAccountResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryAirdropAccountResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *AirdropAccountResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -344,7 +530,29 @@ func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
-func (m *QueryAirdropAccountRequest) Size() (n int) {
+func (m *ParamsRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *ParamsResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Params != nil {
+		l = m.Params.Size()
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *AirdropAccountRequest) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -357,7 +565,7 @@ func (m *QueryAirdropAccountRequest) Size() (n int) {
 	return n
 }
 
-func (m *QueryAirdropAccountResponse) Size() (n int) {
+func (m *AirdropAccountResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -382,7 +590,7 @@ func sovQuery(x uint64) (n int) {
 func sozQuery(x uint64) (n int) {
 	return sovQuery(uint64((x << 1) ^ uint64((int64(x) >> 63))))
 }
-func (m *QueryAirdropAccountRequest) Unmarshal(dAtA []byte) error {
+func (m *ParamsRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -405,10 +613,146 @@ func (m *QueryAirdropAccountRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryAirdropAccountRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: ParamsRequest: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryAirdropAccountRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: ParamsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ParamsResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ParamsResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ParamsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Params", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Params == nil {
+				m.Params = &Params{}
+			}
+			if err := m.Params.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *AirdropAccountRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: AirdropAccountRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: AirdropAccountRequest: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -464,7 +808,7 @@ func (m *QueryAirdropAccountRequest) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryAirdropAccountResponse) Unmarshal(dAtA []byte) error {
+func (m *AirdropAccountResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -487,10 +831,10 @@ func (m *QueryAirdropAccountResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryAirdropAccountResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: AirdropAccountResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryAirdropAccountResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: AirdropAccountResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:

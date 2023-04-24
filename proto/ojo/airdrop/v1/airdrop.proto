@@ -21,14 +21,14 @@ message Params {
   // cosmos.base.v1beta1.Dec delegation_requirement = 1;
   string delegation_requirement = 2 [
     (cosmos_proto.scalar) = "cosmos.Dec",
-    (gogoproto.customtype) = "Dec"
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec"
   ];
   
   // The multiplier for the amount of tokens users will receive once they claim their airdrop.
   // E.g., if we want users to receive an equal second half, this will be 2.
   string airdrop_factor = 3 [
     (cosmos_proto.scalar) = "cosmos.Dec",
-    (gogoproto.customtype) = "Dec"
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec"
   ];
 }
 
@@ -39,18 +39,18 @@ message AirdropAccount {
   // The amount of tokens that were airdropped to the genesis account.
   string origin_amount = 2 [
     (cosmos_proto.scalar) = "cosmos.Dec",
-    (gogoproto.customtype) = "Dec"
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec"
   ];
 
   // The address of the account that the user has claimed the 2nd half of their airdrop to.
   string claim_address = 3 [
     (cosmos_proto.scalar) = "cosmos.Dec",
-    (gogoproto.customtype) = "Dec"
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec"
   ];
 
   // The amount of tokens claimed in the 2nd half of the airdrop.
   string claim_amount = 4 [
     (cosmos_proto.scalar) = "cosmos.Dec",
-    (gogoproto.customtype) = "Dec"
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec"
   ];
 }

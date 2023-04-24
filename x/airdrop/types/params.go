@@ -13,7 +13,7 @@ var (
 func DefaultParams() Params {
 	return Params{
 		ExpiryBlock:           DefaultExpiryBlock,
-		DelegationRequirement: DefaultDelegationRequirement,
-		AirdropFactor:         DefaultAirdropFactor,
+		DelegationRequirement: &DefaultDelegationRequirement,
+		AirdropFactor:         &DefaultAirdropFactor,
 	}
 }

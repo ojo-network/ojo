@@ -2,27 +2,42 @@ syntax = "proto3";
 package ojo.airdrop.v1;
 
 import "google/api/annotations.proto";
+import "ojo/airdrop/v1/airdrop.proto";
 
 option go_package = "github.com/ojo-network/ojo/x/airdrop/types";
 
 // Query defines the gRPC querier service for the airdrop module
 service Query {
-  // QueryAirdropAccount returns an existing airdrop account, along with whether or not
+  // Params queries all parameters.
+  rpc Params(ParamsRequest) returns (ParamsResponse) {
+    option (google.api.http).get = "/ojo/oracle/v1/params";
+  }
+
+  // AirdropAccount returns an existing airdrop account, along with whether or not
   // the user is eligible to claim, and whether or not the airdrop has been claimed.
   // If the airdrop has been claimed, the account to which the tokens were sent should be
   // returned as well.
-  rpc QueryAirdropAccount(QueryAirdropAccountRequest) returns (QueryAirdropAccountResponse) {
+  rpc AirdropAccount(AirdropAccountRequest) returns (AirdropAccountResponse) {
     option (google.api.http).get = "/ojo/airdrop/{address}";
   }
 }
 
-// QueryAirdropAccountRequest is the request type for the QueryAirdropAccount RPC method.
-message QueryAirdropAccountRequest {
+// ParamsRequest is the request type for the Query/Params RPC method.
+message ParamsRequest {}
+
+// ParamsResponse is the response type for the Query/Params RPC method.
+message ParamsResponse {
+  // params defines the parameters of the module.
+  Params params = 1;
+}
+
+// AirdropAccountRequest is the request type for the QueryAirdropAccount RPC method.
+message AirdropAccountRequest {
   string address = 1;
 }
 
-// QueryAirdropAccountResponse is the response type for the QueryAirdropAccount RPC method.
-message QueryAirdropAccountResponse {
+// AirdropAccountResponse is the response type for the QueryAirdropAccount RPC method.
+message AirdropAccountResponse {
   bool eligible = 1;
   bool claimed = 2;
   string claim_address = 3;
