@@ -6,7 +6,7 @@ import (
 	"github.com/ojo-network/ojo/x/airdrop/types"
 )
 
-func (s *IntegrationTestSuite) TestGetAirdropAccount() {
+func (s *IntegrationTestSuite) TestSetAndGetAirdropAccount() {
 	app, ctx := s.app, s.ctx
 
 	originAmount := sdk.MustNewDecFromStr("500")
