@@ -23,6 +23,7 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
+// GenesisState represents the genesis state of the airdrop module.
 type GenesisState struct {
 	Params          Params           `protobuf:"bytes,1,opt,name=params,proto3" json:"params"`
 	AirdropAccounts []AirdropAccount `protobuf:"bytes,2,rep,name=airdrop_accounts,json=airdropAccounts,proto3" json:"airdrop_accounts"`

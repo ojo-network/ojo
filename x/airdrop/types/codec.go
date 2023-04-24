@@ -36,7 +36,7 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 // RegisterInterfaces registers the x/airdrop interfaces types with the interface registry
 func RegisterInterfaces(registry codectypes.InterfaceRegistry) {
 	registry.RegisterImplementations((*sdk.Msg)(nil),
-		&MsgCreateAirdropAccount{},
+		//&MsgCreateAirdropAccount{},
 		&MsgClaimAirdrop{},
 	)
 

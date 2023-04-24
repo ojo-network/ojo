@@ -31,7 +31,7 @@ message MsgCreateAirdropAccount {
 
   string address = 1;
   cosmos.base.v1beta1.DecCoin tokensToReceive = 2;
-  uint64 vestingLength = 3;
+  int64 vestingEndTime = 3;
 }
 
 // MsgCreateAirdropAccountResponse defines the CreateAirdropAccount response type.

@@ -34,23 +34,25 @@ message Params {
 
 // AirDropAccount defines an account that was created at genesis with an initial airdrop.
 message AirdropAccount {
+  uint64 vesting_end_time = 1;
+
   // The address of the account that was created at genesis with the initial airdrop.
-  string origin_address = 1;
+  string origin_address = 2;
 
   // The amount of tokens that were airdropped to the genesis account.
-  string origin_amount = 2 [
+  string origin_amount = 3 [
     (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec"
   ];
 
   // The address of the account that the user has claimed the 2nd half of their airdrop to.
-  string claim_address = 3 [
+  string claim_address = 4 [
     (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec"
   ];
 
   // The amount of tokens claimed in the 2nd half of the airdrop.
-  string claim_amount = 4 [
+  string claim_amount = 5 [
     (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec"
   ];
