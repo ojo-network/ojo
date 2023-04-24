@@ -2,6 +2,7 @@ syntax = "proto3";
 package ojo.airdrop.v1;
 
 import "gogoproto/gogo.proto";
+import "cosmos/msg/v1/msg.proto";
 import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/ojo-network/ojo/x/airdrop/types";

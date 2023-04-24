@@ -99,6 +99,10 @@ import (
 	oraclekeeper "github.com/ojo-network/ojo/x/oracle/keeper"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 
+	"github.com/ojo-network/ojo/x/airdrop"
+	airdropkeeper "github.com/ojo-network/ojo/x/airdrop/keeper"
+	airdroptypes "github.com/ojo-network/ojo/x/airdrop/types"
+
 	customante "github.com/ojo-network/ojo/ante"
 	appparams "github.com/ojo-network/ojo/app/params"
 )
@@ -151,6 +155,7 @@ var (
 		transfer.AppModuleBasic{},
 		vesting.AppModuleBasic{},
 		oracle.AppModuleBasic{},
+		airdrop.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -163,6 +168,7 @@ var (
 		govtypes.ModuleName:            {authtypes.Burner},
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		oracletypes.ModuleName:         {authtypes.Minter},
+		airdroptypes.ModuleName:        {authtypes.Minter},
 	}
 )
 
@@ -217,6 +223,7 @@ type App struct {
 	FeeGrantKeeper   feegrantkeeper.Keeper
 	GroupKeeper      groupkeeper.Keeper
 	OracleKeeper     oraclekeeper.Keeper
+	AirdropKeeper    airdropkeeper.Keeper
 
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -262,7 +269,7 @@ func New(
 		minttypes.StoreKey, distrtypes.StoreKey, slashingtypes.StoreKey, govtypes.StoreKey,
 		paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey, feegrant.StoreKey, evidencetypes.StoreKey,
 		ibctransfertypes.StoreKey, capabilitytypes.StoreKey, group.StoreKey,
-		oracletypes.StoreKey,
+		oracletypes.StoreKey, airdroptypes.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -403,6 +410,11 @@ func New(
 		cast.ToBool(appOpts.Get("telemetry.enabled")),
 	)
 
+	app.AirdropKeeper = airdropkeeper.NewKeeper(
+		appCodec,
+		keys[oracletypes.ModuleName],
+	)
+
 	app.StakingKeeper.SetHooks(
 		stakingtypes.NewMultiStakingHooks(app.DistrKeeper.Hooks(), app.SlashingKeeper.Hooks()),
 	)
@@ -501,6 +513,7 @@ func New(
 		params.NewAppModule(app.ParamsKeeper),
 		transferModule,
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
+		airdrop.NewAppModule(appCodec, app.AirdropKeeper, app.AccountKeeper, app.BankKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
@@ -529,6 +542,7 @@ func New(
 		paramstypes.ModuleName,
 		vestingtypes.ModuleName,
 		oracletypes.ModuleName,
+		airdroptypes.ModuleName,
 	)
 
 	app.mm.SetOrderEndBlockers(
@@ -552,6 +566,7 @@ func New(
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
 		oracletypes.ModuleName,
+		airdroptypes.ModuleName,
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -580,6 +595,7 @@ func New(
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
 		oracletypes.ModuleName,
+		airdroptypes.ModuleName,
 	)
 
 	// Uncomment if you want to set a custom migration order here.

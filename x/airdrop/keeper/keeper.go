@@ -12,12 +12,27 @@ type Keeper struct {
 	storeKey storetypes.StoreKey
 }
 
-func (k Keeper) SetAirdropAccount(ctx sdk.Context, account types.AirdropAccount) {
+// NewKeeper constructs a new keeper for airdrop module.
+func NewKeeper(
+	cdc codec.BinaryCodec,
+	storeKey storetypes.StoreKey,
+) Keeper {
+	return Keeper{
+		cdc:      cdc,
+		storeKey: storeKey,
+	}
+}
+
+func (k Keeper) SetAirdropAccount(
+	ctx sdk.Context,
+	account types.AirdropAccount,
+) (err error) {
 	store := ctx.KVStore(k.storeKey)
 	store.Set(
 		types.AirdropAccountKey(account.OriginAddress),
 		k.cdc.MustMarshal(&account),
 	)
+	return
 }
 
 func (k Keeper) GetAirdropAccount(
