@@ -15,5 +15,5 @@ func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, genState types.GenesisSt
 
 // ExportGenesis returns the x/airdrop module's exported genesis.
 func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) *types.GenesisState {
-	return nil
+	return &types.GenesisState{}
 }
