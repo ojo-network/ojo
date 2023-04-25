@@ -33,7 +33,7 @@ type chain struct {
 }
 
 func newChain() (*chain, error) {
-	tmpDir, err := os.MkdirTemp("", "ojo-e2e-testnet-")
+	tmpDir, err := os.MkdirTemp("", "ojo-testnet")
 	if err != nil {
 		return nil, err
 	}
