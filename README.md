@@ -35,4 +35,3 @@ To install the `ojod` binary:
 ```shell
 $ make install
 ```
-
