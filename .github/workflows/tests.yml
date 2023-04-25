@@ -103,11 +103,6 @@ jobs:
           go-version: 1.19
           cache: true
 
-      - name: cache docker layer
-        uses: satackey/action-docker-layer-caching@v0.0.11
-        if: env.GIT_DIFF
-        continue-on-error: true
-
       - name: Test E2E
         if: env.GIT_DIFF
         run: |
