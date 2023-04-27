@@ -23,6 +23,8 @@ func NewKeeper(
 	}
 }
 
+// SetAirdropAccount saves the airdrop account to the store
+// using the OriginAddress as the key.
 func (k Keeper) SetAirdropAccount(
 	ctx sdk.Context,
 	account types.AirdropAccount,
@@ -35,6 +37,7 @@ func (k Keeper) SetAirdropAccount(
 	return
 }
 
+// GetAirdropAccount returns the airdrop account from the store
 func (k Keeper) GetAirdropAccount(
 	ctx sdk.Context, originAddress string,
 ) (account types.AirdropAccount, err error) {
