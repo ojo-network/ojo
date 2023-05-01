@@ -10,10 +10,16 @@ import (
 // InitGenesis initializes the x/airdrop module's state from a provided genesis
 // state.
 func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, genState types.GenesisState) {
-
+	keeper.SetParams(ctx, genState.Params)
+	for _, airdropAccount := range genState.AirdropAccounts {
+		keeper.SetAirdropAccount(ctx, airdropAccount)
+	}
 }
 
 // ExportGenesis returns the x/airdrop module's exported genesis.
 func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) *types.GenesisState {
-	return &types.GenesisState{}
+	genesisState := types.DefaultGenesisState()
+	genesisState.Params = keeper.GetParams(ctx)
+	genesisState.AirdropAccounts = keeper.GetAllAirdropAccounts(ctx)
+	return genesisState
 }
