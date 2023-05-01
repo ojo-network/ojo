@@ -43,6 +43,7 @@ const (
 )
 
 func (s *IntegrationTestSuite) SetupTest() {
+	appparams.SetAddressPrefixes()
 	require := s.Require()
 	isCheckTx := false
 	app := ojoapp.Setup(s.T())

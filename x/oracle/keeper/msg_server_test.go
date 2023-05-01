@@ -364,6 +364,26 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 			true,
 			"test is not an existing oracle param key",
 		},
+
+		{
+			"bad authority",
+			&types.MsgGovUpdateParams{
+				Authority:   "ojo1zypqa76je7pxsdwkfah6mu9a583sju6xzthge3",
+				Title:       "test",
+				Description: "test",
+				Keys:        []string{"RewardBands"},
+				Changes: types.Params{
+					RewardBands: types.RewardBandList{
+						{
+							SymbolDenom: types.OjoSymbol,
+							RewardBand:  sdk.NewDecWithPrec(2, 2),
+						},
+					},
+				},
+			},
+			true,
+			"bad authority address",
+		},
 	}
 
 	for _, tc := range testCases {
