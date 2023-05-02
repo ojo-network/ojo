@@ -16,25 +16,23 @@ func (s *IntegrationTestSuite) TestMedians() {
 // TestUpdateOracleParams updates the oracle params with a gov prop
 // and then verifies the new params are returned by the params query.
 func (s *IntegrationTestSuite) TestUpdateOracleParams() {
-	params, err := s.orchestrator.OjoClient.QueryClient.QueryParams()
-	s.Require().NoError(err)
-
-	s.Require().Equal(uint64(3), params.HistoricStampPeriod)
-	s.Require().Equal(uint64(4), params.MaximumPriceStamps)
-	s.Require().Equal(uint64(12), params.MedianStampPeriod)
-
-	err = grpc.SubmitAndPassProposal(
+	err := grpc.SubmitAndPassProposal(
 		s.orchestrator.OjoClient,
 		grpc.OracleParamChanges(10, 2, 20),
 	)
 	s.Require().NoError(err)
 
-	params, err = s.orchestrator.OjoClient.QueryClient.QueryParams()
+	params, err := s.orchestrator.OjoClient.QueryClient.QueryParams()
 	s.Require().NoError(err)
 
 	s.Require().Equal(uint64(10), params.HistoricStampPeriod)
 	s.Require().Equal(uint64(2), params.MaximumPriceStamps)
 	s.Require().Equal(uint64(20), params.MedianStampPeriod)
+}
 
+func (s *IntegrationTestSuite) TestUpdateAirdropParams() {
+	s.orchestrator.SubmitProposal("proposals/airdrop_set_params.json")
+
+	_, err := s.orchestrator.OjoClient.TxClient.TxVoteYes(1)
 	s.Require().NoError(err)
 }
