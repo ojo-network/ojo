@@ -8,12 +8,14 @@ import (
 
 func (c *Client) TxSubmitAirdropProposal(
 	params *airdroptypes.Params,
+	govAddress string,
 ) (*sdk.TxResponse, error) {
 
 	msg := airdroptypes.NewMsgSetParams(
 		params.ExpiryBlock,
 		params.DelegationRequirement,
 		params.AirdropFactor,
+		govAddress,
 	)
 
 	address, err := c.keyringRecord.GetAddress()

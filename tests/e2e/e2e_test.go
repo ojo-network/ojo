@@ -1,8 +1,6 @@
 package e2e
 
 import (
-	"fmt"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ojo-network/ojo/tests/grpc"
 	airdroptypes "github.com/ojo-network/ojo/x/airdrop/types"
@@ -20,7 +18,7 @@ func (s *IntegrationTestSuite) TestMedians() {
 // TestUpdateOracleParams updates the oracle params with a gov prop
 // and then verifies the new params are returned by the params query.
 func (s *IntegrationTestSuite) TestUpdateOracleParams() {
-	err := grpc.SubmitAndPassProposal(
+	err := grpc.SubmitAndPassLegacyProposal(
 		s.orchestrator.OjoClient,
 		grpc.OracleParamChanges(10, 2, 20),
 	)
@@ -39,7 +37,7 @@ func (s *IntegrationTestSuite) TestUpdateOracleParams() {
 func (s *IntegrationTestSuite) TestUpdateAirdropParams() {
 	expiryBlock := uint64(100)
 	delegationRequirement := sdk.MustNewDecFromStr("0.1")
-	airdropFactor := sdk.MustNewDecFromStr("0.1")
+	airdropFactor := sdk.MustNewDecFromStr("0.2")
 
 	params := airdroptypes.Params{
 		ExpiryBlock:           expiryBlock,
@@ -47,7 +45,23 @@ func (s *IntegrationTestSuite) TestUpdateAirdropParams() {
 		AirdropFactor:         &airdropFactor,
 	}
 
-	resp, err := s.orchestrator.OjoClient.TxClient.TxSubmitAirdropProposal(&params)
+	ojoClient := s.orchestrator.OjoClient
+
+	govAddress, err := ojoClient.QueryClient.QueryGovAccount()
 	s.Require().NoError(err)
-	fmt.Println(resp)
+
+	resp, err := ojoClient.TxClient.TxSubmitAirdropProposal(&params, govAddress.Address)
+	s.Require().NoError(err)
+
+	proposalID, err := grpc.ParseProposalID(resp)
+	s.Require().NoError(err)
+
+	_, err = ojoClient.TxClient.TxVoteYes(proposalID)
+	s.Require().NoError(err)
+
+	err = grpc.SleepUntilProposalEndTime(ojoClient, proposalID)
+	s.Require().NoError(err)
+
+	err = grpc.VerifyProposalPassed(ojoClient, proposalID)
+	s.Require().NoError(err)
 }

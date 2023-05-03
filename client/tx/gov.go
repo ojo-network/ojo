@@ -27,7 +27,7 @@ func (c *Client) TxVoteYes(proposalID uint64) (*sdk.TxResponse, error) {
 }
 
 // TxSubmitProposal sends a transaction to submit a proposal
-func (c *Client) TxSubmitProposal(
+func (c *Client) TxSubmitLegacyProposal(
 	changes []proposal.ParamChange,
 ) (*sdk.TxResponse, error) {
 

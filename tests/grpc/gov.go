@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	proposal "github.com/cosmos/cosmos-sdk/x/params/types/proposal"
 	"github.com/ojo-network/ojo/client"
 	"github.com/rs/zerolog/log"
@@ -12,39 +13,20 @@ import (
 
 const extraWaitTime = 3 * time.Second // at least one full block
 
-// SubmitAndPassProposal submits a proposal and votes yes on it
-func SubmitAndPassProposal(ojoClient *client.OjoClient, changes []proposal.ParamChange) error {
-	resp, err := ojoClient.TxClient.TxSubmitProposal(changes)
+func VerifyProposalPassed(ojoClient *client.OjoClient, proposalID uint64) error {
+	prop, err := ojoClient.QueryClient.QueryProposal(proposalID)
 	if err != nil {
 		return err
 	}
-
-	var proposalID string
-	for _, event := range resp.Logs[0].Events {
-		if event.Type == "submit_proposal" {
-			for _, attribute := range event.Attributes {
-				if attribute.Key == "proposal_id" {
-					proposalID = attribute.Value
-				}
-			}
-		}
+	status := prop.Status.String()
+	if status != "PROPOSAL_STATUS_PASSED" {
+		return fmt.Errorf("proposal %d failed to pass with status: %s", proposalID, status)
 	}
+	return nil
+}
 
-	if proposalID == "" {
-		return fmt.Errorf("failed to parse proposalID from %s", resp)
-	}
-
-	proposalIDInt, err := strconv.ParseUint(proposalID, 10, 64)
-	if err != nil {
-		return err
-	}
-
-	_, err = ojoClient.TxClient.TxVoteYes(proposalIDInt)
-	if err != nil {
-		return err
-	}
-
-	prop, err := ojoClient.QueryClient.QueryProposal(proposalIDInt)
+func SleepUntilProposalEndTime(ojoClient *client.OjoClient, proposalID uint64) error {
+	prop, err := ojoClient.QueryClient.QueryProposal(proposalID)
 	if err != nil {
 		return err
 	}
@@ -53,17 +35,46 @@ func SubmitAndPassProposal(ojoClient *client.OjoClient, changes []proposal.Param
 	sleepDuration := prop.VotingEndTime.Sub(now) + extraWaitTime
 	log.Info().Msgf("sleeping %s until end of voting period + 1 block", sleepDuration)
 	time.Sleep(sleepDuration)
+	return nil
+}
 
-	prop, err = ojoClient.QueryClient.QueryProposal(proposalIDInt)
+// ParseProposalID parses the proposalID from a tx response
+func ParseProposalID(response *sdk.TxResponse) (uint64, error) {
+	for _, event := range response.Logs[0].Events {
+		if event.Type == "submit_proposal" {
+			for _, attribute := range event.Attributes {
+				if attribute.Key == "proposal_id" {
+					return strconv.ParseUint(attribute.Value, 10, 64)
+				}
+			}
+		}
+	}
+	return 0, fmt.Errorf("unable to find proposalID in tx response")
+}
+
+// SubmitAndPassProposal submits a proposal and votes yes on it
+func SubmitAndPassLegacyProposal(ojoClient *client.OjoClient, changes []proposal.ParamChange) error {
+	resp, err := ojoClient.TxClient.TxSubmitLegacyProposal(changes)
 	if err != nil {
 		return err
 	}
 
-	propStatus := prop.Status.String()
-	if propStatus != "PROPOSAL_STATUS_PASSED" {
-		return fmt.Errorf("proposal %d failed to pass with status: %s", proposalIDInt, propStatus)
+	proposalID, err := ParseProposalID(resp)
+	if err != nil {
+		return err
 	}
-	return nil
+
+	_, err = ojoClient.TxClient.TxVoteYes(proposalID)
+	if err != nil {
+		return err
+	}
+
+	err = SleepUntilProposalEndTime(ojoClient, proposalID)
+	if err != nil {
+		return err
+	}
+
+	return VerifyProposalPassed(ojoClient, proposalID)
 }
 
 func OracleParamChanges(

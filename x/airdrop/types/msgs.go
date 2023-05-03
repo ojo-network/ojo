@@ -16,6 +16,7 @@ func NewMsgSetParams(
 	expiryBlock uint64,
 	delegationRequirement *sdk.Dec,
 	airdropFactor *sdk.Dec,
+	govAddress string,
 ) *MsgSetParams {
 	params := &Params{
 		ExpiryBlock:           expiryBlock,
@@ -23,7 +24,8 @@ func NewMsgSetParams(
 		AirdropFactor:         airdropFactor,
 	}
 	return &MsgSetParams{
-		Params: params,
+		Params:    params,
+		Authority: govAddress,
 	}
 }
 
@@ -37,7 +39,7 @@ func (msg MsgSetParams) GetSignBytes() []byte {
 
 // GetSigners implements sdk.Msg
 func (msg MsgSetParams) GetSigners() []sdk.AccAddress {
-	return checkers.Signers()
+	return checkers.Signers(msg.Authority)
 }
 
 // ValidateBasic Implements sdk.Msg
