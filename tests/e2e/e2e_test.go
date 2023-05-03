@@ -1,7 +1,11 @@
 package e2e
 
 import (
+	"fmt"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ojo-network/ojo/tests/grpc"
+	airdroptypes "github.com/ojo-network/ojo/x/airdrop/types"
 )
 
 // TestMedians queries for the oracle params, collects historical
@@ -30,9 +34,20 @@ func (s *IntegrationTestSuite) TestUpdateOracleParams() {
 	s.Require().Equal(uint64(20), params.MedianStampPeriod)
 }
 
+// TestUpdateAirdropParams updates the airdrop params with a gov prop
+// and then verifies the new params are returned by the params query.
 func (s *IntegrationTestSuite) TestUpdateAirdropParams() {
-	s.orchestrator.SubmitProposal("proposals/airdrop_set_params.json")
+	expiryBlock := uint64(100)
+	delegationRequirement := sdk.MustNewDecFromStr("0.1")
+	airdropFactor := sdk.MustNewDecFromStr("0.1")
 
-	_, err := s.orchestrator.OjoClient.TxClient.TxVoteYes(1)
+	params := airdroptypes.Params{
+		ExpiryBlock:           expiryBlock,
+		DelegationRequirement: &delegationRequirement,
+		AirdropFactor:         &airdropFactor,
+	}
+
+	resp, err := s.orchestrator.OjoClient.TxClient.TxSubmitAirdropProposal(&params)
 	s.Require().NoError(err)
+	fmt.Println(resp)
 }

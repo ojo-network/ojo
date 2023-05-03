@@ -13,7 +13,7 @@ func (o *Orchestrator) ExecCommand(cmd []string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
-	validator := o.chain.validators[0]
+	validator := o.chain.validators[1]
 
 	exec, err := o.dkrPool.Client.CreateExec(docker.CreateExecOptions{
 		Context:      ctx,

@@ -473,7 +473,10 @@ func proposalsDirectory() (string, error) {
 	return absoluteAdjacentDirPath, nil
 }
 
-func (o *Orchestrator) SubmitProposal(filePath string) {
+func (o *Orchestrator) SubmitProposal(filePath string, govAddress string) {
+	o.ExecCommand([]string{
+		"sed", "-i", fmt.Sprintf("s/$GOV_AUTHORITY_ADDRESS/%s/g", govAddress), filePath,
+	})
 	o.ExecCommand([]string{
 		"ojod", "tx", "gov", "submit-proposal",
 		filePath,
