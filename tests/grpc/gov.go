@@ -13,6 +13,7 @@ import (
 
 const extraWaitTime = 3 * time.Second // at least one full block
 
+// VerifyProposalPassed returns a non-nil error if the proposal did not pass
 func VerifyProposalPassed(ojoClient *client.OjoClient, proposalID uint64) error {
 	prop, err := ojoClient.QueryClient.QueryProposal(proposalID)
 	if err != nil {
@@ -25,6 +26,7 @@ func VerifyProposalPassed(ojoClient *client.OjoClient, proposalID uint64) error 
 	return nil
 }
 
+// SleepUntilProposalEndTime sleeps until the end of the voting period + 1 block
 func SleepUntilProposalEndTime(ojoClient *client.OjoClient, proposalID uint64) error {
 	prop, err := ojoClient.QueryClient.QueryProposal(proposalID)
 	if err != nil {
@@ -50,6 +52,31 @@ func ParseProposalID(response *sdk.TxResponse) (uint64, error) {
 		}
 	}
 	return 0, fmt.Errorf("unable to find proposalID in tx response")
+}
+
+func SubmitAndPassProposal(ojoClient *client.OjoClient, msgs []sdk.Msg) error {
+	deposit := sdk.NewCoins(sdk.NewCoin("uojo", sdk.NewInt(10000000)))
+	resp, err := ojoClient.TxClient.TxSubmitProposal(msgs, deposit)
+	if err != nil {
+		return err
+	}
+
+	proposalID, err := ParseProposalID(resp)
+	if err != nil {
+		return err
+	}
+
+	_, err = ojoClient.TxClient.TxVoteYes(proposalID)
+	if err != nil {
+		return err
+	}
+
+	err = SleepUntilProposalEndTime(ojoClient, proposalID)
+	if err != nil {
+		return err
+	}
+
+	return VerifyProposalPassed(ojoClient, proposalID)
 }
 
 // SubmitAndPassProposal submits a proposal and votes yes on it

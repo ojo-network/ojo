@@ -50,18 +50,13 @@ func (s *IntegrationTestSuite) TestUpdateAirdropParams() {
 	govAddress, err := ojoClient.QueryClient.QueryGovAccount()
 	s.Require().NoError(err)
 
-	resp, err := ojoClient.TxClient.TxSubmitAirdropProposal(&params, govAddress.Address)
-	s.Require().NoError(err)
+	msg := airdroptypes.NewMsgSetParams(
+		params.ExpiryBlock,
+		params.DelegationRequirement,
+		params.AirdropFactor,
+		govAddress.Address,
+	)
 
-	proposalID, err := grpc.ParseProposalID(resp)
-	s.Require().NoError(err)
-
-	_, err = ojoClient.TxClient.TxVoteYes(proposalID)
-	s.Require().NoError(err)
-
-	err = grpc.SleepUntilProposalEndTime(ojoClient, proposalID)
-	s.Require().NoError(err)
-
-	err = grpc.VerifyProposalPassed(ojoClient, proposalID)
+	err = grpc.SubmitAndPassProposal(ojoClient, []sdk.Msg{msg})
 	s.Require().NoError(err)
 }
