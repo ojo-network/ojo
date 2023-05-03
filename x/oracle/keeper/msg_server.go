@@ -142,6 +142,10 @@ func (ms msgServer) GovUpdateParams(
 	goCtx context.Context,
 	msg *types.MsgGovUpdateParams,
 ) (*types.MsgGovUpdateParamsResponse, error) {
+	if msg.Authority != ms.authority {
+		return nil, types.ErrNoGovAuthority
+	}
+
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	for _, key := range msg.Keys {
