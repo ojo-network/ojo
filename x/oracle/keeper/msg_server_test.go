@@ -382,7 +382,7 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 				},
 			},
 			true,
-			"bad authority address",
+			"invalid gov authority to perform these changes",
 		},
 	}
 
