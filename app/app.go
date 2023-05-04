@@ -413,6 +413,9 @@ func New(
 	app.AirdropKeeper = airdropkeeper.NewKeeper(
 		appCodec,
 		keys[airdroptypes.ModuleName],
+		app.AccountKeeper,
+		app.BankKeeper,
+		app.StakingKeeper,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 

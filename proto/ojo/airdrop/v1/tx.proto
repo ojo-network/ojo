@@ -51,8 +51,11 @@ message MsgCreateAirdropAccount {
   option (gogoproto.goproto_getters) = false;
 
   string address = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
-  cosmos.base.v1beta1.DecCoin tokensToReceive = 2;
-  int64 vestingEndTime = 3;
+  string tokensToReceive = 2 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec"
+  ];
+  uint64 vestingEndTime = 3;
 }
 
 // MsgCreateAirdropAccountResponse defines the CreateAirdropAccount response type.

@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"fmt"
 
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -20,7 +21,7 @@ func NewMsgServerImpl(keeper Keeper) types.MsgServer {
 }
 
 // SetParams implements MsgServer.SetParams method.
-// It defines a method to update the x/slashing module parameters.
+// It defines a method to update the x/airdrop module parameters.
 func (ms msgServer) SetParams(goCtx context.Context, msg *types.MsgSetParams) (*types.MsgSetParamsResponse, error) {
 	if ms.keeper.authority != msg.Authority {
 		err := errors.Wrapf(
@@ -37,23 +38,79 @@ func (ms msgServer) SetParams(goCtx context.Context, msg *types.MsgSetParams) (*
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	if err := ms.keeper.SetParams(ctx, *msg.Params); err != nil {
-		return nil, err
-	}
+	ms.keeper.SetParams(ctx, *msg.Params)
 
 	return &types.MsgSetParamsResponse{}, nil
 }
 
+// CreateAirdropAccount implements MsgServer.CreateAirdropAccount method.
+// It defines a method to create an airdrop account.
 func (ms msgServer) CreateAirdropAccount(
-	ctx context.Context,
+	goCtx context.Context,
 	msg *types.MsgCreateAirdropAccount,
 ) (*types.MsgCreateAirdropAccountResponse, error) {
-	panic("not implemented")
+	// TODO - require authority signature
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	airdropAccount := types.AirdropAccount{
+		OriginAddress:  msg.Address,
+		OriginAmount:   msg.TokensToReceive,
+		VestingEndTime: msg.VestingEndTime,
+	}
+	fmt.Println(airdropAccount)
+	ms.keeper.SetAirdropAccount(ctx, airdropAccount)
+	return &types.MsgCreateAirdropAccountResponse{}, nil
 }
 
+// ClaimAirdrop implements MsgServer.ClaimAirdrop method.
+// It defines a method to claim an airdrop.
 func (ms msgServer) ClaimAirdrop(
-	ctx context.Context,
+	goCtx context.Context,
 	msg *types.MsgClaimAirdrop,
 ) (*types.MsgClaimAirdropResponse, error) {
-	panic("not implemented")
+	// TODO - require signature from claim address
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	claimAddress := sdk.AccAddress(msg.ToAddress)
+	airdropAccount, err := ms.keeper.GetAirdropAccount(ctx, msg.FromAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if already claimed
+	if airdropAccount.ClaimAddress != "" {
+		return nil, errors.Wrapf(
+			types.ErrAirdropAlreadyClaimed,
+			"already claimed by address %s",
+			airdropAccount.ClaimAddress,
+		)
+	}
+
+	// Check if past expiry block
+	if ctx.BlockHeight() > int64(ms.keeper.GetParams(ctx).ExpiryBlock) {
+		return nil, types.ErrAirdropExpired
+	}
+
+	// Check delegation requirement
+	delegations := ms.keeper.stakingKeeper.GetDelegatorDelegations(ctx, claimAddress, 999)
+	totalShares := sdk.ZeroDec()
+	for _, delegation := range delegations {
+		totalShares = totalShares.Add(delegation.Shares)
+	}
+	if totalShares.LT(*ms.keeper.GetParams(ctx).DelegationRequirement) {
+		return nil, types.ErrInsufficientDelegation
+	}
+
+	// Mint and send tokens
+	claimAmount := airdropAccount.OriginAmount.Mul(*ms.keeper.GetParams(ctx).AirdropFactor)
+	claimAmount.Abs()
+
+	claimDecCoin := sdk.NewCoins(sdk.NewCoin("ojo", claimAmount.TruncateInt()))
+	ms.keeper.bankKeeper.MintCoins(ctx, types.ModuleName, claimDecCoin)
+	ms.keeper.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, claimAddress, claimDecCoin)
+
+	// Update AirdropAccount
+	airdropAccount.ClaimAddress = msg.ToAddress
+	airdropAccount.ClaimAmount = &claimAmount
+	ms.keeper.SetAirdropAccount(ctx, airdropAccount)
+
+	return &types.MsgClaimAirdropResponse{}, nil
 }

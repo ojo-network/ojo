@@ -27,10 +27,7 @@ func (q querier) Params(
 	req *types.ParamsRequest,
 ) (*types.ParamsResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	params, err := q.GetParams(ctx)
-	if err != nil {
-		return nil, err
-	}
+	params := q.GetParams(ctx)
 	return &types.ParamsResponse{Params: params}, nil
 }
 
