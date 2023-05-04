@@ -412,7 +412,7 @@ func New(
 
 	app.AirdropKeeper = airdropkeeper.NewKeeper(
 		appCodec,
-		keys[oracletypes.ModuleName],
+		keys[airdroptypes.ModuleName],
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 

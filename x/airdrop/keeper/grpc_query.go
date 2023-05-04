@@ -31,7 +31,7 @@ func (q querier) Params(
 	if err != nil {
 		return nil, err
 	}
-	return &types.ParamsResponse{Params: &params}, nil
+	return &types.ParamsResponse{Params: params}, nil
 }
 
 func (q querier) AirdropAccount(

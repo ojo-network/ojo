@@ -1,6 +1,7 @@
 syntax = "proto3";
 package ojo.airdrop.v1;
 
+import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "ojo/airdrop/v1/airdrop.proto";
 
@@ -28,7 +29,7 @@ message ParamsRequest {}
 // ParamsResponse is the response type for the Query/Params RPC method.
 message ParamsResponse {
   // params defines the parameters of the module.
-  Params params = 1;
+  Params params = 1 [(gogoproto.nullable) = false];
 }
 
 // AirdropAccountRequest is the request type for the QueryAirdropAccount RPC method.

@@ -21,5 +21,5 @@ func (c *Client) QueryAirdropParams() (*airdroptypes.Params, error) {
 	if err != nil {
 		return nil, err
 	}
-	return queryResponse.Params, nil
+	return &queryResponse.Params, nil
 }
