@@ -3,6 +3,8 @@ package keeper
 import (
 	"context"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/ojo-network/ojo/x/airdrop/types"
 )
 
@@ -21,15 +23,25 @@ func NewQuerier(keeper Keeper) types.QueryServer {
 
 // Params queries params of x/airdrop module.
 func (q querier) Params(
-	ctx context.Context,
+	goCtx context.Context,
 	req *types.ParamsRequest,
 ) (*types.ParamsResponse, error) {
-	panic("not implemented")
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	params, err := q.GetParams(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &types.ParamsResponse{Params: &params}, nil
 }
 
 func (q querier) AirdropAccount(
-	ctx context.Context,
+	goCtx context.Context,
 	req *types.AirdropAccountRequest,
 ) (*types.AirdropAccountResponse, error) {
-	panic("not implemented")
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	airdropAccount, err := q.GetAirdropAccount(ctx, req.Address)
+	if err != nil {
+		return nil, err
+	}
+	return &types.AirdropAccountResponse{AirdropAccount: &airdropAccount}, nil
 }

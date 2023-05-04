@@ -12,8 +12,7 @@ func (c *Client) AirdropQueryClient() airdroptypes.QueryClient {
 	return airdroptypes.NewQueryClient(c.grpcConn)
 }
 
-// QueryProposal sends a grpc query with the given proposalID
-// and returns the govtypes.Proposal object
+// QueryAirdropParams sends a grpc query to fetch the current airdrop params
 func (c *Client) QueryAirdropParams() (*airdroptypes.Params, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), queryTimeout)
 	defer cancel()

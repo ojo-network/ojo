@@ -502,3 +502,11 @@ func (o *Orchestrator) SubmitLegacyParamChangeProposal(filePath string) error {
 		"-b", "block",
 	})
 }
+
+func (o *Orchestrator) ProposalStatus(proposalID uint64) error {
+	return o.ExecCommand([]string{
+		"ojod", "query", "gov", "proposal", fmt.Sprint(proposalID),
+		"--chain-id", o.chain.id,
+		"--output", "json",
+	})
+}

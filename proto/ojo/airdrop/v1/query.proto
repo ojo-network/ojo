@@ -38,7 +38,5 @@ message AirdropAccountRequest {
 
 // AirdropAccountResponse is the response type for the QueryAirdropAccount RPC method.
 message AirdropAccountResponse {
-  bool eligible = 1;
-  bool claimed = 2;
-  string claim_address = 3;
+  AirdropAccount airdrop_account = 1;
 }
