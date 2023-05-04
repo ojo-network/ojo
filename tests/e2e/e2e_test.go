@@ -59,4 +59,9 @@ func (s *IntegrationTestSuite) TestUpdateAirdropParams() {
 
 	err = grpc.SubmitAndPassProposal(ojoClient, []sdk.Msg{msg})
 	s.Require().NoError(err)
+
+	queriedParams, err := ojoClient.QueryClient.QueryAirdropParams()
+	s.Require().NoError(err)
+
+	s.Require().Equal(params, queriedParams)
 }
