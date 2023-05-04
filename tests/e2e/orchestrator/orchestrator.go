@@ -473,11 +473,14 @@ func proposalsDirectory() (string, error) {
 	return absoluteAdjacentDirPath, nil
 }
 
-func (o *Orchestrator) SubmitProposal(filePath string, govAddress string) {
-	o.ExecCommand([]string{
+func (o *Orchestrator) SubmitProposal(filePath string, govAddress string) error {
+	err := o.ExecCommand([]string{
 		"sed", "-i", fmt.Sprintf("s/$GOV_AUTHORITY_ADDRESS/%s/g", govAddress), filePath,
 	})
-	o.ExecCommand([]string{
+	if err != nil {
+		return err
+	}
+	return o.ExecCommand([]string{
 		"ojod", "tx", "gov", "submit-proposal",
 		filePath,
 		"--from", "val",
@@ -488,8 +491,8 @@ func (o *Orchestrator) SubmitProposal(filePath string, govAddress string) {
 	})
 }
 
-func (o *Orchestrator) SubmitLegacyParamChangeProposal(filePath string) {
-	o.ExecCommand([]string{
+func (o *Orchestrator) SubmitLegacyParamChangeProposal(filePath string) error {
+	return o.ExecCommand([]string{
 		"ojod", "tx", "gov", "submit-legacy-proposal", "param-change",
 		filePath,
 		"--from", "val",

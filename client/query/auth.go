@@ -17,7 +17,8 @@ func (c *Client) QueryGovAccount() (account authtypes.ModuleAccount, err error) 
 	ctx, cancel := context.WithTimeout(context.Background(), queryTimeout)
 	defer cancel()
 
-	queryResponse, err := c.AuthQueryClient().ModuleAccountByName(ctx, &authtypes.QueryModuleAccountByNameRequest{Name: "gov"})
+	request := &authtypes.QueryModuleAccountByNameRequest{Name: "gov"}
+	queryResponse, err := c.AuthQueryClient().ModuleAccountByName(ctx, request)
 	if err != nil {
 		return
 	}

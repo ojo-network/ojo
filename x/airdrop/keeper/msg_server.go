@@ -23,7 +23,13 @@ func NewMsgServerImpl(keeper Keeper) types.MsgServer {
 // It defines a method to update the x/slashing module parameters.
 func (ms msgServer) SetParams(goCtx context.Context, msg *types.MsgSetParams) (*types.MsgSetParamsResponse, error) {
 	if ms.keeper.authority != msg.Authority {
-		return nil, errors.Wrapf(govtypes.ErrInvalidSigner, "invalid authority; expected %s, got %s", ms.keeper.authority, msg.Authority)
+		err := errors.Wrapf(
+			govtypes.ErrInvalidSigner,
+			"invalid authority; expected %s, got %s",
+			ms.keeper.authority,
+			msg.Authority,
+		)
+		return nil, err
 	}
 
 	if err := msg.Params.Validate(); err != nil {

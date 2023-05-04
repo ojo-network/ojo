@@ -10,9 +10,16 @@ import (
 // InitGenesis initializes the x/airdrop module's state from a provided genesis
 // state.
 func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, genState types.GenesisState) {
-	keeper.SetParams(ctx, genState.Params)
+	err := keeper.SetParams(ctx, genState.Params)
+	if err != nil {
+		panic(err)
+	}
+
 	for _, airdropAccount := range genState.AirdropAccounts {
-		keeper.SetAirdropAccount(ctx, airdropAccount)
+		err := keeper.SetAirdropAccount(ctx, airdropAccount)
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 
