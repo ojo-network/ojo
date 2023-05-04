@@ -12,6 +12,7 @@ func (c *Client) AuthQueryClient() authtypes.QueryClient {
 	return authtypes.NewQueryClient(c.grpcConn)
 }
 
+// QueryGovAccount returns the gov module account for the chain
 func (c *Client) QueryGovAccount() (account authtypes.ModuleAccount, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), queryTimeout)
 	defer cancel()

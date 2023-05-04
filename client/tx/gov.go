@@ -27,6 +27,7 @@ func (c *Client) TxVoteYes(proposalID uint64) (*sdk.TxResponse, error) {
 	return c.BroadcastTx(msg)
 }
 
+// TxSubmitProposal sends a gov/v1 transaction to submit a proposal
 func (c *Client) TxSubmitProposal(
 	msgs []sdk.Msg,
 	deposit sdk.Coins,
@@ -49,7 +50,7 @@ func (c *Client) TxSubmitProposal(
 	return c.BroadcastTx(proposalMessage)
 }
 
-// TxSubmitProposal sends a transaction to submit a proposal
+// TxSubmitProposal sends a gov/v1beta1 transaction to submit a proposal
 func (c *Client) TxSubmitLegacyProposal(
 	changes []proposal.ParamChange,
 ) (*sdk.TxResponse, error) {

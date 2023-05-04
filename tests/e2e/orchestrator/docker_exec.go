@@ -9,6 +9,8 @@ import (
 	"github.com/ory/dockertest/v3/docker"
 )
 
+// ExecCommand executes a command on the validator container
+// and outputs the stdout and stderr to the console
 func (o *Orchestrator) ExecCommand(cmd []string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
