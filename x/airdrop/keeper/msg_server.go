@@ -19,7 +19,7 @@ func NewMsgServerImpl(keeper Keeper) types.MsgServer {
 	return &msgServer{keeper: keeper}
 }
 
-// UpdateParams implements MsgServer.UpdateParams method.
+// SetParams implements MsgServer.SetParams method.
 // It defines a method to update the x/slashing module parameters.
 func (ms msgServer) SetParams(goCtx context.Context, msg *types.MsgSetParams) (*types.MsgSetParamsResponse, error) {
 	if ms.keeper.authority != msg.Authority {
