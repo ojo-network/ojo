@@ -50,8 +50,8 @@ func (msg MsgSetParams) ValidateBasic() error {
 
 func NewMsgCreateAirdropAccount(
 	address string,
-	tokensToReceive *sdk.Dec,
-	vestingEndTime uint64,
+	tokensToReceive uint64,
+	vestingEndTime int64,
 ) *MsgCreateAirdropAccount {
 	return &MsgCreateAirdropAccount{
 		Address:         address,

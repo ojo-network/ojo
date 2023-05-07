@@ -5,6 +5,9 @@ import (
 
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	authvesting "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
+
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/ojo-network/ojo/x/airdrop/types"
 )
@@ -48,14 +51,29 @@ func (ms msgServer) CreateAirdropAccount(
 	goCtx context.Context,
 	msg *types.MsgCreateAirdropAccount,
 ) (*types.MsgCreateAirdropAccountResponse, error) {
-	// TODO - require authority signature
+	// TODO - require genesis signature
+
+	// Create Continuous Vesting Account
+	baseAccount := &authtypes.BaseAccount{
+		Address: msg.Address,
+	}
+	authvesting.NewContinuousVestingAccount(
+		baseAccount,
+		sdk.NewCoins(sdk.NewCoin("ojo", sdk.NewIntFromUint64(msg.TokensToReceive))),
+		msg.VestingStartTime,
+		msg.VestingEndTime,
+	)
+
+	// Create AirdropAccount entry
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	airdropAccount := types.AirdropAccount{
-		OriginAddress:  msg.Address,
-		OriginAmount:   msg.TokensToReceive,
-		VestingEndTime: msg.VestingEndTime,
+		OriginAddress:    msg.Address,
+		OriginAmount:     msg.TokensToReceive,
+		VestingStartTime: msg.VestingStartTime,
+		VestingEndTime:   msg.VestingEndTime,
 	}
 	ms.keeper.SetAirdropAccount(ctx, airdropAccount)
+
 	return &types.MsgCreateAirdropAccountResponse{}, nil
 }
 
@@ -98,16 +116,27 @@ func (ms msgServer) ClaimAirdrop(
 	}
 
 	// Mint and send tokens
-	claimAmount := airdropAccount.OriginAmount.Mul(*ms.keeper.GetParams(ctx).AirdropFactor)
+	claimAmount := ms.keeper.GetParams(ctx).AirdropFactor.MulInt64(int64(airdropAccount.OriginAmount))
 	claimAmount.Abs()
+	intClaimAmount := claimAmount.TruncateInt64()
 
 	claimDecCoin := sdk.NewCoins(sdk.NewCoin("ojo", claimAmount.TruncateInt()))
 	ms.keeper.bankKeeper.MintCoins(ctx, types.ModuleName, claimDecCoin)
 	ms.keeper.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, claimAddress, claimDecCoin)
 
+	// Create delayed vesting account
+	baseAccount := &authtypes.BaseAccount{
+		Address: msg.ToAddress,
+	}
+	authvesting.NewDelayedVestingAccount(
+		baseAccount,
+		sdk.NewCoins(sdk.NewCoin("ojo", claimAmount.TruncateInt())),
+		airdropAccount.VestingEndTime,
+	)
+
 	// Update AirdropAccount
 	airdropAccount.ClaimAddress = msg.ToAddress
-	airdropAccount.ClaimAmount = &claimAmount
+	airdropAccount.ClaimAmount = uint64(intClaimAmount)
 	ms.keeper.SetAirdropAccount(ctx, airdropAccount)
 
 	return &types.MsgClaimAirdropResponse{}, nil
