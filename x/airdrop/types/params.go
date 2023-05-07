@@ -7,6 +7,7 @@ import (
 )
 
 var (
+	DefaultOriginAccountsCreated = false
 	DefaultExpiryBlock           = uint64(5000)
 	DefaultDelegationRequirement = sdk.NewDecWithPrec(1, 1)
 	DefaultAirdropFactor         = sdk.NewDecWithPrec(1, 1)
@@ -14,6 +15,7 @@ var (
 
 func DefaultParams() Params {
 	return Params{
+		OriginAccountsCreated: DefaultOriginAccountsCreated,
 		ExpiryBlock:           DefaultExpiryBlock,
 		DelegationRequirement: &DefaultDelegationRequirement,
 		AirdropFactor:         &DefaultAirdropFactor,

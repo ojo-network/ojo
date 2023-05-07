@@ -7,6 +7,25 @@ import (
 	appparams "github.com/ojo-network/ojo/app/params"
 )
 
+const (
+	StateCreated   = "created"
+	StateUnclaimed = "unclaimed"
+	StateClaimed   = "claimed"
+)
+
+func NewAirdropAccount(
+	originAddress string,
+	originAmount uint64,
+	vestingEndTime int64,
+) *AirdropAccount {
+	return &AirdropAccount{
+		OriginAddress:  originAddress,
+		OriginAmount:   originAmount,
+		VestingEndTime: vestingEndTime,
+		State:          StateCreated,
+	}
+}
+
 func (aa *AirdropAccount) OriginAccAddress() (sdk.AccAddress, error) {
 	return sdk.AccAddressFromBech32(aa.OriginAddress)
 }

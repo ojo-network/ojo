@@ -25,7 +25,15 @@ var (
 )
 
 // AirdropAccountKey returns the store key for an airdrop account
-func AirdropAccountKey(originAddress string) (key []byte) {
-	key = append(key, AirdropAccountKeyPrefix...)
-	return append(key, address.MustLengthPrefix([]byte(originAddress))...)
+func AirdropAccountKey(originAddress string, state string) (key []byte) {
+	key = AirdropAccountKeyPrefix
+	key = append(key, []byte(state)...)
+	key = append(key, address.MustLengthPrefix([]byte(originAddress))...)
+	return key
+}
+
+func AirdropIteratorKey(state string) (key []byte) {
+	key = AirdropAccountKeyPrefix
+	key = append(key, []byte(state)...)
+	return key
 }

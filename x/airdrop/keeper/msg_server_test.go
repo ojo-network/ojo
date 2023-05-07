@@ -3,7 +3,6 @@ package keeper_test
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/ojo-network/ojo/client/tx"
 	"github.com/ojo-network/ojo/x/airdrop/types"
 )
 
@@ -17,29 +16,6 @@ func (s *IntegrationTestSuite) TestMsgServer_SetParams() {
 	params.DelegationRequirement = &delegationRequirement
 
 	s.Require().Equal(params, s.app.AirdropKeeper.GetParams(s.ctx))
-}
-
-func (s *IntegrationTestSuite) TestMsgServer_CreateAirdropAccount() {
-	tokensToReceive := uint64(1000)
-
-	originAddress := CreateAccount(s)
-
-	msg := types.NewMsgCreateAirdropAccount(
-		originAddress.String(),
-		tokensToReceive,
-		20,
-	)
-	_, err := s.msgServer.CreateAirdropAccount(s.ctx, msg)
-	s.Require().NoError(err)
-
-	airdropAccount, err := s.app.AirdropKeeper.GetAirdropAccount(s.ctx, originAddress.String())
-	s.Require().NoError(err)
-	s.Require().Equal(originAddress.String(), airdropAccount.OriginAddress)
-	s.Require().Equal(tokensToReceive, airdropAccount.OriginAmount)
-	s.Require().Equal(msg.VestingEndTime, airdropAccount.VestingEndTime)
-
-	balance := s.app.BankKeeper.GetBalance(s.ctx, originAddress, bondDenom)
-	s.Require().Equal(tokensToReceive, balance.Amount.Uint64())
 }
 
 func (s *IntegrationTestSuite) TestMsgServer_ClaimAirdrop() {
@@ -62,7 +38,7 @@ func (s *IntegrationTestSuite) TestMsgServer_ClaimAirdrop() {
 			expiryBlock:           10000,
 			delegationRequirement: sdk.MustNewDecFromStr("0"),
 			originAccount:         CreateClaimedAccount(s),
-			errMsg:                "already claimed by address",
+			errMsg:                "no airdrop account found",
 		},
 		{
 			name:                  "past the expiry block",
@@ -105,7 +81,7 @@ func (s *IntegrationTestSuite) TestMsgServer_ClaimAirdrop() {
 			}
 			s.Require().NoError(err)
 
-			airdropAccount, err := s.app.AirdropKeeper.GetAirdropAccount(s.ctx, tc.originAccount.String())
+			airdropAccount, err := s.app.AirdropKeeper.GetAirdropAccount(s.ctx, tc.originAccount.String(), types.StateClaimed)
 			s.Require().NoError(err)
 			s.Require().Equal(claimAddress.String(), airdropAccount.ClaimAddress)
 
@@ -117,28 +93,18 @@ func (s *IntegrationTestSuite) TestMsgServer_ClaimAirdrop() {
 
 // Helper Functions \\
 
-// CreateAccount creates a new account with a random mnemonic and returns the address
-func CreateAccount(s *IntegrationTestSuite) sdk.AccAddress {
-	mnemonic, err := tx.CreateMnemonic()
-	s.Require().NoError(err)
-	account, _, err := tx.CreateAccountFromMnemonic("test", mnemonic)
-	s.Require().NoError(err)
-	address, err := account.GetAddress()
-	s.Require().NoError(err)
-	return address
-}
-
 // CreateAirdropAccount uses the CreateAccount function to create an account and then
 // creates an airdrop account using the new account as the origin address
 func CreateAirdropAccount(s *IntegrationTestSuite) sdk.AccAddress {
 	originAddress := CreateAccount(s)
 	tokensToReceive := uint64(1000)
-	msg := types.NewMsgCreateAirdropAccount(
+
+	airdropAccount := types.NewAirdropAccount(
 		originAddress.String(),
 		tokensToReceive,
 		20,
 	)
-	_, err := s.msgServer.CreateAirdropAccount(s.ctx, msg)
+	err := s.app.AirdropKeeper.CreateAirdropAccount(s.ctx, airdropAccount)
 	s.Require().NoError(err)
 	return originAddress
 }

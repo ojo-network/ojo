@@ -6,9 +6,12 @@ import (
 	"github.com/ojo-network/ojo/util/checkers"
 )
 
+const (
+	TypeMsgClaimAirdrop = "claim_airdrop"
+)
+
 var (
 	_ sdk.Msg = &MsgSetParams{}
-	_ sdk.Msg = &MsgCreateAirdropAccount{}
 	_ sdk.Msg = &MsgClaimAirdrop{}
 )
 
@@ -45,37 +48,6 @@ func (msg MsgSetParams) GetSigners() []sdk.AccAddress {
 // ValidateBasic Implements sdk.Msg
 func (msg MsgSetParams) ValidateBasic() error {
 	// TODO validate params
-	return nil
-}
-
-func NewMsgCreateAirdropAccount(
-	address string,
-	tokensToReceive uint64,
-	vestingEndTime int64,
-) *MsgCreateAirdropAccount {
-	return &MsgCreateAirdropAccount{
-		Address:         address,
-		TokensToReceive: tokensToReceive,
-		VestingEndTime:  vestingEndTime,
-	}
-}
-
-// Type implements LegacyMsg interface
-func (msg MsgCreateAirdropAccount) Type() string { return sdk.MsgTypeURL(&msg) }
-
-// GetSignBytes implements sdk.Msg
-func (msg MsgCreateAirdropAccount) GetSignBytes() []byte {
-	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
-}
-
-// GetSigners implements sdk.Msg
-func (msg MsgCreateAirdropAccount) GetSigners() []sdk.AccAddress {
-	return checkers.Signers()
-}
-
-// ValidateBasic Implements sdk.Msg
-func (msg MsgCreateAirdropAccount) ValidateBasic() error {
-	// TODO validate address
 	return nil
 }
 

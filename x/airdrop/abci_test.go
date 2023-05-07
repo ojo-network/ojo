@@ -100,6 +100,41 @@ var (
 	initCoins  = sdk.NewCoins(sdk.NewCoin(bondDenom, initTokens))
 )
 
+func (s *IntegrationTestSuite) TestEndBlockerAccountCreation() {
+	app, ctx := s.app, s.ctx
+
+	pubKey := secp256k1.GenPrivKey().PubKey()
+	testAddress := sdk.AccAddress(pubKey.Address())
+
+	originAmount := uint64(600)
+
+	params := app.AirdropKeeper.GetParams(ctx)
+	params.OriginAccountsCreated = false
+	app.AirdropKeeper.SetParams(ctx, params)
+
+	airdropAccount := &types.AirdropAccount{
+		OriginAddress:  testAddress.String(),
+		OriginAmount:   originAmount,
+		VestingEndTime: int64(10000000000),
+		State:          types.StateCreated,
+	}
+	app.AirdropKeeper.SetAirdropAccount(ctx, airdropAccount)
+
+	airdrop.EndBlocker(ctx, app.AirdropKeeper)
+
+	accAddress, err := airdropAccount.OriginAccAddress()
+	s.Require().NoError(err)
+
+	balance := app.BankKeeper.GetBalance(
+		ctx,
+		accAddress,
+		bondDenom,
+	).Amount
+
+	s.Require().Equal(originAmount, balance.Uint64())
+
+}
+
 func (s *IntegrationTestSuite) TestEndBlockerMinting() {
 	app, ctx := s.app, s.ctx
 
@@ -110,12 +145,12 @@ func (s *IntegrationTestSuite) TestEndBlockerMinting() {
 	).Amount
 
 	communityPoolStartingBalance := s.app.DistrKeeper.GetFeePool(ctx).CommunityPool.AmountOf(bondDenom)
-	fmt.Println("communityPoolStartingBalance", communityPoolStartingBalance)
 
 	airdropAccount := &types.AirdropAccount{
 		OriginAddress:  "testAddress",
 		OriginAmount:   uint64(600),
 		VestingEndTime: int64(10000000000),
+		State:          types.StateUnclaimed,
 	}
 	app.AirdropKeeper.SetAirdropAccount(ctx, airdropAccount)
 
@@ -123,7 +158,7 @@ func (s *IntegrationTestSuite) TestEndBlockerMinting() {
 	airdrop.EndBlocker(ctx, app.AirdropKeeper)
 
 	// Check that the airdrop account has been claimed
-	queriedAccount, err := app.AirdropKeeper.GetAirdropAccount(ctx, airdropAccount.OriginAddress)
+	queriedAccount, err := app.AirdropKeeper.GetAirdropAccount(ctx, airdropAccount.OriginAddress, types.StateClaimed)
 	s.Require().NoError(err)
 	err = queriedAccount.VerifyNotClaimed()
 	s.Require().Error(err)
