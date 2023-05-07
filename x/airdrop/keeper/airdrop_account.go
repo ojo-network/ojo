@@ -125,7 +125,7 @@ func (k Keeper) VerifyDelegationRequirement(
 	ctx sdk.Context,
 	aa *types.AirdropAccount,
 ) error {
-	address, err := aa.ClaimAccAddress()
+	address, err := aa.OriginAccAddress()
 	if err != nil {
 		return err
 	}
@@ -134,7 +134,10 @@ func (k Keeper) VerifyDelegationRequirement(
 	for _, delegation := range delegations {
 		totalShares = totalShares.Add(delegation.Shares)
 	}
-	if totalShares.LT(*k.GetParams(ctx).DelegationRequirement) {
+
+	totalRequired := k.GetParams(ctx).DelegationRequirement.MulInt64(int64(aa.OriginAmount))
+
+	if totalShares.LT(totalRequired) {
 		return types.ErrInsufficientDelegation
 	}
 	return nil

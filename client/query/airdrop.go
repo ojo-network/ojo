@@ -23,3 +23,17 @@ func (c *Client) QueryAirdropParams() (*airdroptypes.Params, error) {
 	}
 	return &queryResponse.Params, nil
 }
+
+func (c *Client) QueryAirdropAccount(address string) (*airdroptypes.AirdropAccount, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), queryTimeout)
+	defer cancel()
+
+	queryResponse, err := c.AirdropQueryClient().AirdropAccount(
+		ctx,
+		&airdroptypes.AirdropAccountRequest{Address: address},
+	)
+	if err != nil {
+		return nil, err
+	}
+	return queryResponse.AirdropAccount, nil
+}

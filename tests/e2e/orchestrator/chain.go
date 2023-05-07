@@ -9,6 +9,7 @@ import (
 
 	ojoapp "github.com/ojo-network/ojo/app"
 	"github.com/ojo-network/ojo/app/params"
+	"github.com/ojo-network/ojo/client/tx"
 )
 
 const (
@@ -30,6 +31,7 @@ type chain struct {
 	dataDir    string
 	id         string
 	validators []*validator
+	accounts   []*tx.OjoAccount
 }
 
 func newChain() (*chain, error) {
@@ -71,6 +73,17 @@ func (c *chain) createAndInitValidators(count int) error {
 		}
 	}
 
+	return nil
+}
+
+func (c *chain) createAccounts(numAccounts int) error {
+	for i := 0; i < numAccounts; i++ {
+		newAccount, err := tx.NewOjoAccount(fmt.Sprintf("account-%d", i))
+		if err != nil {
+			return err
+		}
+		c.accounts = append(c.accounts, newAccount)
+	}
 	return nil
 }
 

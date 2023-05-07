@@ -111,6 +111,10 @@ func (c *Client) createTxFactory() {
 	c.txFactory = &factory
 }
 
+func (c *Client) Address() (sdk.AccAddress, error) {
+	return c.keyringRecord.GetAddress()
+}
+
 func (c *Client) BroadcastTx(msgs ...sdk.Msg) (*sdk.TxResponse, error) {
 	return BroadcastTx(*c.ClientContext, *c.txFactory, msgs...)
 }

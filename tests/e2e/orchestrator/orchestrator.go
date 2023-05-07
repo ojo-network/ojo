@@ -30,6 +30,7 @@ import (
 
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	govtypesv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
+	airdroptypes "github.com/ojo-network/ojo/x/airdrop/types"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
 
@@ -53,7 +54,8 @@ type Orchestrator struct {
 	dkrPool             *dockertest.Pool
 	dkrNet              *dockertest.Network
 	priceFeederResource *dockertest.Resource
-	OjoClient           *client.OjoClient
+	OjoClient           *client.OjoClient // signs tx with val[0]
+	AirdropClient       *client.OjoClient // signs tx with account[0]
 }
 
 // SetupSuite initializes and runs all the resources needed for the
@@ -81,10 +83,12 @@ func (o *Orchestrator) InitResources(t *testing.T) {
 	require.NoError(t, err)
 
 	o.initNodes(t)
+	o.initUserAccounts(t)
 	o.initGenesis(t)
 	o.initValidatorConfigs(t)
 	o.runValidators(t)
 	o.initOjoClient(t)
+	o.initAirdropClient(t)
 	o.delegatePriceFeederVoting(t)
 	o.runPriceFeeder(t)
 }
@@ -129,6 +133,11 @@ func (o *Orchestrator) initNodes(t *testing.T) {
 	}
 }
 
+func (o *Orchestrator) initUserAccounts(t *testing.T) {
+	err := o.chain.createAccounts(1)
+	require.NoError(t, err)
+}
+
 func (o *Orchestrator) initGenesis(t *testing.T) {
 	serverCtx := server.NewDefaultContext()
 	config := serverCtx.Config
@@ -156,6 +165,25 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 	bz, err := cdc.MarshalJSON(&oracleGenState)
 	require.NoError(t, err)
 	appGenState[oracletypes.ModuleName] = bz
+
+	// Airdrop
+	var airdropGenState airdroptypes.GenesisState
+	require.NoError(t, cdc.UnmarshalJSON(appGenState[airdroptypes.ModuleName], &airdropGenState))
+
+	// Use the first and only account as the airdrop origin
+	airdropOriginAddress, err := o.chain.accounts[0].KeyInfo.GetAddress()
+	require.NoError(t, err)
+	airdropGenState.AirdropAccounts = []*airdroptypes.AirdropAccount{
+		{
+			OriginAddress:  airdropOriginAddress.String(),
+			OriginAmount:   100000000000,
+			VestingEndTime: time.Now().Add(24 * time.Hour).Unix(),
+		},
+	}
+
+	bz, err = cdc.MarshalJSON(&airdropGenState)
+	require.NoError(t, err)
+	appGenState[airdroptypes.ModuleName] = bz
 
 	// Gov
 	var govGenState govtypesv1.GenesisState
@@ -437,6 +465,18 @@ func (o *Orchestrator) initOjoClient(t *testing.T) {
 		fmt.Sprintf("tcp://localhost:%s", ojoGrpcPort),
 		"val1",
 		o.chain.validators[1].mnemonic,
+	)
+	require.NoError(t, err)
+}
+
+func (o *Orchestrator) initAirdropClient(t *testing.T) {
+	var err error
+	o.AirdropClient, err = client.NewOjoClient(
+		o.chain.id,
+		fmt.Sprintf("tcp://localhost:%s", ojoTmrpcPort),
+		fmt.Sprintf("tcp://localhost:%s", ojoGrpcPort),
+		"val1",
+		o.chain.accounts[0].Mnemonic,
 	)
 	require.NoError(t, err)
 }
