@@ -20,5 +20,5 @@ func (s *IntegrationTestSuite) TestMsgServer_CreateAirdropAccount() {
 	s.Require().NoError(err)
 	s.Require().Equal(addr.String(), airdropAccount.OriginAddress)
 	s.Require().Equal(tokensToReceive, *airdropAccount.OriginAmount)
-	s.Require().Equal(int64(20), airdropAccount.VestingEndTime)
+	s.Require().Equal(msg.VestingEndTime, airdropAccount.VestingEndTime)
 }

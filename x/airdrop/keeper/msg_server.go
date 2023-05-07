@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-	"fmt"
 
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -56,7 +55,6 @@ func (ms msgServer) CreateAirdropAccount(
 		OriginAmount:   msg.TokensToReceive,
 		VestingEndTime: msg.VestingEndTime,
 	}
-	fmt.Println(airdropAccount)
 	ms.keeper.SetAirdropAccount(ctx, airdropAccount)
 	return &types.MsgCreateAirdropAccountResponse{}, nil
 }
