@@ -20,11 +20,12 @@ const (
 
 // KVStore key prefixes
 var (
-	KeyPrefixAirdropAccount = []byte{0x01}
+	ParamsKey               = []byte{0x01}
+	AirdropAccountKeyPrefix = []byte{0x02}
 )
 
 // AirdropAccountKey returns the store key for an airdrop account
 func AirdropAccountKey(originAddress string) (key []byte) {
-	key = append(key, KeyPrefixAirdropAccount...)
+	key = append(key, AirdropAccountKeyPrefix...)
 	return append(key, address.MustLengthPrefix([]byte(originAddress))...)
 }

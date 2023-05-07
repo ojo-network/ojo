@@ -53,7 +53,6 @@ type Orchestrator struct {
 	dkrPool             *dockertest.Pool
 	dkrNet              *dockertest.Network
 	priceFeederResource *dockertest.Resource
-	valResources        []*dockertest.Resource
 	OjoClient           *client.OjoClient
 }
 
@@ -95,8 +94,8 @@ func (o *Orchestrator) TearDownResources(t *testing.T) {
 
 	require.NoError(t, o.dkrPool.Purge(o.priceFeederResource))
 
-	for _, vc := range o.valResources {
-		require.NoError(t, o.dkrPool.Purge(vc))
+	for _, val := range o.chain.validators {
+		require.NoError(t, o.dkrPool.Purge(val.dockerResource))
 	}
 
 	require.NoError(t, o.dkrPool.RemoveNetwork(o.dkrNet))
@@ -261,13 +260,16 @@ func (o *Orchestrator) initValidatorConfigs(t *testing.T) {
 func (o *Orchestrator) runValidators(t *testing.T) {
 	t.Log("starting ojo validator containers...")
 
-	o.valResources = make([]*dockertest.Resource, len(o.chain.validators))
-	for i, val := range o.chain.validators {
+	proposalsDirectory, err := proposalsDirectory()
+	require.NoError(t, err)
+
+	for _, val := range o.chain.validators {
 		runOpts := &dockertest.RunOptions{
 			Name:      val.instanceName(),
 			NetworkID: o.dkrNet.Network.ID,
 			Mounts: []string{
 				fmt.Sprintf("%s/:/root/.ojo", val.configDir()),
+				fmt.Sprintf("%s/:/root/proposals", proposalsDirectory),
 			},
 			Repository: ojoContainerRepo,
 		}
@@ -285,7 +287,7 @@ func (o *Orchestrator) runValidators(t *testing.T) {
 		resource, err := o.dkrPool.RunWithOptions(runOpts, noRestart)
 		require.NoError(t, err)
 
-		o.valResources[i] = resource
+		val.dockerResource = resource
 		t.Logf("started ojo validator container: %s", resource.Container.ID)
 	}
 
@@ -320,7 +322,7 @@ func (o *Orchestrator) runValidators(t *testing.T) {
 	}
 
 	if !isHealthy {
-		err := o.outputLogs(o.valResources[0])
+		err := o.outputLogs(o.chain.validators[0].dockerResource)
 		if err != nil {
 			t.Log("Error retrieving Ojo node logs", err)
 		}
@@ -454,4 +456,19 @@ func noRestart(config *docker.HostConfig) {
 	config.RestartPolicy = docker.RestartPolicy{
 		Name: "no",
 	}
+}
+
+func proposalsDirectory() (string, error) {
+	workingDir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+
+	adjacentDirPath := filepath.Join(workingDir, "proposals")
+	absoluteAdjacentDirPath, err := filepath.Abs(adjacentDirPath)
+	if err != nil {
+		return "", err
+	}
+
+	return absoluteAdjacentDirPath, nil
 }
