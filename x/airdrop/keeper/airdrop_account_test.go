@@ -23,3 +23,25 @@ func (s *IntegrationTestSuite) TestSetAndGetAirdropAccount() {
 	s.Require().Equal(airdropAccount2.OriginAddress, airdropAccount.OriginAddress)
 	s.Require().Equal(airdropAccount2.OriginAmount, airdropAccount.OriginAmount)
 }
+
+func (s *IntegrationTestSuite) TestGetAllAirdropAccounts() {
+	app, ctx := s.app, s.ctx
+
+	originAmount := sdk.MustNewDecFromStr("500")
+	airdropAccount := types.AirdropAccount{
+		OriginAddress: "test",
+		OriginAmount:  &originAmount,
+	}
+	err := app.AirdropKeeper.SetAirdropAccount(ctx, airdropAccount)
+	s.Require().NoError(err)
+
+	airdropAccount2 := types.AirdropAccount{
+		OriginAddress: "test2",
+		OriginAmount:  &originAmount,
+	}
+	err = app.AirdropKeeper.SetAirdropAccount(ctx, airdropAccount2)
+	s.Require().NoError(err)
+
+	accounts := app.AirdropKeeper.GetAllAirdropAccounts(ctx)
+	s.Require().Equal(2, len(accounts))
+}

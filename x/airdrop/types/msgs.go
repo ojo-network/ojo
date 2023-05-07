@@ -7,9 +7,46 @@ import (
 )
 
 var (
+	_ sdk.Msg = &MsgSetParams{}
 	_ sdk.Msg = &MsgCreateAirdropAccount{}
 	_ sdk.Msg = &MsgClaimAirdrop{}
 )
+
+func NewMsgSetParams(
+	expiryBlock uint64,
+	delegationRequirement *sdk.Dec,
+	airdropFactor *sdk.Dec,
+	govAddress string,
+) *MsgSetParams {
+	params := &Params{
+		ExpiryBlock:           expiryBlock,
+		DelegationRequirement: delegationRequirement,
+		AirdropFactor:         airdropFactor,
+	}
+	return &MsgSetParams{
+		Params:    params,
+		Authority: govAddress,
+	}
+}
+
+// Type implements LegacyMsg interface
+func (msg MsgSetParams) Type() string { return sdk.MsgTypeURL(&msg) }
+
+// GetSignBytes implements sdk.Msg
+func (msg MsgSetParams) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
+}
+
+// GetSigners implements sdk.Msg
+func (msg MsgSetParams) GetSigners() []sdk.AccAddress {
+	return checkers.Signers(msg.Authority)
+}
+
+// ValidateBasic Implements sdk.Msg
+func (msg MsgSetParams) ValidateBasic() error {
+	// TODO validate params
+	return nil
+}
 
 func NewMsgCreateAirdropAccount(
 	address string,
