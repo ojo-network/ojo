@@ -90,14 +90,16 @@ func (k Keeper) CreateOriginAccount(ctx sdk.Context, aa *types.AirdropAccount) {
 	baseAccount := authtypes.NewBaseAccountWithAddress(aa.OriginAccAddress())
 	baseAccount = k.accountKeeper.NewAccount(ctx, baseAccount).(*authtypes.BaseAccount)
 	baseVestingAccount := authvesting.NewBaseVestingAccount(baseAccount, aa.OriginCoins().Sort(), aa.VestingEndTime)
-	authvesting.NewContinuousVestingAccountRaw(baseVestingAccount, ctx.BlockTime().Unix())
+	vestingAccount := authvesting.NewContinuousVestingAccountRaw(baseVestingAccount, ctx.BlockTime().Unix())
+	k.accountKeeper.SetAccount(ctx, vestingAccount)
 }
 
 func (k Keeper) CreateClaimAccount(ctx sdk.Context, aa *types.AirdropAccount) {
 	baseAccount := authtypes.NewBaseAccountWithAddress(aa.ClaimAccAddress())
 	baseAccount = k.accountKeeper.NewAccount(ctx, baseAccount).(*authtypes.BaseAccount)
 	baseVestingAccount := authvesting.NewBaseVestingAccount(baseAccount, aa.ClaimCoins().Sort(), aa.VestingEndTime)
-	authvesting.NewDelayedVestingAccountRaw(baseVestingAccount)
+	vestingAccount := authvesting.NewDelayedVestingAccountRaw(baseVestingAccount)
+	k.accountKeeper.SetAccount(ctx, vestingAccount)
 }
 
 func (k Keeper) SendOriginTokens(ctx sdk.Context, aa *types.AirdropAccount) {

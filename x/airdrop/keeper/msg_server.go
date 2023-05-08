@@ -51,8 +51,8 @@ func (ms msgServer) CreateAirdropAccount(
 ) (*types.MsgCreateAirdropAccountResponse, error) {
 	// TODO - require genesis signature
 
-	// Create AirdropAccount entry
 	ctx := sdk.UnwrapSDKContext(goCtx)
+
 	airdropAccount := &types.AirdropAccount{
 		OriginAddress:    msg.Address,
 		OriginAmount:     msg.TokensToReceive,
@@ -84,7 +84,6 @@ func (ms msgServer) ClaimAirdrop(
 	}
 	airdropAccount.ClaimAddress = msg.ToAddress
 
-	// Check if already claimed
 	if err := airdropAccount.VerifyNotClaimed(); err != nil {
 		return nil, err
 	}
@@ -94,7 +93,6 @@ func (ms msgServer) ClaimAirdrop(
 		return nil, types.ErrAirdropExpired
 	}
 
-	// Check delegation requirement
 	if err := ms.keeper.VerifyDelegationRequirement(ctx, airdropAccount); err != nil {
 		return nil, err
 	}
