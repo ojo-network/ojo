@@ -52,15 +52,20 @@ func (ms msgServer) CreateAirdropAccount(
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	airdropAccount := &types.AirdropAccount{
-		OriginAddress:    msg.Address,
-		OriginAmount:     msg.TokensToReceive,
-		VestingStartTime: msg.VestingStartTime,
-		VestingEndTime:   msg.VestingEndTime,
+		OriginAddress:  msg.Address,
+		OriginAmount:   msg.TokensToReceive,
+		VestingEndTime: msg.VestingEndTime,
 	}
 
 	ms.keeper.CreateOriginAccount(ctx, airdropAccount)
-	ms.keeper.MintOriginTokens(ctx, airdropAccount)
-	ms.keeper.SendOriginTokens(ctx, airdropAccount)
+	err := ms.keeper.MintOriginTokens(ctx, airdropAccount)
+	if err != nil {
+		return nil, err
+	}
+	err = ms.keeper.SendOriginTokens(ctx, airdropAccount)
+	if err != nil {
+		return nil, err
+	}
 	ms.keeper.SetAirdropAccount(ctx, airdropAccount)
 
 	return &types.MsgCreateAirdropAccountResponse{}, nil
@@ -94,9 +99,15 @@ func (ms msgServer) ClaimAirdrop(
 	}
 
 	ms.keeper.SetClaimAmount(ctx, airdropAccount)
-	ms.keeper.MintClaimTokens(ctx, airdropAccount)
+	err = ms.keeper.MintClaimTokensToAirdrop(ctx, airdropAccount)
+	if err != nil {
+		return nil, err
+	}
 	ms.keeper.CreateClaimAccount(ctx, airdropAccount)
-	ms.keeper.SendClaimTokens(ctx, airdropAccount)
+	err = ms.keeper.SendClaimTokens(ctx, airdropAccount)
+	if err != nil {
+		return nil, err
+	}
 	ms.keeper.SetAirdropAccount(ctx, airdropAccount)
 
 	return &types.MsgClaimAirdropResponse{}, nil

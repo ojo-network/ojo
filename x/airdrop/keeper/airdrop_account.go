@@ -4,6 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	authvesting "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
+	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 
 	"github.com/ojo-network/ojo/x/airdrop/types"
 )
@@ -25,22 +26,23 @@ func (k Keeper) SetAirdropAccount(
 // GetAirdropAccount returns the airdrop account from the store
 func (k Keeper) GetAirdropAccount(
 	ctx sdk.Context, originAddress string,
-) (account *types.AirdropAccount, err error) {
+) (*types.AirdropAccount, error) {
 
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(types.AirdropAccountKey(originAddress))
 	if bz == nil {
-		return
+		return nil, types.ErrNoAccountFound
 	}
 
-	k.cdc.MustUnmarshal(bz, account)
-	return
+	var airdropAccount types.AirdropAccount
+	k.cdc.MustUnmarshal(bz, &airdropAccount)
+	return &airdropAccount, nil
 }
 
 // GetAllAirdropAccounts returns all airdrop accounts from the store
 func (k Keeper) GetAllAirdropAccounts(
 	ctx sdk.Context,
-) (accounts []types.AirdropAccount) {
+) (accounts []*types.AirdropAccount) {
 	store := ctx.KVStore(k.storeKey)
 	iterator := sdk.KVStorePrefixIterator(store, types.AirdropAccountKeyPrefix)
 	defer iterator.Close()
@@ -48,7 +50,7 @@ func (k Keeper) GetAllAirdropAccounts(
 	for ; iterator.Valid(); iterator.Next() {
 		var account types.AirdropAccount
 		k.cdc.MustUnmarshal(iterator.Value(), &account)
-		accounts = append(accounts, account)
+		accounts = append(accounts, &account)
 	}
 	return
 }
@@ -77,13 +79,25 @@ func (k Keeper) SetClaimAmount(ctx sdk.Context, aa *types.AirdropAccount) {
 }
 
 // MintOriginTokens mints the originAmount of tokens to the airdrop module account
-func (k Keeper) MintOriginTokens(ctx sdk.Context, aa *types.AirdropAccount) {
-	k.bankKeeper.MintCoins(ctx, types.ModuleName, aa.OriginCoins())
+func (k Keeper) MintOriginTokens(ctx sdk.Context, aa *types.AirdropAccount) error {
+	return k.bankKeeper.MintCoins(ctx, types.ModuleName, aa.OriginCoins())
 }
 
 // MintClaimTokens mints the claimAmount of tokens to the airdrop module account
-func (k Keeper) MintClaimTokens(ctx sdk.Context, aa *types.AirdropAccount) {
-	k.bankKeeper.MintCoins(ctx, types.ModuleName, aa.ClaimCoins())
+func (k Keeper) MintClaimTokensToAirdrop(ctx sdk.Context, aa *types.AirdropAccount) error {
+	return k.bankKeeper.MintCoins(ctx, types.ModuleName, aa.ClaimCoins())
+}
+
+func (k Keeper) MintClaimTokensToDistribution(ctx sdk.Context, aa *types.AirdropAccount) error {
+	return k.bankKeeper.MintCoins(ctx, distributiontypes.ModuleName, aa.ClaimCoins())
+}
+
+func (k Keeper) AirdropModuleAddress(ctx sdk.Context) sdk.AccAddress {
+	return k.accountKeeper.GetModuleAddress(types.ModuleName)
+}
+
+func (k Keeper) DistributionModuleAddress(ctx sdk.Context) sdk.AccAddress {
+	return k.accountKeeper.GetModuleAddress(distributiontypes.ModuleName)
 }
 
 func (k Keeper) CreateOriginAccount(ctx sdk.Context, aa *types.AirdropAccount) {
@@ -102,10 +116,10 @@ func (k Keeper) CreateClaimAccount(ctx sdk.Context, aa *types.AirdropAccount) {
 	k.accountKeeper.SetAccount(ctx, vestingAccount)
 }
 
-func (k Keeper) SendOriginTokens(ctx sdk.Context, aa *types.AirdropAccount) {
-	k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, aa.OriginAccAddress(), aa.OriginCoins())
+func (k Keeper) SendOriginTokens(ctx sdk.Context, aa *types.AirdropAccount) error {
+	return k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, aa.OriginAccAddress(), aa.OriginCoins())
 }
 
-func (k Keeper) SendClaimTokens(ctx sdk.Context, aa *types.AirdropAccount) {
-	k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, aa.ClaimAccAddress(), aa.ClaimCoins())
+func (k Keeper) SendClaimTokens(ctx sdk.Context, aa *types.AirdropAccount) error {
+	return k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, aa.ClaimAccAddress(), aa.ClaimCoins())
 }

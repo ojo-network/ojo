@@ -8,8 +8,15 @@ import (
 
 // EndBlocker is called at the end of every block
 func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
-	// TODO Check for ExpiryBlock
-	// Query the number of unclaimed accounts?
-	// all unclaimed AirdropAccounts will instead mint tokens into the community pool.
+	if ctx.BlockHeight() == int64(k.GetParams(ctx).ExpiryBlock) {
+		for _, aa := range k.GetAllAirdropAccounts(ctx) {
+			if aa.VerifyNotClaimed() == nil {
+				k.SetClaimAmount(ctx, aa)
+				k.MintClaimTokensToAirdrop(ctx, aa)
+				aa.ClaimAddress = k.DistributionModuleAddress(ctx).String()
+				k.SetAirdropAccount(ctx, aa)
+			}
+		}
+	}
 	return nil
 }

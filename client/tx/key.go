@@ -4,6 +4,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/go-bip39"
 
 	ojoapp "github.com/ojo-network/ojo/app"
 )
@@ -35,4 +36,18 @@ func CreateAccountFromMnemonic(name, mnemonic string) (*keyring.Record, keyring.
 	}
 
 	return account, kb, nil
+}
+
+func CreateMnemonic() (string, error) {
+	entropySeed, err := bip39.NewEntropy(256)
+	if err != nil {
+		return "", err
+	}
+
+	mnemonic, err := bip39.NewMnemonic(entropySeed)
+	if err != nil {
+		return "", err
+	}
+
+	return mnemonic, nil
 }

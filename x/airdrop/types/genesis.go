@@ -2,7 +2,7 @@ package types
 
 func NewGenesisState(
 	params Params,
-	airdropAccounts []AirdropAccount,
+	airdropAccounts []*AirdropAccount,
 ) *GenesisState {
 	return &GenesisState{
 		Params:          params,
@@ -13,6 +13,6 @@ func NewGenesisState(
 func DefaultGenesisState() *GenesisState {
 	return &GenesisState{
 		Params:          DefaultParams(),
-		AirdropAccounts: []AirdropAccount{},
+		AirdropAccounts: []*AirdropAccount{},
 	}
 }

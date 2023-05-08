@@ -13,7 +13,7 @@ func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, genState types.GenesisSt
 	keeper.SetParams(ctx, genState.Params)
 
 	for _, airdropAccount := range genState.AirdropAccounts {
-		err := keeper.SetAirdropAccount(ctx, &airdropAccount)
+		err := keeper.SetAirdropAccount(ctx, airdropAccount)
 		if err != nil {
 			panic(err)
 		}

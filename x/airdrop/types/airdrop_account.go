@@ -3,22 +3,24 @@ package types
 import (
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	appparams "github.com/ojo-network/ojo/app/params"
 )
 
 func (aa *AirdropAccount) OriginAccAddress() sdk.AccAddress {
-	return sdk.AccAddress(aa.OriginAddress)
+	return sdk.MustAccAddressFromBech32(aa.OriginAddress)
 }
 
 func (aa *AirdropAccount) ClaimAccAddress() sdk.AccAddress {
-	return sdk.AccAddress(aa.ClaimAddress)
+	return sdk.MustAccAddressFromBech32(aa.ClaimAddress)
 }
 
 func (aa AirdropAccount) OriginCoins() sdk.Coins {
-	return sdk.NewCoins(sdk.NewCoin("ojo", sdk.NewIntFromUint64(aa.OriginAmount)))
+	return sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdk.NewIntFromUint64(aa.OriginAmount)))
 }
 
 func (aa *AirdropAccount) ClaimCoins() sdk.Coins {
-	return sdk.NewCoins(sdk.NewCoin("ojo", sdk.NewIntFromUint64(aa.ClaimAmount)))
+	return sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdk.NewIntFromUint64(aa.ClaimAmount)))
 }
 
 func (aa *AirdropAccount) VerifyNotClaimed() error {
