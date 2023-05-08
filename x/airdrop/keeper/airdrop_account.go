@@ -2,6 +2,9 @@ package keeper
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	authvesting "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
+
 	"github.com/ojo-network/ojo/x/airdrop/types"
 )
 
@@ -9,12 +12,12 @@ import (
 // using the OriginAddress as the key.
 func (k Keeper) SetAirdropAccount(
 	ctx sdk.Context,
-	account types.AirdropAccount,
+	account *types.AirdropAccount,
 ) (err error) {
 	store := ctx.KVStore(k.storeKey)
 	store.Set(
 		types.AirdropAccountKey(account.OriginAddress),
-		k.cdc.MustMarshal(&account),
+		k.cdc.MustMarshal(account),
 	)
 	return
 }
@@ -22,7 +25,7 @@ func (k Keeper) SetAirdropAccount(
 // GetAirdropAccount returns the airdrop account from the store
 func (k Keeper) GetAirdropAccount(
 	ctx sdk.Context, originAddress string,
-) (account types.AirdropAccount, err error) {
+) (account *types.AirdropAccount, err error) {
 
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(types.AirdropAccountKey(originAddress))
@@ -30,7 +33,7 @@ func (k Keeper) GetAirdropAccount(
 		return
 	}
 
-	k.cdc.MustUnmarshal(bz, &account)
+	k.cdc.MustUnmarshal(bz, account)
 	return
 }
 
@@ -48,4 +51,59 @@ func (k Keeper) GetAllAirdropAccounts(
 		accounts = append(accounts, account)
 	}
 	return
+}
+
+// VerifyDelegationRequirement returns an error if the total shares
+// delegated is less than the delegation requirement.
+func (k Keeper) VerifyDelegationRequirement(
+	ctx sdk.Context,
+	aa *types.AirdropAccount,
+) (err error) {
+	delegations := k.stakingKeeper.GetDelegatorDelegations(ctx, aa.ClaimAccAddress(), 999)
+	totalShares := sdk.ZeroDec()
+	for _, delegation := range delegations {
+		totalShares = totalShares.Add(delegation.Shares)
+	}
+	if totalShares.LT(*k.GetParams(ctx).DelegationRequirement) {
+		return types.ErrInsufficientDelegation
+	}
+	return nil
+}
+
+// SetClaimAmount calculates and sets the claim amount for the airdrop account
+func (k Keeper) SetClaimAmount(ctx sdk.Context, aa *types.AirdropAccount) {
+	claimAmount := k.GetParams(ctx).AirdropFactor.MulInt64(int64(aa.OriginAmount))
+	aa.ClaimAmount = claimAmount.TruncateInt().Uint64()
+}
+
+// MintOriginTokens mints the originAmount of tokens to the airdrop module account
+func (k Keeper) MintOriginTokens(ctx sdk.Context, aa *types.AirdropAccount) {
+	k.bankKeeper.MintCoins(ctx, types.ModuleName, aa.OriginCoins())
+}
+
+// MintClaimTokens mints the claimAmount of tokens to the airdrop module account
+func (k Keeper) MintClaimTokens(ctx sdk.Context, aa *types.AirdropAccount) {
+	k.bankKeeper.MintCoins(ctx, types.ModuleName, aa.ClaimCoins())
+}
+
+func (k Keeper) CreateOriginAccount(ctx sdk.Context, aa *types.AirdropAccount) {
+	baseAccount := authtypes.NewBaseAccountWithAddress(aa.OriginAccAddress())
+	baseAccount = k.accountKeeper.NewAccount(ctx, baseAccount).(*authtypes.BaseAccount)
+	baseVestingAccount := authvesting.NewBaseVestingAccount(baseAccount, aa.OriginCoins().Sort(), aa.VestingEndTime)
+	authvesting.NewContinuousVestingAccountRaw(baseVestingAccount, ctx.BlockTime().Unix())
+}
+
+func (k Keeper) CreateClaimAccount(ctx sdk.Context, aa *types.AirdropAccount) {
+	baseAccount := authtypes.NewBaseAccountWithAddress(aa.ClaimAccAddress())
+	baseAccount = k.accountKeeper.NewAccount(ctx, baseAccount).(*authtypes.BaseAccount)
+	baseVestingAccount := authvesting.NewBaseVestingAccount(baseAccount, aa.ClaimCoins().Sort(), aa.VestingEndTime)
+	authvesting.NewDelayedVestingAccountRaw(baseVestingAccount)
+}
+
+func (k Keeper) SendOriginTokens(ctx sdk.Context, aa *types.AirdropAccount) {
+	k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, aa.OriginAccAddress(), aa.OriginCoins())
+}
+
+func (k Keeper) SendClaimTokens(ctx sdk.Context, aa *types.AirdropAccount) {
+	k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, aa.ClaimAccAddress(), aa.ClaimCoins())
 }

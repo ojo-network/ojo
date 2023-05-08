@@ -5,8 +5,6 @@ import (
 
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	authvesting "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
 
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/ojo-network/ojo/x/airdrop/types"
@@ -53,25 +51,18 @@ func (ms msgServer) CreateAirdropAccount(
 ) (*types.MsgCreateAirdropAccountResponse, error) {
 	// TODO - require genesis signature
 
-	// Create Continuous Vesting Account
-	baseAccount := &authtypes.BaseAccount{
-		Address: msg.Address,
-	}
-	authvesting.NewContinuousVestingAccount(
-		baseAccount,
-		sdk.NewCoins(sdk.NewCoin("ojo", sdk.NewIntFromUint64(msg.TokensToReceive))),
-		msg.VestingStartTime,
-		msg.VestingEndTime,
-	)
-
 	// Create AirdropAccount entry
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	airdropAccount := types.AirdropAccount{
+	airdropAccount := &types.AirdropAccount{
 		OriginAddress:    msg.Address,
 		OriginAmount:     msg.TokensToReceive,
 		VestingStartTime: msg.VestingStartTime,
 		VestingEndTime:   msg.VestingEndTime,
 	}
+
+	ms.keeper.CreateOriginAccount(ctx, airdropAccount)
+	ms.keeper.MintOriginTokens(ctx, airdropAccount)
+	ms.keeper.SendOriginTokens(ctx, airdropAccount)
 	ms.keeper.SetAirdropAccount(ctx, airdropAccount)
 
 	return &types.MsgCreateAirdropAccountResponse{}, nil
@@ -84,20 +75,18 @@ func (ms msgServer) ClaimAirdrop(
 	msg *types.MsgClaimAirdrop,
 ) (*types.MsgClaimAirdropResponse, error) {
 	// TODO - require signature from claim address
+
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	claimAddress := sdk.AccAddress(msg.ToAddress)
+
 	airdropAccount, err := ms.keeper.GetAirdropAccount(ctx, msg.FromAddress)
 	if err != nil {
 		return nil, err
 	}
+	airdropAccount.ClaimAddress = msg.ToAddress
 
 	// Check if already claimed
-	if airdropAccount.ClaimAddress != "" {
-		return nil, errors.Wrapf(
-			types.ErrAirdropAlreadyClaimed,
-			"already claimed by address %s",
-			airdropAccount.ClaimAddress,
-		)
+	if err := airdropAccount.VerifyNotClaimed(); err != nil {
+		return nil, err
 	}
 
 	// Check if past expiry block
@@ -106,37 +95,14 @@ func (ms msgServer) ClaimAirdrop(
 	}
 
 	// Check delegation requirement
-	delegations := ms.keeper.stakingKeeper.GetDelegatorDelegations(ctx, claimAddress, 999)
-	totalShares := sdk.ZeroDec()
-	for _, delegation := range delegations {
-		totalShares = totalShares.Add(delegation.Shares)
-	}
-	if totalShares.LT(*ms.keeper.GetParams(ctx).DelegationRequirement) {
-		return nil, types.ErrInsufficientDelegation
+	if err := ms.keeper.VerifyDelegationRequirement(ctx, airdropAccount); err != nil {
+		return nil, err
 	}
 
-	// Mint and send tokens
-	claimAmount := ms.keeper.GetParams(ctx).AirdropFactor.MulInt64(int64(airdropAccount.OriginAmount))
-	claimAmount.Abs()
-	intClaimAmount := claimAmount.TruncateInt64()
-
-	claimDecCoin := sdk.NewCoins(sdk.NewCoin("ojo", claimAmount.TruncateInt()))
-	ms.keeper.bankKeeper.MintCoins(ctx, types.ModuleName, claimDecCoin)
-	ms.keeper.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, claimAddress, claimDecCoin)
-
-	// Create delayed vesting account
-	baseAccount := &authtypes.BaseAccount{
-		Address: msg.ToAddress,
-	}
-	authvesting.NewDelayedVestingAccount(
-		baseAccount,
-		sdk.NewCoins(sdk.NewCoin("ojo", claimAmount.TruncateInt())),
-		airdropAccount.VestingEndTime,
-	)
-
-	// Update AirdropAccount
-	airdropAccount.ClaimAddress = msg.ToAddress
-	airdropAccount.ClaimAmount = uint64(intClaimAmount)
+	ms.keeper.SetClaimAmount(ctx, airdropAccount)
+	ms.keeper.MintClaimTokens(ctx, airdropAccount)
+	ms.keeper.CreateClaimAccount(ctx, airdropAccount)
+	ms.keeper.SendClaimTokens(ctx, airdropAccount)
 	ms.keeper.SetAirdropAccount(ctx, airdropAccount)
 
 	return &types.MsgClaimAirdropResponse{}, nil
