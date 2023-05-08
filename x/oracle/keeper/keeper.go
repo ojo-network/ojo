@@ -30,6 +30,9 @@ type Keeper struct {
 
 	distrName        string
 	telemetryEnabled bool
+	// the address capable of executing a MsgUpdateParams message. Typically, this
+	// should be the x/gov module account.
+	authority string
 }
 
 // NewKeeper constructs a new keeper for oracle
@@ -43,6 +46,7 @@ func NewKeeper(
 	stakingKeeper types.StakingKeeper,
 	distrName string,
 	telemetryEnabled bool,
+	authority string,
 ) Keeper {
 	// ensure oracle module account is set
 	if addr := accountKeeper.GetModuleAddress(types.ModuleName); addr == nil {
@@ -64,6 +68,7 @@ func NewKeeper(
 		StakingKeeper:    stakingKeeper,
 		distrName:        distrName,
 		telemetryEnabled: telemetryEnabled,
+		authority:        authority,
 	}
 }
 
