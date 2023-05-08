@@ -8,7 +8,7 @@ import (
 
 // AccountKeeper defines the expected interface contract defined by the x/auth module.
 type AccountKeeper interface {
-	NewAccount(ctx sdk.Context, baseAccount *authtypes.BaseAccount) authtypes.AccountI
+	NewAccount(ctx sdk.Context, account authtypes.AccountI) authtypes.AccountI
 	SetAccount(ctx sdk.Context, account authtypes.AccountI)
 	GetAccount(ctx sdk.Context, addr sdk.AccAddress) authtypes.AccountI
 }

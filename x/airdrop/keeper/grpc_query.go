@@ -40,5 +40,5 @@ func (q querier) AirdropAccount(
 	if err != nil {
 		return nil, err
 	}
-	return &types.AirdropAccountResponse{AirdropAccount: &airdropAccount}, nil
+	return &types.AirdropAccountResponse{AirdropAccount: airdropAccount}, nil
 }

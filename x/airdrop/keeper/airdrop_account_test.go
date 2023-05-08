@@ -8,7 +8,7 @@ func (s *IntegrationTestSuite) TestSetAndGetAirdropAccount() {
 	app, ctx := s.app, s.ctx
 
 	originAmount := uint64(500)
-	airdropAccount := types.AirdropAccount{
+	airdropAccount := &types.AirdropAccount{
 		OriginAddress: "test",
 		OriginAmount:  originAmount,
 	}
@@ -26,14 +26,14 @@ func (s *IntegrationTestSuite) TestGetAllAirdropAccounts() {
 	app, ctx := s.app, s.ctx
 
 	originAmount := uint64(500)
-	airdropAccount := types.AirdropAccount{
+	airdropAccount := &types.AirdropAccount{
 		OriginAddress: "test",
 		OriginAmount:  originAmount,
 	}
 	err := app.AirdropKeeper.SetAirdropAccount(ctx, airdropAccount)
 	s.Require().NoError(err)
 
-	airdropAccount2 := types.AirdropAccount{
+	airdropAccount2 := &types.AirdropAccount{
 		OriginAddress: "test2",
 		OriginAmount:  originAmount,
 	}

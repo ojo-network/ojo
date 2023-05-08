@@ -49,8 +49,6 @@ func (ms msgServer) CreateAirdropAccount(
 	goCtx context.Context,
 	msg *types.MsgCreateAirdropAccount,
 ) (*types.MsgCreateAirdropAccountResponse, error) {
-	// TODO - require genesis signature
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	airdropAccount := &types.AirdropAccount{
@@ -74,8 +72,6 @@ func (ms msgServer) ClaimAirdrop(
 	goCtx context.Context,
 	msg *types.MsgClaimAirdrop,
 ) (*types.MsgClaimAirdropResponse, error) {
-	// TODO - require signature from claim address
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	airdropAccount, err := ms.keeper.GetAirdropAccount(ctx, msg.FromAddress)
