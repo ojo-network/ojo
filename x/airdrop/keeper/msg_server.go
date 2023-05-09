@@ -83,7 +83,6 @@ func (ms msgServer) ClaimAirdrop(
 	if err != nil {
 		return nil, err
 	}
-	airdropAccount.ClaimAddress = msg.ToAddress
 
 	if err := airdropAccount.VerifyNotClaimed(); err != nil {
 		return nil, err
@@ -94,18 +93,17 @@ func (ms msgServer) ClaimAirdrop(
 		return nil, types.ErrAirdropExpired
 	}
 
+	airdropAccount.ClaimAddress = msg.ToAddress
 	if err := ms.keeper.VerifyDelegationRequirement(ctx, airdropAccount); err != nil {
 		return nil, err
 	}
 
 	ms.keeper.SetClaimAmount(ctx, airdropAccount)
-	err = ms.keeper.MintClaimTokensToAirdrop(ctx, airdropAccount)
-	if err != nil {
+	if err = ms.keeper.MintClaimTokensToAirdrop(ctx, airdropAccount); err != nil {
 		return nil, err
 	}
 	ms.keeper.CreateClaimAccount(ctx, airdropAccount)
-	err = ms.keeper.SendClaimTokens(ctx, airdropAccount)
-	if err != nil {
+	if err = ms.keeper.SendClaimTokens(ctx, airdropAccount); err != nil {
 		return nil, err
 	}
 	ms.keeper.SetAirdropAccount(ctx, airdropAccount)

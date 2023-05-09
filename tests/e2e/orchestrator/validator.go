@@ -27,6 +27,7 @@ import (
 
 	ojoapp "github.com/ojo-network/ojo/app"
 	appparams "github.com/ojo-network/ojo/app/params"
+	"github.com/ojo-network/ojo/client/tx"
 )
 
 // validator holds all the necessary information to run a validator node
@@ -164,7 +165,7 @@ func (v *validator) createKeyFromMnemonic(name, mnemonic string) error {
 }
 
 func (v *validator) createKey(name string) error {
-	mnemonic, err := createMnemonic()
+	mnemonic, err := tx.CreateMnemonic()
 	if err != nil {
 		return err
 	}

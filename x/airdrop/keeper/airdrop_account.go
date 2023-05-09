@@ -88,18 +88,22 @@ func (k Keeper) MintClaimTokensToAirdrop(ctx sdk.Context, aa *types.AirdropAccou
 	return k.bankKeeper.MintCoins(ctx, types.ModuleName, aa.ClaimCoins())
 }
 
+// MintClaimTokensToDistribution mints the claimAmount of tokens to the distribution module account
 func (k Keeper) MintClaimTokensToDistribution(ctx sdk.Context, aa *types.AirdropAccount) error {
 	return k.bankKeeper.MintCoins(ctx, distributiontypes.ModuleName, aa.ClaimCoins())
 }
 
+// AirdropModuleAddress returns the airdrop module account address
 func (k Keeper) AirdropModuleAddress(ctx sdk.Context) sdk.AccAddress {
 	return k.accountKeeper.GetModuleAddress(types.ModuleName)
 }
 
+// DistributionModuleAddress returns the distribution module account address
 func (k Keeper) DistributionModuleAddress(ctx sdk.Context) sdk.AccAddress {
 	return k.accountKeeper.GetModuleAddress(distributiontypes.ModuleName)
 }
 
+// CreateOriginAccount creates a new continuously vesting origin account
 func (k Keeper) CreateOriginAccount(ctx sdk.Context, aa *types.AirdropAccount) {
 	baseAccount := authtypes.NewBaseAccountWithAddress(aa.OriginAccAddress())
 	baseAccount = k.accountKeeper.NewAccount(ctx, baseAccount).(*authtypes.BaseAccount)
@@ -108,6 +112,7 @@ func (k Keeper) CreateOriginAccount(ctx sdk.Context, aa *types.AirdropAccount) {
 	k.accountKeeper.SetAccount(ctx, vestingAccount)
 }
 
+// CreateClaimAccount creates a new delayed vesting claim account
 func (k Keeper) CreateClaimAccount(ctx sdk.Context, aa *types.AirdropAccount) {
 	baseAccount := authtypes.NewBaseAccountWithAddress(aa.ClaimAccAddress())
 	baseAccount = k.accountKeeper.NewAccount(ctx, baseAccount).(*authtypes.BaseAccount)
@@ -116,10 +121,12 @@ func (k Keeper) CreateClaimAccount(ctx sdk.Context, aa *types.AirdropAccount) {
 	k.accountKeeper.SetAccount(ctx, vestingAccount)
 }
 
+// SendOriginTokens sends the origin tokens to the origin account from the airdrop module
 func (k Keeper) SendOriginTokens(ctx sdk.Context, aa *types.AirdropAccount) error {
 	return k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, aa.OriginAccAddress(), aa.OriginCoins())
 }
 
+// SendClaimTokens sends the claim tokens to the claim account from the airdrop module
 func (k Keeper) SendClaimTokens(ctx sdk.Context, aa *types.AirdropAccount) error {
 	return k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, aa.ClaimAccAddress(), aa.ClaimCoins())
 }
