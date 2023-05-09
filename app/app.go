@@ -408,11 +408,13 @@ func New(
 		app.StakingKeeper,
 		distrtypes.ModuleName,
 		cast.ToBool(appOpts.Get("telemetry.enabled")),
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 
 	app.AirdropKeeper = airdropkeeper.NewKeeper(
 		appCodec,
-		keys[oracletypes.ModuleName],
+		keys[airdroptypes.ModuleName],
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 
 	app.StakingKeeper.SetHooks(
