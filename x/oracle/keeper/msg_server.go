@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
@@ -142,6 +143,16 @@ func (ms msgServer) GovUpdateParams(
 	goCtx context.Context,
 	msg *types.MsgGovUpdateParams,
 ) (*types.MsgGovUpdateParamsResponse, error) {
+	if msg.Authority != ms.authority {
+		err := errors.Wrapf(
+			types.ErrNoGovAuthority,
+			"invalid authority; expected %s, got %s",
+			ms.authority,
+			msg.Authority,
+		)
+		return nil, err
+	}
+
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	for _, key := range msg.Keys {
