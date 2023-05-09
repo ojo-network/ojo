@@ -23,5 +23,9 @@ type BankKeeper interface {
 
 // StakingKeeper defines the expected interface contract defined by the x/staking module.
 type StakingKeeper interface {
-	GetDelegatorDelegations(ctx sdk.Context, delegator sdk.AccAddress, maxRetrieve uint16) (delegations []stakingtypes.Delegation)
+	GetDelegatorDelegations(
+		ctx sdk.Context,
+		delegator sdk.AccAddress,
+		maxRetrieve uint16,
+	) (delegations []stakingtypes.Delegation)
 }

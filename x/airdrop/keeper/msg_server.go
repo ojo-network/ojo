@@ -66,7 +66,10 @@ func (ms msgServer) CreateAirdropAccount(
 	if err != nil {
 		return nil, err
 	}
-	ms.keeper.SetAirdropAccount(ctx, airdropAccount)
+	err = ms.keeper.SetAirdropAccount(ctx, airdropAccount)
+	if err != nil {
+		return nil, err
+	}
 
 	return &types.MsgCreateAirdropAccountResponse{}, nil
 }
@@ -106,7 +109,10 @@ func (ms msgServer) ClaimAirdrop(
 	if err = ms.keeper.SendClaimTokens(ctx, airdropAccount); err != nil {
 		return nil, err
 	}
-	ms.keeper.SetAirdropAccount(ctx, airdropAccount)
+	err = ms.keeper.SetAirdropAccount(ctx, airdropAccount)
+	if err != nil {
+		return nil, err
+	}
 
 	return &types.MsgClaimAirdropResponse{}, nil
 }
