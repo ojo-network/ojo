@@ -58,17 +58,15 @@ func (ms msgServer) CreateAirdropAccount(
 	}
 
 	if err = ms.keeper.CreateOriginAccount(ctx, airdropAccount); err != nil {
-		return nil, err
+		return
 	}
 	if err = ms.keeper.MintOriginTokens(ctx, airdropAccount); err != nil {
-		return nil, err
+		return
 	}
 	if err = ms.keeper.SendOriginTokens(ctx, airdropAccount); err != nil {
-		return nil, err
+		return
 	}
-	if err = ms.keeper.SetAirdropAccount(ctx, airdropAccount); err != nil {
-		return nil, err
-	}
+	err = ms.keeper.SetAirdropAccount(ctx, airdropAccount)
 	return
 }
 
@@ -77,7 +75,7 @@ func (ms msgServer) CreateAirdropAccount(
 func (ms msgServer) ClaimAirdrop(
 	goCtx context.Context,
 	msg *types.MsgClaimAirdrop,
-) (resp *types.MsgClaimAirdropResponse, err error) {
+) (*types.MsgClaimAirdropResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	airdropAccount, err := ms.keeper.GetAirdropAccount(ctx, msg.FromAddress)
@@ -93,21 +91,23 @@ func (ms msgServer) ClaimAirdrop(
 	// Check if past expiry block
 	if ctx.BlockHeight() > int64(ms.keeper.GetParams(ctx).ExpiryBlock) {
 		err = types.ErrAirdropExpired
-		return
+		return nil, err
 	}
 	if err = ms.keeper.VerifyDelegationRequirement(ctx, airdropAccount); err != nil {
-		return
+		return nil, err
 	}
 	ms.keeper.SetClaimAmount(ctx, airdropAccount)
 	if err = ms.keeper.MintClaimTokensToAirdrop(ctx, airdropAccount); err != nil {
-		return
+		return nil, err
 	}
-	ms.keeper.CreateClaimAccount(ctx, airdropAccount)
+	if err = ms.keeper.CreateClaimAccount(ctx, airdropAccount); err != nil {
+		return nil, err
+	}
 	if err = ms.keeper.SendClaimTokens(ctx, airdropAccount); err != nil {
-		return
+		return nil, err
 	}
 	if err = ms.keeper.SetAirdropAccount(ctx, airdropAccount); err != nil {
-		return
+		return nil, err
 	}
-	return
+	return &types.MsgClaimAirdropResponse{}, nil
 }
