@@ -90,7 +90,11 @@ func (k Keeper) MintClaimTokensToAirdrop(ctx sdk.Context, aa *types.AirdropAccou
 
 // MintClaimTokensToDistribution mints the claimAmount of tokens to the distribution module account
 func (k Keeper) MintClaimTokensToDistribution(ctx sdk.Context, aa *types.AirdropAccount) error {
-	return k.bankKeeper.MintCoins(ctx, distributiontypes.ModuleName, aa.ClaimCoins())
+	err := k.bankKeeper.MintCoins(ctx, types.ModuleName, aa.ClaimCoins())
+	if err != nil {
+		return err
+	}
+	return k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, distributiontypes.ModuleName, aa.ClaimCoins())
 }
 
 // AirdropModuleAddress returns the airdrop module account address
