@@ -48,7 +48,7 @@ func (ms msgServer) SetParams(goCtx context.Context, msg *types.MsgSetParams) (*
 func (ms msgServer) CreateAirdropAccount(
 	goCtx context.Context,
 	msg *types.MsgCreateAirdropAccount,
-) (*types.MsgCreateAirdropAccountResponse, error) {
+) (resp *types.MsgCreateAirdropAccountResponse, err error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	airdropAccount := &types.AirdropAccount{
@@ -57,21 +57,19 @@ func (ms msgServer) CreateAirdropAccount(
 		VestingEndTime: msg.VestingEndTime,
 	}
 
-	ms.keeper.CreateOriginAccount(ctx, airdropAccount)
-	err := ms.keeper.MintOriginTokens(ctx, airdropAccount)
-	if err != nil {
+	if err = ms.keeper.CreateOriginAccount(ctx, airdropAccount); err != nil {
 		return nil, err
 	}
-	err = ms.keeper.SendOriginTokens(ctx, airdropAccount)
-	if err != nil {
+	if err = ms.keeper.MintOriginTokens(ctx, airdropAccount); err != nil {
 		return nil, err
 	}
-	err = ms.keeper.SetAirdropAccount(ctx, airdropAccount)
-	if err != nil {
+	if err = ms.keeper.SendOriginTokens(ctx, airdropAccount); err != nil {
 		return nil, err
 	}
-
-	return &types.MsgCreateAirdropAccountResponse{}, nil
+	if err = ms.keeper.SetAirdropAccount(ctx, airdropAccount); err != nil {
+		return nil, err
+	}
+	return
 }
 
 // ClaimAirdrop implements MsgServer.ClaimAirdrop method.
@@ -79,7 +77,7 @@ func (ms msgServer) CreateAirdropAccount(
 func (ms msgServer) ClaimAirdrop(
 	goCtx context.Context,
 	msg *types.MsgClaimAirdrop,
-) (*types.MsgClaimAirdropResponse, error) {
+) (resp *types.MsgClaimAirdropResponse, err error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	airdropAccount, err := ms.keeper.GetAirdropAccount(ctx, msg.FromAddress)
@@ -90,29 +88,26 @@ func (ms msgServer) ClaimAirdrop(
 	if err := airdropAccount.VerifyNotClaimed(); err != nil {
 		return nil, err
 	}
+	airdropAccount.ClaimAddress = msg.ToAddress
 
 	// Check if past expiry block
 	if ctx.BlockHeight() > int64(ms.keeper.GetParams(ctx).ExpiryBlock) {
-		return nil, types.ErrAirdropExpired
+		err = types.ErrAirdropExpired
+		return
 	}
-
-	airdropAccount.ClaimAddress = msg.ToAddress
-	if err := ms.keeper.VerifyDelegationRequirement(ctx, airdropAccount); err != nil {
-		return nil, err
+	if err = ms.keeper.VerifyDelegationRequirement(ctx, airdropAccount); err != nil {
+		return
 	}
-
 	ms.keeper.SetClaimAmount(ctx, airdropAccount)
 	if err = ms.keeper.MintClaimTokensToAirdrop(ctx, airdropAccount); err != nil {
-		return nil, err
+		return
 	}
 	ms.keeper.CreateClaimAccount(ctx, airdropAccount)
 	if err = ms.keeper.SendClaimTokens(ctx, airdropAccount); err != nil {
-		return nil, err
+		return
 	}
-	err = ms.keeper.SetAirdropAccount(ctx, airdropAccount)
-	if err != nil {
-		return nil, err
+	if err = ms.keeper.SetAirdropAccount(ctx, airdropAccount); err != nil {
+		return
 	}
-
-	return &types.MsgClaimAirdropResponse{}, nil
+	return
 }

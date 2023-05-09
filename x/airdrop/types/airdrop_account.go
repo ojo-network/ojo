@@ -7,12 +7,12 @@ import (
 	appparams "github.com/ojo-network/ojo/app/params"
 )
 
-func (aa *AirdropAccount) OriginAccAddress() sdk.AccAddress {
-	return sdk.MustAccAddressFromBech32(aa.OriginAddress)
+func (aa *AirdropAccount) OriginAccAddress() (sdk.AccAddress, error) {
+	return sdk.AccAddressFromBech32(aa.OriginAddress)
 }
 
-func (aa *AirdropAccount) ClaimAccAddress() sdk.AccAddress {
-	return sdk.MustAccAddressFromBech32(aa.ClaimAddress)
+func (aa *AirdropAccount) ClaimAccAddress() (sdk.AccAddress, error) {
+	return sdk.AccAddressFromBech32(aa.ClaimAddress)
 }
 
 func (aa AirdropAccount) OriginCoins() sdk.Coins {

@@ -60,8 +60,12 @@ func (k Keeper) GetAllAirdropAccounts(
 func (k Keeper) VerifyDelegationRequirement(
 	ctx sdk.Context,
 	aa *types.AirdropAccount,
-) (err error) {
-	delegations := k.stakingKeeper.GetDelegatorDelegations(ctx, aa.ClaimAccAddress(), 999)
+) error {
+	address, err := aa.ClaimAccAddress()
+	if err != nil {
+		return err
+	}
+	delegations := k.stakingKeeper.GetDelegatorDelegations(ctx, address, 999)
 	totalShares := sdk.ZeroDec()
 	for _, delegation := range delegations {
 		totalShares = totalShares.Add(delegation.Shares)
@@ -108,29 +112,47 @@ func (k Keeper) DistributionModuleAddress(ctx sdk.Context) sdk.AccAddress {
 }
 
 // CreateOriginAccount creates a new continuously vesting origin account
-func (k Keeper) CreateOriginAccount(ctx sdk.Context, aa *types.AirdropAccount) {
-	baseAccount := authtypes.NewBaseAccountWithAddress(aa.OriginAccAddress())
+func (k Keeper) CreateOriginAccount(ctx sdk.Context, aa *types.AirdropAccount) error {
+	originAccAddress, err := aa.OriginAccAddress()
+	if err != nil {
+		return err
+	}
+	baseAccount := authtypes.NewBaseAccountWithAddress(originAccAddress)
 	baseAccount = k.accountKeeper.NewAccount(ctx, baseAccount).(*authtypes.BaseAccount)
 	baseVestingAccount := authvesting.NewBaseVestingAccount(baseAccount, aa.OriginCoins().Sort(), aa.VestingEndTime)
 	vestingAccount := authvesting.NewContinuousVestingAccountRaw(baseVestingAccount, ctx.BlockTime().Unix())
 	k.accountKeeper.SetAccount(ctx, vestingAccount)
+	return nil
 }
 
 // CreateClaimAccount creates a new delayed vesting claim account
-func (k Keeper) CreateClaimAccount(ctx sdk.Context, aa *types.AirdropAccount) {
-	baseAccount := authtypes.NewBaseAccountWithAddress(aa.ClaimAccAddress())
+func (k Keeper) CreateClaimAccount(ctx sdk.Context, aa *types.AirdropAccount) error {
+	claimAccAddress, err := aa.ClaimAccAddress()
+	if err != nil {
+		return err
+	}
+	baseAccount := authtypes.NewBaseAccountWithAddress(claimAccAddress)
 	baseAccount = k.accountKeeper.NewAccount(ctx, baseAccount).(*authtypes.BaseAccount)
 	baseVestingAccount := authvesting.NewBaseVestingAccount(baseAccount, aa.ClaimCoins().Sort(), aa.VestingEndTime)
 	vestingAccount := authvesting.NewDelayedVestingAccountRaw(baseVestingAccount)
 	k.accountKeeper.SetAccount(ctx, vestingAccount)
+	return nil
 }
 
 // SendOriginTokens sends the origin tokens to the origin account from the airdrop module
 func (k Keeper) SendOriginTokens(ctx sdk.Context, aa *types.AirdropAccount) error {
-	return k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, aa.OriginAccAddress(), aa.OriginCoins())
+	originAccAddress, err := aa.OriginAccAddress()
+	if err != nil {
+		return err
+	}
+	return k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, originAccAddress, aa.OriginCoins())
 }
 
 // SendClaimTokens sends the claim tokens to the claim account from the airdrop module
 func (k Keeper) SendClaimTokens(ctx sdk.Context, aa *types.AirdropAccount) error {
-	return k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, aa.ClaimAccAddress(), aa.ClaimCoins())
+	claimAccAddress, err := aa.ClaimAccAddress()
+	if err != nil {
+		return err
+	}
+	return k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, claimAccAddress, aa.ClaimCoins())
 }
