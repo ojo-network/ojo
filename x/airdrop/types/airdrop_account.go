@@ -19,8 +19,16 @@ func (aa AirdropAccount) OriginCoins() sdk.Coins {
 	return sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdk.NewIntFromUint64(aa.OriginAmount)))
 }
 
+func (aa AirdropAccount) ClaimCoin() sdk.Coin {
+	return sdk.NewCoin(appparams.BondDenom, sdk.NewIntFromUint64(aa.ClaimAmount))
+}
+
 func (aa *AirdropAccount) ClaimCoins() sdk.Coins {
-	return sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdk.NewIntFromUint64(aa.ClaimAmount)))
+	return sdk.NewCoins(aa.ClaimCoin())
+}
+
+func (aa *AirdropAccount) ClaimDecCoin() sdk.DecCoin {
+	return sdk.NewDecCoinFromCoin(aa.ClaimCoin())
 }
 
 func (aa *AirdropAccount) VerifyNotClaimed() error {

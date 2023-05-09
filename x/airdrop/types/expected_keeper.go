@@ -3,6 +3,7 @@ package types
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
@@ -28,4 +29,9 @@ type StakingKeeper interface {
 		delegator sdk.AccAddress,
 		maxRetrieve uint16,
 	) (delegations []stakingtypes.Delegation)
+}
+
+type DistributionKeeper interface {
+	GetFeePool(ctx sdk.Context) (feePool distributiontypes.FeePool)
+	SetFeePool(ctx sdk.Context, feePool distributiontypes.FeePool)
 }

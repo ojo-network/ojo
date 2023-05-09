@@ -98,7 +98,14 @@ func (k Keeper) MintClaimTokensToDistribution(ctx sdk.Context, aa *types.Airdrop
 	if err != nil {
 		return err
 	}
-	return k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, distributiontypes.ModuleName, aa.ClaimCoins())
+	err = k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, distributiontypes.ModuleName, aa.ClaimCoins())
+	if err != nil {
+		return err
+	}
+	feePool := k.distributionKeeper.GetFeePool(ctx)
+	feePool.CommunityPool = feePool.CommunityPool.Add(aa.ClaimDecCoin())
+	k.distributionKeeper.SetFeePool(ctx, feePool)
+	return nil
 }
 
 // AirdropModuleAddress returns the airdrop module account address

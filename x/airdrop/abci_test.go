@@ -109,12 +109,14 @@ func (s *IntegrationTestSuite) TestEndBlockerMinting() {
 		bondDenom,
 	).Amount
 
+	communityPoolStartingBalance := s.app.DistrKeeper.GetFeePool(ctx).CommunityPool.AmountOf(bondDenom)
+	fmt.Println("communityPoolStartingBalance", communityPoolStartingBalance)
+
 	airdropAccount := &types.AirdropAccount{
 		OriginAddress:  "testAddress",
 		OriginAmount:   uint64(600),
 		VestingEndTime: int64(10000000000),
 	}
-
 	app.AirdropKeeper.SetAirdropAccount(ctx, airdropAccount)
 
 	ctx = ctx.WithBlockHeight(int64(app.AirdropKeeper.GetParams(ctx).ExpiryBlock))
@@ -123,7 +125,6 @@ func (s *IntegrationTestSuite) TestEndBlockerMinting() {
 	// Check that the airdrop account has been claimed
 	queriedAccount, err := app.AirdropKeeper.GetAirdropAccount(ctx, airdropAccount.OriginAddress)
 	s.Require().NoError(err)
-
 	err = queriedAccount.VerifyNotClaimed()
 	s.Require().Error(err)
 
@@ -133,8 +134,11 @@ func (s *IntegrationTestSuite) TestEndBlockerMinting() {
 		app.AirdropKeeper.DistributionModuleAddress(ctx),
 		bondDenom,
 	).Amount
-
 	distributionDifference := distributionEndingBalance.Sub(distributionStartingBalance)
-
 	s.Require().Equal(queriedAccount.ClaimAmount, distributionDifference.Uint64())
+
+	// Check that the community pool balance has been updated
+	communityPoolEndingBalance := s.app.DistrKeeper.GetFeePool(ctx).CommunityPool.AmountOf(bondDenom)
+	communityPoolDifference := communityPoolEndingBalance.Sub(communityPoolStartingBalance)
+	s.Require().Equal(queriedAccount.ClaimAmount, uint64(communityPoolDifference.TruncateInt64()))
 }

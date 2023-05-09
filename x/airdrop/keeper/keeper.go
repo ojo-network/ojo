@@ -7,11 +7,12 @@ import (
 )
 
 type Keeper struct {
-	cdc           codec.BinaryCodec
-	storeKey      storetypes.StoreKey
-	accountKeeper types.AccountKeeper
-	bankKeeper    types.BankKeeper
-	stakingKeeper types.StakingKeeper
+	cdc                codec.BinaryCodec
+	storeKey           storetypes.StoreKey
+	accountKeeper      types.AccountKeeper
+	bankKeeper         types.BankKeeper
+	stakingKeeper      types.StakingKeeper
+	distributionKeeper types.DistributionKeeper
 
 	// the address capable of executing a MsgSetParams message. Typically, this
 	// should be the x/gov module account.
@@ -25,14 +26,16 @@ func NewKeeper(
 	accountKeeper types.AccountKeeper,
 	bankKeeper types.BankKeeper,
 	stakingKeeper types.StakingKeeper,
+	distributionKeeper types.DistributionKeeper,
 	authority string,
 ) Keeper {
 	return Keeper{
-		cdc:           cdc,
-		storeKey:      storeKey,
-		authority:     authority,
-		accountKeeper: accountKeeper,
-		bankKeeper:    bankKeeper,
-		stakingKeeper: stakingKeeper,
+		cdc:                cdc,
+		storeKey:           storeKey,
+		authority:          authority,
+		accountKeeper:      accountKeeper,
+		bankKeeper:         bankKeeper,
+		stakingKeeper:      stakingKeeper,
+		distributionKeeper: distributionKeeper,
 	}
 }
