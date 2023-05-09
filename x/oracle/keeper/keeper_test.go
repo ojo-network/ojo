@@ -43,6 +43,12 @@ const (
 )
 
 func (s *IntegrationTestSuite) SetupTest() {
+	// set prefixes for valid addresses, without sealing
+	config := sdk.GetConfig()
+	config.SetBech32PrefixForAccount(appparams.AccountAddressPrefix, appparams.AccountPubKeyPrefix)
+	config.SetBech32PrefixForValidator(appparams.ValidatorAddressPrefix, appparams.ValidatorPubKeyPrefix)
+	config.SetBech32PrefixForConsensusNode(appparams.ConsNodeAddressPrefix, appparams.ConsNodePubKeyPrefix)
+
 	require := s.Require()
 	isCheckTx := false
 	app := ojoapp.Setup(s.T())

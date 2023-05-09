@@ -111,6 +111,7 @@ func (GovModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	minDeposit := sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, govv1.DefaultMinDepositTokens))
 	genState := govv1.DefaultGenesisState()
 	genState.DepositParams.MinDeposit = minDeposit
+	genState.VotingParams.VotingPeriod = &appparams.DefaultGovPeriod
 
 	return cdc.MustMarshalJSON(genState)
 }
