@@ -18,11 +18,9 @@ func (s *IntegrationTestSuite) TestSetAndGetParams() {
 		AirdropFactor:         &airdropFactor,
 	}
 
-	err := app.AirdropKeeper.SetParams(ctx, params)
-	s.Require().NoError(err)
+	app.AirdropKeeper.SetParams(ctx, params)
 
-	params2, err := app.AirdropKeeper.GetParams(ctx)
-	s.Require().NoError(err)
+	params2 := app.AirdropKeeper.GetParams(ctx)
 
 	s.Require().Equal(params2.ExpiryBlock, params.ExpiryBlock)
 	s.Require().Equal(params2.DelegationRequirement, params.DelegationRequirement)
