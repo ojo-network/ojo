@@ -1,18 +1,16 @@
 package keeper_test
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"github.com/ojo-network/ojo/x/airdrop/types"
 )
 
 func (s *IntegrationTestSuite) TestSetAndGetAirdropAccount() {
 	app, ctx := s.app, s.ctx
 
-	originAmount := sdk.MustNewDecFromStr("500")
-	airdropAccount := types.AirdropAccount{
+	originAmount := uint64(500)
+	airdropAccount := &types.AirdropAccount{
 		OriginAddress: "test",
-		OriginAmount:  &originAmount,
+		OriginAmount:  originAmount,
 	}
 	err := app.AirdropKeeper.SetAirdropAccount(ctx, airdropAccount)
 	s.Require().NoError(err)
@@ -27,17 +25,17 @@ func (s *IntegrationTestSuite) TestSetAndGetAirdropAccount() {
 func (s *IntegrationTestSuite) TestGetAllAirdropAccounts() {
 	app, ctx := s.app, s.ctx
 
-	originAmount := sdk.MustNewDecFromStr("500")
-	airdropAccount := types.AirdropAccount{
+	originAmount := uint64(500)
+	airdropAccount := &types.AirdropAccount{
 		OriginAddress: "test",
-		OriginAmount:  &originAmount,
+		OriginAmount:  originAmount,
 	}
 	err := app.AirdropKeeper.SetAirdropAccount(ctx, airdropAccount)
 	s.Require().NoError(err)
 
-	airdropAccount2 := types.AirdropAccount{
+	airdropAccount2 := &types.AirdropAccount{
 		OriginAddress: "test2",
-		OriginAmount:  &originAmount,
+		OriginAmount:  originAmount,
 	}
 	err = app.AirdropKeeper.SetAirdropAccount(ctx, airdropAccount2)
 	s.Require().NoError(err)

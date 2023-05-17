@@ -5,6 +5,7 @@ import (
 
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/ojo-network/ojo/x/airdrop/types"
 )
@@ -20,7 +21,7 @@ func NewMsgServerImpl(keeper Keeper) types.MsgServer {
 }
 
 // SetParams implements MsgServer.SetParams method.
-// It defines a method to update the x/slashing module parameters.
+// It defines a method to update the x/airdrop module parameters.
 func (ms msgServer) SetParams(goCtx context.Context, msg *types.MsgSetParams) (*types.MsgSetParamsResponse, error) {
 	if ms.keeper.authority != msg.Authority {
 		err := errors.Wrapf(
@@ -37,23 +38,76 @@ func (ms msgServer) SetParams(goCtx context.Context, msg *types.MsgSetParams) (*
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	if err := ms.keeper.SetParams(ctx, *msg.Params); err != nil {
-		return nil, err
-	}
+	ms.keeper.SetParams(ctx, *msg.Params)
 
 	return &types.MsgSetParamsResponse{}, nil
 }
 
+// CreateAirdropAccount implements MsgServer.CreateAirdropAccount method.
+// It defines a method to create an airdrop account.
 func (ms msgServer) CreateAirdropAccount(
-	ctx context.Context,
+	goCtx context.Context,
 	msg *types.MsgCreateAirdropAccount,
-) (*types.MsgCreateAirdropAccountResponse, error) {
-	panic("not implemented")
+) (resp *types.MsgCreateAirdropAccountResponse, err error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	airdropAccount := &types.AirdropAccount{
+		OriginAddress:  msg.Address,
+		OriginAmount:   msg.TokensToReceive,
+		VestingEndTime: msg.VestingEndTime,
+	}
+
+	if err = ms.keeper.CreateOriginAccount(ctx, airdropAccount); err != nil {
+		return
+	}
+	if err = ms.keeper.MintOriginTokens(ctx, airdropAccount); err != nil {
+		return
+	}
+	if err = ms.keeper.SendOriginTokens(ctx, airdropAccount); err != nil {
+		return
+	}
+	err = ms.keeper.SetAirdropAccount(ctx, airdropAccount)
+	return
 }
 
+// ClaimAirdrop implements MsgServer.ClaimAirdrop method.
+// It defines a method to claim an airdrop.
 func (ms msgServer) ClaimAirdrop(
-	ctx context.Context,
+	goCtx context.Context,
 	msg *types.MsgClaimAirdrop,
 ) (*types.MsgClaimAirdropResponse, error) {
-	panic("not implemented")
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	airdropAccount, err := ms.keeper.GetAirdropAccount(ctx, msg.FromAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := airdropAccount.VerifyNotClaimed(); err != nil {
+		return nil, err
+	}
+	airdropAccount.ClaimAddress = msg.ToAddress
+
+	// Check if past expiry block
+	if ctx.BlockHeight() > int64(ms.keeper.GetParams(ctx).ExpiryBlock) {
+		err = types.ErrAirdropExpired
+		return nil, err
+	}
+	if err = ms.keeper.VerifyDelegationRequirement(ctx, airdropAccount); err != nil {
+		return nil, err
+	}
+	ms.keeper.SetClaimAmount(ctx, airdropAccount)
+	if err = ms.keeper.MintClaimTokensToAirdrop(ctx, airdropAccount); err != nil {
+		return nil, err
+	}
+	if err = ms.keeper.CreateClaimAccount(ctx, airdropAccount); err != nil {
+		return nil, err
+	}
+	if err = ms.keeper.SendClaimTokens(ctx, airdropAccount); err != nil {
+		return nil, err
+	}
+	if err = ms.keeper.SetAirdropAccount(ctx, airdropAccount); err != nil {
+		return nil, err
+	}
+	return &types.MsgClaimAirdropResponse{}, nil
 }
