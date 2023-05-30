@@ -176,7 +176,7 @@ func (ms msgServer) GovUpdateParams(
 			accept := msg.Changes.AcceptList.Normalize()
 			mandatory := ms.Keeper.MandatoryList(ctx).Normalize()
 			if !accept.ContainDenoms(mandatory) {
-				return nil, fmt.Errorf("existing mandatorylist is not a subset of new acceptlist")
+				return nil, fmt.Errorf("denom in MandatoryList not present in AcceptList")
 			}
 			ms.SetAcceptList(ctx, accept)
 
@@ -184,7 +184,7 @@ func (ms msgServer) GovUpdateParams(
 			mandatory := msg.Changes.MandatoryList.Normalize()
 			accept := ms.Keeper.AcceptList(ctx).Normalize()
 			if !accept.ContainDenoms(mandatory) {
-				return nil, fmt.Errorf("new mandatorylist is not a subset of existing acceptlist")
+				return nil, fmt.Errorf("denom in MandatoryList not present in AcceptList")
 			}
 			ms.SetMandatoryList(ctx, mandatory)
 

@@ -60,8 +60,8 @@ func (dl DenomList) ContainDenoms(d DenomList) bool {
 
 // Normalize updates all the SymbolDenom strings to use all caps.
 func (dl DenomList) Normalize() DenomList {
-	for _, denom := range dl {
-		denom.SymbolDenom = strings.ToUpper(denom.SymbolDenom)
+	for i := range dl {
+		dl[i].SymbolDenom = strings.ToUpper(dl[i].SymbolDenom)
 	}
 	return dl
 }
