@@ -17,3 +17,12 @@ pull_request_rules:
         commit_message_template: |
           {{ title }} (#{{ number }})
           {{ body }}
+
+  - name: Backport patches to the release/v0.1.x branch
+    conditions:
+      - base=main
+      - label=S:backport/v0.1.x
+    actions:
+      backport:
+        branches:
+          - release/v0.1.x
