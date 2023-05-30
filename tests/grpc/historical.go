@@ -2,7 +2,7 @@ package grpc
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -45,9 +45,24 @@ func MedianCheck(val1Client *client.OjoClient) error {
 	if err != nil {
 		return err
 	}
+
 	if len(exchangeRates) != len(denomMandatoryList) {
-		// TODO - update the output to display which denoms are missing https://github.com/ojo-network/ojo/issues/130
-		return errors.New("couldn't fetch exchange rates matching denom accept list")
+		rateMap := make(map[string]struct{})
+		var missingRates []string
+
+		for _, v := range exchangeRates {
+			rateMap[v.Denom] = struct{}{}
+		}
+		for _, denom := range denomMandatoryList {
+			_, ok := rateMap[denom]
+			if !ok {
+				missingRates = append(missingRates, denom)
+			}
+		}
+		return fmt.Errorf(
+			"couldn't fetch exchange rates matching denom mandatory list. Missing: %s",
+			strings.Join(missingRates, ", "),
+		)
 	}
 
 	priceStore, err := listenForPrices(val1Client, params, chainHeight)
