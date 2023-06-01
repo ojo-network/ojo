@@ -16,6 +16,7 @@ updates:
     labels:
       - "A:Automerge"
       - "T:Dependencies"
+      - "S:backport/v0.1.x"
   - package-ecosystem: gomod
     directory: "/infra/pulumi/testnet"
     schedule:
