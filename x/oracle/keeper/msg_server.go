@@ -173,16 +173,20 @@ func (ms msgServer) GovUpdateParams(
 			ms.SetRewardDistributionWindow(ctx, msg.Changes.RewardDistributionWindow)
 
 		case string(types.KeyAcceptList):
-			if !msg.Changes.AcceptList.ContainDenoms(ms.Keeper.MandatoryList(ctx)) {
+			accept := msg.Changes.AcceptList.Normalize()
+			mandatory := ms.Keeper.MandatoryList(ctx).Normalize()
+			if !accept.ContainDenoms(mandatory) {
 				return nil, fmt.Errorf("denom in MandatoryList not present in AcceptList")
 			}
-			ms.SetAcceptList(ctx, msg.Changes.AcceptList)
+			ms.SetAcceptList(ctx, accept)
 
 		case string(types.KeyMandatoryList):
-			if !ms.Keeper.AcceptList(ctx).ContainDenoms(msg.Changes.MandatoryList) {
+			mandatory := msg.Changes.MandatoryList.Normalize()
+			accept := ms.Keeper.AcceptList(ctx).Normalize()
+			if !accept.ContainDenoms(mandatory) {
 				return nil, fmt.Errorf("denom in MandatoryList not present in AcceptList")
 			}
-			ms.SetMandatoryList(ctx, msg.Changes.MandatoryList)
+			ms.SetMandatoryList(ctx, mandatory)
 
 		case string(types.KeySlashFraction):
 			ms.SetSlashFraction(ctx, msg.Changes.SlashFraction)

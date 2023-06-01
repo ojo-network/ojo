@@ -57,3 +57,11 @@ func (dl DenomList) ContainDenoms(d DenomList) bool {
 
 	return true
 }
+
+// Normalize updates all the SymbolDenom strings to use all caps.
+func (dl DenomList) Normalize() DenomList {
+	for i := range dl {
+		dl[i].SymbolDenom = strings.ToUpper(dl[i].SymbolDenom)
+	}
+	return dl
+}

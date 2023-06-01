@@ -416,7 +416,7 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 							SymbolDenom: "symbol",
 							Exponent:    6,
 						},
-					})
+					}.Normalize())
 
 				case "valid mandatory list":
 					mandatoryList := s.app.OracleKeeper.MandatoryList(s.ctx)
@@ -431,7 +431,7 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 							SymbolDenom: oracletypes.AtomSymbol,
 							Exponent:    6,
 						},
-					})
+					}.Normalize())
 
 				case "valid reward band list":
 					rewardBand := s.app.OracleKeeper.RewardBands(s.ctx)
