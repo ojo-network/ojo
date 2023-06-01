@@ -15,7 +15,7 @@ require (
 	github.com/golangci/golangci-lint v1.52.2
 	github.com/gorilla/mux v1.8.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
-	github.com/mgechev/revive v1.3.1
+	github.com/mgechev/revive v1.3.2
 	github.com/ory/dockertest/v3 v3.10.0
 	github.com/rs/zerolog v1.29.1
 	github.com/spf13/cast v1.5.1
@@ -292,13 +292,13 @@ require (
 	golang.org/x/exp v0.0.0-20221205204356-47842c84f3db // indirect
 	golang.org/x/exp/typeparams v0.0.0-20230224173230-c95f2b4c22f2 // indirect
 	golang.org/x/mod v0.10.0 // indirect
-	golang.org/x/net v0.9.0 // indirect
+	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/oauth2 v0.6.0 // indirect
-	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.7.0 // indirect
-	golang.org/x/term v0.7.0 // indirect
+	golang.org/x/sync v0.2.0 // indirect
+	golang.org/x/sys v0.8.0 // indirect
+	golang.org/x/term v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
-	golang.org/x/tools v0.8.0 // indirect
+	golang.org/x/tools v0.9.1 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/api v0.110.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
