@@ -2,11 +2,12 @@ package grpc
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ojo-network/ojo/client"
+	"github.com/ojo-network/ojo/x/oracle/types"
 	"github.com/rs/zerolog"
 )
 
@@ -23,20 +24,17 @@ func MedianCheck(val1Client *client.OjoClient) error {
 		return err
 	}
 
-	denomMandatoryList := []string{}
-	for _, mandatoryItem := range params.MandatoryList {
-		denomMandatoryList = append(denomMandatoryList, strings.ToUpper(mandatoryItem.SymbolDenom))
-	}
-
 	chainHeight, err := val1Client.NewChainHeight(ctx, zerolog.Nop())
 	if err != nil {
 		return err
 	}
 
 	var exchangeRates sdk.DecCoins
+	var missingDenoms []string
 	for i := 0; i < 40; i++ {
 		exchangeRates, err = val1Client.QueryClient.QueryExchangeRates()
-		if err == nil && len(exchangeRates) == len(denomMandatoryList) {
+		missingDenoms = findMissingDenoms(exchangeRates, params.MandatoryList)
+		if err == nil && len(missingDenoms) == 0 {
 			break
 		}
 		<-chainHeight.HeightChanged
@@ -45,9 +43,11 @@ func MedianCheck(val1Client *client.OjoClient) error {
 	if err != nil {
 		return err
 	}
-	if len(exchangeRates) != len(denomMandatoryList) {
-		// TODO - update the output to display which denoms are missing https://github.com/ojo-network/ojo/issues/130
-		return errors.New("couldn't fetch exchange rates matching denom accept list")
+	if len(missingDenoms) > 0 {
+		return fmt.Errorf(
+			"couldn't fetch exchange rates matching denom mandatory list. Missing: %s",
+			strings.Join(missingDenoms, ", "),
+		)
 	}
 
 	priceStore, err := listenForPrices(val1Client, params, chainHeight)
@@ -64,4 +64,14 @@ func MedianCheck(val1Client *client.OjoClient) error {
 	}
 
 	return nil
+}
+
+func findMissingDenoms(exchangeRates sdk.DecCoins, denomList types.DenomList) []string {
+	missingDenoms := []string{}
+	for _, denom := range denomList {
+		if exchangeRates.AmountOf(denom.SymbolDenom).IsZero() {
+			missingDenoms = append(missingDenoms, denom.SymbolDenom)
+		}
+	}
+	return missingDenoms
 }
