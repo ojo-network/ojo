@@ -126,3 +126,34 @@ func TestDenomListContains(t *testing.T) {
 		require.Equal(t, testCase.symbolInList, testCase.denomList.Contains(testCase.denomSymbol))
 	}
 }
+
+// TestNormalize makes sure that the Normalize function
+// updates the SymbolDenom of a DenomList to all caps.
+func TestNormalize(t *testing.T) {
+	testCases := []struct {
+		denomList       types.DenomList
+		expectedSymbols map[string]struct{}
+	}{
+		{
+			denomList: types.DenomList{types.DenomOjo},
+			expectedSymbols: map[string]struct{}{
+				"OJO": {},
+			},
+		},
+		{
+			denomList: types.DenomList{types.DenomAtom, types.DenomLuna},
+			expectedSymbols: map[string]struct{}{
+				"ATOM": {},
+				"LUNA": {},
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		normalized := testCase.denomList.Normalize()
+		for _, v := range normalized {
+			_, ok := testCase.expectedSymbols[v.SymbolDenom]
+			require.True(t, ok)
+		}
+	}
+}
