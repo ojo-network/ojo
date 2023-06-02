@@ -19,7 +19,6 @@ linters:
     # - wsl
     - asciicheck
     - bodyclose
-    - depguard
     - dogsled
     - errcheck
     - exportloopref
