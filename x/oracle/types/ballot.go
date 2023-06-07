@@ -205,10 +205,10 @@ func ClaimMapToSlices(claims map[string]Claim, rewardSet []string) ([]Claim, []C
 	return c, r
 }
 
-func rewardSetToMap(rewardSet []string) map[string]bool {
-	rewardMap := make(map[string]bool)
+func rewardSetToMap(rewardSet []string) map[string]struct{} {
+	rewardMap := make(map[string]struct{})
 	for _, v := range rewardSet {
-		rewardMap[v] = true
+		rewardMap[v] = struct{}{}
 	}
 
 	return rewardMap
