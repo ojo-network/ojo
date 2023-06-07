@@ -95,21 +95,21 @@ func (s *IntegrationTestSuite) TestPossibleWinsPerSlashWindow() {
 		possibleWinsPerSlashWindow int64
 	}{
 		{
-			name:                       "multiple denoms in accept list",
+			name:                       "multiple denoms in mandatory list",
 			votePeriod:                 5,
 			slashWindow:                15,
 			mandatoryList:              types.DenomList{atomDenom, umeeDenom},
 			possibleWinsPerSlashWindow: 6,
 		},
 		{
-			name:                       "no denoms in accept list",
+			name:                       "no denoms in mandatory list",
 			votePeriod:                 5,
 			slashWindow:                15,
 			mandatoryList:              types.DenomList{},
 			possibleWinsPerSlashWindow: 0,
 		},
 		{
-			name:                       "single denom in accept list",
+			name:                       "single denom in mandatory list",
 			votePeriod:                 2,
 			slashWindow:                10,
 			mandatoryList:              types.DenomList{atomDenom},
