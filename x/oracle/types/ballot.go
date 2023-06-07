@@ -172,9 +172,10 @@ func NewClaim(power, weight, mandatoryWinCount int64, recipient sdk.ValAddress) 
 // ClaimMapToSlices returns an array of sorted exchange rate ballots and uses the
 // rewardMap to return a second array of claims that are eligible to earn rewards
 // in the current Slash Window.
-func ClaimMapToSlices(claims map[string]Claim, rewardMap map[string]bool) ([]Claim, []Claim) {
+func ClaimMapToSlices(claims map[string]Claim, rewardSet []string) ([]Claim, []Claim) {
+	rewardMap := rewardSetToMap(rewardSet)
 	c := make([]Claim, len(claims))
-	r := make([]Claim, len(rewardMap))
+	r := make([]Claim, len(rewardSet))
 	i := 0
 	j := 0
 	for _, claim := range claims {
@@ -202,4 +203,13 @@ func ClaimMapToSlices(claims map[string]Claim, rewardMap map[string]bool) ([]Cla
 		return r[i].Recipient.String() < r[j].Recipient.String()
 	})
 	return c, r
+}
+
+func rewardSetToMap(rewardSet []string) map[string]bool {
+	rewardMap := make(map[string]bool)
+	for _, v := range rewardSet {
+		rewardMap[v] = true
+	}
+
+	return rewardMap
 }

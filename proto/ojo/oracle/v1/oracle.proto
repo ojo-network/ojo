@@ -127,5 +127,5 @@ message PriceStamp {
 // rewards for voting on exchange rates based on their misscounter
 // in a given Slash Window. This set gets updated every Slash Window.
 message ValidatorRewardSet {
-  map<string, bool> validator_map = 1 [ (gogoproto.moretags) = "yaml:\"validator_map\"" ];
+  repeated string validator_set = 1 [ (gogoproto.moretags) = "yaml:\"validator_map\"" ];
 }
