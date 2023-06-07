@@ -376,8 +376,8 @@ func TestClaimMapToSlices(t *testing.T) {
 			"testClaim":    claim1,
 			"anotherClaim": claim2,
 		},
-		map[string]bool{
-			claim1.Recipient.String(): true,
+		[]string{
+			claim1.Recipient.String(),
 		},
 	)
 	require.Contains(t, claimSlice, claim1, claim2)
