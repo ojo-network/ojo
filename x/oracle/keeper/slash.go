@@ -61,7 +61,7 @@ func (k Keeper) PossibleWinsPerSlashWindow(ctx sdk.Context) int64 {
 	votePeriod := int64(k.VotePeriod(ctx))
 
 	votePeriodsPerWindow := sdk.NewDec(slashWindow).QuoInt64(votePeriod).TruncateInt64()
-	numberOfAssets := int64(len(k.GetParams(ctx).AcceptList))
+	numberOfAssets := int64(len(k.GetParams(ctx).MandatoryList))
 
 	return (votePeriodsPerWindow * numberOfAssets)
 }
