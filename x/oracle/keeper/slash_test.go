@@ -105,7 +105,7 @@ func (s *IntegrationTestSuite) TestPossibleWinsPerSlashWindow() {
 			name:                       "no denoms in accept list",
 			votePeriod:                 5,
 			slashWindow:                15,
-			acceptmandatoryListList:    types.DenomList{},
+			mandatoryList:              types.DenomList{},
 			possibleWinsPerSlashWindow: 0,
 		},
 		{
