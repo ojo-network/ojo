@@ -70,11 +70,11 @@ func (k Keeper) PossibleWinsPerSlashWindow(ctx sdk.Context) int64 {
 // in the ValidatorRewardSet to earn rewards in the current Slash Window.
 func (k Keeper) SetValidatorRewardSet(ctx sdk.Context) {
 	validatorRewardSet := types.ValidatorRewardSet{
-		ValidatorMap: make(map[string]bool),
+		ValidatorSet: []string{},
 	}
 	for _, v := range k.StakingKeeper.GetBondedValidatorsByPower(ctx) {
 		addr := v.GetOperator()
-		validatorRewardSet.ValidatorMap[addr.String()] = true
+		validatorRewardSet.ValidatorSet = append(validatorRewardSet.ValidatorSet, addr.String())
 	}
 
 	store := ctx.KVStore(k.storeKey)
@@ -96,7 +96,7 @@ func (k Keeper) CurrentValidatorRewardSet(
 
 	for ; iter.Valid(); iter.Next() {
 		validatorRewardSet := types.ValidatorRewardSet{
-			ValidatorMap: make(map[string]bool),
+			ValidatorSet: []string{},
 		}
 		k.cdc.MustUnmarshal(iter.Value(), &validatorRewardSet)
 		if handler(validatorRewardSet) {

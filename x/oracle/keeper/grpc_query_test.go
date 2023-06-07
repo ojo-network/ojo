@@ -300,7 +300,7 @@ func (s *IntegrationTestSuite) TestQuerier_ValidatorRewardSet() {
 	ctx = ctx.WithBlockHeight(slashWindowBlock + 20)
 	valRewardSetResp, err := s.queryClient.ValidatorRewardSet(ctx.Context(), &types.QueryValidatorRewardSet{})
 	s.Require().NoError(err)
-	s.Require().Equal(3, len(valRewardSetResp.Validators.ValidatorMap))
+	s.Require().Equal(3, len(valRewardSetResp.Validators.ValidatorSet))
 
 	ctx = ctx.WithBlockHeight(originalBlockHeight)
 }

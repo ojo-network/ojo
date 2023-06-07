@@ -115,7 +115,7 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 
 	// Get the validators which can earn rewards in this Slash Window.
 	validatorRewardSet := types.ValidatorRewardSet{
-		ValidatorMap: make(map[string]bool),
+		ValidatorSet: []string{},
 	}
 	k.CurrentValidatorRewardSet(ctx, func(valRewardSet types.ValidatorRewardSet) bool {
 		validatorRewardSet = valRewardSet
@@ -124,7 +124,7 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 
 	// update miss counting & slashing
 	voteTargetsLen := len(params.MandatoryList)
-	claimSlice, rewardSlice := types.ClaimMapToSlices(validatorClaimMap, validatorRewardSet.ValidatorMap)
+	claimSlice, rewardSlice := types.ClaimMapToSlices(validatorClaimMap, validatorRewardSet.ValidatorSet)
 	for _, claim := range claimSlice {
 		misses := uint64(voteTargetsLen - int(claim.MandatoryWinCount))
 		if misses == 0 {
