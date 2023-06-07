@@ -91,28 +91,28 @@ func (s *IntegrationTestSuite) TestPossibleWinsPerSlashWindow() {
 		name                       string
 		votePeriod                 uint64
 		slashWindow                uint64
-		acceptList                 types.DenomList
+		mandatoryList              types.DenomList
 		possibleWinsPerSlashWindow int64
 	}{
 		{
-			name:                       "multiple denoms in accept list",
+			name:                       "multiple denoms in mandatory list",
 			votePeriod:                 5,
 			slashWindow:                15,
-			acceptList:                 types.DenomList{atomDenom, umeeDenom},
+			mandatoryList:              types.DenomList{atomDenom, umeeDenom},
 			possibleWinsPerSlashWindow: 6,
 		},
 		{
-			name:                       "no denoms in accept list",
+			name:                       "no denoms in mandatory list",
 			votePeriod:                 5,
 			slashWindow:                15,
-			acceptList:                 types.DenomList{},
+			mandatoryList:              types.DenomList{},
 			possibleWinsPerSlashWindow: 0,
 		},
 		{
-			name:                       "single denom in accept list",
+			name:                       "single denom in mandatory list",
 			votePeriod:                 2,
 			slashWindow:                10,
-			acceptList:                 types.DenomList{atomDenom},
+			mandatoryList:              types.DenomList{atomDenom},
 			possibleWinsPerSlashWindow: 5,
 		},
 	}
@@ -122,7 +122,7 @@ func (s *IntegrationTestSuite) TestPossibleWinsPerSlashWindow() {
 			params := types.DefaultParams()
 			params.VotePeriod = tc.votePeriod
 			params.SlashWindow = tc.slashWindow
-			params.AcceptList = tc.acceptList
+			params.MandatoryList = tc.mandatoryList
 			s.app.OracleKeeper.SetParams(s.ctx, params)
 			actual := s.app.OracleKeeper.PossibleWinsPerSlashWindow(s.ctx)
 			s.Require().Equal(tc.possibleWinsPerSlashWindow, actual)

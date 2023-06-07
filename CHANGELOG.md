@@ -54,6 +54,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [182](https://github.com/ojo-network/ojo/pull/182) Set standard for oracle parameter symbols
 
+### Fixes
+
+- [197](https://github.com/ojo-network/ojo/pull/197) Fix potential win count calculations.
+
 ## [v0.1.3](https://github.com/ojo-network/ojo/releases/tag/v0.1.3) - 2023-05-09
 
 ### Features
