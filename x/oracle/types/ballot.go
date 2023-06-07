@@ -170,7 +170,7 @@ func NewClaim(power, weight, mandatoryWinCount int64, recipient sdk.ValAddress) 
 }
 
 // ClaimMapToSlices returns an array of sorted exchange rate ballots and uses the
-// rewardMap to return a second array of claims that are eligible to earn rewards
+// rewardSet to return a second array of claims that are eligible to earn rewards
 // in the current Slash Window.
 func ClaimMapToSlices(claims map[string]Claim, rewardSet []string) ([]Claim, []Claim) {
 	rewardMap := rewardSetToMap(rewardSet)
