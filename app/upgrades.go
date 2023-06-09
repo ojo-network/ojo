@@ -20,7 +20,7 @@ func (app App) RegisterUpgradeHandlers() {
 
 // performs upgrade from v0.1 to v.0.2
 func (app *App) registerUpgrade0_2(_ upgradetypes.Plan) {
-	const planName = "v0.2.0"
+	const planName = "v0.1.4"
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			ctx.Logger().Info("Upgrade handler execution", "name", planName)
