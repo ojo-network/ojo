@@ -57,6 +57,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Fixes
 
 - [197](https://github.com/ojo-network/ojo/pull/197) Fix potential win count calculations.
+- [202](https://github.com/ojo-network/ojo/pull/202) Migration to update ValidatorRewardSet from map to list.
 
 ## [v0.1.3](https://github.com/ojo-network/ojo/releases/tag/v0.1.3) - 2023-05-09
 
