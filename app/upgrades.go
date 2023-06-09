@@ -15,7 +15,7 @@ func (app App) RegisterUpgradeHandlers() {
 		panic(err)
 	}
 
-	app.registerUpgrade0_2(upgradeInfo)
+	app.registerUpgrade0_1_4(upgradeInfo)
 }
 
 // performs upgrade from v0.1.3 to v0.1.4
