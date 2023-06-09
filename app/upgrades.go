@@ -18,8 +18,8 @@ func (app App) RegisterUpgradeHandlers() {
 	app.registerUpgrade0_2(upgradeInfo)
 }
 
-// performs upgrade from v0.1 to v.0.2
-func (app *App) registerUpgrade0_2(_ upgradetypes.Plan) {
+// performs upgrade from v0.1.3 to v0.1.4
+func (app *App) registerUpgrade0_1_4(_ upgradetypes.Plan) {
 	const planName = "v0.1.4"
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
