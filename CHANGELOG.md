@@ -46,6 +46,9 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### State Machine Breaking
+- [203](https://github.com/ojo-network/ojo/pull/203) Update cosmos SDK to v0.46.13 - [barberry](https://forum.cosmos.network/t/cosmos-sdk-security-advisory-barberry/10825)
+
 ### Features
 
 - [172](https://github.com/ojo-network/ojo/pull/172) Initial airdrop module ABCI & msg_server
