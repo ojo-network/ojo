@@ -50,7 +50,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [172](https://github.com/ojo-network/ojo/pull/172) Initial airdrop module ABCI & msg_server
 
-## [v0.1.4]
+## [v0.1.4](https://github.com/ojo-network/ojo/releases/tag/v0.1.4) - 2023-06-12
 
 ### State Machine Breaking
 
