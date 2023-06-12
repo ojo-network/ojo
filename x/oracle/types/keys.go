@@ -83,8 +83,8 @@ func KeyHistoricPrice(denom string, blockNum uint64) (key []byte) {
 }
 
 // KeyValidatorRewardSet - stored by *block*
-func KeyValidatorRewardSet(blockNum uint64) (key []byte) {
-	return util.ConcatBytes(0, KeyPrefixValidatorRewardSet, util.UintWithNullPrefix(blockNum))
+func KeyValidatorRewardSet() (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixValidatorRewardSet)
 }
 
 // ParseDenomAndBlockFromKey returns the denom and block contained in the *key*
