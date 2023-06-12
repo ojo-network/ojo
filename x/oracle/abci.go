@@ -114,13 +114,7 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 	}
 
 	// Get the validators which can earn rewards in this Slash Window.
-	validatorRewardSet := types.ValidatorRewardSet{
-		ValidatorSet: []string{},
-	}
-	k.CurrentValidatorRewardSet(ctx, func(valRewardSet types.ValidatorRewardSet) bool {
-		validatorRewardSet = valRewardSet
-		return false
-	})
+	validatorRewardSet := k.GetValidatorRewardSet(ctx)
 
 	// update miss counting & slashing
 	voteTargetsLen := len(params.MandatoryList)

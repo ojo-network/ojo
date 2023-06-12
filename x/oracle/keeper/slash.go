@@ -3,7 +3,6 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/ojo-network/ojo/util"
 	"github.com/ojo-network/ojo/x/oracle/types"
 )
 
@@ -79,28 +78,20 @@ func (k Keeper) SetValidatorRewardSet(ctx sdk.Context) {
 
 	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshal(&validatorRewardSet)
-	store.Set(types.KeyValidatorRewardSet(uint64(ctx.BlockHeight())), bz)
+	store.Set(types.KeyValidatorRewardSet(), bz)
 }
 
 // CurrentValidatorRewardSet returns the latest ValidatorRewardSet in the store.
-func (k Keeper) CurrentValidatorRewardSet(
-	ctx sdk.Context,
-	handler func(types.ValidatorRewardSet) bool,
-) {
+func (k Keeper) GetValidatorRewardSet(ctx sdk.Context) types.ValidatorRewardSet {
 	store := ctx.KVStore(k.storeKey)
 
-	// make sure we have one zero byte to correctly separate blocknum
-	prefix := util.ConcatBytes(1, types.KeyPrefixValidatorRewardSet)
-	iter := sdk.KVStoreReversePrefixIteratorPaginated(store, prefix, 1, 1)
-	defer iter.Close()
-
-	for ; iter.Valid(); iter.Next() {
-		validatorRewardSet := types.ValidatorRewardSet{
-			ValidatorSet: []string{},
-		}
-		k.cdc.MustUnmarshal(iter.Value(), &validatorRewardSet)
-		if handler(validatorRewardSet) {
-			break
-		}
+	bz := store.Get(types.KeyValidatorRewardSet())
+	if bz == nil {
+		return types.ValidatorRewardSet{}
 	}
+
+	var rewardSet types.ValidatorRewardSet
+	k.cdc.MustUnmarshal(bz, &rewardSet)
+
+	return rewardSet
 }
