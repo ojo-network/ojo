@@ -320,11 +320,7 @@ func (q querier) ValidatorRewardSet(
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	validatorRewardSet := types.ValidatorRewardSet{}
-	q.CurrentValidatorRewardSet(ctx, func(valSet types.ValidatorRewardSet) bool {
-		validatorRewardSet = valSet
-		return false
-	})
+	validatorRewardSet := q.GetValidatorRewardSet(ctx)
 
 	return &types.QueryValidatorRewardSetResponse{
 		Validators: validatorRewardSet,
