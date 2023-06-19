@@ -46,12 +46,15 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
-### State Machine Breaking
-- [203](https://github.com/ojo-network/ojo/pull/203) Update cosmos SDK to v0.46.13 - [barberry](https://forum.cosmos.network/t/cosmos-sdk-security-advisory-barberry/10825)
-
 ### Features
 
 - [172](https://github.com/ojo-network/ojo/pull/172) Initial airdrop module ABCI & msg_server
+
+## [v0.1.4](https://github.com/ojo-network/ojo/releases/tag/v0.1.4) - 2023-06-12
+
+### State Machine Breaking
+
+- [203](https://github.com/ojo-network/ojo/pull/203) Update cosmos SDK to v0.46.13 - [barberry](https://forum.cosmos.network/t/cosmos-sdk-security-advisory-barberry/10825)
 
 ### Improvements
 
@@ -61,6 +64,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [197](https://github.com/ojo-network/ojo/pull/197) Fix potential win count calculations.
 - [202](https://github.com/ojo-network/ojo/pull/202) Migration to update ValidatorRewardSet from map to list.
+- [207](https://github.com/ojo-network/ojo/pull/207) Store validator reward set in one key instead of by block
 
 ## [v0.1.3](https://github.com/ojo-network/ojo/releases/tag/v0.1.3) - 2023-05-09
 
