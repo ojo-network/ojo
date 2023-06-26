@@ -56,8 +56,10 @@ func (s *IntegrationTestSuite) TestUpdateAirdropParams() {
 		params.AirdropFactor,
 		govAddress.Address,
 	)
+	title := "Update Airdrop Params"
+	summary := "Update Airdrop Params expiry block, delegation requirement, and airdrop factor"
 
-	err = grpc.SubmitAndPassProposal(ojoClient, []sdk.Msg{msg})
+	err = grpc.SubmitAndPassProposal(ojoClient, []sdk.Msg{msg}, title, summary)
 	s.Require().NoError(err)
 
 	queriedParams, err := ojoClient.QueryClient.QueryAirdropParams()

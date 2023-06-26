@@ -11,8 +11,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	ojoapp "github.com/ojo-network/ojo/app"
-	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
-	tmjsonclient "github.com/tendermint/tendermint/rpc/jsonrpc/client"
+	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
+	tmjsonclient "github.com/cometbft/cometbft/rpc/jsonrpc/client"
 )
 
 const (
@@ -77,7 +77,7 @@ func (c *Client) createClientContext() error {
 		ChainID:           c.ChainID,
 		InterfaceRegistry: encoding.InterfaceRegistry,
 		Output:            os.Stderr,
-		BroadcastMode:     flags.BroadcastBlock,
+		BroadcastMode:     flags.BroadcastSync,
 		TxConfig:          encoding.TxConfig,
 		AccountRetriever:  authtypes.AccountRetriever{},
 		Codec:             encoding.Codec,
@@ -96,6 +96,7 @@ func (c *Client) createClientContext() error {
 		Offline:           false,
 		SkipConfirm:       true,
 	}
+
 	return nil
 }
 

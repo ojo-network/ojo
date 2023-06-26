@@ -15,8 +15,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
-	"github.com/cosmos/cosmos-sdk/simapp"
-	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
+	simcli "github.com/cosmos/cosmos-sdk/x/simulation/client/cli"
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	"github.com/cosmos/cosmos-sdk/store"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -27,10 +27,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/stretchr/testify/require"
-	tmjson "github.com/tendermint/tendermint/libs/json"
-	"github.com/tendermint/tendermint/libs/log"
-	tmtypes "github.com/tendermint/tendermint/types"
-	dbm "github.com/tendermint/tm-db"
+	tmjson "github.com/cometbft/cometbft/libs/json"
+	"github.com/cometbft/cometbft/libs/log"
+	tmrand "github.com/cometbft/cometbft/libs/rand"
+	tmtypes "github.com/cometbft/cometbft/types"
+	dbm "github.com/cometbft/cometbft-db"
 
 	ojoapp "github.com/ojo-network/ojo/app"
 	appparams "github.com/ojo-network/ojo/app/params"
@@ -73,10 +74,10 @@ func initAppState(cdc codec.JSONCodec, simManager *module.SimulationManager) sim
 		accs []simtypes.Account,
 		config simtypes.Config,
 	) (appState json.RawMessage, simAccs []simtypes.Account, chainID string, genesisTimestamp time.Time) {
-		if simapp.FlagGenesisTimeValue == 0 {
+		if simcli.FlagGenesisTimeValue == 0 {
 			genesisTimestamp = simtypes.RandTimestamp(r)
 		} else {
-			genesisTimestamp = time.Unix(simapp.FlagGenesisTimeValue, 0)
+			genesisTimestamp = time.Unix(simcli.FlagGenesisTimeValue, 0)
 		}
 
 		chainID = config.ChainID
@@ -88,7 +89,7 @@ func initAppState(cdc codec.JSONCodec, simManager *module.SimulationManager) sim
 			// override the default chain-id from simapp to set it later to the config
 			genesisDoc, accounts := appStateFromGenesisFileFn(r, cdc, config.GenesisFile)
 
-			if simapp.FlagGenesisTimeValue == 0 {
+			if simcli.FlagGenesisTimeValue == 0 {
 				// use genesis timestamp if no custom timestamp is provided (i.e no random timestamp)
 				genesisTimestamp = genesisDoc.GenesisTime
 			}
@@ -201,14 +202,14 @@ func appStateRandomizedFn(
 	var initialStake sdkmath.Int
 	appParams.GetOrGenerate(
 		cdc,
-		simappparams.StakePerAccount,
+		simtestutil.StakePerAccount,
 		&initialStake,
 		r,
 		func(r *rand.Rand) { initialStake = sdkmath.NewIntFromUint64(uint64(r.Int63n(1e12))) },
 	)
 	appParams.GetOrGenerate(
 		cdc,
-		simappparams.InitiallyBondedValidators,
+		simtestutil.InitiallyBondedValidators,
 		&numInitiallyBonded,
 		r,
 		func(r *rand.Rand) { numInitiallyBonded = int64(r.Intn(300)) },
@@ -304,7 +305,10 @@ func appExportAndImport(t *testing.T) (
 	dbm.DB, string, *ojoapp.App, log.Logger, servertypes.ExportedApp, bool, dbm.DB, string, *ojoapp.App,
 	simtypes.Config,
 ) {
-	config, db, dir, logger, skip, err := simapp.SetupSimulation("leveldb-app-sim", "Simulation")
+	config := simcli.NewConfigFromFlags()
+	config.ChainID = fmt.Sprintf("simulation-chain-%s", tmrand.NewRand().Str(6))
+
+	db, dir, logger, skip, err := simtestutil.SetupSimulation(config, "leveldb-app-sim", "Simulation", simcli.FlagVerboseValue, simcli.FlagEnabledValue)
 	if skip {
 		t.Skip("skipping application simulation")
 	}
@@ -318,7 +322,7 @@ func appExportAndImport(t *testing.T) (
 		true,
 		map[int64]bool{},
 		dir,
-		simapp.FlagPeriodValue,
+		simcli.FlagPeriodValue,
 		ojoapp.MakeEncodingConfig(),
 		ojoapp.EmptyAppOptions{},
 		fauxMerkleModeOpt,
@@ -332,30 +336,32 @@ func appExportAndImport(t *testing.T) (
 		app.BaseApp,
 		initAppState(app.AppCodec(), app.StateSimulationManager),
 		simtypes.RandomAccounts,
-		simapp.SimulationOperations(app, app.AppCodec(), config),
+		simtestutil.SimulationOperations(app, app.AppCodec(), config),
 		app.ModuleAccountAddrs(),
 		config,
 		app.AppCodec(),
 	)
 
 	// export state and simParams before the simulation error is checked
-	err = simapp.CheckExportSimulation(app, config, simParams)
+	err = simtestutil.CheckExportSimulation(app, config, simParams)
 	require.NoError(t, err)
 	require.NoError(t, simErr)
 
 	if config.Commit {
-		simapp.PrintStats(db)
+		simtestutil.PrintStats(db)
 	}
 
 	fmt.Printf("exporting genesis...\n")
 
-	exported, err := app.ExportAppStateAndValidators(false, []string{})
+	exported, err := app.ExportAppStateAndValidators(false, []string{}, []string{})
 	require.NoError(t, err)
 
 	fmt.Printf("importing genesis...\n")
 
-	config, newDB, newDir, _, _, err := simapp.SetupSimulation("leveldb-app-sim-2", "Simulation-2")
-	require.NoError(t, err, "simulation setup failed")
+	newDB, newDir, logger, skip, err := simtestutil.SetupSimulation(config, "leveldb-app-sim", "Simulation", simcli.FlagVerboseValue, simcli.FlagEnabledValue)
+	if skip {
+		t.Skip("skipping application simulation")
+	}
 
 	newApp := ojoapp.New(
 		logger,
@@ -364,7 +370,7 @@ func appExportAndImport(t *testing.T) (
 		true,
 		map[int64]bool{},
 		newDir,
-		simapp.FlagPeriodValue,
+		simcli.FlagPeriodValue,
 		ojoapp.MakeEncodingConfig(),
 		ojoapp.EmptyAppOptions{},
 		fauxMerkleModeOpt,

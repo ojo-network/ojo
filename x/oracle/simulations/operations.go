@@ -8,7 +8,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
-	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
@@ -18,6 +17,7 @@ import (
 	ojosim "github.com/ojo-network/ojo/util/sim"
 	"github.com/ojo-network/ojo/x/oracle/keeper"
 	"github.com/ojo-network/ojo/x/oracle/types"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 )
 
 // Simulation operation weights constants
@@ -25,6 +25,9 @@ const (
 	OpWeightMsgAggregateExchangeRatePrevote = "op_weight_msg_exchange_rate_aggregate_prevote" //nolint: gosec
 	OpWeightMsgAggregateExchangeRateVote    = "op_weight_msg_exchange_rate_aggregate_vote"    //nolint: gosec
 	OpWeightMsgDelegateFeedConsent          = "op_weight_msg_exchange_feed_consent"           //nolint: gosec
+
+	DefaultWeightMsgSend = 100                  // from simappparams.DefaultWeightMsgSend
+	DefaultWeightMsgSetWithdrawAddress int = 50 // from simappparams.DefaultWeightMsgSetWithdrawAddress
 
 	salt = "89b8164ca0b4b8703ae9ab25962f3dd6d1de5d656f5442971a93b2ca7893f654"
 )
@@ -68,19 +71,19 @@ func WeightedOperations(
 
 	appParams.GetOrGenerate(cdc, OpWeightMsgAggregateExchangeRatePrevote, &weightMsgAggregateExchangeRatePrevote, nil,
 		func(_ *rand.Rand) {
-			weightMsgAggregateExchangeRatePrevote = simappparams.DefaultWeightMsgSend * 2
+			weightMsgAggregateExchangeRatePrevote = DefaultWeightMsgSend * 2
 		},
 	)
 
 	appParams.GetOrGenerate(cdc, OpWeightMsgAggregateExchangeRateVote, &weightMsgAggregateExchangeRateVote, nil,
 		func(_ *rand.Rand) {
-			weightMsgAggregateExchangeRateVote = simappparams.DefaultWeightMsgSend * 2
+			weightMsgAggregateExchangeRateVote = DefaultWeightMsgSend * 2
 		},
 	)
 
 	appParams.GetOrGenerate(cdc, OpWeightMsgDelegateFeedConsent, &weightMsgDelegateFeedConsent, nil,
 		func(_ *rand.Rand) {
-			weightMsgDelegateFeedConsent = simappparams.DefaultWeightMsgSetWithdrawAddress
+			weightMsgDelegateFeedConsent = DefaultWeightMsgSetWithdrawAddress
 		},
 	)
 
@@ -224,7 +227,7 @@ func SimulateMsgDelegateFeedConsent(ak types.AccountKeeper, bk bankkeeper.Keeper
 func deliver(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, ak simulation.AccountKeeper,
 	bk bankkeeper.Keeper, from simtypes.Account, msg sdk.Msg, coins sdk.Coins,
 ) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
-	cfg := simappparams.MakeTestEncodingConfig()
+	cfg := testutil.MakeTestEncodingConfig()
 	o := simulation.OperationInput{
 		R:               r,
 		App:             app,

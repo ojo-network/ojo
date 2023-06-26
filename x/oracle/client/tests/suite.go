@@ -9,8 +9,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gogo/protobuf/proto"
 	"github.com/stretchr/testify/suite"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
-	tmcli "github.com/tendermint/tendermint/libs/cli"
+	"github.com/cometbft/cometbft/crypto/secp256k1"
+	tmcli "github.com/cometbft/cometbft/libs/cli"
 
 	appparams "github.com/ojo-network/ojo/app/params"
 	"github.com/ojo-network/ojo/x/oracle/client/cli"
@@ -80,7 +80,7 @@ func (s *IntegrationTestSuite) TestDelegateFeedConsent() {
 				val.Address.String(),
 				s.network.Validators[1].Address.String(),
 				fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
-				fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
+				fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastSync),
 				fmt.Sprintf("--%s=%s", flags.FlagGasPrices, appparams.ProtocolMinGasPrice),
 			},
 			expectErr:    false,

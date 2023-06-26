@@ -26,7 +26,7 @@ jobs:
           cache: true
 
       - name: Set Env
-        run: echo "TM_VERSION=$(go list -m github.com/tendermint/tendermint | sed 's:.* ::')" >> $GITHUB_ENV
+        run: echo "TM_VERSION=$(go list -m github.com/cometbft/cometbft | sed 's:.* ::')" >> $GITHUB_ENV
       - name: Build
         uses: goreleaser/goreleaser-action@v4
         if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'Enable:ReleaseBuild')

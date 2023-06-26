@@ -3,6 +3,8 @@ package cmd
 import (
 	"os"
 
+	rosettaCmd "cosmossdk.io/tools/rosetta/cmd"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/config"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -18,8 +20,8 @@ import (
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	"github.com/spf13/cobra"
-	tmcfg "github.com/tendermint/tendermint/config"
-	tmcli "github.com/tendermint/tendermint/libs/cli"
+	tmcfg "github.com/cometbft/cometbft/config"
+	tmcli "github.com/cometbft/cometbft/libs/cli"
 
 	app "github.com/ojo-network/ojo/app"
 	appparams "github.com/ojo-network/ojo/app/params"
@@ -37,7 +39,7 @@ func NewRootCmd() (*cobra.Command, appparams.EncodingConfig) {
 		WithLegacyAmino(encodingConfig.Amino).
 		WithInput(os.Stdin).
 		WithAccountRetriever(types.AccountRetriever{}).
-		WithBroadcastMode(flags.BroadcastBlock).
+		WithBroadcastMode(flags.BroadcastSync).
 		WithHomeDir(app.DefaultNodeHome).
 		WithViper(appparams.Name)
 
@@ -138,7 +140,8 @@ func initRootCmd(rootCmd *cobra.Command, a appCreator) {
 
 	rootCmd.AddCommand(
 		genutilcli.InitCmd(a.moduleManager, app.DefaultNodeHome),
-		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, app.DefaultNodeHome),
+		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, app.DefaultNodeHome,
+			gentxModule.GenTxValidator),
 		genutilcli.MigrateGenesisCmd(),
 		genutilcli.GenTxCmd(
 			a.moduleManager,
@@ -164,7 +167,7 @@ func initRootCmd(rootCmd *cobra.Command, a appCreator) {
 	)
 
 	// add rosetta
-	rootCmd.AddCommand(server.RosettaCommand(a.encCfg.InterfaceRegistry, a.encCfg.Codec))
+	rootCmd.AddCommand(rosettaCmd.RosettaCommand(a.encCfg.InterfaceRegistry, a.encCfg.Codec))
 }
 
 func addModuleInitFlags(startCmd *cobra.Command) {

@@ -5,10 +5,12 @@ import (
 	"errors"
 	"sync"
 
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/rs/zerolog"
-	tmrpcclient "github.com/tendermint/tendermint/rpc/client"
-	tmctypes "github.com/tendermint/tendermint/rpc/core/types"
-	tmtypes "github.com/tendermint/tendermint/types"
+	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
+	tmrpcclient "github.com/cometbft/cometbft/rpc/client"
+	tmctypes "github.com/cometbft/cometbft/rpc/core/types"
+	tmtypes "github.com/cometbft/cometbft/types"
 )
 
 var (
@@ -33,9 +35,11 @@ type ChainHeight struct {
 // starts a new goroutine subscribed to EventNewBlockHeader.
 func NewChainHeight(
 	ctx context.Context,
-	rpcClient tmrpcclient.Client,
+	client client.TendermintRPC,
 	logger zerolog.Logger,
 ) (*ChainHeight, error) {
+	rpcClient := client.(*rpchttp.HTTP)
+
 	if !rpcClient.IsRunning() {
 		if err := rpcClient.Start(); err != nil {
 			return nil, err

@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/cosmos/cosmos-sdk/codec"
-	tmrand "github.com/tendermint/tendermint/libs/rand"
+	tmrand "github.com/cometbft/cometbft/libs/rand"
 
 	ojoapp "github.com/ojo-network/ojo/app"
 	"github.com/ojo-network/ojo/app/params"

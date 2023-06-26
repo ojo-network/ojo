@@ -54,9 +54,9 @@ func ParseProposalID(response *sdk.TxResponse) (uint64, error) {
 	return 0, fmt.Errorf("unable to find proposalID in tx response")
 }
 
-func SubmitAndPassProposal(ojoClient *client.OjoClient, msgs []sdk.Msg) error {
+func SubmitAndPassProposal(ojoClient *client.OjoClient, msgs []sdk.Msg, title, summary string) error {
 	deposit := sdk.NewCoins(sdk.NewCoin("uojo", sdk.NewInt(10000000)))
-	resp, err := ojoClient.TxClient.TxSubmitProposal(msgs, deposit)
+	resp, err := ojoClient.TxClient.TxSubmitProposal(msgs, deposit, title, summary)
 	if err != nil {
 		return err
 	}
