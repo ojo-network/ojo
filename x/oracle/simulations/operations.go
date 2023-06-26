@@ -13,11 +13,11 @@ import (
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	appparams "github.com/ojo-network/ojo/app/params"
 	ojosim "github.com/ojo-network/ojo/util/sim"
 	"github.com/ojo-network/ojo/x/oracle/keeper"
 	"github.com/ojo-network/ojo/x/oracle/types"
-	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 )
 
 // Simulation operation weights constants
@@ -26,8 +26,8 @@ const (
 	OpWeightMsgAggregateExchangeRateVote    = "op_weight_msg_exchange_rate_aggregate_vote"    //nolint: gosec
 	OpWeightMsgDelegateFeedConsent          = "op_weight_msg_exchange_feed_consent"           //nolint: gosec
 
-	DefaultWeightMsgSend = 100                  // from simappparams.DefaultWeightMsgSend
-	DefaultWeightMsgSetWithdrawAddress int = 50 // from simappparams.DefaultWeightMsgSetWithdrawAddress
+	DefaultWeightMsgSend               = 100 // from simappparams.DefaultWeightMsgSend
+	DefaultWeightMsgSetWithdrawAddress = 50  // from simappparams.DefaultWeightMsgSetWithdrawAddress
 
 	salt = "89b8164ca0b4b8703ae9ab25962f3dd6d1de5d656f5442971a93b2ca7893f654"
 )

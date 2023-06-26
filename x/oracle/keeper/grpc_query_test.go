@@ -3,8 +3,8 @@ package keeper_test
 import (
 	"math/rand"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cometbft/cometbft/crypto/secp256k1"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/ojo-network/ojo/app/params"
 	"github.com/ojo-network/ojo/x/oracle/keeper"

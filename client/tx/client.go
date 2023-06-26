@@ -3,6 +3,8 @@ package tx
 import (
 	"os"
 
+	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
+	tmjsonclient "github.com/cometbft/cometbft/rpc/jsonrpc/client"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
@@ -11,8 +13,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	ojoapp "github.com/ojo-network/ojo/app"
-	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
-	tmjsonclient "github.com/cometbft/cometbft/rpc/jsonrpc/client"
 )
 
 const (

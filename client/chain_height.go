@@ -5,12 +5,12 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/rs/zerolog"
-	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
 	tmrpcclient "github.com/cometbft/cometbft/rpc/client"
+	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
 	tmctypes "github.com/cometbft/cometbft/rpc/core/types"
 	tmtypes "github.com/cometbft/cometbft/types"
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/rs/zerolog"
 )
 
 var (

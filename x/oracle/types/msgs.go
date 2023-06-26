@@ -3,9 +3,9 @@ package types
 import (
 	"fmt"
 
+	"github.com/cometbft/cometbft/crypto/tmhash"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/cometbft/cometbft/crypto/tmhash"
 
 	"github.com/ojo-network/ojo/util/checkers"
 	"gopkg.in/yaml.v3"

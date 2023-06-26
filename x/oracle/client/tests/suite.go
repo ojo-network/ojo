@@ -3,14 +3,14 @@ package tests
 import (
 	"fmt"
 
+	"github.com/cometbft/cometbft/crypto/secp256k1"
+	tmcli "github.com/cometbft/cometbft/libs/cli"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gogo/protobuf/proto"
 	"github.com/stretchr/testify/suite"
-	"github.com/cometbft/cometbft/crypto/secp256k1"
-	tmcli "github.com/cometbft/cometbft/libs/cli"
 
 	appparams "github.com/ojo-network/ojo/app/params"
 	"github.com/ojo-network/ojo/x/oracle/client/cli"

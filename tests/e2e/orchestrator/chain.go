@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/cosmos/cosmos-sdk/codec"
 	tmrand "github.com/cometbft/cometbft/libs/rand"
+	"github.com/cosmos/cosmos-sdk/codec"
 
 	ojoapp "github.com/ojo-network/ojo/app"
 	"github.com/ojo-network/ojo/app/params"

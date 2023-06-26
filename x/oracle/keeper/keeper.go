@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/cometbft/cometbft/libs/log"
 
 	"github.com/ojo-network/ojo/util/metrics"
 	"github.com/ojo-network/ojo/x/oracle/types"
