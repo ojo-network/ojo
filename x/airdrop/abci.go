@@ -7,6 +7,10 @@ import (
 	"github.com/ojo-network/ojo/x/airdrop/types"
 )
 
+const (
+	BatchSize = 10
+)
+
 // EndBlocker is called at the end of every block
 func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 	createOriginAccounts(ctx, k)
@@ -16,7 +20,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 // createOriginAccounts creates the airdrop accounts for all the
 // addresses in the airdrop module account.
 func createOriginAccounts(ctx sdk.Context, k keeper.Keeper) {
-	airdropAccounts := k.PaginatedAirdropAccounts(ctx, types.StateCreated, 10)
+	airdropAccounts := k.PaginatedAirdropAccounts(ctx, types.StateCreated, BatchSize)
 	for _, airdropAccount := range airdropAccounts {
 		err := k.CreateAirdropAccount(ctx, airdropAccount)
 		if err != nil {
@@ -31,7 +35,7 @@ func distributeUnclaimedAirdrops(ctx sdk.Context, k keeper.Keeper) error {
 		return nil
 	}
 
-	for _, aa := range k.PaginatedAirdropAccounts(ctx, types.StateUnclaimed, 10) {
+	for _, aa := range k.PaginatedAirdropAccounts(ctx, types.StateUnclaimed, BatchSize) {
 		if aa.VerifyNotClaimed() != nil {
 			continue
 		}
