@@ -33,10 +33,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 	if k.IsPeriodLastBlock(ctx, params.SlashWindow) {
 		k.SlashAndResetMissCounters(ctx)
 	}
-
 	k.PruneAllPrices(ctx)
-	go k.RecordEndBlockMetrics(ctx)
-
 	return nil
 }
 
