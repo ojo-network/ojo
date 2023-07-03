@@ -58,7 +58,6 @@ func (c *Client) TxSubmitProposal(
 func (c *Client) TxSubmitLegacyProposal(
 	changes []proposal.ParamChange,
 ) (*sdk.TxResponse, error) {
-
 	content := proposal.NewParameterChangeProposal(
 		"update historic stamp period",
 		"auto grpc proposal",

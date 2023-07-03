@@ -27,7 +27,6 @@ func (k Keeper) SetAirdropAccount(
 func (k Keeper) GetAirdropAccount(
 	ctx sdk.Context, originAddress string,
 ) (*types.AirdropAccount, error) {
-
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(types.AirdropAccountKey(originAddress))
 	if bz == nil {
