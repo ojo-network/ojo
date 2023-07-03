@@ -38,6 +38,33 @@ func (s *IntegrationTestSuite) TestGetAllAirdropAccounts() {
 	s.Require().Equal(prevAcctsLen+2, len(accounts))
 }
 
+func (s *IntegrationTestSuite) TestPaginatedAirdropAccounts() {
+	app, ctx := s.app, s.ctx
+
+	accounts := app.AirdropKeeper.GetAllAirdropAccounts(ctx)
+	prevAcctsLen := len(accounts)
+
+	originAmount := uint64(500)
+	airdropAccount := types.NewAirdropAccount("test", originAmount, 0)
+	err := app.AirdropKeeper.SetAirdropAccount(ctx, airdropAccount)
+	s.Require().NoError(err)
+
+	airdropAccount2 := types.NewAirdropAccount("test2", originAmount, 0)
+	err = app.AirdropKeeper.SetAirdropAccount(ctx, airdropAccount2)
+	s.Require().NoError(err)
+
+	accounts = app.AirdropKeeper.GetAllAirdropAccounts(ctx)
+	s.Require().Equal(prevAcctsLen+2, len(accounts))
+
+	accounts = app.AirdropKeeper.PaginatedAirdropAccounts(ctx, types.StateCreated, 1)
+	s.Require().Equal(1, len(accounts))
+
+	accounts2 := app.AirdropKeeper.PaginatedAirdropAccounts(ctx, types.StateCreated, 1)
+	s.Require().Equal(1, len(accounts2))
+
+	s.Require().Equal(accounts[0].OriginAddress, accounts2[0].OriginAddress)
+}
+
 func (s *IntegrationTestSuite) TestCreateAirdropAccount() {
 	app, ctx := s.app, s.ctx
 
