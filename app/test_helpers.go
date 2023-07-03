@@ -245,7 +245,7 @@ func IntegrationTestNetworkConfig() network.Config {
 	}
 
 	votingPeriod := time.Minute
-	govGenState.VotingParams.VotingPeriod = &votingPeriod
+	govGenState.Params.VotingPeriod = &votingPeriod
 
 	bz, err = cdc.MarshalJSON(&govGenState)
 	if err != nil {

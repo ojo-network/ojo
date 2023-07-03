@@ -184,8 +184,8 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 
 // ProposalContents returns all the airdrop content functions used to
 // simulate governance proposals.
-func (am AppModule) ProposalContents(_ module.SimulationState) []simtypes.WeightedProposalContent {
-	return []simtypes.WeightedProposalContent{}
+func (am AppModule) ProposalContents(_ module.SimulationState) []simtypes.WeightedProposalMsg {
+	return []simtypes.WeightedProposalMsg{}
 }
 
 // RegisterStoreDecoder registers a decoder for airdrop module's types

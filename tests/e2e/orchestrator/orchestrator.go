@@ -162,7 +162,7 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 	require.NoError(t, cdc.UnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState))
 
 	var votingPeroid = 5 * time.Second
-	govGenState.VotingParams.VotingPeriod = &votingPeroid
+	govGenState.Params.VotingPeriod = &votingPeroid
 
 	bz, err = cdc.MarshalJSON(&govGenState)
 	require.NoError(t, err)
