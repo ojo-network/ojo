@@ -108,10 +108,6 @@ func (s *IntegrationTestSuite) TestEndBlockerAccountCreation() {
 
 	originAmount := uint64(600)
 
-	params := app.AirdropKeeper.GetParams(ctx)
-	params.OriginAccountsCreated = false
-	app.AirdropKeeper.SetParams(ctx, params)
-
 	airdropAccount := &types.AirdropAccount{
 		OriginAddress:  testAddress.String(),
 		OriginAmount:   originAmount,

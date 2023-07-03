@@ -15,7 +15,6 @@ var (
 
 func DefaultParams() Params {
 	return Params{
-		OriginAccountsCreated: DefaultOriginAccountsCreated,
 		ExpiryBlock:           DefaultExpiryBlock,
 		DelegationRequirement: &DefaultDelegationRequirement,
 		AirdropFactor:         &DefaultAirdropFactor,
