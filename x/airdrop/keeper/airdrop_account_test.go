@@ -45,11 +45,11 @@ func (s *IntegrationTestSuite) TestPaginatedAirdropAccounts() {
 	prevAcctsLen := len(accounts)
 
 	originAmount := uint64(500)
-	airdropAccount := types.NewAirdropAccount("test", originAmount, 0)
+	airdropAccount := types.NewAirdropAccount("testpaginate", originAmount, 0)
 	err := app.AirdropKeeper.SetAirdropAccount(ctx, airdropAccount)
 	s.Require().NoError(err)
 
-	airdropAccount2 := types.NewAirdropAccount("test2", originAmount, 0)
+	airdropAccount2 := types.NewAirdropAccount("testpaginate2", originAmount, 0)
 	err = app.AirdropKeeper.SetAirdropAccount(ctx, airdropAccount2)
 	s.Require().NoError(err)
 
