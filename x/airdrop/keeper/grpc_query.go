@@ -36,15 +36,15 @@ func (q querier) AirdropAccount(
 	req *types.AirdropAccountRequest,
 ) (*types.AirdropAccountResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	airdropAccount, err := q.GetAirdropAccount(ctx, req.Address, types.StateCreated)
+	airdropAccount, err := q.GetAirdropAccount(ctx, req.Address, types.AirdropAccount_CREATED)
 	if err == nil {
 		return &types.AirdropAccountResponse{AirdropAccount: airdropAccount}, nil
 	}
-	airdropAccount, err = q.GetAirdropAccount(ctx, req.Address, types.StateUnclaimed)
+	airdropAccount, err = q.GetAirdropAccount(ctx, req.Address, types.AirdropAccount_UNCLAIMED)
 	if err == nil {
 		return &types.AirdropAccountResponse{AirdropAccount: airdropAccount}, nil
 	}
-	airdropAccount, err = q.GetAirdropAccount(ctx, req.Address, types.StateClaimed)
+	airdropAccount, err = q.GetAirdropAccount(ctx, req.Address, types.AirdropAccount_CLAIMED)
 	if err == nil {
 		return &types.AirdropAccountResponse{AirdropAccount: airdropAccount}, nil
 	}

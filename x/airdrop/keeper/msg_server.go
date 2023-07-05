@@ -51,7 +51,7 @@ func (ms msgServer) ClaimAirdrop(
 ) (*types.MsgClaimAirdropResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	airdropAccount, err := ms.keeper.GetAirdropAccount(ctx, msg.FromAddress, types.StateUnclaimed)
+	airdropAccount, err := ms.keeper.GetAirdropAccount(ctx, msg.FromAddress, types.AirdropAccount_UNCLAIMED)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func (ms msgServer) ClaimAirdrop(
 	if err = ms.keeper.SendClaimTokens(ctx, airdropAccount); err != nil {
 		return nil, err
 	}
-	if err = ms.keeper.ChangeAirdropAccountState(ctx, airdropAccount, types.StateClaimed); err != nil {
+	if err = ms.keeper.ChangeAirdropAccountState(ctx, airdropAccount, types.AirdropAccount_CLAIMED); err != nil {
 		return nil, err
 	}
 	return &types.MsgClaimAirdropResponse{}, nil

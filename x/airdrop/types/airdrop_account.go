@@ -7,12 +7,6 @@ import (
 	appparams "github.com/ojo-network/ojo/app/params"
 )
 
-const (
-	StateCreated   = "created"
-	StateUnclaimed = "unclaimed"
-	StateClaimed   = "claimed"
-)
-
 func NewAirdropAccount(
 	originAddress string,
 	originAmount uint64,
@@ -22,7 +16,7 @@ func NewAirdropAccount(
 		OriginAddress:  originAddress,
 		OriginAmount:   originAmount,
 		VestingEndTime: vestingEndTime,
-		State:          StateCreated,
+		State:          AirdropAccount_CREATED,
 	}
 }
 

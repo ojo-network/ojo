@@ -27,7 +27,7 @@ func (k Keeper) SetAirdropAccount(
 func (k Keeper) GetAirdropAccount(
 	ctx sdk.Context,
 	originAddress string,
-	state string,
+	state types.AirdropAccount_State,
 ) (*types.AirdropAccount, error) {
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(types.AirdropAccountKey(originAddress, state))
@@ -43,7 +43,7 @@ func (k Keeper) GetAirdropAccount(
 func (k Keeper) DeleteAirdropAccount(
 	ctx sdk.Context,
 	account *types.AirdropAccount,
-	state string,
+	state types.AirdropAccount_State,
 ) {
 	store := ctx.KVStore(k.storeKey)
 	store.Delete(types.AirdropAccountKey(account.OriginAddress, state))
@@ -68,7 +68,7 @@ func (k Keeper) GetAllAirdropAccounts(
 // PaginatedAirdropAccounts returns a paginated list of airdrop accounts
 func (k Keeper) PaginatedAirdropAccounts(
 	ctx sdk.Context,
-	state string,
+	state types.AirdropAccount_State,
 	limit int,
 ) (accounts []*types.AirdropAccount) {
 	store := ctx.KVStore(k.storeKey)
@@ -87,7 +87,7 @@ func (k Keeper) PaginatedAirdropAccounts(
 func (k Keeper) ChangeAirdropAccountState(
 	ctx sdk.Context,
 	account *types.AirdropAccount,
-	newState string,
+	newState types.AirdropAccount_State,
 ) error {
 	oldState := account.State
 	account.State = newState
@@ -104,7 +104,7 @@ func (k Keeper) CreateAirdropAccount(
 	ctx sdk.Context,
 	airdropAccount *types.AirdropAccount,
 ) (err error) {
-	if airdropAccount.State != types.StateCreated {
+	if airdropAccount.State != types.AirdropAccount_CREATED {
 		return types.ErrOriginAccountExists
 	}
 	if err = k.CreateOriginAccount(ctx, airdropAccount); err != nil {
@@ -116,7 +116,7 @@ func (k Keeper) CreateAirdropAccount(
 	if err = k.SendOriginTokens(ctx, airdropAccount); err != nil {
 		return err
 	}
-	return k.ChangeAirdropAccountState(ctx, airdropAccount, types.StateUnclaimed)
+	return k.ChangeAirdropAccountState(ctx, airdropAccount, types.AirdropAccount_UNCLAIMED)
 }
 
 // VerifyDelegationRequirement returns an error if the total shares

@@ -43,7 +43,13 @@ message AirdropAccount {
   uint64 origin_amount = 3;
 
   // The current state of the airdrop account
-  string state = 4;
+  enum State {
+    CREATED = 0;
+    UNCLAIMED = 1;
+    CLAIMED = 2;
+    COMMUNITY_POOL = 3;
+  }
+  State state = 4;
 
   // The address of the account that the user has claimed the 2nd half of their airdrop to.
   string claim_address = 5 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
