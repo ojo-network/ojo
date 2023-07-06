@@ -235,8 +235,6 @@ type App struct {
 	// mm is the module manager
 	mm *module.Manager
 
-	// simulation manager
-	sm *module.SimulationManager
 	// simulation manager to create state
 	StateSimulationManager *module.SimulationManager
 
@@ -648,9 +646,9 @@ func New(
 			app.GetSubspace(authtypes.ModuleName),
 		),
 	}
-	app.sm = module.NewSimulationManagerFromAppModules(app.mm.Modules, overrideModules)
+	app.StateSimulationManager = module.NewSimulationManagerFromAppModules(app.mm.Modules, overrideModules)
 
-	app.sm.RegisterStoreDecoders()
+	app.StateSimulationManager.RegisterStoreDecoders()
 
 	// initialize stores
 	app.MountKVStores(keys)
@@ -868,5 +866,5 @@ func initParamsKeeper(
 
 // SimulationManager implements the SimulationApp interface
 func (app *App) SimulationManager() *module.SimulationManager {
-	return app.sm
+	return app.StateSimulationManager
 }

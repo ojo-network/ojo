@@ -14,6 +14,7 @@ import (
 	"github.com/cometbft/cometbft/libs/log"
 	tmrand "github.com/cometbft/cometbft/libs/rand"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	"github.com/cosmos/cosmos-sdk/baseapp"
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
@@ -71,6 +72,7 @@ func TestFullAppSimulation(t *testing.T) {
 		ojoapp.MakeEncodingConfig(),
 		ojoapp.EmptyAppOptions{},
 		fauxMerkleModeOpt,
+		baseapp.SetChainID(config.ChainID),
 	)
 	require.Equal(t, appparams.Name, app.Name())
 
@@ -138,6 +140,7 @@ func TestAppStateDeterminism(t *testing.T) {
 				ojoapp.MakeEncodingConfig(),
 				ojoapp.EmptyAppOptions{},
 				interBlockCacheOpt(),
+				baseapp.SetChainID(config.ChainID),
 			)
 
 			fmt.Printf(
@@ -205,6 +208,7 @@ func BenchmarkFullAppSimulation(b *testing.B) {
 		ojoapp.MakeEncodingConfig(),
 		ojoapp.EmptyAppOptions{},
 		interBlockCacheOpt(),
+		baseapp.SetChainID(config.ChainID),
 	)
 
 	// Run randomized simulation:w
