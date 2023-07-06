@@ -44,6 +44,7 @@ message AirdropAccount {
 
   // The current state of the airdrop account
   enum State {
+    // Unspecified state
     STATE_UNSPECIFIED = 0;
   
     // The KV store entry has been created but initial tokens have not been allocated
