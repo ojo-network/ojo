@@ -171,12 +171,13 @@ func initRootCmd(rootCmd *cobra.Command, a appCreator) {
 	rootCmd.AddCommand(rosettaCmd.RosettaCommand(a.encCfg.InterfaceRegistry, a.encCfg.Codec))
 }
 
-// genesisCommand builds genesis-related `simd genesis` command. Users may provide application specific commands as a parameter
+// genesisCommand builds genesis-related `simd genesis` command. Users may
+// provide application specific commands as a parameter.
 func genesisCommand(encodingConfig appparams.EncodingConfig, cmds ...*cobra.Command) *cobra.Command {
 	cmd := genutilcli.GenesisCoreCommand(encodingConfig.TxConfig, app.ModuleBasics, app.DefaultNodeHome)
 
-	for _, sub_cmd := range cmds {
-		cmd.AddCommand(sub_cmd)
+	for _, subCmd := range cmds {
+		cmd.AddCommand(subCmd)
 	}
 	return cmd
 }

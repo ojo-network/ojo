@@ -40,8 +40,7 @@ type NodeConfig struct {
 	Locations   []NodeLocation
 }
 
-type NodeSecretConfig struct {
-}
+type NodeSecretConfig struct{}
 
 type Disk struct {
 	Name       string
