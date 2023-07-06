@@ -20,7 +20,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 // createOriginAccounts creates the airdrop accounts for all the
 // addresses in the airdrop module account.
 func createOriginAccounts(ctx sdk.Context, k keeper.Keeper) {
-	airdropAccounts := k.PaginatedAirdropAccounts(ctx, types.AirdropAccount_CREATED, BatchSize)
+	airdropAccounts := k.PaginatedAirdropAccounts(ctx, types.AirdropAccount_STATE_CREATED, BatchSize)
 	for _, airdropAccount := range airdropAccounts {
 		err := k.CreateAirdropAccount(ctx, airdropAccount)
 		if err != nil {
@@ -35,7 +35,7 @@ func distributeUnclaimedAirdrops(ctx sdk.Context, k keeper.Keeper) error {
 		return nil
 	}
 
-	for _, aa := range k.PaginatedAirdropAccounts(ctx, types.AirdropAccount_UNCLAIMED, BatchSize) {
+	for _, aa := range k.PaginatedAirdropAccounts(ctx, types.AirdropAccount_STATE_UNCLAIMED, BatchSize) {
 		if aa.VerifyNotClaimed() != nil {
 			continue
 		}
@@ -54,5 +54,5 @@ func distributeUnclaimedAirdrop(ctx sdk.Context, k keeper.Keeper, aa *types.Aird
 		return err
 	}
 	aa.ClaimAddress = k.DistributionModuleAddress(ctx).String()
-	return k.ChangeAirdropAccountState(ctx, aa, types.AirdropAccount_CLAIMED)
+	return k.ChangeAirdropAccountState(ctx, aa, types.AirdropAccount_STATE_CLAIMED)
 }

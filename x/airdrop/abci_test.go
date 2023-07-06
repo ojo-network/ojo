@@ -112,7 +112,7 @@ func (s *IntegrationTestSuite) TestEndBlockerAccountCreation() {
 		OriginAddress:  testAddress.String(),
 		OriginAmount:   originAmount,
 		VestingEndTime: int64(10000000000),
-		State:          types.AirdropAccount_CREATED,
+		State:          types.AirdropAccount_STATE_CREATED,
 	}
 	app.AirdropKeeper.SetAirdropAccount(ctx, airdropAccount)
 
@@ -146,7 +146,7 @@ func (s *IntegrationTestSuite) TestEndBlockerMinting() {
 		OriginAddress:  "testAddress",
 		OriginAmount:   uint64(600),
 		VestingEndTime: int64(10000000000),
-		State:          types.AirdropAccount_UNCLAIMED,
+		State:          types.AirdropAccount_STATE_UNCLAIMED,
 	}
 	app.AirdropKeeper.SetAirdropAccount(ctx, airdropAccount)
 
@@ -154,7 +154,7 @@ func (s *IntegrationTestSuite) TestEndBlockerMinting() {
 	airdrop.EndBlocker(ctx, app.AirdropKeeper)
 
 	// Check that the airdrop account has been claimed
-	queriedAccount, err := app.AirdropKeeper.GetAirdropAccount(ctx, airdropAccount.OriginAddress, types.AirdropAccount_CLAIMED)
+	queriedAccount, err := app.AirdropKeeper.GetAirdropAccount(ctx, airdropAccount.OriginAddress, types.AirdropAccount_STATE_CLAIMED)
 	s.Require().NoError(err)
 	err = queriedAccount.VerifyNotClaimed()
 	s.Require().Error(err)

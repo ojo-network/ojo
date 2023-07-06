@@ -104,7 +104,7 @@ func (k Keeper) CreateAirdropAccount(
 	ctx sdk.Context,
 	airdropAccount *types.AirdropAccount,
 ) (err error) {
-	if airdropAccount.State != types.AirdropAccount_CREATED {
+	if airdropAccount.State != types.AirdropAccount_STATE_CREATED {
 		return types.ErrOriginAccountExists
 	}
 	if err = k.CreateOriginAccount(ctx, airdropAccount); err != nil {
@@ -116,7 +116,7 @@ func (k Keeper) CreateAirdropAccount(
 	if err = k.SendOriginTokens(ctx, airdropAccount); err != nil {
 		return err
 	}
-	return k.ChangeAirdropAccountState(ctx, airdropAccount, types.AirdropAccount_UNCLAIMED)
+	return k.ChangeAirdropAccountState(ctx, airdropAccount, types.AirdropAccount_STATE_UNCLAIMED)
 }
 
 // VerifyDelegationRequirement returns an error if the total shares

@@ -81,7 +81,7 @@ func (s *IntegrationTestSuite) TestMsgServer_ClaimAirdrop() {
 			}
 			s.Require().NoError(err)
 
-			airdropAccount, err := s.app.AirdropKeeper.GetAirdropAccount(s.ctx, tc.originAccount.String(), types.AirdropAccount_CLAIMED)
+			airdropAccount, err := s.app.AirdropKeeper.GetAirdropAccount(s.ctx, tc.originAccount.String(), types.AirdropAccount_STATE_CLAIMED)
 			s.Require().NoError(err)
 			s.Require().Equal(claimAddress.String(), airdropAccount.ClaimAddress)
 

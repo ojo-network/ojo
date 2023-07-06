@@ -56,10 +56,10 @@ func (s *IntegrationTestSuite) TestPaginatedAirdropAccounts() {
 	accounts = app.AirdropKeeper.GetAllAirdropAccounts(ctx)
 	s.Require().Equal(prevAcctsLen+2, len(accounts))
 
-	accounts = app.AirdropKeeper.PaginatedAirdropAccounts(ctx, types.AirdropAccount_CREATED, 1)
+	accounts = app.AirdropKeeper.PaginatedAirdropAccounts(ctx, types.AirdropAccount_STATE_CREATED, 1)
 	s.Require().Equal(1, len(accounts))
 
-	accounts2 := app.AirdropKeeper.PaginatedAirdropAccounts(ctx, types.AirdropAccount_CREATED, 1)
+	accounts2 := app.AirdropKeeper.PaginatedAirdropAccounts(ctx, types.AirdropAccount_STATE_CREATED, 1)
 	s.Require().Equal(1, len(accounts2))
 
 	s.Require().Equal(accounts[0].OriginAddress, accounts2[0].OriginAddress)

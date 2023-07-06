@@ -16,7 +16,7 @@ func NewAirdropAccount(
 		OriginAddress:  originAddress,
 		OriginAmount:   originAmount,
 		VestingEndTime: vestingEndTime,
-		State:          AirdropAccount_CREATED,
+		State:          AirdropAccount_STATE_CREATED,
 	}
 }
 

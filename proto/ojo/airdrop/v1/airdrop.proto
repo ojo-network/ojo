@@ -44,14 +44,16 @@ message AirdropAccount {
 
   // The current state of the airdrop account
   enum State {
+    STATE_UNSPECIFIED = 0;
+  
     // The KV store entry has been created but initial tokens have not been allocated
-    CREATED = 0;
+    STATE_CREATED = 1;
 
     // The initial airdrop has been distributed but the 2nd half is unclaimed
-    UNCLAIMED = 1;
+    STATE_UNCLAIMED = 2;
 
     // The 2nd half of the airdrop has been distributed
-    CLAIMED = 2;
+    STATE_CLAIMED = 3;
   }
   State state = 4;
 
