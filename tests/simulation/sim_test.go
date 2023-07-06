@@ -19,6 +19,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/cosmos/cosmos-sdk/x/authz"
 	authzkeeper "github.com/cosmos/cosmos-sdk/x/authz/keeper"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
@@ -37,6 +38,8 @@ import (
 
 	ojoapp "github.com/ojo-network/ojo/app"
 	appparams "github.com/ojo-network/ojo/app/params"
+
+	airdroptypes "github.com/ojo-network/ojo/x/airdrop/types"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
 
@@ -143,7 +146,7 @@ func TestAppStateDeterminism(t *testing.T) {
 				baseapp.SetChainID(config.ChainID),
 			)
 
-			fmt.Printf(
+			logger.Info(
 				"running non-determinism simulation; seed %d; run: %d/%d; attempt: %d/%d\n",
 				config.Seed, i+1, numSeeds, j+1, numTimesToRunPerSeed,
 			)
@@ -260,7 +263,7 @@ func TestAppImportExport(t *testing.T) {
 	}()
 
 	if stopEarly {
-		fmt.Println("can't export or import a zero-validator genesis, exiting test...")
+		logger.Info("can't export or import a zero-validator genesis, exiting test...")
 		return
 	}
 
@@ -273,11 +276,13 @@ func TestAppImportExport(t *testing.T) {
 	})
 	newApp.StoreConsensusParams(ctxB, exported.ConsensusParams)
 
-	fmt.Printf("comparing stores...\n")
+	logger.Info("comparing stores...\n")
 
 	storeKeysPrefixes := []StoreKeysPrefixes{
-		{app.GetKey(authtypes.StoreKey), newApp.GetKey(authtypes.StoreKey), [][]byte{}},
+		// The airdrop module creates vesting accounts so the number of accounts will be different
+		{authtypes.ModuleName, app.GetKey(authtypes.StoreKey), newApp.GetKey(authtypes.StoreKey), [][]byte{}},
 		{
+			stakingtypes.ModuleName,
 			app.GetKey(stakingtypes.StoreKey), newApp.GetKey(stakingtypes.StoreKey),
 			[][]byte{
 				stakingtypes.UnbondingQueueKey, stakingtypes.RedelegationQueueKey, stakingtypes.ValidatorQueueKey,
@@ -298,17 +303,25 @@ func TestAppImportExport(t *testing.T) {
 		{app.GetKey(ibctransfertypes.StoreKey), newApp.GetKey(ibctransfertypes.StoreKey), [][]byte{}},
 
 		// Ojo Modules
-		{app.GetKey(oracletypes.StoreKey), newApp.GetKey(oracletypes.StoreKey), [][]byte{}},
+		{oracletypes.ModuleName, app.GetKey(oracletypes.StoreKey), newApp.GetKey(oracletypes.StoreKey), [][]byte{}},
+		{airdroptypes.ModuleName, app.GetKey(airdroptypes.StoreKey), newApp.GetKey(airdroptypes.StoreKey), [][]byte{}},
 	}
 
 	for _, skp := range storeKeysPrefixes {
+		logger.Info("comparing ", skp.A, " and ", skp.B)
 		storeA := ctxA.KVStore(skp.A)
 		storeB := ctxB.KVStore(skp.B)
 
 		failedKVAs, failedKVBs := sdk.DiffKVStores(storeA, storeB, skp.Prefixes)
 		require.Equal(t, len(failedKVAs), len(failedKVBs), "unequal sets of key-values to compare")
 
-		fmt.Printf("compared %d different key/value pairs between %s and %s\n", len(failedKVAs), skp.A, skp.B)
+		logger.Info(
+			"using module %s StoreKey compared %d different key/value pairs between %s and %s\n",
+			skp.moduleName,
+			len(failedKVAs),
+			skp.A,
+			skp.B,
+		)
 
 		require.Equal(t, 0, len(failedKVAs), simtestutil.GetSimulationLog(skp.A.Name(), app.SimulationManager().StoreDecoders, failedKVAs, failedKVBs))
 	}
@@ -338,7 +351,7 @@ func TestAppSimulationAfterImport(t *testing.T) {
 	}()
 
 	if stopEarly {
-		fmt.Println("can't export or import a zero-validator genesis, exiting test...")
+		logger.Info("can't export or import a zero-validator genesis, exiting test...")
 		return
 	}
 

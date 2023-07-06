@@ -43,33 +43,6 @@ func (ms msgServer) SetParams(goCtx context.Context, msg *types.MsgSetParams) (*
 	return &types.MsgSetParamsResponse{}, nil
 }
 
-// CreateAirdropAccount implements MsgServer.CreateAirdropAccount method.
-// It defines a method to create an airdrop account.
-func (ms msgServer) CreateAirdropAccount(
-	goCtx context.Context,
-	msg *types.MsgCreateAirdropAccount,
-) (resp *types.MsgCreateAirdropAccountResponse, err error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	airdropAccount := &types.AirdropAccount{
-		OriginAddress:  msg.Address,
-		OriginAmount:   msg.TokensToReceive,
-		VestingEndTime: msg.VestingEndTime,
-	}
-
-	if err = ms.keeper.CreateOriginAccount(ctx, airdropAccount); err != nil {
-		return
-	}
-	if err = ms.keeper.MintOriginTokens(ctx, airdropAccount); err != nil {
-		return
-	}
-	if err = ms.keeper.SendOriginTokens(ctx, airdropAccount); err != nil {
-		return
-	}
-	err = ms.keeper.SetAirdropAccount(ctx, airdropAccount)
-	return
-}
-
 // ClaimAirdrop implements MsgServer.ClaimAirdrop method.
 // It defines a method to claim an airdrop.
 func (ms msgServer) ClaimAirdrop(
@@ -78,7 +51,7 @@ func (ms msgServer) ClaimAirdrop(
 ) (*types.MsgClaimAirdropResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	airdropAccount, err := ms.keeper.GetAirdropAccount(ctx, msg.FromAddress)
+	airdropAccount, err := ms.keeper.GetAirdropAccount(ctx, msg.FromAddress, types.AirdropAccount_STATE_UNCLAIMED)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +79,7 @@ func (ms msgServer) ClaimAirdrop(
 	if err = ms.keeper.SendClaimTokens(ctx, airdropAccount); err != nil {
 		return nil, err
 	}
-	if err = ms.keeper.SetAirdropAccount(ctx, airdropAccount); err != nil {
+	if err = ms.keeper.ChangeAirdropAccountState(ctx, airdropAccount, types.AirdropAccount_STATE_CLAIMED); err != nil {
 		return nil, err
 	}
 	return &types.MsgClaimAirdropResponse{}, nil

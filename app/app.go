@@ -646,9 +646,22 @@ func New(
 			app.GetSubspace(authtypes.ModuleName),
 		),
 	}
+  
+  simStateModules := genmap.Pick(app.mm.Modules,
+		[]string{
+			stakingtypes.ModuleName,
+			authtypes.ModuleName,
+			oracletypes.ModuleName,
+			airdroptypes.ModuleName,
+		})
+	simTestModules := genmap.Pick(simStateModules, []string{oracletypes.ModuleName, airdroptypes.ModuleName})
+  
 	app.StateSimulationManager = module.NewSimulationManagerFromAppModules(app.mm.Modules, overrideModules)
 
 	app.StateSimulationManager.RegisterStoreDecoders()
+
+	app.StateSimulationManager = module.NewSimulationManagerFromAppModules(simStateModules, overrideModules)
+	app.StateSimulationManager = module.NewSimulationManagerFromAppModules(simTestModules, nil)
 
 	// initialize stores
 	app.MountKVStores(keys)

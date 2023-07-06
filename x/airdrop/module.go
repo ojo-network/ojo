@@ -18,6 +18,7 @@ import (
 
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/ojo-network/ojo/x/airdrop/keeper"
+	simulation "github.com/ojo-network/ojo/x/airdrop/simulation"
 	"github.com/ojo-network/ojo/x/airdrop/types"
 )
 
@@ -35,8 +36,7 @@ type AppModuleBasic struct {
 // RegisterLegacyAminoCodec registers the x/airdrop module's types with a legacy
 // Amino codec.
 func (AppModuleBasic) RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
-	// TODO
-	// types.RegisterLegacyAminoCodec(cdc)
+	types.RegisterLegacyAminoCodec(cdc)
 }
 
 func NewAppModuleBasic(cdc codec.Codec) AppModuleBasic {
@@ -144,8 +144,7 @@ func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, gs json.Ra
 	var genState types.GenesisState
 
 	cdc.MustUnmarshalJSON(gs, &genState)
-	// TODO
-	// InitGenesis(ctx, am.keeper, genState)
+	InitGenesis(ctx, am.keeper, genState)
 
 	return []abci.ValidatorUpdate{}
 }
@@ -172,14 +171,12 @@ func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.Val
 
 // GenerateGenesisState creates a randomized GenState of the distribution module.
 func (AppModule) GenerateGenesisState(simState *module.SimulationState) {
-	// TODO
-	// simulation.RandomizedGenState(simState)
+	simulation.RandomizedGenState(simState)
 }
 
 // WeightedOperations returns the all the airdrop module operations with their respective weights.
 func (am AppModule) WeightedOperations(simState module.SimulationState) []simtypes.WeightedOperation {
-	// TODO
-	return []simtypes.WeightedOperation{}
+	return simulation.WeightedOperations(simState.AppParams, simState.Cdc, am.accountKeeper, am.bankKeeper, am.keeper)
 }
 
 // ProposalContents returns all the airdrop content functions used to
@@ -190,6 +187,5 @@ func (am AppModule) ProposalContents(_ module.SimulationState) []simtypes.Weight
 
 // RegisterStoreDecoder registers a decoder for airdrop module's types
 func (am AppModule) RegisterStoreDecoder(sdr sdk.StoreDecoderRegistry) {
-	// TODO
-	// sdr[types.StoreKey] = simulation.NewDecodeStore(am.cdc)
+	sdr[types.StoreKey] = simulation.NewDecodeStore(am.cdc)
 }

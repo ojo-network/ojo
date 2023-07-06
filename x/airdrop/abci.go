@@ -7,32 +7,52 @@ import (
 	"github.com/ojo-network/ojo/x/airdrop/types"
 )
 
+const (
+	BatchSize = 10
+)
+
 // EndBlocker is called at the end of every block
 func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
-	if ctx.BlockHeight() == int64(k.GetParams(ctx).ExpiryBlock) {
-		for _, aa := range k.GetAllAirdropAccounts(ctx) {
-			if aa.VerifyNotClaimed() != nil {
-				continue
-			}
-			err := DistributeUnclaimedAirdrop(ctx, k, aa)
-			if err != nil {
-				return err
-			}
+	createOriginAccounts(ctx, k)
+	return distributeUnclaimedAirdrops(ctx, k)
+}
+
+// createOriginAccounts creates the airdrop accounts for all the
+// addresses in the airdrop module account.
+func createOriginAccounts(ctx sdk.Context, k keeper.Keeper) {
+	airdropAccounts := k.PaginatedAirdropAccounts(ctx, types.AirdropAccount_STATE_CREATED, BatchSize)
+	for _, airdropAccount := range airdropAccounts {
+		err := k.CreateAirdropAccount(ctx, airdropAccount)
+		if err != nil {
+			ctx.Logger().Error("error creating airdrop account", err)
+		}
+	}
+
+}
+
+func distributeUnclaimedAirdrops(ctx sdk.Context, k keeper.Keeper) error {
+	if ctx.BlockHeight() < int64(k.GetParams(ctx).ExpiryBlock) {
+		return nil
+	}
+
+	for _, aa := range k.PaginatedAirdropAccounts(ctx, types.AirdropAccount_STATE_UNCLAIMED, BatchSize) {
+		if aa.VerifyNotClaimed() != nil {
+			continue
+		}
+		err := distributeUnclaimedAirdrop(ctx, k, aa)
+		if err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func DistributeUnclaimedAirdrop(ctx sdk.Context, k keeper.Keeper, aa *types.AirdropAccount) error {
+func distributeUnclaimedAirdrop(ctx sdk.Context, k keeper.Keeper, aa *types.AirdropAccount) error {
 	k.SetClaimAmount(ctx, aa)
 	err := k.MintClaimTokensToDistribution(ctx, aa)
 	if err != nil {
 		return err
 	}
 	aa.ClaimAddress = k.DistributionModuleAddress(ctx).String()
-	err = k.SetAirdropAccount(ctx, aa)
-	if err != nil {
-		return err
-	}
-	return nil
+	return k.ChangeAirdropAccountState(ctx, aa, types.AirdropAccount_STATE_CLAIMED)
 }
