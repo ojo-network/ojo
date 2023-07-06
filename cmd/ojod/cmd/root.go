@@ -158,9 +158,10 @@ func initRootCmd(rootCmd *cobra.Command, a appCreator) {
 
 	server.AddCommands(rootCmd, app.DefaultNodeHome, a.newApp, a.appExport, addModuleInitFlags)
 
-	// add keybase, auxiliary RPC, query, and tx child commands
+	// add keybase, auxiliary RPC, query, genesis, and tx child commands
 	rootCmd.AddCommand(
 		rpc.StatusCommand(),
+		genesisCommand(a.encCfg),
 		queryCommand(a),
 		txCommand(a),
 		keys.Commands(app.DefaultNodeHome),
@@ -168,6 +169,16 @@ func initRootCmd(rootCmd *cobra.Command, a appCreator) {
 
 	// add rosetta
 	rootCmd.AddCommand(rosettaCmd.RosettaCommand(a.encCfg.InterfaceRegistry, a.encCfg.Codec))
+}
+
+// genesisCommand builds genesis-related `simd genesis` command. Users may provide application specific commands as a parameter
+func genesisCommand(encodingConfig appparams.EncodingConfig, cmds ...*cobra.Command) *cobra.Command {
+	cmd := genutilcli.GenesisCoreCommand(encodingConfig.TxConfig, app.ModuleBasics, app.DefaultNodeHome)
+
+	for _, sub_cmd := range cmds {
+		cmd.AddCommand(sub_cmd)
+	}
+	return cmd
 }
 
 func addModuleInitFlags(startCmd *cobra.Command) {

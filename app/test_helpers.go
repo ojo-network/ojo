@@ -12,6 +12,7 @@ import (
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	tmtypes "github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
@@ -190,6 +191,8 @@ func GenesisStateWithValSet(codec codec.Codec, genesisState map[string]json.RawM
 func setup(withGenesis bool, invCheckPeriod uint) (*App, GenesisState) {
 	db := dbm.NewMemDB()
 	encCdc := MakeEncodingConfig()
+	appOptions := make(simtestutil.AppOptionsMap, 0)
+
 	app := New(
 		log.NewNopLogger(),
 		db,
@@ -199,10 +202,10 @@ func setup(withGenesis bool, invCheckPeriod uint) (*App, GenesisState) {
 		DefaultNodeHome,
 		invCheckPeriod,
 		encCdc,
-		EmptyAppOptions{},
+		appOptions,
 	)
 	if withGenesis {
-		return app, NewDefaultGenesisState(encCdc.Codec)
+		return app, app.DefaultGenesis()
 	}
 
 	return app, GenesisState{}
@@ -271,6 +274,7 @@ func IntegrationTestNetworkConfig() network.Config {
 			0,
 			encCfg,
 			EmptyAppOptions{},
+			baseapp.SetChainID(val.GetCtx().Viper.GetString(flags.FlagChainID)),
 			baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(val.GetAppConfig().Pruning)),
 			baseapp.SetMinGasPrices(val.GetAppConfig().MinGasPrices),
 		)
