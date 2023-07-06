@@ -623,8 +623,13 @@ func New(
 	}
 
 	simStateModules := genmap.Pick(app.mm.Modules,
-		[]string{stakingtypes.ModuleName, authtypes.ModuleName, oracletypes.ModuleName})
-	simTestModules := genmap.Pick(simStateModules, []string{oracletypes.ModuleName})
+		[]string{
+			stakingtypes.ModuleName,
+			authtypes.ModuleName,
+			oracletypes.ModuleName,
+			airdroptypes.ModuleName,
+		})
+	simTestModules := genmap.Pick(simStateModules, []string{oracletypes.ModuleName, airdroptypes.ModuleName})
 
 	app.StateSimulationManager = module.NewSimulationManagerFromAppModules(simStateModules, overrideModules)
 	app.sm = module.NewSimulationManagerFromAppModules(simTestModules, nil)
