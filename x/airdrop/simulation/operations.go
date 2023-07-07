@@ -5,9 +5,9 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
-	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
@@ -20,6 +20,8 @@ import (
 const (
 	OpWeightMsgCreateAirdropAccount = "op_weight_msg_create_airdrop_account" //nolint: gosec
 	OpWeightMsgClaimAirdrop         = "op_weight_msg_claim_airdrop"          //nolint: gosec
+
+	DefaultWeightMsgSend = 100 // from simappparams.DefaultWeightMsgSend
 )
 
 // WeightedOperations returns all the operations from the module with their respective weights
@@ -37,13 +39,13 @@ func WeightedOperations(
 
 	appParams.GetOrGenerate(cdc, OpWeightMsgCreateAirdropAccount, &weightMsgCreateAirdropAccount, nil,
 		func(_ *rand.Rand) {
-			weightMsgCreateAirdropAccount = simappparams.DefaultWeightMsgSend * 2
+			weightMsgCreateAirdropAccount = DefaultWeightMsgSend * 2
 		},
 	)
 
 	appParams.GetOrGenerate(cdc, OpWeightMsgClaimAirdrop, &weightMsgClaimAirdrop, nil,
 		func(_ *rand.Rand) {
-			weightMsgClaimAirdrop = simappparams.DefaultWeightMsgSend * 2
+			weightMsgClaimAirdrop = DefaultWeightMsgSend * 2
 		},
 	)
 
@@ -59,7 +61,6 @@ func SimulateMsgClaimAirdrop(ak types.AccountKeeper, bk bankkeeper.Keeper, k kee
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simtypes.Account, chainID string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
-
 		airdropAccounts := k.GetAllAirdropAccounts(ctx)
 		if len(airdropAccounts) == 0 {
 			return simtypes.NoOpMsg(types.ModuleName, types.TypeMsgClaimAirdrop, "no Airdrop Accounts"), nil, nil
@@ -95,7 +96,7 @@ func randomAirdropAccount(r *rand.Rand, airdropAccounts []*types.AirdropAccount)
 func deliver(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, ak simulation.AccountKeeper,
 	bk bankkeeper.Keeper, from simtypes.Account, msg sdk.Msg, coins sdk.Coins,
 ) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
-	cfg := simappparams.MakeTestEncodingConfig()
+	cfg := testutil.MakeTestEncodingConfig()
 	o := simulation.OperationInput{
 		R:               r,
 		App:             app,

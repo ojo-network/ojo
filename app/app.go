@@ -97,6 +97,7 @@ import (
 	ibckeeper "github.com/cosmos/ibc-go/v7/modules/core/keeper"
 	"github.com/spf13/cast"
 
+	"github.com/ojo-network/ojo/util/genmap"
 	"github.com/ojo-network/ojo/x/oracle"
 	oraclekeeper "github.com/ojo-network/ojo/x/oracle/keeper"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
@@ -235,6 +236,8 @@ type App struct {
 	// mm is the module manager
 	mm *module.Manager
 
+	// simulation manager
+	sm *module.SimulationManager
 	// simulation manager to create state
 	StateSimulationManager *module.SimulationManager
 
@@ -646,8 +649,8 @@ func New(
 			app.GetSubspace(authtypes.ModuleName),
 		),
 	}
-  
-  simStateModules := genmap.Pick(app.mm.Modules,
+
+	simStateModules := genmap.Pick(app.mm.Modules,
 		[]string{
 			stakingtypes.ModuleName,
 			authtypes.ModuleName,
@@ -655,14 +658,13 @@ func New(
 			airdroptypes.ModuleName,
 		})
 	simTestModules := genmap.Pick(simStateModules, []string{oracletypes.ModuleName, airdroptypes.ModuleName})
-  
+
+	app.sm = module.NewSimulationManagerFromAppModules(simTestModules, nil)
+	app.sm.RegisterStoreDecoders()
+
 	app.StateSimulationManager = module.NewSimulationManagerFromAppModules(app.mm.Modules, overrideModules)
-
 	app.StateSimulationManager.RegisterStoreDecoders()
-
-	app.StateSimulationManager = module.NewSimulationManagerFromAppModules(simStateModules, overrideModules)
-	app.StateSimulationManager = module.NewSimulationManagerFromAppModules(simTestModules, nil)
-
+	
 	// initialize stores
 	app.MountKVStores(keys)
 	app.MountTransientStores(tkeys)

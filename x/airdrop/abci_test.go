@@ -128,7 +128,6 @@ func (s *IntegrationTestSuite) TestEndBlockerAccountCreation() {
 	).Amount
 
 	s.Require().Equal(originAmount, balance.Uint64())
-
 }
 
 func (s *IntegrationTestSuite) TestEndBlockerMinting() {
