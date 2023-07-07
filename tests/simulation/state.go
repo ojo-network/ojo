@@ -46,9 +46,10 @@ import (
 type GenesisState map[string]json.RawMessage
 
 type StoreKeysPrefixes struct {
-	A        storetypes.StoreKey
-	B        storetypes.StoreKey
-	Prefixes [][]byte
+	moduleName string
+	A          storetypes.StoreKey
+	B          storetypes.StoreKey
+	Prefixes   [][]byte
 }
 
 // interBlockCacheOpt returns a BaseApp option function that sets the persistent

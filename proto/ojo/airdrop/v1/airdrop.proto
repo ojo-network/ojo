@@ -42,9 +42,25 @@ message AirdropAccount {
   // The amount of tokens that were airdropped to the genesis account.
   uint64 origin_amount = 3;
 
+  // The current state of the airdrop account
+  enum State {
+    // Unspecified state
+    STATE_UNSPECIFIED = 0;
+  
+    // The KV store entry has been created but initial tokens have not been allocated
+    STATE_CREATED = 1;
+
+    // The initial airdrop has been distributed but the 2nd half is unclaimed
+    STATE_UNCLAIMED = 2;
+
+    // The 2nd half of the airdrop has been distributed
+    STATE_CLAIMED = 3;
+  }
+  State state = 4;
+
   // The address of the account that the user has claimed the 2nd half of their airdrop to.
-  string claim_address = 4 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  string claim_address = 5 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
 
   // The amount of tokens claimed in the 2nd half of the airdrop.
-  uint64 claim_amount = 5;
+  uint64 claim_amount = 6;
 }

@@ -14,6 +14,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/cosmos/cosmos-sdk/x/authz"
 	authzkeeper "github.com/cosmos/cosmos-sdk/x/authz/keeper"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
@@ -37,6 +38,8 @@ import (
 
 	ojoapp "github.com/ojo-network/ojo/app"
 	appparams "github.com/ojo-network/ojo/app/params"
+
+	airdroptypes "github.com/ojo-network/ojo/x/airdrop/types"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
 
@@ -142,7 +145,7 @@ func TestAppStateDeterminism(t *testing.T) {
 				interBlockCacheOpt(),
 			)
 
-			fmt.Printf(
+			logger.Info(
 				"running non-determinism simulation; seed %d; run: %d/%d; attempt: %d/%d\n",
 				config.Seed, i+1, numSeeds, j+1, numTimesToRunPerSeed,
 			)
@@ -255,7 +258,7 @@ func TestAppImportExport(t *testing.T) {
 	}()
 
 	if stopEarly {
-		fmt.Println("can't export or import a zero-validator genesis, exiting test...")
+		logger.Info("can't export or import a zero-validator genesis, exiting test...")
 		return
 	}
 
@@ -268,42 +271,52 @@ func TestAppImportExport(t *testing.T) {
 	})
 	newApp.StoreConsensusParams(ctxB, exported.ConsensusParams)
 
-	fmt.Printf("comparing stores...\n")
+	logger.Info("comparing stores...\n")
 
 	storeKeysPrefixes := []StoreKeysPrefixes{
-		{app.GetKey(authtypes.StoreKey), newApp.GetKey(authtypes.StoreKey), [][]byte{}},
+		// The airdrop module creates vesting accounts so the number of accounts will be different
+		{authtypes.ModuleName, app.GetKey(authtypes.StoreKey), newApp.GetKey(authtypes.StoreKey), [][]byte{}},
 		{
+			stakingtypes.ModuleName,
 			app.GetKey(stakingtypes.StoreKey), newApp.GetKey(stakingtypes.StoreKey),
 			[][]byte{
 				stakingtypes.UnbondingQueueKey, stakingtypes.RedelegationQueueKey, stakingtypes.ValidatorQueueKey,
 				stakingtypes.HistoricalInfoKey,
 			},
 		}, // ordering may change but it doesn't matter
-		{app.GetKey(slashingtypes.StoreKey), newApp.GetKey(slashingtypes.StoreKey), [][]byte{}},
-		{app.GetKey(minttypes.StoreKey), newApp.GetKey(minttypes.StoreKey), [][]byte{}},
-		{app.GetKey(distrtypes.StoreKey), newApp.GetKey(distrtypes.StoreKey), [][]byte{}},
-		{app.GetKey(banktypes.StoreKey), newApp.GetKey(banktypes.StoreKey), [][]byte{banktypes.BalancesPrefix}},
-		{app.GetKey(paramtypes.StoreKey), newApp.GetKey(paramtypes.StoreKey), [][]byte{}},
-		{app.GetKey(govtypes.StoreKey), newApp.GetKey(govtypes.StoreKey), [][]byte{}},
-		{app.GetKey(evidencetypes.StoreKey), newApp.GetKey(evidencetypes.StoreKey), [][]byte{}},
-		{app.GetKey(capabilitytypes.StoreKey), newApp.GetKey(capabilitytypes.StoreKey), [][]byte{}},
-		{app.GetKey(authzkeeper.StoreKey), newApp.GetKey(authzkeeper.StoreKey), [][]byte{authzkeeper.GrantKey, authzkeeper.GrantQueuePrefix}},
+		{slashingtypes.ModuleName, app.GetKey(slashingtypes.StoreKey), newApp.GetKey(slashingtypes.StoreKey), [][]byte{}},
+		{minttypes.ModuleName, app.GetKey(minttypes.StoreKey), newApp.GetKey(minttypes.StoreKey), [][]byte{}},
+		{distrtypes.ModuleName, app.GetKey(distrtypes.StoreKey), newApp.GetKey(distrtypes.StoreKey), [][]byte{}},
+		{banktypes.ModuleName, app.GetKey(banktypes.StoreKey), newApp.GetKey(banktypes.StoreKey), [][]byte{banktypes.BalancesPrefix}},
+		{paramtypes.ModuleName, app.GetKey(paramtypes.StoreKey), newApp.GetKey(paramtypes.StoreKey), [][]byte{}},
+		{govtypes.ModuleName, app.GetKey(govtypes.StoreKey), newApp.GetKey(govtypes.StoreKey), [][]byte{}},
+		{evidencetypes.ModuleName, app.GetKey(evidencetypes.StoreKey), newApp.GetKey(evidencetypes.StoreKey), [][]byte{}},
+		{capabilitytypes.ModuleName, app.GetKey(capabilitytypes.StoreKey), newApp.GetKey(capabilitytypes.StoreKey), [][]byte{}},
+		{authz.ModuleName, app.GetKey(authzkeeper.StoreKey), newApp.GetKey(authzkeeper.StoreKey), [][]byte{authzkeeper.GrantKey, authzkeeper.GrantQueuePrefix}},
 
-		{app.GetKey(ibchost.StoreKey), newApp.GetKey(ibchost.StoreKey), [][]byte{}},
-		{app.GetKey(ibctransfertypes.StoreKey), newApp.GetKey(ibctransfertypes.StoreKey), [][]byte{}},
+		{ibchost.ModuleName, app.GetKey(ibchost.StoreKey), newApp.GetKey(ibchost.StoreKey), [][]byte{}},
+		{ibctransfertypes.ModuleName, app.GetKey(ibctransfertypes.StoreKey), newApp.GetKey(ibctransfertypes.StoreKey), [][]byte{}},
 
 		// Ojo Modules
-		{app.GetKey(oracletypes.StoreKey), newApp.GetKey(oracletypes.StoreKey), [][]byte{}},
+		{oracletypes.ModuleName, app.GetKey(oracletypes.StoreKey), newApp.GetKey(oracletypes.StoreKey), [][]byte{}},
+		{airdroptypes.ModuleName, app.GetKey(airdroptypes.StoreKey), newApp.GetKey(airdroptypes.StoreKey), [][]byte{}},
 	}
 
 	for _, skp := range storeKeysPrefixes {
+		logger.Info("comparing ", skp.A, " and ", skp.B)
 		storeA := ctxA.KVStore(skp.A)
 		storeB := ctxB.KVStore(skp.B)
 
 		failedKVAs, failedKVBs := sdk.DiffKVStores(storeA, storeB, skp.Prefixes)
 		require.Equal(t, len(failedKVAs), len(failedKVBs), "unequal sets of key-values to compare")
 
-		fmt.Printf("compared %d different key/value pairs between %s and %s\n", len(failedKVAs), skp.A, skp.B)
+		logger.Info(
+			"using module %s StoreKey compared %d different key/value pairs between %s and %s\n",
+			skp.moduleName,
+			len(failedKVAs),
+			skp.A,
+			skp.B,
+		)
 
 		require.Equal(t, 0, len(failedKVAs), simapp.GetSimulationLog(skp.A.Name(), app.SimulationManager().StoreDecoders, failedKVAs, failedKVBs))
 	}
@@ -333,7 +346,7 @@ func TestAppSimulationAfterImport(t *testing.T) {
 	}()
 
 	if stopEarly {
-		fmt.Println("can't export or import a zero-validator genesis, exiting test...")
+		logger.Info("can't export or import a zero-validator genesis, exiting test...")
 		return
 	}
 
