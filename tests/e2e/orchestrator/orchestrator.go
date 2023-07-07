@@ -178,6 +178,7 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 			OriginAddress:  airdropOriginAddress.String(),
 			OriginAmount:   100000000000,
 			VestingEndTime: time.Now().Add(24 * time.Hour).Unix(),
+			State:          airdroptypes.AirdropAccount_STATE_CREATED,
 		},
 	}
 
