@@ -3,6 +3,8 @@ package cli
 import (
 	"fmt"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
@@ -33,6 +35,18 @@ func GetCmdClaimAirdrop() *cobra.Command {
 		Short: "Claim airdrop for an address",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println(args[0])
+			_, err = sdk.AccAddressFromBech32(args[0])
+			if err != nil {
+				return err
+			}
+
+			fmt.Println(args[1])
+			_, err = sdk.AccAddressFromBech32(args[1])
 			if err != nil {
 				return err
 			}
