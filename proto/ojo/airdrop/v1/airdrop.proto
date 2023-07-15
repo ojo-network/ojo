@@ -10,23 +10,26 @@ option (gogoproto.goproto_getters_all) = false;
 
 // Params defines the parameters for the airdrop module.
 message Params {
+  // Flag to determine if the origin vesting accounts have been created yet
+  bool origin_accounts_created = 1;
+
   // The block at which all unclaimed AirdropAccounts will instead mint tokens
   // into the community pool. After this block, all unclaimed airdrop accounts
   // will no longer be able to be claimed.
-  uint64 expiry_block = 1;
+  uint64 expiry_block = 2;
 
   // The percentage of the initial airdrop that users must delegate in order to
   // receive their second portion.
   // E.g., if we want to require users to stake their entire initial airdrop, this will be 1.
   // cosmos.base.v1beta1.Dec delegation_requirement = 1;
-  string delegation_requirement = 2 [
+  string delegation_requirement = 3 [
     (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec"
   ];
   
   // The multiplier for the amount of tokens users will receive once they claim their airdrop.
   // E.g., if we want users to receive an equal second half, this will be 2.
-  string airdrop_factor = 3 [
+  string airdrop_factor = 4 [
     (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec"
   ];

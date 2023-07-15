@@ -14,6 +14,24 @@ const (
 	keyringAppName    = "testnet"
 )
 
+type OjoAccount struct {
+	Moniker    string
+	Mnemonic   string
+	KeyInfo    *keyring.Record
+	PrivateKey keyring.Keyring
+}
+
+func NewOjoAccount(moniker string) (*OjoAccount, error) {
+	a := &OjoAccount{Moniker: moniker}
+	mnemonic, err := CreateMnemonic()
+	if err != nil {
+		return nil, err
+	}
+	a.Mnemonic = mnemonic
+	a.KeyInfo, a.PrivateKey, err = CreateAccountFromMnemonic(moniker, a.Mnemonic)
+	return a, err
+}
+
 // CreateAccountFromMnemonic creates a new account from a mnemonic
 func CreateAccountFromMnemonic(name, mnemonic string) (*keyring.Record, keyring.Keyring, error) {
 	encodingConfig := ojoapp.MakeEncodingConfig()

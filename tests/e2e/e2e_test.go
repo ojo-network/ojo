@@ -2,8 +2,11 @@ package e2e
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/ojo-network/ojo/client/tx"
 	"github.com/ojo-network/ojo/tests/grpc"
 	airdroptypes "github.com/ojo-network/ojo/x/airdrop/types"
+
+	appparams "github.com/ojo-network/ojo/app/params"
 )
 
 // TestMedians queries for the oracle params, collects historical
@@ -66,4 +69,47 @@ func (s *IntegrationTestSuite) TestUpdateAirdropParams() {
 	s.Require().NoError(err)
 
 	s.Require().True(delegationRequirement.Equal(*queriedParams.DelegationRequirement))
+}
+
+func (s *IntegrationTestSuite) TestClaimAirdrop() {
+	ojoClient := s.orchestrator.AirdropClient
+	originAddress, err := ojoClient.TxClient.Address()
+	s.Require().NoError(err)
+
+	airdropAccount, err := ojoClient.QueryClient.QueryAirdropAccount(originAddress.String())
+	s.Require().NoError(err)
+
+	// Delegate tokens to qualify for claiming the airdrop
+	originAccAddress, err := sdk.AccAddressFromBech32(originAddress.String())
+	s.Require().NoError(err)
+	val1Address, err := s.orchestrator.OjoClient.TxClient.Address()
+	s.Require().NoError(err)
+
+	val1ValAddress := sdk.ValAddress(val1Address)
+
+	s.Require().NoError(err)
+	_, err = ojoClient.TxClient.TxDelegate(
+		originAccAddress,
+		val1ValAddress,
+		sdk.NewCoin(appparams.BondDenom, sdk.NewInt(int64(airdropAccount.OriginAmount))),
+	)
+	s.Require().NoError(err)
+
+	// Claim the airdrop
+	claimAccount, err := tx.NewOjoAccount("claim_account")
+	s.Require().NoError(err)
+	claimAddress, err := claimAccount.KeyInfo.GetAddress()
+	s.Require().NoError(err)
+
+	_, err = ojoClient.TxClient.TxClaimAirdrop(originAddress.String(), claimAddress.String())
+	s.Require().NoError(err)
+
+	// Verify the new address has the claimed amount in it
+	airdropAccount, err = ojoClient.QueryClient.QueryAirdropAccount(originAddress.String())
+	s.Require().NoError(err)
+
+	amount, err := ojoClient.QueryClient.QueryBalance(claimAddress.String(), appparams.BondDenom)
+	s.Require().NoError(err)
+
+	s.Require().Equal(airdropAccount.ClaimAmount, amount.Uint64())
 }
