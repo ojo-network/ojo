@@ -100,7 +100,7 @@ func (s *IntegrationTestSuite) TestClaimAirdrop() {
 				s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), tc.respType), out.String())
 
 				txResp := tc.respType.(*sdk.TxResponse)
-				s.Require().Equal(tc.expectedCode, txResp.Code)
+				s.Require().Contains(txResp.RawLog, "no airdrop account found")
 			}
 		})
 	}

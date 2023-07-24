@@ -34,28 +34,21 @@ func GetCmdClaimAirdrop() *cobra.Command {
 		Args:  cobra.ExactArgs(2),
 		Short: "Claim airdrop for an address",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
+				return err
+			}
+
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			fmt.Println(args[0])
-			_, err = sdk.AccAddressFromBech32(args[0])
-			if err != nil {
-				return err
-			}
-
-			fmt.Println(args[1])
 			_, err = sdk.AccAddressFromBech32(args[1])
 			if err != nil {
 				return err
 			}
 
-			msg := types.NewMsgClaimAirdrop(args[0], args[1])
-
-			if err := msg.ValidateBasic(); err != nil {
-				return err
-			}
+			msg := types.NewMsgClaimAirdrop(clientCtx.GetFromAddress().String(), args[1])
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
