@@ -31,6 +31,7 @@ func (q querier) Params(
 	return &types.ParamsResponse{Params: params}, nil
 }
 
+// AirdropAccounts queries a specific airdrop account by address.
 func (q querier) AirdropAccount(
 	goCtx context.Context,
 	req *types.AirdropAccountRequest,

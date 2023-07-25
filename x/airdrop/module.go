@@ -18,6 +18,7 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
+	"github.com/ojo-network/ojo/x/airdrop/client/cli"
 	"github.com/ojo-network/ojo/x/airdrop/keeper"
 	simulation "github.com/ojo-network/ojo/x/airdrop/simulation"
 	"github.com/ojo-network/ojo/x/airdrop/types"
@@ -91,12 +92,12 @@ func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *r
 
 // GetTxCmd returns the x/airdrop module's root tx command.
 func (AppModuleBasic) GetTxCmd() *cobra.Command {
-	return nil
+	return cli.GetTxCmd()
 }
 
 // GetQueryCmd returns the x/airdrop module's root query command.
 func (AppModuleBasic) GetQueryCmd() *cobra.Command {
-	return nil
+	return cli.GetQueryCmd()
 }
 
 // AppModule implements the AppModule interface for the x/airdrop module.
