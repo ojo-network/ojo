@@ -283,7 +283,8 @@ func TestAppImportExport(t *testing.T) {
 			app.GetKey(stakingtypes.StoreKey), newApp.GetKey(stakingtypes.StoreKey),
 			[][]byte{
 				stakingtypes.UnbondingQueueKey, stakingtypes.RedelegationQueueKey, stakingtypes.ValidatorQueueKey,
-				stakingtypes.HistoricalInfoKey,
+				stakingtypes.HistoricalInfoKey, stakingtypes.UnbondingIDKey, stakingtypes.UnbondingIndexKey,
+				stakingtypes.UnbondingTypeKey, stakingtypes.ValidatorUpdatesKey,
 			},
 		}, // ordering may change but it doesn't matter
 		{slashingtypes.ModuleName, app.GetKey(slashingtypes.StoreKey), newApp.GetKey(slashingtypes.StoreKey), [][]byte{}},
