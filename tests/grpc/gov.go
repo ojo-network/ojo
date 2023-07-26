@@ -61,6 +61,20 @@ func SubmitAndPassProposal(ojoClient *client.OjoClient, msgs []sdk.Msg, title, s
 		return err
 	}
 
+	// retry
+	for i := 0; i < 5; i++ {
+		newResp, err := ojoClient.QueryTxHash(resp.TxHash)
+		if err != nil && i == 4 {
+			return err
+		}
+		if err == nil {
+			resp = newResp
+			break
+		}
+
+		time.Sleep(time.Second * (1 + time.Duration(i)))
+	}
+
 	proposalID, err := ParseProposalID(resp)
 	if err != nil {
 		return err
@@ -84,6 +98,20 @@ func SubmitAndPassLegacyProposal(ojoClient *client.OjoClient, changes []proposal
 	resp, err := ojoClient.TxClient.TxSubmitLegacyProposal(changes)
 	if err != nil {
 		return err
+	}
+
+	// retry
+	for i := 0; i < 5; i++ {
+		newResp, err := ojoClient.QueryTxHash(resp.TxHash)
+		if err != nil && i == 4 {
+			return err
+		}
+		if err == nil {
+			resp = newResp
+			break
+		}
+
+		time.Sleep(time.Second * (1 + time.Duration(i)))
 	}
 
 	proposalID, err := ParseProposalID(resp)

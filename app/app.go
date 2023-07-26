@@ -107,7 +107,6 @@ import (
 	airdroptypes "github.com/ojo-network/ojo/x/airdrop/types"
 
 	customante "github.com/ojo-network/ojo/ante"
-	appparams "github.com/ojo-network/ojo/app/params"
 )
 
 const (
@@ -198,6 +197,7 @@ type App struct {
 	cdc               *codec.LegacyAmino
 	appCodec          codec.Codec
 	interfaceRegistry types.InterfaceRegistry
+	txConfig          client.TxConfig
 
 	invCheckPeriod uint
 
@@ -254,14 +254,14 @@ func New(
 	skipUpgradeHeights map[int64]bool,
 	homePath string,
 	invCheckPeriod uint,
-	encodingConfig appparams.EncodingConfig,
 	appOpts servertypes.AppOptions,
 	baseAppOptions ...func(*baseapp.BaseApp),
 ) *App {
-	appCodec := encodingConfig.Codec
-	cdc := encodingConfig.Amino
-	interfaceRegistry := encodingConfig.InterfaceRegistry
-	txConfig := encodingConfig.TxConfig
+	encCfg := MakeEncodingConfig()
+	appCodec := encCfg.Codec
+	cdc := encCfg.Amino
+	interfaceRegistry := encCfg.InterfaceRegistry
+	txConfig := encCfg.TxConfig
 
 	bApp := baseapp.NewBaseApp(Name, logger, db, txConfig.TxDecoder(), baseAppOptions...)
 	bApp.SetCommitMultiStoreTracer(traceStore)
@@ -284,6 +284,7 @@ func New(
 		cdc:               cdc,
 		appCodec:          appCodec,
 		interfaceRegistry: interfaceRegistry,
+		txConfig:          txConfig,
 		invCheckPeriod:    invCheckPeriod,
 		keys:              keys,
 		tkeys:             tkeys,
@@ -519,7 +520,7 @@ func New(
 	app.mm = module.NewManager(
 		genutil.NewAppModule(
 			app.AccountKeeper, app.StakingKeeper, app.BaseApp.DeliverTx,
-			encodingConfig.TxConfig,
+			encCfg.TxConfig,
 		),
 		auth.NewAppModule(appCodec, app.AccountKeeper, authsims.RandomGenesisAccounts, app.GetSubspace(authtypes.ModuleName)),
 		authzmodule.NewAppModule(appCodec, app.AuthzKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
@@ -664,7 +665,7 @@ func New(
 
 	app.StateSimulationManager = module.NewSimulationManagerFromAppModules(app.mm.Modules, overrideModules)
 	app.StateSimulationManager.RegisterStoreDecoders()
-	
+
 	// initialize stores
 	app.MountKVStores(keys)
 	app.MountTransientStores(tkeys)
@@ -674,7 +675,7 @@ func New(
 	app.SetInitChainer(app.InitChainer)
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
-	app.setAnteHandler(encodingConfig.TxConfig)
+	app.setAnteHandler(encCfg.TxConfig)
 
 	if loadLatest {
 		if err := app.LoadLatestVersion(); err != nil {
@@ -791,6 +792,11 @@ func (app *App) GetMemKey(storeKey string) *storetypes.MemoryStoreKey {
 func (app *App) GetSubspace(moduleName string) paramstypes.Subspace {
 	subspace, _ := app.ParamsKeeper.GetSubspace(moduleName)
 	return subspace
+}
+
+// GetTxConfig is used solely for testing purposes.
+func (app *App) GetTxConfig() client.TxConfig {
+	return app.txConfig
 }
 
 // RegisterAPIRoutes registers all application module routes with the provided

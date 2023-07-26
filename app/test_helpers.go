@@ -190,7 +190,6 @@ func GenesisStateWithValSet(codec codec.Codec, genesisState map[string]json.RawM
 
 func setup(withGenesis bool, invCheckPeriod uint) (*App, GenesisState) {
 	db := dbm.NewMemDB()
-	encCdc := MakeEncodingConfig()
 	appOptions := make(simtestutil.AppOptionsMap, 0)
 
 	app := New(
@@ -201,7 +200,6 @@ func setup(withGenesis bool, invCheckPeriod uint) (*App, GenesisState) {
 		map[int64]bool{},
 		DefaultNodeHome,
 		invCheckPeriod,
-		encCdc,
 		appOptions,
 	)
 	if withGenesis {
@@ -272,7 +270,6 @@ func IntegrationTestNetworkConfig() network.Config {
 			make(map[int64]bool),
 			val.GetCtx().Config.RootDir,
 			0,
-			encCfg,
 			EmptyAppOptions{},
 			baseapp.SetChainID(val.GetCtx().Viper.GetString(flags.FlagChainID)),
 			baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(val.GetAppConfig().Pruning)),

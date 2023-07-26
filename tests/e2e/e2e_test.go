@@ -1,6 +1,8 @@
 package e2e
 
 import (
+	"time"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ojo-network/ojo/client/tx"
 	"github.com/ojo-network/ojo/tests/grpc"
@@ -94,6 +96,9 @@ func (s *IntegrationTestSuite) TestClaimAirdrop() {
 		sdk.NewCoin(appparams.BondDenom, sdk.NewInt(int64(airdropAccount.OriginAmount))),
 	)
 	s.Require().NoError(err)
+
+	// prevent account sequence mismatch
+	time.Sleep(time.Second * 2)
 
 	// Claim the airdrop
 	claimAccount, err := tx.NewOjoAccount("claim_account")

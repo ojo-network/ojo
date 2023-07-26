@@ -14,15 +14,19 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	"github.com/ojo-network/ojo/app"
 	appparams "github.com/ojo-network/ojo/app/params"
 	"github.com/ojo-network/ojo/client"
 
+	dbm "github.com/cometbft/cometbft-db"
 	tmconfig "github.com/cometbft/cometbft/config"
 	tmjson "github.com/cometbft/cometbft/libs/json"
 	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
+	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
@@ -51,6 +55,7 @@ const (
 type Orchestrator struct {
 	tmpDirs             []string
 	chain               *chain
+	cdc                 codec.Codec
 	dkrPool             *dockertest.Pool
 	dkrNet              *dockertest.Network
 	priceFeederResource *dockertest.Resource
@@ -69,6 +74,27 @@ type Orchestrator struct {
 func (o *Orchestrator) InitResources(t *testing.T) {
 	t.Log("setting up e2e integration test suite...")
 	appparams.SetAddressPrefixes()
+
+	db := dbm.NewMemDB()
+	app := app.New(
+		nil,
+		db,
+		nil,
+		true,
+		map[int64]bool{},
+		"",
+		0,
+		app.EmptyAppOptions{},
+	)
+	encodingConfig = testutil.TestEncodingConfig{
+		InterfaceRegistry: app.InterfaceRegistry(),
+		Codec:             app.AppCodec(),
+		TxConfig:          app.GetTxConfig(),
+		Amino:             app.LegacyAmino(),
+	}
+
+	// codec
+	o.cdc = encodingConfig.Codec
 
 	var err error
 	o.chain, err = newChain()
@@ -111,7 +137,7 @@ func (o *Orchestrator) TearDownResources(t *testing.T) {
 }
 
 func (o *Orchestrator) initNodes(t *testing.T) {
-	require.NoError(t, o.chain.createAndInitValidators(2))
+	require.NoError(t, o.chain.createAndInitValidators(o.cdc, 2))
 
 	// initialize a genesis file for the first validator
 	val0ConfigDir := o.chain.validators[0].configDir()
@@ -119,7 +145,7 @@ func (o *Orchestrator) initNodes(t *testing.T) {
 		valAddr, err := val.keyInfo.GetAddress()
 		require.NoError(t, err)
 		require.NoError(t,
-			addGenesisAccount(val0ConfigDir, "", initBalanceStr, valAddr),
+			addGenesisAccount(o.cdc, val0ConfigDir, "", initBalanceStr, valAddr),
 		)
 	}
 
@@ -152,7 +178,7 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 
 	// Oracle
 	var oracleGenState oracletypes.GenesisState
-	require.NoError(t, cdc.UnmarshalJSON(appGenState[oracletypes.ModuleName], &oracleGenState))
+	require.NoError(t, o.cdc.UnmarshalJSON(appGenState[oracletypes.ModuleName], &oracleGenState))
 
 	oracleGenState.Params.HistoricStampPeriod = 3
 	oracleGenState.Params.MaximumPriceStamps = 4
@@ -162,13 +188,13 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 	oracleGenState.Params.MandatoryList = oracleMandatoryList
 	oracleGenState.Params.RewardBands = oracleRewardBands
 
-	bz, err := cdc.MarshalJSON(&oracleGenState)
+	bz, err := o.cdc.MarshalJSON(&oracleGenState)
 	require.NoError(t, err)
 	appGenState[oracletypes.ModuleName] = bz
 
 	// Airdrop
 	var airdropGenState airdroptypes.GenesisState
-	require.NoError(t, cdc.UnmarshalJSON(appGenState[airdroptypes.ModuleName], &airdropGenState))
+	require.NoError(t, o.cdc.UnmarshalJSON(appGenState[airdroptypes.ModuleName], &airdropGenState))
 
 	// Use the first and only account as the airdrop origin
 	airdropOriginAddress, err := o.chain.accounts[0].KeyInfo.GetAddress()
@@ -182,24 +208,24 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 		},
 	}
 
-	bz, err = cdc.MarshalJSON(&airdropGenState)
+	bz, err = o.cdc.MarshalJSON(&airdropGenState)
 	require.NoError(t, err)
 	appGenState[airdroptypes.ModuleName] = bz
 
 	// Gov
 	var govGenState govtypesv1.GenesisState
-	require.NoError(t, cdc.UnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState))
+	require.NoError(t, o.cdc.UnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState))
 
 	votingPeroid := 5 * time.Second
 	govGenState.Params.VotingPeriod = &votingPeroid
 
-	bz, err = cdc.MarshalJSON(&govGenState)
+	bz, err = o.cdc.MarshalJSON(&govGenState)
 	require.NoError(t, err)
 	appGenState[govtypes.ModuleName] = bz
 
 	// Genesis Txs
 	var genUtilGenState genutiltypes.GenesisState
-	require.NoError(t, cdc.UnmarshalJSON(appGenState[genutiltypes.ModuleName], &genUtilGenState))
+	require.NoError(t, o.cdc.UnmarshalJSON(appGenState[genutiltypes.ModuleName], &genUtilGenState))
 
 	genTxs := make([]json.RawMessage, len(o.chain.validators))
 	for i, val := range o.chain.validators {
@@ -211,10 +237,10 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 		}
 		require.NoError(t, err)
 
-		signedTx, err := val.signMsg(createValmsg)
+		signedTx, err := val.signMsg(o.cdc, createValmsg)
 		require.NoError(t, err)
 
-		txRaw, err := cdc.MarshalJSON(signedTx)
+		txRaw, err := o.cdc.MarshalJSON(signedTx)
 		require.NoError(t, err)
 
 		genTxs[i] = txRaw
@@ -222,7 +248,7 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 
 	genUtilGenState.GenTxs = genTxs
 
-	bz, err = cdc.MarshalJSON(&genUtilGenState)
+	bz, err = o.cdc.MarshalJSON(&genUtilGenState)
 	require.NoError(t, err)
 	appGenState[genutiltypes.ModuleName] = bz
 
@@ -280,7 +306,9 @@ func (o *Orchestrator) initValidatorConfigs(t *testing.T) {
 
 		appConfig := srvconfig.DefaultConfig()
 		appConfig.API.Enable = true
+		appConfig.API.Address = "tcp://0.0.0.0:1317"
 		appConfig.MinGasPrices = minGasPrice
+		appConfig.GRPC.Address = "0.0.0.0:9090"
 
 		srvconfig.WriteConfigFile(appCfgPath, appConfig)
 	}
@@ -411,7 +439,7 @@ func (o *Orchestrator) runPriceFeeder(t *testing.T) {
 	checkHealth := func() bool {
 		resp, err := http.Get(endpoint)
 		if err != nil {
-			t.Log("Price feeder endpoint not available", err)
+			t.Log("Price feeder endpoint not available", err, endpoint)
 			return false
 		}
 

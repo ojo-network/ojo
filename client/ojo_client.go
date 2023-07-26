@@ -3,6 +3,8 @@ package client
 import (
 	"context"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	"github.com/ojo-network/ojo/client/query"
 	"github.com/ojo-network/ojo/client/tx"
 	"github.com/rs/zerolog"
@@ -37,4 +39,8 @@ func NewOjoClient(
 // using the OjoClient's transaction sdk.client
 func (oc *OjoClient) NewChainHeight(ctx context.Context, logger zerolog.Logger) (*ChainHeight, error) {
 	return NewChainHeight(ctx, oc.TxClient.ClientContext.Client, logger)
+}
+
+func (oc *OjoClient) QueryTxHash(hash string) (*sdk.TxResponse, error) {
+	return authtx.QueryTx(*oc.TxClient.ClientContext, hash)
 }

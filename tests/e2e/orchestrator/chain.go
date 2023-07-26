@@ -5,10 +5,9 @@ import (
 	"os"
 
 	tmrand "github.com/cometbft/cometbft/libs/rand"
-	"github.com/cosmos/cosmos-sdk/codec"
 
-	ojoapp "github.com/ojo-network/ojo/app"
-	"github.com/ojo-network/ojo/app/params"
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	"github.com/ojo-network/ojo/client/tx"
 )
 
@@ -17,15 +16,7 @@ const (
 	keyringAppName    = "testnet"
 )
 
-var (
-	encodingConfig params.EncodingConfig
-	cdc            codec.Codec
-)
-
-func init() {
-	encodingConfig = ojoapp.MakeEncodingConfig()
-	cdc = encodingConfig.Codec
-}
+var encodingConfig testutil.TestEncodingConfig
 
 type chain struct {
 	dataDir    string
@@ -50,19 +41,19 @@ func (c *chain) configDir() string {
 	return fmt.Sprintf("%s/%s", c.dataDir, c.id)
 }
 
-func (c *chain) createAndInitValidators(count int) error {
+func (c *chain) createAndInitValidators(cdc codec.Codec, count int) error {
 	for i := 0; i < count; i++ {
 		node := c.createValidator(i)
 
 		// generate genesis files
-		if err := node.init(); err != nil {
+		if err := node.init(cdc); err != nil {
 			return err
 		}
 
 		c.validators = append(c.validators, node)
 
 		// create keys
-		if err := node.createKey("val"); err != nil {
+		if err := node.createKey(cdc, "val"); err != nil {
 			return err
 		}
 		if err := node.createNodeKey(); err != nil {

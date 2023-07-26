@@ -1,22 +1,11 @@
 package params
 
 import (
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/codec/types"
-	"github.com/cosmos/cosmos-sdk/x/auth/tx"
+	"github.com/cosmos/cosmos-sdk/types/module"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 )
 
 // MakeEncodingConfig creates an EncodingConfig for Amino-based tests.
-func MakeEncodingConfig() EncodingConfig {
-	amino := codec.NewLegacyAmino()
-	interfaceRegistry := types.NewInterfaceRegistry()
-	marshaler := codec.NewProtoCodec(interfaceRegistry)
-	txCfg := tx.NewTxConfig(marshaler, tx.DefaultSignModes)
-
-	return EncodingConfig{
-		InterfaceRegistry: interfaceRegistry,
-		Codec:             marshaler,
-		TxConfig:          txCfg,
-		Amino:             amino,
-	}
+func MakeEncodingConfig(modules ...module.AppModuleBasic) testutil.TestEncodingConfig {
+	return testutil.MakeTestEncodingConfig(modules...)
 }

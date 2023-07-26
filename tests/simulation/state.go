@@ -324,7 +324,6 @@ func appExportAndImport(t *testing.T) (
 		map[int64]bool{},
 		dir,
 		simcli.FlagPeriodValue,
-		ojoapp.MakeEncodingConfig(),
 		ojoapp.EmptyAppOptions{},
 		fauxMerkleModeOpt,
 	)
@@ -372,7 +371,6 @@ func appExportAndImport(t *testing.T) (
 		map[int64]bool{},
 		newDir,
 		simcli.FlagPeriodValue,
-		ojoapp.MakeEncodingConfig(),
 		ojoapp.EmptyAppOptions{},
 		fauxMerkleModeOpt,
 	)

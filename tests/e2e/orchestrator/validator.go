@@ -11,6 +11,7 @@ import (
 	tmos "github.com/cometbft/cometbft/libs/os"
 	p2p "github.com/cometbft/cometbft/p2p"
 	"github.com/cometbft/cometbft/privval"
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdkcrypto "github.com/cosmos/cosmos-sdk/crypto"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
@@ -58,7 +59,7 @@ func (v *validator) createConfig() error {
 	return os.MkdirAll(p, 0o755)
 }
 
-func (v *validator) init() error {
+func (v *validator) init(cdc codec.Codec) error {
 	if err := v.createConfig(); err != nil {
 		return err
 	}
@@ -130,7 +131,7 @@ func (v *validator) createConsensusKey() error {
 	return nil
 }
 
-func (v *validator) createKeyFromMnemonic(name, mnemonic string) error {
+func (v *validator) createKeyFromMnemonic(cdc codec.Codec, name, mnemonic string) error {
 	kb, err := keyring.New(keyringAppName, keyring.BackendTest, v.configDir(), nil, cdc)
 	if err != nil {
 		return err
@@ -164,13 +165,13 @@ func (v *validator) createKeyFromMnemonic(name, mnemonic string) error {
 	return nil
 }
 
-func (v *validator) createKey(name string) error {
+func (v *validator) createKey(cdc codec.Codec, name string) error {
 	mnemonic, err := tx.CreateMnemonic()
 	if err != nil {
 		return err
 	}
 
-	return v.createKeyFromMnemonic(name, mnemonic)
+	return v.createKeyFromMnemonic(cdc, name, mnemonic)
 }
 
 func (v *validator) buildCreateValidatorMsg(amount sdk.Coin) (sdk.Msg, error) {
@@ -203,7 +204,7 @@ func (v *validator) buildCreateValidatorMsg(amount sdk.Coin) (sdk.Msg, error) {
 	)
 }
 
-func (v *validator) signMsg(msgs ...sdk.Msg) (*sdktx.Tx, error) {
+func (v *validator) signMsg(cdc codec.Codec, msgs ...sdk.Msg) (*sdktx.Tx, error) {
 	txBuilder := encodingConfig.TxConfig.NewTxBuilder()
 
 	if err := txBuilder.SetMsgs(msgs...); err != nil {
@@ -277,5 +278,5 @@ func (v *validator) signMsg(msgs ...sdk.Msg) (*sdktx.Tx, error) {
 		return nil, err
 	}
 
-	return decodeTx(bz)
+	return decodeTx(cdc, bz)
 }

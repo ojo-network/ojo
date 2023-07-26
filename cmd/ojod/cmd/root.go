@@ -23,12 +23,13 @@ import (
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	"github.com/spf13/cobra"
 
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	app "github.com/ojo-network/ojo/app"
 	appparams "github.com/ojo-network/ojo/app/params"
 )
 
 // NewRootCmd returns the root command handler for the Ojo daemon.
-func NewRootCmd() (*cobra.Command, appparams.EncodingConfig) {
+func NewRootCmd() (*cobra.Command, testutil.TestEncodingConfig) {
 	encodingConfig := app.MakeEncodingConfig()
 	moduleManager := app.ModuleBasics
 
@@ -173,7 +174,7 @@ func initRootCmd(rootCmd *cobra.Command, a appCreator) {
 
 // genesisCommand builds genesis-related `simd genesis` command. Users may
 // provide application specific commands as a parameter.
-func genesisCommand(encodingConfig appparams.EncodingConfig, cmds ...*cobra.Command) *cobra.Command {
+func genesisCommand(encodingConfig testutil.TestEncodingConfig, cmds ...*cobra.Command) *cobra.Command {
 	cmd := genutilcli.GenesisCoreCommand(encodingConfig.TxConfig, app.ModuleBasics, app.DefaultNodeHome)
 
 	for _, subCmd := range cmds {

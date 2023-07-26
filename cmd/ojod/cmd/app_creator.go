@@ -18,13 +18,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	ojoapp "github.com/ojo-network/ojo/app"
-	appparams "github.com/ojo-network/ojo/app/params"
 	"github.com/spf13/cast"
 )
 
 type appCreator struct {
-	encCfg        appparams.EncodingConfig
+	encCfg        testutil.TestEncodingConfig
 	moduleManager module.BasicManager
 }
 
@@ -83,7 +83,6 @@ func (a appCreator) newApp(
 		logger, db, traceStore, true, skipUpgradeHeights,
 		cast.ToString(appOpts.Get(flags.FlagHome)),
 		cast.ToUint(appOpts.Get(server.FlagInvCheckPeriod)),
-		a.encCfg,
 		appOpts,
 		baseapp.SetPruning(pruningOpts),
 		baseapp.SetMinGasPrices(minGasPrices),
@@ -127,7 +126,6 @@ func (a appCreator) appExport(
 		map[int64]bool{},
 		homePath,
 		uint(1),
-		a.encCfg,
 		appOpts,
 	)
 
