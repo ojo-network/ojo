@@ -14,7 +14,6 @@ import (
 	dbm "github.com/cometbft/cometbft-db"
 	tmjson "github.com/cometbft/cometbft/libs/json"
 	"github.com/cometbft/cometbft/libs/log"
-	tmrand "github.com/cometbft/cometbft/libs/rand"
 	tmtypes "github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -307,7 +306,6 @@ func appExportAndImport(t *testing.T) (
 	simtypes.Config,
 ) {
 	config := simcli.NewConfigFromFlags()
-	config.ChainID = fmt.Sprintf("simulation-chain-%s", tmrand.NewRand().Str(6))
 
 	db, dir, logger, skip, err := simtestutil.SetupSimulation(config, "leveldb-app-sim", "Simulation", simcli.FlagVerboseValue, simcli.FlagEnabledValue)
 	if skip {
