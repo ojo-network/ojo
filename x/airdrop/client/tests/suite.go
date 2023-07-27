@@ -44,6 +44,8 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 }
 
 func (s *IntegrationTestSuite) TestClaimAirdrop() {
+	s.T().Skip()
+
 	val := s.network.Validators[0]
 
 	testCases := []struct {

@@ -3,6 +3,7 @@ package app
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -23,6 +24,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
@@ -212,9 +214,7 @@ func setup(withGenesis bool, invCheckPeriod uint) (*App, GenesisState) {
 // IntegrationTestNetworkConfig returns a networking configuration used for
 // integration tests using the SDK's in-process network test suite.
 func IntegrationTestNetworkConfig() network.Config {
-	cfg := network.DefaultConfig(func() network.TestFixture {
-		return network.TestFixture{}
-	})
+	cfg := network.DefaultConfig(NewTestNetworkFixture)
 	encCfg := MakeEncodingConfig()
 	cdc := encCfg.Codec
 
@@ -261,7 +261,20 @@ func IntegrationTestNetworkConfig() network.Config {
 	cfg.GenesisState = appGenState
 	cfg.MinGasPrices = params.ProtocolMinGasPrice.String()
 	cfg.BondDenom = params.BondDenom
-	cfg.AppConstructor = func(val network.ValidatorI) servertypes.Application {
+
+	return cfg
+}
+
+func NewTestNetworkFixture() network.TestFixture {
+	dir, err := os.MkdirTemp("", "simapp")
+	if err != nil {
+		panic(fmt.Sprintf("failed creating temporary directory: %v", err))
+	}
+	defer os.RemoveAll(dir)
+
+	app, genState := setup(true, 100)
+
+	appCtr := func(val network.ValidatorI) servertypes.Application {
 		return New(
 			val.GetCtx().Logger,
 			dbm.NewMemDB(),
@@ -271,11 +284,20 @@ func IntegrationTestNetworkConfig() network.Config {
 			val.GetCtx().Config.RootDir,
 			0,
 			EmptyAppOptions{},
-			baseapp.SetChainID(val.GetCtx().Viper.GetString(flags.FlagChainID)),
 			baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(val.GetAppConfig().Pruning)),
 			baseapp.SetMinGasPrices(val.GetAppConfig().MinGasPrices),
+			baseapp.SetChainID(val.GetCtx().Viper.GetString(flags.FlagChainID)),
 		)
 	}
 
-	return cfg
+	return network.TestFixture{
+		AppConstructor: appCtr,
+		GenesisState:   genState,
+		EncodingConfig: testutil.TestEncodingConfig{
+			InterfaceRegistry: app.InterfaceRegistry(),
+			Codec:             app.AppCodec(),
+			TxConfig:          app.txConfig,
+			Amino:             app.LegacyAmino(),
+		},
+	}
 }
