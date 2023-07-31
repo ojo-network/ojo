@@ -56,21 +56,21 @@ func (app *App) registerUpgrade0_2_0(upgradeInfo upgradetypes.Plan) {
 		var keyTable paramstypes.KeyTable
 		switch subspace.Name() {
 		case authtypes.ModuleName:
-			keyTable = authtypes.ParamKeyTable()
+			keyTable = authtypes.ParamKeyTable() //nolint: all
 		case banktypes.ModuleName:
-			keyTable = banktypes.ParamKeyTable()
+			keyTable = banktypes.ParamKeyTable() //nolint: all
 		case stakingtypes.ModuleName:
-			keyTable = stakingtypes.ParamKeyTable()
+			keyTable = stakingtypes.ParamKeyTable() //nolint: all
 		case minttypes.ModuleName:
-			keyTable = minttypes.ParamKeyTable()
+			keyTable = minttypes.ParamKeyTable() //nolint: all
 		case distrtypes.ModuleName:
-			keyTable = distrtypes.ParamKeyTable()
+			keyTable = distrtypes.ParamKeyTable() //nolint: all
 		case slashingtypes.ModuleName:
-			keyTable = slashingtypes.ParamKeyTable()
+			keyTable = slashingtypes.ParamKeyTable() //nolint: all
 		case govtypes.ModuleName:
-			keyTable = govv1.ParamKeyTable()
+			keyTable = govv1.ParamKeyTable() //nolint: all
 		case crisistypes.ModuleName:
-			keyTable = crisistypes.ParamKeyTable()
+			keyTable = crisistypes.ParamKeyTable() //nolint: all
 		default:
 			// subspace not handled
 			found = false
