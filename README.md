@@ -13,7 +13,7 @@
 
 Ojo is an oracle platform which other blockchains and smart contracts can use to receive
 up-to-date and accurate data. This platform arose from our work at
-[Umee](https://github.com/umee-network/umee), where we worked on on developing our
+[Umee](https://github.com/umee-network/umee), where we worked on developing our
 own oracle based off of the [Terra Classic](https://github.com/terra-money/classic-core) design.
 Now, we specalize bringing the lessons we've learned to the greater Cosmos.
 
