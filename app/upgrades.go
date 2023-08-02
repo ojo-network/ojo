@@ -85,7 +85,9 @@ func (app *App) registerUpgrade0_2_0(upgradeInfo upgradetypes.Plan) {
 		}
 	}
 
-	baseAppLegacySS := app.ParamsKeeper.Subspace(baseapp.Paramspace).WithKeyTable(paramstypes.ConsensusParamsKeyTable())
+	baseAppLegacySS := app.ParamsKeeper.Subspace(baseapp.Paramspace).WithKeyTable(
+		paramstypes.ConsensusParamsKeyTable(),
+	)
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
