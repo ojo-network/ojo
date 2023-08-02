@@ -357,6 +357,7 @@ func appExportAndImport(t *testing.T) (
 	fmt.Printf("importing genesis...\n")
 
 	newDB, newDir, logger, skip, err := simtestutil.SetupSimulation(config, "leveldb-app-sim", "Simulation", simcli.FlagVerboseValue, simcli.FlagEnabledValue)
+	require.NoError(t, err, "simulation setup failed")
 	if skip {
 		t.Skip("skipping application simulation")
 	}
