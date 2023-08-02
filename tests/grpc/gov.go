@@ -62,7 +62,7 @@ func SubmitAndPassProposal(ojoClient *client.OjoClient, msgs []sdk.Msg, title, s
 	}
 
 	// retry
-	err = retryTx(ojoClient, resp)
+	resp, err = retryTx(ojoClient, resp)
 	if err != nil {
 		return err
 	}
@@ -93,7 +93,7 @@ func SubmitAndPassLegacyProposal(ojoClient *client.OjoClient, changes []proposal
 	}
 
 	// retry
-	err = retryTx(ojoClient, resp)
+	resp, err = retryTx(ojoClient, resp)
 	if err != nil {
 		return err
 	}
@@ -140,11 +140,11 @@ func OracleParamChanges(
 	}
 }
 
-func retryTx(ojoClient *client.OjoClient, resp *sdk.TxResponse) error {
+func retryTx(ojoClient *client.OjoClient, resp *sdk.TxResponse) (*sdk.TxResponse, error) {
 	for i := 0; i < 5; i++ {
 		newResp, err := ojoClient.QueryTxHash(resp.TxHash)
 		if err != nil && i == 4 {
-			return err
+			return nil, err
 		}
 		if err == nil {
 			resp = newResp
@@ -154,5 +154,5 @@ func retryTx(ojoClient *client.OjoClient, resp *sdk.TxResponse) error {
 		time.Sleep(time.Second * (1 + time.Duration(i)))
 	}
 
-	return nil
+	return resp, nil
 }
