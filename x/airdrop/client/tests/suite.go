@@ -43,6 +43,7 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 	s.network.Cleanup()
 }
 
+// TODO: Fix tx raw log not having "no airdrop account found" message in it
 func (s *IntegrationTestSuite) TestClaimAirdrop() {
 	s.T().Skip()
 

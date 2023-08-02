@@ -26,9 +26,6 @@ const (
 	OpWeightMsgAggregateExchangeRateVote    = "op_weight_msg_exchange_rate_aggregate_vote"    //nolint: gosec
 	OpWeightMsgDelegateFeedConsent          = "op_weight_msg_exchange_feed_consent"           //nolint: gosec
 
-	DefaultWeightMsgSend               = 100 // from simappparams.DefaultWeightMsgSend
-	DefaultWeightMsgSetWithdrawAddress = 50  // from simappparams.DefaultWeightMsgSetWithdrawAddress
-
 	salt = "89b8164ca0b4b8703ae9ab25962f3dd6d1de5d656f5442971a93b2ca7893f654"
 )
 
@@ -71,19 +68,19 @@ func WeightedOperations(
 
 	appParams.GetOrGenerate(cdc, OpWeightMsgAggregateExchangeRatePrevote, &weightMsgAggregateExchangeRatePrevote, nil,
 		func(_ *rand.Rand) {
-			weightMsgAggregateExchangeRatePrevote = DefaultWeightMsgSend * 2
+			weightMsgAggregateExchangeRatePrevote = ojosim.DefaultWeightMsgSend * 2
 		},
 	)
 
 	appParams.GetOrGenerate(cdc, OpWeightMsgAggregateExchangeRateVote, &weightMsgAggregateExchangeRateVote, nil,
 		func(_ *rand.Rand) {
-			weightMsgAggregateExchangeRateVote = DefaultWeightMsgSend * 2
+			weightMsgAggregateExchangeRateVote = ojosim.DefaultWeightMsgSend * 2
 		},
 	)
 
 	appParams.GetOrGenerate(cdc, OpWeightMsgDelegateFeedConsent, &weightMsgDelegateFeedConsent, nil,
 		func(_ *rand.Rand) {
-			weightMsgDelegateFeedConsent = DefaultWeightMsgSetWithdrawAddress
+			weightMsgDelegateFeedConsent = ojosim.DefaultWeightMsgSetWithdrawAddress
 		},
 	)
 

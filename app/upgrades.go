@@ -19,6 +19,7 @@ import (
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 
 	oraclekeeper "github.com/ojo-network/ojo/x/oracle/keeper"
+	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
 
 // RegisterUpgradeHandlersregisters upgrade handlers.
@@ -45,6 +46,7 @@ func (app *App) registerUpgrade0_1_4(_ upgradetypes.Plan) {
 	)
 }
 
+// nolint: all
 func (app *App) registerUpgrade0_2_0(upgradeInfo upgradetypes.Plan) {
 	const planName = "v0.2.0"
 
@@ -56,21 +58,23 @@ func (app *App) registerUpgrade0_2_0(upgradeInfo upgradetypes.Plan) {
 		var keyTable paramstypes.KeyTable
 		switch subspace.Name() {
 		case authtypes.ModuleName:
-			keyTable = authtypes.ParamKeyTable() //nolint: all
+			keyTable = authtypes.ParamKeyTable()
 		case banktypes.ModuleName:
-			keyTable = banktypes.ParamKeyTable() //nolint: all
+			keyTable = banktypes.ParamKeyTable()
 		case stakingtypes.ModuleName:
-			keyTable = stakingtypes.ParamKeyTable() //nolint: all
+			keyTable = stakingtypes.ParamKeyTable()
 		case minttypes.ModuleName:
-			keyTable = minttypes.ParamKeyTable() //nolint: all
+			keyTable = minttypes.ParamKeyTable()
 		case distrtypes.ModuleName:
-			keyTable = distrtypes.ParamKeyTable() //nolint: all
+			keyTable = distrtypes.ParamKeyTable()
 		case slashingtypes.ModuleName:
-			keyTable = slashingtypes.ParamKeyTable() //nolint: all
+			keyTable = slashingtypes.ParamKeyTable()
 		case govtypes.ModuleName:
-			keyTable = govv1.ParamKeyTable() //nolint: all
+			keyTable = govv1.ParamKeyTable()
 		case crisistypes.ModuleName:
-			keyTable = crisistypes.ParamKeyTable() //nolint: all
+			keyTable = crisistypes.ParamKeyTable()
+		case oracletypes.ModuleName:
+			keyTable = oracletypes.ParamKeyTable()
 		default:
 			// subspace not handled
 			found = false

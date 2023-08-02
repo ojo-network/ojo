@@ -45,7 +45,7 @@ const (
 	ojoGrpcPort       = "9090"
 	ojoMaxStartupTime = 40 // seconds
 
-	priceFeederContainerRepo  = "ghcr.io/ojo-network/price-feeder-ojo-47"
+	priceFeederContainerRepo  = "ghcr.io/ojo-network/price-feeder-ojo-47" // TODO: update original pf instance with sdk 0.47
 	priceFeederServerPort     = "7171/tcp"
 	priceFeederMaxStartupTime = 20 // seconds
 

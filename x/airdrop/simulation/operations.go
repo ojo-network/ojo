@@ -20,8 +20,6 @@ import (
 const (
 	OpWeightMsgCreateAirdropAccount = "op_weight_msg_create_airdrop_account" //nolint: gosec
 	OpWeightMsgClaimAirdrop         = "op_weight_msg_claim_airdrop"          //nolint: gosec
-
-	DefaultWeightMsgSend = 100 // from simappparams.DefaultWeightMsgSend
 )
 
 // WeightedOperations returns all the operations from the module with their respective weights
@@ -39,13 +37,13 @@ func WeightedOperations(
 
 	appParams.GetOrGenerate(cdc, OpWeightMsgCreateAirdropAccount, &weightMsgCreateAirdropAccount, nil,
 		func(_ *rand.Rand) {
-			weightMsgCreateAirdropAccount = DefaultWeightMsgSend * 2
+			weightMsgCreateAirdropAccount = ojosim.DefaultWeightMsgSend * 2
 		},
 	)
 
 	appParams.GetOrGenerate(cdc, OpWeightMsgClaimAirdrop, &weightMsgClaimAirdrop, nil,
 		func(_ *rand.Rand) {
-			weightMsgClaimAirdrop = DefaultWeightMsgSend * 2
+			weightMsgClaimAirdrop = ojosim.DefaultWeightMsgSend * 2
 		},
 	)
 
