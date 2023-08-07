@@ -19,13 +19,14 @@ const (
 var encodingConfig testutil.TestEncodingConfig
 
 type chain struct {
+	cdc        codec.Codec
 	dataDir    string
 	id         string
 	validators []*validator
 	accounts   []*tx.OjoAccount
 }
 
-func newChain() (*chain, error) {
+func newChain(cdc codec.Codec) (*chain, error) {
 	tmpDir, err := os.MkdirTemp("", "ojo-e2e-testnet-")
 	if err != nil {
 		return nil, err
@@ -34,6 +35,7 @@ func newChain() (*chain, error) {
 	return &chain{
 		id:      "chain-" + tmrand.NewRand().Str(6),
 		dataDir: tmpDir,
+		cdc:     cdc,
 	}, nil
 }
 
@@ -41,19 +43,19 @@ func (c *chain) configDir() string {
 	return fmt.Sprintf("%s/%s", c.dataDir, c.id)
 }
 
-func (c *chain) createAndInitValidators(cdc codec.Codec, count int) error {
+func (c *chain) createAndInitValidators(count int) error {
 	for i := 0; i < count; i++ {
 		node := c.createValidator(i)
 
 		// generate genesis files
-		if err := node.init(cdc); err != nil {
+		if err := node.init(); err != nil {
 			return err
 		}
 
 		c.validators = append(c.validators, node)
 
 		// create keys
-		if err := node.createKey(cdc, "val"); err != nil {
+		if err := node.createKey("val"); err != nil {
 			return err
 		}
 		if err := node.createNodeKey(); err != nil {

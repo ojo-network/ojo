@@ -59,7 +59,7 @@ func (v *validator) createConfig() error {
 	return os.MkdirAll(p, 0o755)
 }
 
-func (v *validator) init(cdc codec.Codec) error {
+func (v *validator) init() error {
 	if err := v.createConfig(); err != nil {
 		return err
 	}
@@ -75,7 +75,7 @@ func (v *validator) init(cdc codec.Codec) error {
 		return err
 	}
 
-	appState, err := json.MarshalIndent(ojoapp.ModuleBasics.DefaultGenesis(cdc), "", " ")
+	appState, err := json.MarshalIndent(ojoapp.ModuleBasics.DefaultGenesis(v.chain.cdc), "", " ")
 	if err != nil {
 		return fmt.Errorf("failed to JSON encode app genesis state: %w", err)
 	}
@@ -165,13 +165,13 @@ func (v *validator) createKeyFromMnemonic(cdc codec.Codec, name, mnemonic string
 	return nil
 }
 
-func (v *validator) createKey(cdc codec.Codec, name string) error {
+func (v *validator) createKey(name string) error {
 	mnemonic, err := tx.CreateMnemonic()
 	if err != nil {
 		return err
 	}
 
-	return v.createKeyFromMnemonic(cdc, name, mnemonic)
+	return v.createKeyFromMnemonic(v.chain.cdc, name, mnemonic)
 }
 
 func (v *validator) buildCreateValidatorMsg(amount sdk.Coin) (sdk.Msg, error) {

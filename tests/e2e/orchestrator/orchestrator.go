@@ -22,7 +22,6 @@ import (
 	tmconfig "github.com/cometbft/cometbft/config"
 	tmjson "github.com/cometbft/cometbft/libs/json"
 	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
-	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -56,7 +55,6 @@ const (
 type Orchestrator struct {
 	tmpDirs             []string
 	chain               *chain
-	cdc                 codec.Codec
 	dkrPool             *dockertest.Pool
 	dkrNet              *dockertest.Network
 	priceFeederResource *dockertest.Resource
@@ -95,10 +93,10 @@ func (o *Orchestrator) InitResources(t *testing.T) {
 	}
 
 	// codec
-	o.cdc = encodingConfig.Codec
+	cdc := encodingConfig.Codec
 
 	var err error
-	o.chain, err = newChain()
+	o.chain, err = newChain(cdc)
 	require.NoError(t, err)
 
 	t.Logf("starting e2e infrastructure; chain-id: %s; datadir: %s", o.chain.id, o.chain.dataDir)
@@ -138,7 +136,7 @@ func (o *Orchestrator) TearDownResources(t *testing.T) {
 }
 
 func (o *Orchestrator) initNodes(t *testing.T) {
-	require.NoError(t, o.chain.createAndInitValidators(o.cdc, 2))
+	require.NoError(t, o.chain.createAndInitValidators(2))
 
 	// initialize a genesis file for the first validator
 	val0ConfigDir := o.chain.validators[0].configDir()
@@ -146,7 +144,7 @@ func (o *Orchestrator) initNodes(t *testing.T) {
 		valAddr, err := val.keyInfo.GetAddress()
 		require.NoError(t, err)
 		require.NoError(t,
-			addGenesisAccount(o.cdc, val0ConfigDir, "", initBalanceStr, valAddr),
+			addGenesisAccount(o.chain.cdc, val0ConfigDir, "", initBalanceStr, valAddr),
 		)
 	}
 
@@ -179,7 +177,7 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 
 	// Oracle
 	var oracleGenState oracletypes.GenesisState
-	require.NoError(t, o.cdc.UnmarshalJSON(appGenState[oracletypes.ModuleName], &oracleGenState))
+	require.NoError(t, o.chain.cdc.UnmarshalJSON(appGenState[oracletypes.ModuleName], &oracleGenState))
 
 	oracleGenState.Params.HistoricStampPeriod = 3
 	oracleGenState.Params.MaximumPriceStamps = 4
@@ -189,13 +187,13 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 	oracleGenState.Params.MandatoryList = oracleMandatoryList
 	oracleGenState.Params.RewardBands = oracleRewardBands
 
-	bz, err := o.cdc.MarshalJSON(&oracleGenState)
+	bz, err := o.chain.cdc.MarshalJSON(&oracleGenState)
 	require.NoError(t, err)
 	appGenState[oracletypes.ModuleName] = bz
 
 	// Airdrop
 	var airdropGenState airdroptypes.GenesisState
-	require.NoError(t, o.cdc.UnmarshalJSON(appGenState[airdroptypes.ModuleName], &airdropGenState))
+	require.NoError(t, o.chain.cdc.UnmarshalJSON(appGenState[airdroptypes.ModuleName], &airdropGenState))
 
 	// Use the first and only account as the airdrop origin
 	airdropOriginAddress, err := o.chain.accounts[0].KeyInfo.GetAddress()
@@ -209,24 +207,24 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 		},
 	}
 
-	bz, err = o.cdc.MarshalJSON(&airdropGenState)
+	bz, err = o.chain.cdc.MarshalJSON(&airdropGenState)
 	require.NoError(t, err)
 	appGenState[airdroptypes.ModuleName] = bz
 
 	// Gov
 	var govGenState govtypesv1.GenesisState
-	require.NoError(t, o.cdc.UnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState))
+	require.NoError(t, o.chain.cdc.UnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState))
 
 	votingPeroid := 5 * time.Second
 	govGenState.Params.VotingPeriod = &votingPeroid
 
-	bz, err = o.cdc.MarshalJSON(&govGenState)
+	bz, err = o.chain.cdc.MarshalJSON(&govGenState)
 	require.NoError(t, err)
 	appGenState[govtypes.ModuleName] = bz
 
 	// Genesis Txs
 	var genUtilGenState genutiltypes.GenesisState
-	require.NoError(t, o.cdc.UnmarshalJSON(appGenState[genutiltypes.ModuleName], &genUtilGenState))
+	require.NoError(t, o.chain.cdc.UnmarshalJSON(appGenState[genutiltypes.ModuleName], &genUtilGenState))
 
 	genTxs := make([]json.RawMessage, len(o.chain.validators))
 	for i, val := range o.chain.validators {
@@ -238,10 +236,10 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 		}
 		require.NoError(t, err)
 
-		signedTx, err := val.signMsg(o.cdc, createValmsg)
+		signedTx, err := val.signMsg(o.chain.cdc, createValmsg)
 		require.NoError(t, err)
 
-		txRaw, err := o.cdc.MarshalJSON(signedTx)
+		txRaw, err := o.chain.cdc.MarshalJSON(signedTx)
 		require.NoError(t, err)
 
 		genTxs[i] = txRaw
@@ -249,7 +247,7 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 
 	genUtilGenState.GenTxs = genTxs
 
-	bz, err = o.cdc.MarshalJSON(&genUtilGenState)
+	bz, err = o.chain.cdc.MarshalJSON(&genUtilGenState)
 	require.NoError(t, err)
 	appGenState[genutiltypes.ModuleName] = bz
 
