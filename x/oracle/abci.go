@@ -14,6 +14,15 @@ import (
 func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 	defer telemetry.ModuleMeasureSince(types.ModuleName, time.Now(), telemetry.MetricKeyEndBlocker)
 
+	plan, found := k.GetParamUpdatePlan(ctx)
+
+	if found {
+		err := k.ExecuteParamUpdatePlan(ctx, plan)
+		if err != nil {
+			ctx.Logger().Error("Error executing Oracle param update plan", "plan title", plan.Title, "err", err)
+		}
+	}
+
 	params := k.GetParams(ctx)
 
 	// Set all current active validators into the ValidatorRewardSet at

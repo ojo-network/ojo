@@ -129,3 +129,22 @@ message PriceStamp {
 message ValidatorRewardSet {
   repeated string validator_set = 1 [ (gogoproto.moretags) = "yaml:\"validator_set\"" ];
 }
+
+// ParamUpdatePlan specifies updates to the Oracle module parameters
+// and at which block height they should occur.
+message ParamUpdatePlan {
+  option (gogoproto.equal)            = true;
+  option (gogoproto.goproto_getters)  = false;
+  option (gogoproto.goproto_stringer) = true;
+
+  string title         = 1;
+  string description   = 2;
+
+  // Store keys of the Oracle params getting updated.
+  repeated string keys = 3;
+
+  // The height at which the param update must be performed.
+  int64 height   = 4;
+
+  Params changes = 5 [ (gogoproto.nullable) = false ];
+}

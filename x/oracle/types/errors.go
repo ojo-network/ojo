@@ -32,4 +32,6 @@ var (
 	ErrNoRewardBand          = errors.Register(ModuleName, 22, "unable to find the reward band the given asset")
 	ErrNoValidatorRewardSet  = errors.Register(ModuleName, 23, "unable to find the latest validator reward set")
 	ErrNoGovAuthority        = errors.Register(ModuleName, 24, "invalid gov authority to perform these changes")
+	ErrInvalidRequest        = errors.Register(ModuleName, 25, "invalid request")
+	ErrInvalidParamValue     = errors.Register(ModuleName, 26, "invalid oracle param value")
 )

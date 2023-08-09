@@ -16,10 +16,10 @@ func init() {
 var _ gov.Content = &MsgGovUpdateParams{}
 
 // GetTitle returns the title of a community pool spend proposal.
-func (msg *MsgGovUpdateParams) GetTitle() string { return msg.Title }
+func (msg *MsgGovUpdateParams) GetTitle() string { return msg.Plan.Title }
 
 // GetDescription returns the description of a community pool spend proposal.
-func (msg *MsgGovUpdateParams) GetDescription() string { return msg.Description }
+func (msg *MsgGovUpdateParams) GetDescription() string { return msg.Plan.Description }
 
 // GetDescription returns the routing key of a community pool spend proposal.
 func (msg *MsgGovUpdateParams) ProposalRoute() string { return RouterKey }

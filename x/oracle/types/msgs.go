@@ -176,11 +176,13 @@ func (msg MsgDelegateFeedConsent) ValidateBasic() error {
 // NewMsgUpdateParams will creates a new MsgUpdateParams instance
 func NewMsgUpdateParams(authority, title, description string, keys []string, changes Params) *MsgGovUpdateParams {
 	return &MsgGovUpdateParams{
-		Title:       title,
-		Description: description,
 		Authority:   authority,
-		Keys:        keys,
-		Changes:     changes,
+		Plan: ParamUpdatePlan{
+			Title:       title,
+			Description: description,
+			Keys:        keys,
+			Changes:     changes,
+		},
 	}
 }
 
@@ -208,74 +210,76 @@ func (msg MsgGovUpdateParams) GetSigners() []sdk.AccAddress {
 // specified in the proposal. If one param is invalid, the whole proposal
 // will fail to go through.
 func (msg MsgGovUpdateParams) ValidateBasic() error {
-	if err := checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority); err != nil {
+	plan := msg.Plan
+
+	if err := checkers.ValidateProposal(plan.Title, plan.Description, msg.Authority); err != nil {
 		return err
 	}
 
-	for _, key := range msg.Keys {
+	for _, key := range plan.Keys {
 		switch key {
 		case string(KeyVotePeriod):
-			if err := validateVotePeriod(msg.Changes.VotePeriod); err != nil {
+			if err := validateVotePeriod(plan.Changes.VotePeriod); err != nil {
 				return err
 			}
 
 		case string(KeyVoteThreshold):
-			if err := validateVoteThreshold(msg.Changes.VoteThreshold); err != nil {
+			if err := validateVoteThreshold(plan.Changes.VoteThreshold); err != nil {
 				return err
 			}
 
 		case string(KeyRewardBands):
-			if err := validateRewardBands(msg.Changes.RewardBands); err != nil {
+			if err := validateRewardBands(plan.Changes.RewardBands); err != nil {
 				return err
 			}
 
 		case string(KeyRewardDistributionWindow):
-			if err := validateRewardDistributionWindow(msg.Changes.RewardDistributionWindow); err != nil {
+			if err := validateRewardDistributionWindow(plan.Changes.RewardDistributionWindow); err != nil {
 				return err
 			}
 
 		case string(KeyAcceptList):
-			if err := validateDenomList(msg.Changes.AcceptList); err != nil {
+			if err := validateDenomList(plan.Changes.AcceptList); err != nil {
 				return err
 			}
 
 		case string(KeyMandatoryList):
-			if err := validateDenomList(msg.Changes.MandatoryList); err != nil {
+			if err := validateDenomList(plan.Changes.MandatoryList); err != nil {
 				return err
 			}
 
 		case string(KeySlashFraction):
-			if err := validateSlashFraction(msg.Changes.SlashFraction); err != nil {
+			if err := validateSlashFraction(plan.Changes.SlashFraction); err != nil {
 				return err
 			}
 
 		case string(KeySlashWindow):
-			if err := validateSlashWindow(msg.Changes.SlashWindow); err != nil {
+			if err := validateSlashWindow(plan.Changes.SlashWindow); err != nil {
 				return err
 			}
 
 		case string(KeyMinValidPerWindow):
-			if err := validateMinValidPerWindow(msg.Changes.MinValidPerWindow); err != nil {
+			if err := validateMinValidPerWindow(plan.Changes.MinValidPerWindow); err != nil {
 				return err
 			}
 
 		case string(KeyHistoricStampPeriod):
-			if err := validateHistoricStampPeriod(msg.Changes.HistoricStampPeriod); err != nil {
+			if err := validateHistoricStampPeriod(plan.Changes.HistoricStampPeriod); err != nil {
 				return err
 			}
 
 		case string(KeyMedianStampPeriod):
-			if err := validateMedianStampPeriod(msg.Changes.MedianStampPeriod); err != nil {
+			if err := validateMedianStampPeriod(plan.Changes.MedianStampPeriod); err != nil {
 				return err
 			}
 
 		case string(KeyMaximumPriceStamps):
-			if err := validateMaximumPriceStamps(msg.Changes.MaximumPriceStamps); err != nil {
+			if err := validateMaximumPriceStamps(plan.Changes.MaximumPriceStamps); err != nil {
 				return err
 			}
 
 		case string(KeyMaximumMedianStamps):
-			if err := validateMaximumMedianStamps(msg.Changes.MaximumMedianStamps); err != nil {
+			if err := validateMaximumMedianStamps(plan.Changes.MaximumMedianStamps); err != nil {
 				return err
 			}
 

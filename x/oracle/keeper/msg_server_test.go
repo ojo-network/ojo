@@ -168,25 +168,27 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 			"valid accept list",
 			&types.MsgGovUpdateParams{
 				Authority:   govAccAddr,
-				Title:       "test",
-				Description: "test",
-				Keys:        []string{"AcceptList"},
-				Changes: types.Params{
-					AcceptList: types.DenomList{
-						{
-							BaseDenom:   oracletypes.OjoDenom,
-							SymbolDenom: oracletypes.OjoSymbol,
-							Exponent:    6,
-						},
-						{
-							BaseDenom:   oracletypes.AtomDenom,
-							SymbolDenom: oracletypes.AtomSymbol,
-							Exponent:    6,
-						},
-						{
-							BaseDenom:   "base",
-							SymbolDenom: "symbol",
-							Exponent:    6,
+				Plan: types.ParamUpdatePlan{
+					Title:       "test",
+					Description: "test",
+					Keys:        []string{"AcceptList"},
+					Changes: types.Params{
+						AcceptList: types.DenomList{
+							{
+								BaseDenom:   oracletypes.OjoDenom,
+								SymbolDenom: oracletypes.OjoSymbol,
+								Exponent:    6,
+							},
+							{
+								BaseDenom:   oracletypes.AtomDenom,
+								SymbolDenom: oracletypes.AtomSymbol,
+								Exponent:    6,
+							},
+							{
+								BaseDenom:   "base",
+								SymbolDenom: "symbol",
+								Exponent:    6,
+							},
 						},
 					},
 				},
@@ -198,20 +200,22 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 			"valid mandatory list",
 			&types.MsgGovUpdateParams{
 				Authority:   govAccAddr,
-				Title:       "test",
-				Description: "test",
-				Keys:        []string{"MandatoryList"},
-				Changes: types.Params{
-					MandatoryList: types.DenomList{
-						{
-							BaseDenom:   oracletypes.OjoDenom,
-							SymbolDenom: oracletypes.OjoSymbol,
-							Exponent:    6,
-						},
-						{
-							BaseDenom:   oracletypes.AtomDenom,
-							SymbolDenom: oracletypes.AtomSymbol,
-							Exponent:    6,
+				Plan: types.ParamUpdatePlan{
+					Title:       "test",
+					Description: "test",
+					Keys:        []string{"MandatoryList"},
+					Changes: types.Params{
+						MandatoryList: types.DenomList{
+							{
+								BaseDenom:   oracletypes.OjoDenom,
+								SymbolDenom: oracletypes.OjoSymbol,
+								Exponent:    6,
+							},
+							{
+								BaseDenom:   oracletypes.AtomDenom,
+								SymbolDenom: oracletypes.AtomSymbol,
+								Exponent:    6,
+							},
 						},
 					},
 				},
@@ -223,15 +227,17 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 			"invalid mandatory list",
 			&types.MsgGovUpdateParams{
 				Authority:   govAccAddr,
-				Title:       "test",
-				Description: "test",
-				Keys:        []string{"MandatoryList"},
-				Changes: types.Params{
-					MandatoryList: types.DenomList{
-						{
-							BaseDenom:   "test",
-							SymbolDenom: "test",
-							Exponent:    6,
+				Plan: types.ParamUpdatePlan{
+					Title:       "test",
+					Description: "test",
+					Keys:        []string{"MandatoryList"},
+					Changes: types.Params{
+						MandatoryList: types.DenomList{
+							{
+								BaseDenom:   "test",
+								SymbolDenom: "test",
+								Exponent:    6,
+							},
 						},
 					},
 				},
@@ -243,22 +249,24 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 			"valid reward band list",
 			&types.MsgGovUpdateParams{
 				Authority:   govAccAddr,
-				Title:       "test",
-				Description: "test",
-				Keys:        []string{"RewardBands"},
-				Changes: types.Params{
-					RewardBands: types.RewardBandList{
-						{
-							SymbolDenom: types.OjoSymbol,
-							RewardBand:  sdk.NewDecWithPrec(2, 2),
-						},
-						{
-							SymbolDenom: types.AtomSymbol,
-							RewardBand:  sdk.NewDecWithPrec(2, 2),
-						},
-						{
-							SymbolDenom: "symbol",
-							RewardBand:  sdk.NewDecWithPrec(2, 2),
+				Plan: types.ParamUpdatePlan{
+					Title:       "test",
+					Description: "test",
+					Keys:        []string{"RewardBands"},
+					Changes: types.Params{
+						RewardBands: types.RewardBandList{
+							{
+								SymbolDenom: types.OjoSymbol,
+								RewardBand:  sdk.NewDecWithPrec(2, 2),
+							},
+							{
+								SymbolDenom: types.AtomSymbol,
+								RewardBand:  sdk.NewDecWithPrec(2, 2),
+							},
+							{
+								SymbolDenom: "symbol",
+								RewardBand:  sdk.NewDecWithPrec(2, 2),
+							},
 						},
 					},
 				},
@@ -270,18 +278,20 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 			"invalid reward band list",
 			&types.MsgGovUpdateParams{
 				Authority:   govAccAddr,
-				Title:       "test",
-				Description: "test",
-				Keys:        []string{"RewardBands"},
-				Changes: types.Params{
-					RewardBands: types.RewardBandList{
-						{
-							SymbolDenom: types.OjoSymbol,
-							RewardBand:  sdk.NewDecWithPrec(2, 0),
-						},
-						{
-							SymbolDenom: types.AtomSymbol,
-							RewardBand:  sdk.NewDecWithPrec(2, 2),
+				Plan: types.ParamUpdatePlan{
+					Title:       "test",
+					Description: "test",
+					Keys:        []string{"RewardBands"},
+					Changes: types.Params{
+						RewardBands: types.RewardBandList{
+							{
+								SymbolDenom: types.OjoSymbol,
+								RewardBand:  sdk.NewDecWithPrec(2, 0),
+							},
+							{
+								SymbolDenom: types.AtomSymbol,
+								RewardBand:  sdk.NewDecWithPrec(2, 2),
+							},
 						},
 					},
 				},
@@ -293,31 +303,33 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 			"multiple valid params",
 			&types.MsgGovUpdateParams{
 				Authority:   govAccAddr,
-				Title:       "test",
-				Description: "test",
-				Keys: []string{
-					"VotePeriod",
-					"VoteThreshold",
-					"RewardDistributionWindow",
-					"SlashFraction",
-					"SlashWindow",
-					"MinValidPerWindow",
-					"HistoricStampPeriod",
-					"MedianStampPeriod",
-					"MaximumPriceStamps",
-					"MaximumMedianStamps",
-				},
-				Changes: types.Params{
-					VotePeriod:               10,
-					VoteThreshold:            sdk.NewDecWithPrec(40, 2),
-					RewardDistributionWindow: types.BlocksPerWeek,
-					SlashFraction:            sdk.NewDecWithPrec(2, 4),
-					SlashWindow:              types.BlocksPerDay,
-					MinValidPerWindow:        sdk.NewDecWithPrec(4, 2),
-					HistoricStampPeriod:      10 * types.BlocksPerMinute,
-					MedianStampPeriod:        5 * types.BlocksPerHour,
-					MaximumPriceStamps:       40,
-					MaximumMedianStamps:      30,
+				Plan: types.ParamUpdatePlan{
+					Title:       "test",
+					Description: "test",
+					Keys: []string{
+						"VotePeriod",
+						"VoteThreshold",
+						"RewardDistributionWindow",
+						"SlashFraction",
+						"SlashWindow",
+						"MinValidPerWindow",
+						"HistoricStampPeriod",
+						"MedianStampPeriod",
+						"MaximumPriceStamps",
+						"MaximumMedianStamps",
+					},
+					Changes: types.Params{
+						VotePeriod:               10,
+						VoteThreshold:            sdk.NewDecWithPrec(40, 2),
+						RewardDistributionWindow: types.BlocksPerWeek,
+						SlashFraction:            sdk.NewDecWithPrec(2, 4),
+						SlashWindow:              types.BlocksPerDay,
+						MinValidPerWindow:        sdk.NewDecWithPrec(4, 2),
+						HistoricStampPeriod:      10 * types.BlocksPerMinute,
+						MedianStampPeriod:        5 * types.BlocksPerHour,
+						MaximumPriceStamps:       40,
+						MaximumMedianStamps:      30,
+					},
 				},
 			},
 			false,
@@ -327,11 +339,13 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 			"invalid vote threshold",
 			&types.MsgGovUpdateParams{
 				Authority:   govAccAddr,
-				Title:       "test",
-				Description: "test",
-				Keys:        []string{"VoteThreshold"},
-				Changes: types.Params{
-					VoteThreshold: sdk.NewDecWithPrec(10, 2),
+				Plan: types.ParamUpdatePlan{
+					Title:       "test",
+					Description: "test",
+					Keys:        []string{"VoteThreshold"},
+					Changes: types.Params{
+						VoteThreshold: sdk.NewDecWithPrec(10, 2),
+					},
 				},
 			},
 			true,
@@ -341,12 +355,14 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 			"invalid slash window",
 			&types.MsgGovUpdateParams{
 				Authority:   govAccAddr,
-				Title:       "test",
-				Description: "test",
-				Keys:        []string{"VotePeriod", "SlashWindow"},
-				Changes: types.Params{
-					VotePeriod:  5,
-					SlashWindow: 4,
+				Plan: types.ParamUpdatePlan{
+					Title:       "test",
+					Description: "test",
+					Keys:        []string{"VotePeriod", "SlashWindow"},
+					Changes: types.Params{
+						VotePeriod:  5,
+						SlashWindow: 4,
+					},
 				},
 			},
 			true,
@@ -356,10 +372,12 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 			"invalid key",
 			&types.MsgGovUpdateParams{
 				Authority:   govAccAddr,
-				Title:       "test",
-				Description: "test",
-				Keys:        []string{"test"},
-				Changes:     types.Params{},
+				Plan: types.ParamUpdatePlan{
+					Title:       "test",
+					Description: "test",
+					Keys:        []string{"test"},
+					Changes:     types.Params{},
+				},
 			},
 			true,
 			"test is not an existing oracle param key",
@@ -369,14 +387,16 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 			"bad authority",
 			&types.MsgGovUpdateParams{
 				Authority:   "ojo1zypqa76je7pxsdwkfah6mu9a583sju6xzthge3",
-				Title:       "test",
-				Description: "test",
-				Keys:        []string{"RewardBands"},
-				Changes: types.Params{
-					RewardBands: types.RewardBandList{
-						{
-							SymbolDenom: types.OjoSymbol,
-							RewardBand:  sdk.NewDecWithPrec(2, 2),
+				Plan: types.ParamUpdatePlan{
+					Title:       "test",
+					Description: "test",
+					Keys:        []string{"RewardBands"},
+					Changes: types.Params{
+						RewardBands: types.RewardBandList{
+							{
+								SymbolDenom: types.OjoSymbol,
+								RewardBand:  sdk.NewDecWithPrec(2, 2),
+							},
 						},
 					},
 				},
