@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/cometbft/cometbft/crypto/secp256k1"
+	tmrand "github.com/cometbft/cometbft/libs/rand"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
-	"github.com/cosmos/cosmos-sdk/simapp"
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
-	"github.com/cosmos/cosmos-sdk/x/staking/teststaking"
+	stakingtestutil "github.com/cosmos/cosmos-sdk/x/staking/testutil"
 	"github.com/stretchr/testify/suite"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
-	tmrand "github.com/tendermint/tendermint/libs/rand"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	ojoapp "github.com/ojo-network/ojo/app"
 	appparams "github.com/ojo-network/ojo/app/params"
@@ -30,7 +30,7 @@ const (
 
 // Test addresses
 var (
-	valPubKeys = simapp.CreateTestPubKeys(2)
+	valPubKeys = simtestutil.CreateTestPubKeys(2)
 
 	valPubKey = valPubKeys[0]
 	pubKey    = secp256k1.GenPrivKey().PubKey()
@@ -77,7 +77,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
 	types.RegisterQueryServer(queryHelper, keeper.NewQuerier(app.AirdropKeeper))
 
-	sh := teststaking.NewHelper(s.T(), ctx, *app.StakingKeeper)
+	sh := stakingtestutil.NewHelper(s.T(), ctx, app.StakingKeeper)
 	sh.Denom = bondDenom
 	amt := sdk.TokensFromConsensusPower(100, sdk.DefaultPowerReduction)
 
@@ -90,7 +90,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	sh.CreateValidator(valAddr, valPubKey, amt, true)
 	sh.CreateValidator(valAddr2, valPubKey2, amt, true)
 
-	staking.EndBlocker(ctx, *app.StakingKeeper)
+	staking.EndBlocker(ctx, app.StakingKeeper)
 
 	s.app = app
 	s.ctx = ctx

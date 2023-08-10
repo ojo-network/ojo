@@ -8,12 +8,12 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
-	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	appparams "github.com/ojo-network/ojo/app/params"
 	ojosim "github.com/ojo-network/ojo/util/sim"
 	"github.com/ojo-network/ojo/x/oracle/keeper"
@@ -68,19 +68,19 @@ func WeightedOperations(
 
 	appParams.GetOrGenerate(cdc, OpWeightMsgAggregateExchangeRatePrevote, &weightMsgAggregateExchangeRatePrevote, nil,
 		func(_ *rand.Rand) {
-			weightMsgAggregateExchangeRatePrevote = simappparams.DefaultWeightMsgSend * 2
+			weightMsgAggregateExchangeRatePrevote = ojosim.DefaultWeightMsgSend * 2
 		},
 	)
 
 	appParams.GetOrGenerate(cdc, OpWeightMsgAggregateExchangeRateVote, &weightMsgAggregateExchangeRateVote, nil,
 		func(_ *rand.Rand) {
-			weightMsgAggregateExchangeRateVote = simappparams.DefaultWeightMsgSend * 2
+			weightMsgAggregateExchangeRateVote = ojosim.DefaultWeightMsgSend * 2
 		},
 	)
 
 	appParams.GetOrGenerate(cdc, OpWeightMsgDelegateFeedConsent, &weightMsgDelegateFeedConsent, nil,
 		func(_ *rand.Rand) {
-			weightMsgDelegateFeedConsent = simappparams.DefaultWeightMsgSetWithdrawAddress
+			weightMsgDelegateFeedConsent = ojosim.DefaultWeightMsgSetWithdrawAddress
 		},
 	)
 
@@ -224,7 +224,7 @@ func SimulateMsgDelegateFeedConsent(ak types.AccountKeeper, bk bankkeeper.Keeper
 func deliver(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, ak simulation.AccountKeeper,
 	bk bankkeeper.Keeper, from simtypes.Account, msg sdk.Msg, coins sdk.Coins,
 ) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
-	cfg := simappparams.MakeTestEncodingConfig()
+	cfg := testutil.MakeTestEncodingConfig()
 	o := simulation.OperationInput{
 		R:               r,
 		App:             app,

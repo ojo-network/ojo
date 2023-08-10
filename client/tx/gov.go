@@ -31,6 +31,8 @@ func (c *Client) TxVoteYes(proposalID uint64) (*sdk.TxResponse, error) {
 func (c *Client) TxSubmitProposal(
 	msgs []sdk.Msg,
 	deposit sdk.Coins,
+	title string,
+	summary string,
 ) (*sdk.TxResponse, error) {
 	address, err := c.keyringRecord.GetAddress()
 	if err != nil {
@@ -42,6 +44,8 @@ func (c *Client) TxSubmitProposal(
 		deposit,
 		address.String(),
 		"",
+		title,
+		summary,
 	)
 	if err != nil {
 		return nil, err
@@ -54,7 +58,6 @@ func (c *Client) TxSubmitProposal(
 func (c *Client) TxSubmitLegacyProposal(
 	changes []proposal.ParamChange,
 ) (*sdk.TxResponse, error) {
-
 	content := proposal.NewParameterChangeProposal(
 		"update historic stamp period",
 		"auto grpc proposal",

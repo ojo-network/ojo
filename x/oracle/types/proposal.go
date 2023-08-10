@@ -4,9 +4,7 @@ import (
 	gov "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 )
 
-var (
-	proposalTypeMsgGovUpdateParams = MsgGovUpdateParams{}.Type()
-)
+var proposalTypeMsgGovUpdateParams = MsgGovUpdateParams{}.Type()
 
 func init() {
 	gov.RegisterProposalType(proposalTypeMsgGovUpdateParams)

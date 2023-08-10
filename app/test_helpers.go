@@ -3,53 +3,38 @@ package app
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
+	dbm "github.com/cometbft/cometbft-db"
+	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/cometbft/cometbft/libs/log"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	tmtypes "github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
-	pruningtypes "github.com/cosmos/cosmos-sdk/pruning/types"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
+	pruningtypes "github.com/cosmos/cosmos-sdk/store/pruning/types"
 	"github.com/cosmos/cosmos-sdk/testutil/mock"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/stretchr/testify/require"
-	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/libs/log"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	tmtypes "github.com/tendermint/tendermint/types"
-	dbm "github.com/tendermint/tm-db"
 
 	"github.com/ojo-network/ojo/app/params"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
-
-// DefaultConsensusParams defines the default Tendermint consensus params used
-// in App testing.
-var DefaultConsensusParams = &abci.ConsensusParams{
-	Block: &abci.BlockParams{
-		MaxBytes: 200000,
-		MaxGas:   2000000,
-	},
-	Evidence: &tmproto.EvidenceParams{
-		MaxAgeNumBlocks: 302400,
-		MaxAgeDuration:  504 * time.Hour, // 3 weeks is the max duration
-		MaxBytes:        10000,
-	},
-	Validator: &tmproto.ValidatorParams{
-		PubKeyTypes: []string{
-			tmtypes.ABCIPubKeyTypeEd25519,
-		},
-	},
-}
 
 type EmptyAppOptions struct{}
 
@@ -101,7 +86,7 @@ func SetupWithGenesisValSet(
 	app.InitChain(
 		abci.RequestInitChain{
 			Validators:      []abci.ValidatorUpdate{},
-			ConsensusParams: DefaultConsensusParams,
+			ConsensusParams: simtestutil.DefaultConsensusParams,
 			AppStateBytes:   stateBytes,
 		},
 	)
@@ -198,6 +183,7 @@ func GenesisStateWithValSet(codec codec.Codec, genesisState map[string]json.RawM
 		balances,
 		totalSupply,
 		[]banktypes.Metadata{},
+		[]banktypes.SendEnabled{},
 	)
 	genesisState[banktypes.ModuleName] = codec.MustMarshalJSON(bankGenesis)
 
@@ -206,7 +192,8 @@ func GenesisStateWithValSet(codec codec.Codec, genesisState map[string]json.RawM
 
 func setup(withGenesis bool, invCheckPeriod uint) (*App, GenesisState) {
 	db := dbm.NewMemDB()
-	encCdc := MakeEncodingConfig()
+	appOptions := make(simtestutil.AppOptionsMap, 0)
+
 	app := New(
 		log.NewNopLogger(),
 		db,
@@ -215,11 +202,10 @@ func setup(withGenesis bool, invCheckPeriod uint) (*App, GenesisState) {
 		map[int64]bool{},
 		DefaultNodeHome,
 		invCheckPeriod,
-		encCdc,
-		EmptyAppOptions{},
+		appOptions,
 	)
 	if withGenesis {
-		return app, NewDefaultGenesisState(encCdc.Codec)
+		return app, app.DefaultGenesis()
 	}
 
 	return app, GenesisState{}
@@ -228,7 +214,7 @@ func setup(withGenesis bool, invCheckPeriod uint) (*App, GenesisState) {
 // IntegrationTestNetworkConfig returns a networking configuration used for
 // integration tests using the SDK's in-process network test suite.
 func IntegrationTestNetworkConfig() network.Config {
-	cfg := network.DefaultConfig()
+	cfg := network.DefaultConfig(NewTestNetworkFixture)
 	encCfg := MakeEncodingConfig()
 	cdc := encCfg.Codec
 
@@ -260,7 +246,7 @@ func IntegrationTestNetworkConfig() network.Config {
 	}
 
 	votingPeriod := time.Minute
-	govGenState.VotingParams.VotingPeriod = &votingPeriod
+	govGenState.Params.VotingPeriod = &votingPeriod
 
 	bz, err = cdc.MarshalJSON(&govGenState)
 	if err != nil {
@@ -275,21 +261,43 @@ func IntegrationTestNetworkConfig() network.Config {
 	cfg.GenesisState = appGenState
 	cfg.MinGasPrices = params.ProtocolMinGasPrice.String()
 	cfg.BondDenom = params.BondDenom
-	cfg.AppConstructor = func(val network.Validator) servertypes.Application {
+
+	return cfg
+}
+
+func NewTestNetworkFixture() network.TestFixture {
+	dir, err := os.MkdirTemp("", "simapp")
+	if err != nil {
+		panic(fmt.Sprintf("failed creating temporary directory: %v", err))
+	}
+	defer os.RemoveAll(dir)
+
+	app, genState := setup(true, 100)
+
+	appCtr := func(val network.ValidatorI) servertypes.Application {
 		return New(
-			val.Ctx.Logger,
+			val.GetCtx().Logger,
 			dbm.NewMemDB(),
 			nil,
 			true,
 			make(map[int64]bool),
-			val.Ctx.Config.RootDir,
+			val.GetCtx().Config.RootDir,
 			0,
-			encCfg,
 			EmptyAppOptions{},
-			baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(val.AppConfig.Pruning)),
-			baseapp.SetMinGasPrices(val.AppConfig.MinGasPrices),
+			baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(val.GetAppConfig().Pruning)),
+			baseapp.SetMinGasPrices(val.GetAppConfig().MinGasPrices),
+			baseapp.SetChainID(val.GetCtx().Viper.GetString(flags.FlagChainID)),
 		)
 	}
 
-	return cfg
+	return network.TestFixture{
+		AppConstructor: appCtr,
+		GenesisState:   genState,
+		EncodingConfig: testutil.TestEncodingConfig{
+			InterfaceRegistry: app.InterfaceRegistry(),
+			Codec:             app.AppCodec(),
+			TxConfig:          app.txConfig,
+			Amino:             app.LegacyAmino(),
+		},
+	}
 }

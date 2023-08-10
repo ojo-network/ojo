@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	tmrand "github.com/tendermint/tendermint/libs/rand"
+	tmrand "github.com/cometbft/cometbft/libs/rand"
 
-	ojoapp "github.com/ojo-network/ojo/app"
-	"github.com/ojo-network/ojo/app/params"
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	"github.com/ojo-network/ojo/client/tx"
 )
 
@@ -17,24 +16,17 @@ const (
 	keyringAppName    = "testnet"
 )
 
-var (
-	encodingConfig params.EncodingConfig
-	cdc            codec.Codec
-)
-
-func init() {
-	encodingConfig = ojoapp.MakeEncodingConfig()
-	cdc = encodingConfig.Codec
-}
+var encodingConfig testutil.TestEncodingConfig
 
 type chain struct {
+	cdc        codec.Codec
 	dataDir    string
 	id         string
 	validators []*validator
 	accounts   []*tx.OjoAccount
 }
 
-func newChain() (*chain, error) {
+func newChain(cdc codec.Codec) (*chain, error) {
 	tmpDir, err := os.MkdirTemp("", "ojo-e2e-testnet-")
 	if err != nil {
 		return nil, err
@@ -43,6 +35,7 @@ func newChain() (*chain, error) {
 	return &chain{
 		id:      "chain-" + tmrand.NewRand().Str(6),
 		dataDir: tmpDir,
+		cdc:     cdc,
 	}, nil
 }
 

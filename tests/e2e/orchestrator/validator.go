@@ -7,6 +7,11 @@ import (
 	"path"
 	"path/filepath"
 
+	tmcfg "github.com/cometbft/cometbft/config"
+	tmos "github.com/cometbft/cometbft/libs/os"
+	p2p "github.com/cometbft/cometbft/p2p"
+	"github.com/cometbft/cometbft/privval"
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdkcrypto "github.com/cosmos/cosmos-sdk/crypto"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
@@ -20,10 +25,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/ory/dockertest/v3"
-	tmcfg "github.com/tendermint/tendermint/config"
-	tmos "github.com/tendermint/tendermint/libs/os"
-	p2p "github.com/tendermint/tendermint/p2p"
-	"github.com/tendermint/tendermint/privval"
 
 	ojoapp "github.com/ojo-network/ojo/app"
 	appparams "github.com/ojo-network/ojo/app/params"
@@ -74,7 +75,7 @@ func (v *validator) init() error {
 		return err
 	}
 
-	appState, err := json.MarshalIndent(ojoapp.ModuleBasics.DefaultGenesis(cdc), "", " ")
+	appState, err := json.MarshalIndent(ojoapp.ModuleBasics.DefaultGenesis(v.chain.cdc), "", " ")
 	if err != nil {
 		return fmt.Errorf("failed to JSON encode app genesis state: %w", err)
 	}
@@ -130,7 +131,7 @@ func (v *validator) createConsensusKey() error {
 	return nil
 }
 
-func (v *validator) createKeyFromMnemonic(name, mnemonic string) error {
+func (v *validator) createKeyFromMnemonic(cdc codec.Codec, name, mnemonic string) error {
 	kb, err := keyring.New(keyringAppName, keyring.BackendTest, v.configDir(), nil, cdc)
 	if err != nil {
 		return err
@@ -170,7 +171,7 @@ func (v *validator) createKey(name string) error {
 		return err
 	}
 
-	return v.createKeyFromMnemonic(name, mnemonic)
+	return v.createKeyFromMnemonic(v.chain.cdc, name, mnemonic)
 }
 
 func (v *validator) buildCreateValidatorMsg(amount sdk.Coin) (sdk.Msg, error) {
@@ -203,7 +204,7 @@ func (v *validator) buildCreateValidatorMsg(amount sdk.Coin) (sdk.Msg, error) {
 	)
 }
 
-func (v *validator) signMsg(msgs ...sdk.Msg) (*sdktx.Tx, error) {
+func (v *validator) signMsg(cdc codec.Codec, msgs ...sdk.Msg) (*sdktx.Tx, error) {
 	txBuilder := encodingConfig.TxConfig.NewTxBuilder()
 
 	if err := txBuilder.SetMsgs(msgs...); err != nil {
@@ -277,5 +278,5 @@ func (v *validator) signMsg(msgs ...sdk.Msg) (*sdktx.Tx, error) {
 		return nil, err
 	}
 
-	return decodeTx(bz)
+	return decodeTx(cdc, bz)
 }

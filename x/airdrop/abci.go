@@ -27,7 +27,6 @@ func createOriginAccounts(ctx sdk.Context, k keeper.Keeper) {
 			ctx.Logger().Error("error creating airdrop account", err)
 		}
 	}
-
 }
 
 func distributeUnclaimedAirdrops(ctx sdk.Context, k keeper.Keeper) error {
