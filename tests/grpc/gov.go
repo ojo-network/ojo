@@ -54,9 +54,15 @@ func ParseProposalID(response *sdk.TxResponse) (uint64, error) {
 	return 0, fmt.Errorf("unable to find proposalID in tx response")
 }
 
-func SubmitAndPassProposal(ojoClient *client.OjoClient, msgs []sdk.Msg) error {
+func SubmitAndPassProposal(ojoClient *client.OjoClient, msgs []sdk.Msg, title, summary string) error {
 	deposit := sdk.NewCoins(sdk.NewCoin("uojo", sdk.NewInt(10000000)))
-	resp, err := ojoClient.TxClient.TxSubmitProposal(msgs, deposit)
+	resp, err := ojoClient.TxClient.TxSubmitProposal(msgs, deposit, title, summary)
+	if err != nil {
+		return err
+	}
+
+	// retry
+	resp, err = retryTx(ojoClient, resp)
 	if err != nil {
 		return err
 	}
@@ -82,6 +88,12 @@ func SubmitAndPassProposal(ojoClient *client.OjoClient, msgs []sdk.Msg) error {
 // SubmitAndPassProposal submits a proposal and votes yes on it
 func SubmitAndPassLegacyProposal(ojoClient *client.OjoClient, changes []proposal.ParamChange) error {
 	resp, err := ojoClient.TxClient.TxSubmitLegacyProposal(changes)
+	if err != nil {
+		return err
+	}
+
+	// retry
+	resp, err = retryTx(ojoClient, resp)
 	if err != nil {
 		return err
 	}
@@ -126,4 +138,21 @@ func OracleParamChanges(
 			Value:    fmt.Sprintf("\"%d\"", medianStampPeriod),
 		},
 	}
+}
+
+func retryTx(ojoClient *client.OjoClient, resp *sdk.TxResponse) (*sdk.TxResponse, error) {
+	for i := 0; i < 5; i++ {
+		newResp, err := ojoClient.QueryTxHash(resp.TxHash)
+		if err != nil && i == 4 {
+			return nil, err
+		}
+		if err == nil {
+			resp = newResp
+			break
+		}
+
+		time.Sleep(time.Second * (1 + time.Duration(i)))
+	}
+
+	return resp, nil
 }

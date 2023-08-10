@@ -3,6 +3,10 @@ package cmd
 import (
 	"os"
 
+	rosettaCmd "cosmossdk.io/tools/rosetta/cmd"
+
+	tmcfg "github.com/cometbft/cometbft/config"
+	tmcli "github.com/cometbft/cometbft/libs/cli"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/config"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -18,15 +22,14 @@ import (
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	"github.com/spf13/cobra"
-	tmcfg "github.com/tendermint/tendermint/config"
-	tmcli "github.com/tendermint/tendermint/libs/cli"
 
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	app "github.com/ojo-network/ojo/app"
 	appparams "github.com/ojo-network/ojo/app/params"
 )
 
 // NewRootCmd returns the root command handler for the Ojo daemon.
-func NewRootCmd() (*cobra.Command, appparams.EncodingConfig) {
+func NewRootCmd() (*cobra.Command, testutil.TestEncodingConfig) {
 	encodingConfig := app.MakeEncodingConfig()
 	moduleManager := app.ModuleBasics
 
@@ -37,7 +40,7 @@ func NewRootCmd() (*cobra.Command, appparams.EncodingConfig) {
 		WithLegacyAmino(encodingConfig.Amino).
 		WithInput(os.Stdin).
 		WithAccountRetriever(types.AccountRetriever{}).
-		WithBroadcastMode(flags.BroadcastBlock).
+		WithBroadcastMode(flags.BroadcastSync).
 		WithHomeDir(app.DefaultNodeHome).
 		WithViper(appparams.Name)
 
@@ -138,7 +141,8 @@ func initRootCmd(rootCmd *cobra.Command, a appCreator) {
 
 	rootCmd.AddCommand(
 		genutilcli.InitCmd(a.moduleManager, app.DefaultNodeHome),
-		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, app.DefaultNodeHome),
+		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, app.DefaultNodeHome,
+			gentxModule.GenTxValidator),
 		genutilcli.MigrateGenesisCmd(),
 		genutilcli.GenTxCmd(
 			a.moduleManager,
@@ -155,16 +159,28 @@ func initRootCmd(rootCmd *cobra.Command, a appCreator) {
 
 	server.AddCommands(rootCmd, app.DefaultNodeHome, a.newApp, a.appExport, addModuleInitFlags)
 
-	// add keybase, auxiliary RPC, query, and tx child commands
+	// add keybase, auxiliary RPC, query, genesis, and tx child commands
 	rootCmd.AddCommand(
 		rpc.StatusCommand(),
+		genesisCommand(a.encCfg),
 		queryCommand(a),
 		txCommand(a),
 		keys.Commands(app.DefaultNodeHome),
 	)
 
 	// add rosetta
-	rootCmd.AddCommand(server.RosettaCommand(a.encCfg.InterfaceRegistry, a.encCfg.Codec))
+	rootCmd.AddCommand(rosettaCmd.RosettaCommand(a.encCfg.InterfaceRegistry, a.encCfg.Codec))
+}
+
+// genesisCommand builds genesis-related `simd genesis` command. Users may
+// provide application specific commands as a parameter.
+func genesisCommand(encodingConfig testutil.TestEncodingConfig, cmds ...*cobra.Command) *cobra.Command {
+	cmd := genutilcli.GenesisCoreCommand(encodingConfig.TxConfig, app.ModuleBasics, app.DefaultNodeHome)
+
+	for _, subCmd := range cmds {
+		cmd.AddCommand(subCmd)
+	}
+	return cmd
 }
 
 func addModuleInitFlags(startCmd *cobra.Command) {

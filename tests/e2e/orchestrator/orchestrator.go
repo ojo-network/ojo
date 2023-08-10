@@ -14,19 +14,22 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	"github.com/ojo-network/ojo/app"
 	appparams "github.com/ojo-network/ojo/app/params"
 	"github.com/ojo-network/ojo/client"
 
+	dbm "github.com/cometbft/cometbft-db"
+	tmconfig "github.com/cometbft/cometbft/config"
+	tmjson "github.com/cometbft/cometbft/libs/json"
+	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
 	"github.com/cosmos/cosmos-sdk/server"
 	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
 	"github.com/spf13/viper"
-	tmconfig "github.com/tendermint/tendermint/config"
-	tmjson "github.com/tendermint/tendermint/libs/json"
-	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	govtypesv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
@@ -41,7 +44,8 @@ const (
 	ojoGrpcPort       = "9090"
 	ojoMaxStartupTime = 40 // seconds
 
-	priceFeederContainerRepo  = "ghcr.io/ojo-network/price-feeder-ojo"
+	// TODO: update original pf instance with sdk 0.47
+	priceFeederContainerRepo  = "ghcr.io/ojo-network/price-feeder-ojo-47"
 	priceFeederServerPort     = "7171/tcp"
 	priceFeederMaxStartupTime = 20 // seconds
 
@@ -70,8 +74,29 @@ func (o *Orchestrator) InitResources(t *testing.T) {
 	t.Log("setting up e2e integration test suite...")
 	appparams.SetAddressPrefixes()
 
+	db := dbm.NewMemDB()
+	app := app.New(
+		nil,
+		db,
+		nil,
+		true,
+		map[int64]bool{},
+		"",
+		0,
+		app.EmptyAppOptions{},
+	)
+	encodingConfig = testutil.TestEncodingConfig{
+		InterfaceRegistry: app.InterfaceRegistry(),
+		Codec:             app.AppCodec(),
+		TxConfig:          app.GetTxConfig(),
+		Amino:             app.LegacyAmino(),
+	}
+
+	// codec
+	cdc := encodingConfig.Codec
+
 	var err error
-	o.chain, err = newChain()
+	o.chain, err = newChain(cdc)
 	require.NoError(t, err)
 
 	t.Logf("starting e2e infrastructure; chain-id: %s; datadir: %s", o.chain.id, o.chain.dataDir)
@@ -119,7 +144,7 @@ func (o *Orchestrator) initNodes(t *testing.T) {
 		valAddr, err := val.keyInfo.GetAddress()
 		require.NoError(t, err)
 		require.NoError(t,
-			addGenesisAccount(val0ConfigDir, "", initBalanceStr, valAddr),
+			addGenesisAccount(o.chain.cdc, val0ConfigDir, "", initBalanceStr, valAddr),
 		)
 	}
 
@@ -152,7 +177,7 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 
 	// Oracle
 	var oracleGenState oracletypes.GenesisState
-	require.NoError(t, cdc.UnmarshalJSON(appGenState[oracletypes.ModuleName], &oracleGenState))
+	require.NoError(t, o.chain.cdc.UnmarshalJSON(appGenState[oracletypes.ModuleName], &oracleGenState))
 
 	oracleGenState.Params.HistoricStampPeriod = 3
 	oracleGenState.Params.MaximumPriceStamps = 4
@@ -162,13 +187,13 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 	oracleGenState.Params.MandatoryList = oracleMandatoryList
 	oracleGenState.Params.RewardBands = oracleRewardBands
 
-	bz, err := cdc.MarshalJSON(&oracleGenState)
+	bz, err := o.chain.cdc.MarshalJSON(&oracleGenState)
 	require.NoError(t, err)
 	appGenState[oracletypes.ModuleName] = bz
 
 	// Airdrop
 	var airdropGenState airdroptypes.GenesisState
-	require.NoError(t, cdc.UnmarshalJSON(appGenState[airdroptypes.ModuleName], &airdropGenState))
+	require.NoError(t, o.chain.cdc.UnmarshalJSON(appGenState[airdroptypes.ModuleName], &airdropGenState))
 
 	// Use the first and only account as the airdrop origin
 	airdropOriginAddress, err := o.chain.accounts[0].KeyInfo.GetAddress()
@@ -182,24 +207,24 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 		},
 	}
 
-	bz, err = cdc.MarshalJSON(&airdropGenState)
+	bz, err = o.chain.cdc.MarshalJSON(&airdropGenState)
 	require.NoError(t, err)
 	appGenState[airdroptypes.ModuleName] = bz
 
 	// Gov
 	var govGenState govtypesv1.GenesisState
-	require.NoError(t, cdc.UnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState))
+	require.NoError(t, o.chain.cdc.UnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState))
 
-	var votingPeroid = 5 * time.Second
-	govGenState.VotingParams.VotingPeriod = &votingPeroid
+	votingPeroid := 5 * time.Second
+	govGenState.Params.VotingPeriod = &votingPeroid
 
-	bz, err = cdc.MarshalJSON(&govGenState)
+	bz, err = o.chain.cdc.MarshalJSON(&govGenState)
 	require.NoError(t, err)
 	appGenState[govtypes.ModuleName] = bz
 
 	// Genesis Txs
 	var genUtilGenState genutiltypes.GenesisState
-	require.NoError(t, cdc.UnmarshalJSON(appGenState[genutiltypes.ModuleName], &genUtilGenState))
+	require.NoError(t, o.chain.cdc.UnmarshalJSON(appGenState[genutiltypes.ModuleName], &genUtilGenState))
 
 	genTxs := make([]json.RawMessage, len(o.chain.validators))
 	for i, val := range o.chain.validators {
@@ -211,10 +236,10 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 		}
 		require.NoError(t, err)
 
-		signedTx, err := val.signMsg(createValmsg)
+		signedTx, err := val.signMsg(o.chain.cdc, createValmsg)
 		require.NoError(t, err)
 
-		txRaw, err := cdc.MarshalJSON(signedTx)
+		txRaw, err := o.chain.cdc.MarshalJSON(signedTx)
 		require.NoError(t, err)
 
 		genTxs[i] = txRaw
@@ -222,7 +247,7 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 
 	genUtilGenState.GenTxs = genTxs
 
-	bz, err = cdc.MarshalJSON(&genUtilGenState)
+	bz, err = o.chain.cdc.MarshalJSON(&genUtilGenState)
 	require.NoError(t, err)
 	appGenState[genutiltypes.ModuleName] = bz
 
@@ -280,7 +305,9 @@ func (o *Orchestrator) initValidatorConfigs(t *testing.T) {
 
 		appConfig := srvconfig.DefaultConfig()
 		appConfig.API.Enable = true
+		appConfig.API.Address = "tcp://0.0.0.0:1317"
 		appConfig.MinGasPrices = minGasPrice
+		appConfig.GRPC.Address = "0.0.0.0:9090"
 
 		srvconfig.WriteConfigFile(appCfgPath, appConfig)
 	}
@@ -411,7 +438,7 @@ func (o *Orchestrator) runPriceFeeder(t *testing.T) {
 	checkHealth := func() bool {
 		resp, err := http.Get(endpoint)
 		if err != nil {
-			t.Log("Price feeder endpoint not available", err)
+			t.Log("Price feeder endpoint not available", err, endpoint)
 			return false
 		}
 
