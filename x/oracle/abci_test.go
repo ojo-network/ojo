@@ -497,6 +497,10 @@ func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 	}
 }
 
+func (s *IntegrationTestSuite) TestUpdateOracleParams(
+	
+)
+
 func TestOracleTestSuite(t *testing.T) {
 	suite.Run(t, new(IntegrationTestSuite))
 }

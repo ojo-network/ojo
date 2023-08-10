@@ -135,7 +135,7 @@ message ValidatorRewardSet {
 message ParamUpdatePlan {
   option (gogoproto.equal)            = true;
   option (gogoproto.goproto_getters)  = false;
-  option (gogoproto.goproto_stringer) = true;
+  option (gogoproto.goproto_stringer) = false;
 
   string title         = 1;
   string description   = 2;

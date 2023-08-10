@@ -363,7 +363,7 @@ func (k Keeper) ScheduleParamUpdatePlan(ctx sdk.Context, plan types.ParamUpdateP
 	store := ctx.KVStore(k.storeKey)
 
 	bz := k.cdc.MustMarshal(&plan)
-	store.Set(types.KeyParamUpdatePlan(uint64(plan.Height)), bz)
+	store.Set(types.KeyParamUpdatePlan(), bz)
 
 	return nil
 }
@@ -371,7 +371,7 @@ func (k Keeper) ScheduleParamUpdatePlan(ctx sdk.Context, plan types.ParamUpdateP
 //
 func (k Keeper) GetParamUpdatePlan(ctx sdk.Context) (plan types.ParamUpdatePlan, havePlan bool) {
 	store := ctx.KVStore(k.storeKey)
-	bz := store.Get(types.KeyParamUpdatePlan(uint64(ctx.BlockHeight())))
+	bz := store.Get(types.KeyParamUpdatePlan())
 	if bz == nil {
 		return plan, false
 	}

@@ -88,9 +88,9 @@ func KeyValidatorRewardSet() (key []byte) {
 	return util.ConcatBytes(0, KeyPrefixValidatorRewardSet)
 }
 
-// KeyParamUpdatePlan - stored by *plan title*
-func KeyParamUpdatePlan(blockNum uint64) (key []byte) {
-	return util.ConcatBytes(0, KeyPrefixValidatorRewardSet, util.UintWithNullPrefix(blockNum))
+// KeyParamUpdatePlan
+func KeyParamUpdatePlan() (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixParamUpdatePlan)
 }
 
 // ParseDenomAndBlockFromKey returns the denom and block contained in the *key*
