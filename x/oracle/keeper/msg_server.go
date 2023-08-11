@@ -153,8 +153,33 @@ func (ms msgServer) GovUpdateParams(
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	ms.ScheduleParamUpdatePlan(ctx, msg.Plan)
+	err := ms.ScheduleParamUpdatePlan(ctx, msg.Plan)
+	if err != nil {
+		return nil, err
+	}
 
 	return &types.MsgGovUpdateParamsResponse{}, nil
+}
+
+func (ms msgServer) GovCancelUpdateParams(
+	goCtx context.Context,
+	msg *types.MsgGovCancelUpdateParams,
+) (*types.MsgGovCancelUpdateParamsResponse, error) {
+	if msg.Authority != ms.authority {
+		err := errors.Wrapf(
+			types.ErrNoGovAuthority,
+			"invalid authority; expected %s, got %s",
+			ms.authority,
+			msg.Authority,
+		)
+		return nil, err
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	err := ms.ClearParamUpdatePlan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.MsgGovCancelUpdateParamsResponse{}, nil
 }

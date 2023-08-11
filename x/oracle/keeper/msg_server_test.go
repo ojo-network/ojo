@@ -157,7 +157,7 @@ func (s *IntegrationTestSuite) TestMsgServer_DelegateFeedConsent() {
 
 func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 	govAccAddr := s.app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String()
-
+	fmt.Println("current block height", s.ctx.BlockHeight())
 	testCases := []struct {
 		name      string
 		req       *types.MsgGovUpdateParams
@@ -168,10 +168,11 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 			"valid accept list",
 			&types.MsgGovUpdateParams{
 				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
 				Plan: types.ParamUpdatePlan{
-					Title:       "test",
-					Description: "test",
-					Keys:        []string{"AcceptList"},
+					Keys:    []string{"AcceptList"},
+					Height:  9,
 					Changes: types.Params{
 						AcceptList: types.DenomList{
 							{
@@ -200,10 +201,11 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 			"valid mandatory list",
 			&types.MsgGovUpdateParams{
 				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
 				Plan: types.ParamUpdatePlan{
-					Title:       "test",
-					Description: "test",
-					Keys:        []string{"MandatoryList"},
+					Keys:    []string{"MandatoryList"},
+					Height:  9,
 					Changes: types.Params{
 						MandatoryList: types.DenomList{
 							{
@@ -227,10 +229,11 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 			"invalid mandatory list",
 			&types.MsgGovUpdateParams{
 				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
 				Plan: types.ParamUpdatePlan{
-					Title:       "test",
-					Description: "test",
-					Keys:        []string{"MandatoryList"},
+					Keys:    []string{"MandatoryList"},
+					Height:  9,
 					Changes: types.Params{
 						MandatoryList: types.DenomList{
 							{
@@ -249,10 +252,11 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 			"valid reward band list",
 			&types.MsgGovUpdateParams{
 				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
 				Plan: types.ParamUpdatePlan{
-					Title:       "test",
-					Description: "test",
-					Keys:        []string{"RewardBands"},
+					Keys:    []string{"RewardBands"},
+					Height:  9,
 					Changes: types.Params{
 						RewardBands: types.RewardBandList{
 							{
@@ -278,10 +282,11 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 			"invalid reward band list",
 			&types.MsgGovUpdateParams{
 				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
 				Plan: types.ParamUpdatePlan{
-					Title:       "test",
-					Description: "test",
-					Keys:        []string{"RewardBands"},
+					Keys:    []string{"RewardBands"},
+					Height:  9,
 					Changes: types.Params{
 						RewardBands: types.RewardBandList{
 							{
@@ -303,9 +308,9 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 			"multiple valid params",
 			&types.MsgGovUpdateParams{
 				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
 				Plan: types.ParamUpdatePlan{
-					Title:       "test",
-					Description: "test",
 					Keys: []string{
 						"VotePeriod",
 						"VoteThreshold",
@@ -318,6 +323,7 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 						"MaximumPriceStamps",
 						"MaximumMedianStamps",
 					},
+					Height:  9,
 					Changes: types.Params{
 						VotePeriod:               10,
 						VoteThreshold:            sdk.NewDecWithPrec(40, 2),
@@ -339,10 +345,11 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 			"invalid vote threshold",
 			&types.MsgGovUpdateParams{
 				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
 				Plan: types.ParamUpdatePlan{
-					Title:       "test",
-					Description: "test",
-					Keys:        []string{"VoteThreshold"},
+					Keys:    []string{"VoteThreshold"},
+					Height:  9,
 					Changes: types.Params{
 						VoteThreshold: sdk.NewDecWithPrec(10, 2),
 					},
@@ -355,10 +362,11 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 			"invalid slash window",
 			&types.MsgGovUpdateParams{
 				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
 				Plan: types.ParamUpdatePlan{
-					Title:       "test",
-					Description: "test",
-					Keys:        []string{"VotePeriod", "SlashWindow"},
+					Keys:    []string{"VotePeriod", "SlashWindow"},
+					Height:  9,
 					Changes: types.Params{
 						VotePeriod:  5,
 						SlashWindow: 4,
@@ -372,11 +380,12 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 			"invalid key",
 			&types.MsgGovUpdateParams{
 				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
 				Plan: types.ParamUpdatePlan{
-					Title:       "test",
-					Description: "test",
-					Keys:        []string{"test"},
-					Changes:     types.Params{},
+					Keys:    []string{"test"},
+					Height:  9,
+					Changes: types.Params{},
 				},
 			},
 			true,
@@ -387,10 +396,11 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 			"bad authority",
 			&types.MsgGovUpdateParams{
 				Authority:   "ojo1zypqa76je7pxsdwkfah6mu9a583sju6xzthge3",
+				Title:       "test",
+				Description: "test",
 				Plan: types.ParamUpdatePlan{
-					Title:       "test",
-					Description: "test",
-					Keys:        []string{"RewardBands"},
+					Keys:    []string{"RewardBands"},
+					Height:  9,
 					Changes: types.Params{
 						RewardBands: types.RewardBandList{
 							{
@@ -495,4 +505,45 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 			}
 		})
 	}
+}
+
+func (s *IntegrationTestSuite) TestMsgServer_CancelUpdateGovParams() {
+	govAccAddr := s.app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String()
+
+	// No plan exists
+	_, err := s.msgServer.GovCancelUpdateParams(s.ctx,
+		&types.MsgGovCancelUpdateParams{
+			Authority: govAccAddr,
+		},
+	)
+	s.Require().ErrorContains(err, "No param update plan found: invalid request")
+
+	// Schedule plan
+	_, err = s.msgServer.GovUpdateParams(s.ctx,
+		&types.MsgGovUpdateParams{
+			Authority:   govAccAddr,
+			Title:       "test",
+			Description: "test",
+			Plan: types.ParamUpdatePlan{
+				Keys:        []string{"VoteThreshold"},
+				Height:      100,
+				Changes: types.Params{
+					VoteThreshold: sdk.NewDecWithPrec(10, 2),
+				},
+			},
+		},
+	)
+	s.Require().NoError(err)
+
+	// Plan exists now
+	_, err = s.msgServer.GovCancelUpdateParams(s.ctx,
+		&types.MsgGovCancelUpdateParams{
+			Authority: govAccAddr,
+		},
+	)
+	s.Require().NoError(err)
+
+	plan, found := s.app.OracleKeeper.GetParamUpdatePlan(s.ctx)
+	s.Require().Nil(plan)
+	s.Require().Equal(false, found)
 }

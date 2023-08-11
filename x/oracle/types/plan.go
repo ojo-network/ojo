@@ -9,18 +9,87 @@ import (
 func (p ParamUpdatePlan) String() string {
 	due := p.DueAt()
 	return fmt.Sprintf(`Oracle Param Update Plan
-  Title: %s
+  Keys: %s
   %s
-  Description: %s.`, p.Title, due, p.Description)
+  Changes: %s.`, p.Keys, due, p.Changes)
 }
 
 // ValidateBasic does basic validation of a ParamUpdatePlan
 func (p ParamUpdatePlan) ValidateBasic() error {
-	if len(p.Title) == 0 {
-		return ErrInvalidRequest.Wrap("name cannot be empty")
-	}
 	if p.Height <= 0 {
 		return ErrInvalidRequest.Wrap("height must be greater than 0")
+	}
+
+	for _, key := range p.Keys {
+		switch key {
+		case string(KeyVotePeriod):
+			if err := validateVotePeriod(p.Changes.VotePeriod); err != nil {
+				return err
+			}
+
+		case string(KeyVoteThreshold):
+			if err := validateVoteThreshold(p.Changes.VoteThreshold); err != nil {
+				return err
+			}
+
+		case string(KeyRewardBands):
+			if err := validateRewardBands(p.Changes.RewardBands); err != nil {
+				return err
+			}
+
+		case string(KeyRewardDistributionWindow):
+			if err := validateRewardDistributionWindow(p.Changes.RewardDistributionWindow); err != nil {
+				return err
+			}
+
+		case string(KeyAcceptList):
+			if err := validateDenomList(p.Changes.AcceptList); err != nil {
+				return err
+			}
+
+		case string(KeyMandatoryList):
+			if err := validateDenomList(p.Changes.MandatoryList); err != nil {
+				return err
+			}
+
+		case string(KeySlashFraction):
+			if err := validateSlashFraction(p.Changes.SlashFraction); err != nil {
+				return err
+			}
+
+		case string(KeySlashWindow):
+			if err := validateSlashWindow(p.Changes.SlashWindow); err != nil {
+				return err
+			}
+
+		case string(KeyMinValidPerWindow):
+			if err := validateMinValidPerWindow(p.Changes.MinValidPerWindow); err != nil {
+				return err
+			}
+
+		case string(KeyHistoricStampPeriod):
+			if err := validateHistoricStampPeriod(p.Changes.HistoricStampPeriod); err != nil {
+				return err
+			}
+
+		case string(KeyMedianStampPeriod):
+			if err := validateMedianStampPeriod(p.Changes.MedianStampPeriod); err != nil {
+				return err
+			}
+
+		case string(KeyMaximumPriceStamps):
+			if err := validateMaximumPriceStamps(p.Changes.MaximumPriceStamps); err != nil {
+				return err
+			}
+
+		case string(KeyMaximumMedianStamps):
+			if err := validateMaximumMedianStamps(p.Changes.MaximumMedianStamps); err != nil {
+				return err
+			}
+
+		default:
+			return fmt.Errorf("%s is not an existing oracle param key", key)
+		}
 	}
 
 	return nil

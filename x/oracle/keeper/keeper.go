@@ -354,7 +354,7 @@ func (k Keeper) ValidateFeeder(ctx sdk.Context, feederAddr sdk.AccAddress, valAd
 	return nil
 }
 
-//
+// ScheduleParamUpdatePlan schedules a param update plan.
 func (k Keeper) ScheduleParamUpdatePlan(ctx sdk.Context, plan types.ParamUpdatePlan) error {
 	if plan.Height < ctx.BlockHeight() {
 		return types.ErrInvalidRequest.Wrap("param update cannot be scheduled in the past")
@@ -368,7 +368,21 @@ func (k Keeper) ScheduleParamUpdatePlan(ctx sdk.Context, plan types.ParamUpdateP
 	return nil
 }
 
-//
+// ClearParamUpdatePlan will clear an upcoming param update plan if one exists and return
+// an error if one isn't found.
+func (k Keeper) ClearParamUpdatePlan(ctx sdk.Context) error {
+	store := ctx.KVStore(k.storeKey)
+	bz := store.Get(types.KeyParamUpdatePlan())
+	if bz == nil {
+		return types.ErrInvalidRequest.Wrap("No param update plan found")
+	}
+
+	store.Delete(types.KeyParamUpdatePlan())
+	return nil
+}
+
+// GetParamUpdatePlan will return whether an upcoming param update plan exists and the plan
+// if it does.
 func (k Keeper) GetParamUpdatePlan(ctx sdk.Context) (plan types.ParamUpdatePlan, havePlan bool) {
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(types.KeyParamUpdatePlan())
@@ -380,7 +394,7 @@ func (k Keeper) GetParamUpdatePlan(ctx sdk.Context) (plan types.ParamUpdatePlan,
 	return plan, true
 }
 
-//
+// ExecuteParamUpdatePlan will execute a given param update plan.
 func (k Keeper) ExecuteParamUpdatePlan(ctx sdk.Context, plan types.ParamUpdatePlan) error {
 	for _, key := range plan.Keys {
 		switch key {

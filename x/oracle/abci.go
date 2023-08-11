@@ -20,7 +20,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 	if found && plan.ShouldExecute(ctx) {
 		err := k.ExecuteParamUpdatePlan(ctx, plan)
 		if err != nil {
-			ctx.Logger().Error("Error executing Oracle param update plan", "plan title", plan.Title, "err", err)
+			ctx.Logger().Error("Error executing Oracle param update plan", err)
 		}
 	}
 

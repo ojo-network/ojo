@@ -1,8 +1,6 @@
 package types
 
 import (
-	"fmt"
-
 	"github.com/cometbft/cometbft/crypto/tmhash"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -16,6 +14,7 @@ var (
 	_ sdk.Msg = &MsgAggregateExchangeRatePrevote{}
 	_ sdk.Msg = &MsgAggregateExchangeRateVote{}
 	_ sdk.Msg = &MsgGovUpdateParams{}
+	_ sdk.Msg = &MsgGovCancelUpdateParams{}
 )
 
 func NewMsgAggregateExchangeRatePrevote(
@@ -174,15 +173,12 @@ func (msg MsgDelegateFeedConsent) ValidateBasic() error {
 }
 
 // NewMsgUpdateParams will creates a new MsgUpdateParams instance
-func NewMsgUpdateParams(authority, title, description string, keys []string, changes Params) *MsgGovUpdateParams {
+func NewMsgUpdateParams(authority, title, description string, plan ParamUpdatePlan) *MsgGovUpdateParams {
 	return &MsgGovUpdateParams{
 		Authority:   authority,
-		Plan: ParamUpdatePlan{
-			Title:       title,
-			Description: description,
-			Keys:        keys,
-			Changes:     changes,
-		},
+		Title:       title,
+		Description: description,
+		Plan:        plan,
 	}
 }
 
@@ -210,83 +206,43 @@ func (msg MsgGovUpdateParams) GetSigners() []sdk.AccAddress {
 // specified in the proposal. If one param is invalid, the whole proposal
 // will fail to go through.
 func (msg MsgGovUpdateParams) ValidateBasic() error {
-	plan := msg.Plan
-
-	if err := checkers.ValidateProposal(plan.Title, plan.Description, msg.Authority); err != nil {
+	if err := checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority); err != nil {
 		return err
 	}
 
-	for _, key := range plan.Keys {
-		switch key {
-		case string(KeyVotePeriod):
-			if err := validateVotePeriod(plan.Changes.VotePeriod); err != nil {
-				return err
-			}
+	return msg.Plan.ValidateBasic()
+}
 
-		case string(KeyVoteThreshold):
-			if err := validateVoteThreshold(plan.Changes.VoteThreshold); err != nil {
-				return err
-			}
-
-		case string(KeyRewardBands):
-			if err := validateRewardBands(plan.Changes.RewardBands); err != nil {
-				return err
-			}
-
-		case string(KeyRewardDistributionWindow):
-			if err := validateRewardDistributionWindow(plan.Changes.RewardDistributionWindow); err != nil {
-				return err
-			}
-
-		case string(KeyAcceptList):
-			if err := validateDenomList(plan.Changes.AcceptList); err != nil {
-				return err
-			}
-
-		case string(KeyMandatoryList):
-			if err := validateDenomList(plan.Changes.MandatoryList); err != nil {
-				return err
-			}
-
-		case string(KeySlashFraction):
-			if err := validateSlashFraction(plan.Changes.SlashFraction); err != nil {
-				return err
-			}
-
-		case string(KeySlashWindow):
-			if err := validateSlashWindow(plan.Changes.SlashWindow); err != nil {
-				return err
-			}
-
-		case string(KeyMinValidPerWindow):
-			if err := validateMinValidPerWindow(plan.Changes.MinValidPerWindow); err != nil {
-				return err
-			}
-
-		case string(KeyHistoricStampPeriod):
-			if err := validateHistoricStampPeriod(plan.Changes.HistoricStampPeriod); err != nil {
-				return err
-			}
-
-		case string(KeyMedianStampPeriod):
-			if err := validateMedianStampPeriod(plan.Changes.MedianStampPeriod); err != nil {
-				return err
-			}
-
-		case string(KeyMaximumPriceStamps):
-			if err := validateMaximumPriceStamps(plan.Changes.MaximumPriceStamps); err != nil {
-				return err
-			}
-
-		case string(KeyMaximumMedianStamps):
-			if err := validateMaximumMedianStamps(plan.Changes.MaximumMedianStamps); err != nil {
-				return err
-			}
-
-		default:
-			return fmt.Errorf("%s is not an existing oracle param key", key)
-		}
+// NewMsgCancelUpdateParams will creates a new MsgGovCancelUpdateParams instance
+func NewMsgCancelUpdateParams(authority, title, description string) *MsgGovCancelUpdateParams {
+	return &MsgGovCancelUpdateParams{
+		Authority:   authority,
+		Title:       title,
+		Description: description,
 	}
+}
 
-	return nil
+// Type implements Msg interface
+func (msg MsgGovCancelUpdateParams) Type() string { return sdk.MsgTypeURL(&msg) }
+
+// String implements the Stringer interface.
+func (msg MsgGovCancelUpdateParams) String() string {
+	out, _ := yaml.Marshal(msg)
+	return string(out)
+}
+
+// GetSignBytes implements Msg
+func (msg MsgGovCancelUpdateParams) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(&msg)
+	return sdk.MustSortJSON(bz)
+}
+
+// GetSigners implements Msg
+func (msg MsgGovCancelUpdateParams) GetSigners() []sdk.AccAddress {
+	return checkers.Signers(msg.Authority)
+}
+
+// ValidateBasic implements Msg
+func (msg MsgGovCancelUpdateParams) ValidateBasic() error {
+	return checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority)
 }
