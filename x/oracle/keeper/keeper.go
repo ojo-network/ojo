@@ -359,6 +359,9 @@ func (k Keeper) ScheduleParamUpdatePlan(ctx sdk.Context, plan types.ParamUpdateP
 	if plan.Height < ctx.BlockHeight() {
 		return types.ErrInvalidRequest.Wrap("param update cannot be scheduled in the past")
 	}
+	if err := k.ValidateParamChanges(ctx, plan.Keys, plan.Changes); err != nil {
+		return err
+	}
 
 	store := ctx.KVStore(k.storeKey)
 
@@ -394,8 +397,58 @@ func (k Keeper) GetParamUpdatePlan(ctx sdk.Context) (plan types.ParamUpdatePlan,
 	return plan, true
 }
 
+// ValidateParamChanges validates parameter changes agianst the existing oracle parameters.
+func (k Keeper) ValidateParamChanges(ctx sdk.Context, keys []string, changes types.Params) error {
+	params := k.GetParams(ctx)
+
+	for _, key := range keys {
+		switch key {
+		case string(types.KeyVotePeriod):
+			params.VotePeriod = changes.VotePeriod
+
+		case string(types.KeyVoteThreshold):
+			params.VoteThreshold = changes.VoteThreshold
+
+		case string(types.KeyRewardBands):
+			params.RewardBands = changes.RewardBands
+
+		case string(types.KeyRewardDistributionWindow):
+			params.RewardDistributionWindow = changes.RewardDistributionWindow
+
+		case string(types.KeyAcceptList):
+			params.AcceptList = changes.AcceptList.Normalize()
+
+		case string(types.KeyMandatoryList):
+			params.MandatoryList = changes.MandatoryList.Normalize()
+
+		case string(types.KeySlashFraction):
+			params.SlashFraction = changes.SlashFraction
+
+		case string(types.KeySlashWindow):
+			params.SlashWindow = changes.SlashWindow
+
+		case string(types.KeyMinValidPerWindow):
+			params.MinValidPerWindow = changes.MinValidPerWindow
+
+		case string(types.KeyHistoricStampPeriod):
+			params.HistoricStampPeriod = changes.HistoricStampPeriod
+
+		case string(types.KeyMedianStampPeriod):
+			params.MedianStampPeriod = changes.MedianStampPeriod
+
+		case string(types.KeyMaximumPriceStamps):
+			params.MaximumPriceStamps = changes.MaximumPriceStamps
+
+		case string(types.KeyMaximumMedianStamps):
+			params.MaximumMedianStamps = changes.MaximumMedianStamps
+		}
+	}
+
+	return params.Validate()
+}
+
 // ExecuteParamUpdatePlan will execute a given param update plan.
-func (k Keeper) ExecuteParamUpdatePlan(ctx sdk.Context, plan types.ParamUpdatePlan) error {
+func (k Keeper) ExecuteParamUpdatePlan(ctx sdk.Context, plan types.ParamUpdatePlan) {
 	for _, key := range plan.Keys {
 		switch key {
 		case string(types.KeyVotePeriod):
@@ -408,91 +461,34 @@ func (k Keeper) ExecuteParamUpdatePlan(ctx sdk.Context, plan types.ParamUpdatePl
 			k.SetRewardBand(ctx, plan.Changes.RewardBands)
 
 		case string(types.KeyRewardDistributionWindow):
-			if plan.Changes.RewardDistributionWindow < k.VotePeriod(ctx) {
-				return types.ErrInvalidParamValue.Wrap(
-					"oracle parameter RewardDistributionWindow must be greater than or equal with VotePeriod",
-				)
-			}
 			k.SetRewardDistributionWindow(ctx, plan.Changes.RewardDistributionWindow)
 
 		case string(types.KeyAcceptList):
-			accept := plan.Changes.AcceptList.Normalize()
-			mandatory := k.MandatoryList(ctx).Normalize()
-			if !accept.ContainDenoms(mandatory) {
-				return types.ErrInvalidParamValue.Wrap("denom in MandatoryList not present in AcceptList")
-			}
-			k.SetAcceptList(ctx, accept)
+			k.SetAcceptList(ctx, plan.Changes.AcceptList.Normalize())
 
 		case string(types.KeyMandatoryList):
-			mandatory := plan.Changes.MandatoryList.Normalize()
-			accept := k.AcceptList(ctx).Normalize()
-			if !accept.ContainDenoms(mandatory) {
-				return types.ErrInvalidParamValue.Wrap("denom in MandatoryList not present in AcceptList")
-			}
-			k.SetMandatoryList(ctx, mandatory)
+			k.SetMandatoryList(ctx, plan.Changes.MandatoryList.Normalize())
 
 		case string(types.KeySlashFraction):
 			k.SetSlashFraction(ctx, plan.Changes.SlashFraction)
 
 		case string(types.KeySlashWindow):
-			if plan.Changes.SlashWindow < k.VotePeriod(ctx) {
-				return types.ErrInvalidParamValue.Wrap(
-					"oracle parameter SlashWindow must be greater than or equal with VotePeriod",
-				)
-			}
 			k.SetSlashWindow(ctx, plan.Changes.SlashWindow)
 
 		case string(types.KeyMinValidPerWindow):
 			k.SetMinValidPerWindow(ctx, plan.Changes.MinValidPerWindow)
 
 		case string(types.KeyHistoricStampPeriod):
-			if plan.Changes.HistoricStampPeriod < 1 {
-				return types.ErrInvalidParamValue.Wrap("oracle parameters HistoricStampPeriod must be greater than 0")
-			}
-			if plan.Changes.HistoricStampPeriod > k.MedianStampPeriod(ctx) {
-				return types.ErrInvalidParamValue.Wrap(
-					"oracle parameter HistoricStampPeriod must be less than or equal with MedianStampPeriod",
-				)
-			}
-			if plan.Changes.HistoricStampPeriod%k.VotePeriod(ctx) != 0 {
-				return types.ErrInvalidParamValue.Wrap(
-					"oracle parameters HistoricStampPeriod must be exact multiples of VotePeriod",
-				)
-			}
 			k.SetHistoricStampPeriod(ctx, plan.Changes.HistoricStampPeriod)
 
 		case string(types.KeyMedianStampPeriod):
-			if plan.Changes.MedianStampPeriod < 1 {
-				return types.ErrInvalidParamValue.Wrap("oracle parameters MedianStampPeriod must be greater than 0")
-			}
-			if plan.Changes.MedianStampPeriod < k.HistoricStampPeriod(ctx) {
-				return types.ErrInvalidParamValue.Wrap(
-					"oracle parameter MedianStampPeriod must be greater than or equal with HistoricStampPeriod",
-				)
-			}
-			if plan.Changes.MedianStampPeriod%k.VotePeriod(ctx) != 0 {
-				return types.ErrInvalidParamValue.Wrap(
-					"oracle parameters MedianStampPeriod must be exact multiples of VotePeriod",
-				)
-			}
 			k.SetMedianStampPeriod(ctx, plan.Changes.MedianStampPeriod)
 
 		case string(types.KeyMaximumPriceStamps):
-			if plan.Changes.MaximumPriceStamps < 1 {
-				return types.ErrInvalidParamValue.Wrap("oracle parameters MaximumPriceStamps must be greater than 0")
-			}
 			k.SetMaximumPriceStamps(ctx, plan.Changes.MaximumPriceStamps)
 
 		case string(types.KeyMaximumMedianStamps):
-			if plan.Changes.MaximumMedianStamps < 1 {
-				return types.ErrInvalidParamValue.Wrap("oracle parameters MaximumMedianStamps must be greater than 0")
-			}
 			k.SetMaximumMedianStamps(ctx, plan.Changes.MaximumMedianStamps)
-
-		default:
-			return types.ErrInvalidParamValue.Wrapf("%s is not an existing oracle param key", key)
 		}
 	}
-
-	return nil
 }

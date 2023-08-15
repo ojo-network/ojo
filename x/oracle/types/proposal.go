@@ -42,4 +42,6 @@ func (msg *MsgGovCancelUpdateParams) GetDescription() string { return msg.Descri
 func (msg *MsgGovCancelUpdateParams) ProposalRoute() string { return RouterKey }
 
 // ProposalType returns the type of a community pool spend proposal.
-func (msg *MsgGovCancelUpdateParams) ProposalType() string { return proposalTypeMsgGovCancelUpdateParams }
+func (msg *MsgGovCancelUpdateParams) ProposalType() string {
+	return proposalTypeMsgGovCancelUpdateParams
+}

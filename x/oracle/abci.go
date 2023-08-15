@@ -18,10 +18,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 	// found and the update plan height is set to the current block.
 	plan, found := k.GetParamUpdatePlan(ctx)
 	if found && plan.ShouldExecute(ctx) {
-		err := k.ExecuteParamUpdatePlan(ctx, plan)
-		if err != nil {
-			ctx.Logger().Error("Error executing Oracle param update plan", err)
-		}
+		k.ExecuteParamUpdatePlan(ctx, plan)
 	}
 
 	params := k.GetParams(ctx)

@@ -4,10 +4,10 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math/rand"
-	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/ojo-network/ojo/x/oracle"
 	"github.com/ojo-network/ojo/x/oracle/types"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
@@ -122,7 +122,7 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 	vote, err := s.app.OracleKeeper.GetAggregateExchangeRateVote(ctx, valAddr)
 	s.Require().Nil(err)
 	for _, v := range vote.ExchangeRates {
-		s.Require().Contains(acceptListFlat, strings.ToLower(v.Denom))
+		s.Require().Contains(acceptListFlat, v.Denom)
 	}
 
 	// Valid, but with an exchange rate which isn't in AcceptList
@@ -137,7 +137,7 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 	vote, err = s.app.OracleKeeper.GetAggregateExchangeRateVote(ctx, valAddr)
 	s.Require().NoError(err)
 	for _, v := range vote.ExchangeRates {
-		s.Require().Contains(acceptListFlat, strings.ToLower(v.Denom))
+		s.Require().Contains(acceptListFlat, v.Denom)
 	}
 }
 
@@ -157,7 +157,6 @@ func (s *IntegrationTestSuite) TestMsgServer_DelegateFeedConsent() {
 
 func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 	govAccAddr := s.app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String()
-	fmt.Println("current block height", s.ctx.BlockHeight())
 	testCases := []struct {
 		name      string
 		req       *types.MsgGovUpdateParams
@@ -171,8 +170,8 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 				Title:       "test",
 				Description: "test",
 				Plan: types.ParamUpdatePlan{
-					Keys:    []string{"AcceptList"},
-					Height:  9,
+					Keys:   []string{"AcceptList"},
+					Height: 9,
 					Changes: types.Params{
 						AcceptList: types.DenomList{
 							{
@@ -204,8 +203,8 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 				Title:       "test",
 				Description: "test",
 				Plan: types.ParamUpdatePlan{
-					Keys:    []string{"MandatoryList"},
-					Height:  9,
+					Keys:   []string{"MandatoryList"},
+					Height: 9,
 					Changes: types.Params{
 						MandatoryList: types.DenomList{
 							{
@@ -232,8 +231,8 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 				Title:       "test",
 				Description: "test",
 				Plan: types.ParamUpdatePlan{
-					Keys:    []string{"MandatoryList"},
-					Height:  9,
+					Keys:   []string{"MandatoryList"},
+					Height: 9,
 					Changes: types.Params{
 						MandatoryList: types.DenomList{
 							{
@@ -255,8 +254,8 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 				Title:       "test",
 				Description: "test",
 				Plan: types.ParamUpdatePlan{
-					Keys:    []string{"RewardBands"},
-					Height:  9,
+					Keys:   []string{"RewardBands"},
+					Height: 9,
 					Changes: types.Params{
 						RewardBands: types.RewardBandList{
 							{
@@ -285,8 +284,8 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 				Title:       "test",
 				Description: "test",
 				Plan: types.ParamUpdatePlan{
-					Keys:    []string{"RewardBands"},
-					Height:  9,
+					Keys:   []string{"RewardBands"},
+					Height: 9,
 					Changes: types.Params{
 						RewardBands: types.RewardBandList{
 							{
@@ -323,7 +322,7 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 						"MaximumPriceStamps",
 						"MaximumMedianStamps",
 					},
-					Height:  9,
+					Height: 9,
 					Changes: types.Params{
 						VotePeriod:               10,
 						VoteThreshold:            sdk.NewDecWithPrec(40, 2),
@@ -348,8 +347,8 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 				Title:       "test",
 				Description: "test",
 				Plan: types.ParamUpdatePlan{
-					Keys:    []string{"VoteThreshold"},
-					Height:  9,
+					Keys:   []string{"VoteThreshold"},
+					Height: 9,
 					Changes: types.Params{
 						VoteThreshold: sdk.NewDecWithPrec(10, 2),
 					},
@@ -365,8 +364,8 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 				Title:       "test",
 				Description: "test",
 				Plan: types.ParamUpdatePlan{
-					Keys:    []string{"VotePeriod", "SlashWindow"},
-					Height:  9,
+					Keys:   []string{"VotePeriod", "SlashWindow"},
+					Height: 9,
 					Changes: types.Params{
 						VotePeriod:  5,
 						SlashWindow: 4,
@@ -391,7 +390,6 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 			true,
 			"test is not an existing oracle param key",
 		},
-
 		{
 			"bad authority",
 			&types.MsgGovUpdateParams{
@@ -399,8 +397,8 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 				Title:       "test",
 				Description: "test",
 				Plan: types.ParamUpdatePlan{
-					Keys:    []string{"RewardBands"},
-					Height:  9,
+					Keys:   []string{"RewardBands"},
+					Height: 9,
 					Changes: types.Params{
 						RewardBands: types.RewardBandList{
 							{
@@ -421,6 +419,7 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 			err := tc.req.ValidateBasic()
 			if err == nil {
 				_, err = s.msgServer.GovUpdateParams(s.ctx, tc.req)
+				oracle.EndBlocker(s.ctx, s.app.OracleKeeper)
 			}
 			if tc.expectErr {
 				s.Require().ErrorContains(err, tc.errMsg)
@@ -525,10 +524,10 @@ func (s *IntegrationTestSuite) TestMsgServer_CancelUpdateGovParams() {
 			Title:       "test",
 			Description: "test",
 			Plan: types.ParamUpdatePlan{
-				Keys:        []string{"VoteThreshold"},
-				Height:      100,
+				Keys:   []string{"VoteThreshold"},
+				Height: 100,
 				Changes: types.Params{
-					VoteThreshold: sdk.NewDecWithPrec(10, 2),
+					VoteThreshold: sdk.NewDecWithPrec(40, 2),
 				},
 			},
 		},
@@ -543,7 +542,6 @@ func (s *IntegrationTestSuite) TestMsgServer_CancelUpdateGovParams() {
 	)
 	s.Require().NoError(err)
 
-	plan, found := s.app.OracleKeeper.GetParamUpdatePlan(s.ctx)
-	s.Require().Nil(plan)
+	_, found := s.app.OracleKeeper.GetParamUpdatePlan(s.ctx)
 	s.Require().Equal(false, found)
 }
