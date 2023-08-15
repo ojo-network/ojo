@@ -397,7 +397,7 @@ func (k Keeper) GetParamUpdatePlan(ctx sdk.Context) (plan types.ParamUpdatePlan,
 	return plan, true
 }
 
-// ValidateParamChanges validates parameter changes agianst the existing oracle parameters.
+// ValidateParamChanges validates parameter changes against the existing oracle parameters.
 func (k Keeper) ValidateParamChanges(ctx sdk.Context, keys []string, changes types.Params) error {
 	params := k.GetParams(ctx)
 

@@ -204,7 +204,9 @@ func (p Params) Validate() error {
 	}
 
 	if p.RewardDistributionWindow < p.VotePeriod {
-		return ErrInvalidParamValue.Wrap("oracle parameter RewardDistributionWindow must be greater than or equal with VotePeriod")
+		return ErrInvalidParamValue.Wrap(
+			"oracle parameter RewardDistributionWindow must be greater than or equal with VotePeriod",
+		)
 	}
 
 	if p.SlashFraction.GT(sdk.OneDec()) || p.SlashFraction.IsNegative() {
@@ -232,11 +234,15 @@ func (p Params) Validate() error {
 	}
 
 	if p.HistoricStampPeriod > p.MedianStampPeriod {
-		return ErrInvalidParamValue.Wrap("oracle parameter MedianStampPeriod must be greater than or equal with HistoricStampPeriod")
+		return ErrInvalidParamValue.Wrap(
+			"oracle parameter MedianStampPeriod must be greater than or equal with HistoricStampPeriod",
+		)
 	}
 
 	if p.HistoricStampPeriod%p.VotePeriod != 0 || p.MedianStampPeriod%p.VotePeriod != 0 {
-		return ErrInvalidParamValue.Wrap("oracle parameters HistoricStampPeriod and MedianStampPeriod must be exact multiples of VotePeriod")
+		return ErrInvalidParamValue.Wrap(
+			"oracle parameters HistoricStampPeriod and MedianStampPeriod must be exact multiples of VotePeriod",
+		)
 	}
 
 	if err := validateRewardBands(p.RewardBands); err != nil {
