@@ -3,8 +3,15 @@ module github.com/ojo-network/ojo
 go 1.19
 
 require (
+<<<<<<< HEAD
 	cosmossdk.io/errors v1.0.0
 	cosmossdk.io/math v1.0.1
+=======
+	cosmossdk.io/api v0.3.1
+	cosmossdk.io/errors v1.0.0-beta.7
+	cosmossdk.io/math v1.1.2
+	cosmossdk.io/tools/rosetta v0.2.1
+>>>>>>> a21f813 (chore(deps): bump cosmossdk.io/math from 1.0.1 to 1.1.2 (#254))
 	github.com/armon/go-metrics v0.4.1
 	github.com/cosmos/cosmos-proto v1.0.0-beta.3
 	github.com/cosmos/cosmos-sdk v0.46.13
