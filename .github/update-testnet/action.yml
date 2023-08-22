@@ -71,7 +71,7 @@ runs:
     run: |
       binary_name=${{ inputs.COSMOS_BINARY_NAME }}-${{ inputs.COSMOS_BINARY_VERSION }}
       pulumi config set --stack ${{ inputs.PULUMI_STACK_NAME }} --color never --path config.localCosmosBinaryPath ${binary_name}
-      #pulumi config set --stack ${{ inputs.PULUMI_STACK_NAME }} --color never --path config.chainID $(echo ojo-devnet-${{ inputs.COSMOS_BINARY_VERSION }} | tr '.' '-')
+      #pulumi config set --stack ${{ inputs.PULUMI_STACK_NAME }} --color never --path config.chainID $(echo ojo-internal-devnet-${{ inputs.COSMOS_BINARY_VERSION }} | tr '.' '-')
       ls -lha /usr/local/bin
     env:
       PULUMI_ACCESS_TOKEN: ${{ inputs.PULUMI_ACCESS_TOKEN }}

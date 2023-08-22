@@ -1,7 +1,7 @@
 # Ojo Devnet
 
 ```text
-Chain ID: ojo-devnet
+Chain ID: ojo-internal-devnet
 ```
 
 ## Automation Notes

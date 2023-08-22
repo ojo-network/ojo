@@ -1,7 +1,7 @@
 config:
   gcp:project: ojo-network
   ojo-testnet:config:
-    chainID: ojo-devnet
+    chainID: ojo-internal-devnet
     cosmosHomeFolderName: .ojo
     genesisAccounts:
       - address: ojo1zypqa76je7pxsdwkfah6mu9a583sju6xzthge3
