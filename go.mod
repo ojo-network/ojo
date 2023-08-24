@@ -5,7 +5,7 @@ go 1.20
 require (
 	cosmossdk.io/api v0.3.1
 	cosmossdk.io/errors v1.0.0-beta.7
-	cosmossdk.io/math v1.0.1
+	cosmossdk.io/math v1.1.2
 	cosmossdk.io/tools/rosetta v0.2.1
 	github.com/armon/go-metrics v0.4.1
 	github.com/cometbft/cometbft v0.37.2
