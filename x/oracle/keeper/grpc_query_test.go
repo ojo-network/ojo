@@ -305,6 +305,37 @@ func (s *IntegrationTestSuite) TestQuerier_ValidatorRewardSet() {
 	ctx = ctx.WithBlockHeight(originalBlockHeight)
 }
 
+func (s *IntegrationTestSuite) TestQuerier_PriceFeederCurrencyPairProviders() {
+	app, ctx := s.app, s.ctx
+
+	pfCurrencyPairProvidersList := types.CurrencyPairProvidersList{
+		types.CurrencyPairProviders{
+			BaseDenom: "OJO",
+			QuoteDenom: "USD",
+			Providers: []string{
+				"binance",
+				"coinbase",
+			},
+		},
+		types.CurrencyPairProviders{
+			BaseDenom: "OJO",
+			QuoteDenom: "ATOM",
+			Providers: []string{
+				"osmosis",
+				"mexc",
+			},
+		},
+	}
+	app.OracleKeeper.SetPriceFeederCurrencyPairProvidersList(ctx, pfCurrencyPairProvidersList)
+
+	priceFeederCurrencyPairProvidersResp, err := s.queryClient.PriceFeederCurrencyPairProviders(
+		ctx.Context(),
+		&types.QueryPriceFeederCurrencyPairProviders{},
+	)
+	s.Require().NoError(err)
+	s.Require().Equal(2, len(priceFeederCurrencyPairProvidersResp.PriceFeederCurrencyPairProviders))
+}
+
 func (s *IntegrationTestSuite) TestEmptyRequest() {
 	q := keeper.NewQuerier(keeper.Keeper{})
 	const emptyRequestErrorMsg = "empty request"

@@ -97,6 +97,14 @@ service Query {
     option (google.api.http).get =
         "/ojo/oracle/v1/valdiators/validator_reward_set";
   }
+
+  // PriceFeederCurrencyPairProviders returns the currency provider
+  // pairs the price feeder uses upon start up for pricing data.
+  rpc PriceFeederCurrencyPairProviders(QueryPriceFeederCurrencyPairProviders)
+      returns (QueryPriceFeederCurrencyPairProvidersResponse) {
+    option (google.api.http).get =
+        "/ojo/oracle/v1/valdiators/price_feeder_currency_pair_providers";
+  }
 }
 
 // QueryExchangeRates is the request type for the Query/ExchangeRate RPC
@@ -290,4 +298,16 @@ message QueryValidatorRewardSet {}
 // QueryValidatorRewardSetResponse is the response type for the Query/ValidatorRewardSet RPC method.
 message QueryValidatorRewardSetResponse {
   ValidatorRewardSet validators = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryPriceFeederCurrencyPairProviders is the request type for the
+// Query/PriceFeederCurrencyPairProviders RPC method.
+message QueryPriceFeederCurrencyPairProviders {}
+
+// QueryPriceFeederCurrencyPairProvidersResponse is the response type
+// for the Query/PriceFeederCurrencyPairProviders RPC method.
+message QueryPriceFeederCurrencyPairProvidersResponse {
+  repeated CurrencyPairProviders PriceFeederCurrencyPairProviders = 1 [
+    (gogoproto.nullable) = false
+  ];
 }

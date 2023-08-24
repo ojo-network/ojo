@@ -25,7 +25,7 @@ message GenesisState {
       [ (gogoproto.nullable) = false ];
   repeated PriceStamp medians = 7 [ (gogoproto.nullable) = false ];
   repeated PriceStamp historic_prices = 8 [ (gogoproto.nullable) = false ];
-  repeated PriceStamp medianDeviations = 9 [ (gogoproto.nullable) = false ];
+  repeated PriceStamp median_deviations = 9 [ (gogoproto.nullable) = false ];
 }
 
 // FeederDelegation is the address for where oracle feeder authority are

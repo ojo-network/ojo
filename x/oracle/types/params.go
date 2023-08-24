@@ -21,19 +21,20 @@ const (
 
 // Parameter keys
 var (
-	KeyVotePeriod               = []byte("VotePeriod")
-	KeyVoteThreshold            = []byte("VoteThreshold")
-	KeyRewardBands              = []byte("RewardBands")
-	KeyRewardDistributionWindow = []byte("RewardDistributionWindow")
-	KeyAcceptList               = []byte("AcceptList")
-	KeyMandatoryList            = []byte("MandatoryList")
-	KeySlashFraction            = []byte("SlashFraction")
-	KeySlashWindow              = []byte("SlashWindow")
-	KeyMinValidPerWindow        = []byte("MinValidPerWindow")
-	KeyHistoricStampPeriod      = []byte("HistoricStampPeriod")
-	KeyMedianStampPeriod        = []byte("MedianStampPeriod")
-	KeyMaximumPriceStamps       = []byte("MaximumPriceStamps")
-	KeyMaximumMedianStamps      = []byte("MaximumMedianStamps")
+	KeyVotePeriod               		= []byte("VotePeriod")
+	KeyVoteThreshold            		= []byte("VoteThreshold")
+	KeyRewardBands              		= []byte("RewardBands")
+	KeyRewardDistributionWindow 		= []byte("RewardDistributionWindow")
+	KeyAcceptList               		= []byte("AcceptList")
+	KeyMandatoryList            		= []byte("MandatoryList")
+	KeySlashFraction            		= []byte("SlashFraction")
+	KeySlashWindow              		= []byte("SlashWindow")
+	KeyMinValidPerWindow        		= []byte("MinValidPerWindow")
+	KeyHistoricStampPeriod      		= []byte("HistoricStampPeriod")
+	KeyMedianStampPeriod       		    = []byte("MedianStampPeriod")
+	KeyMaximumPriceStamps       		= []byte("MaximumPriceStamps")
+	KeyMaximumMedianStamps      		= []byte("MaximumMedianStamps")
+	KeyPriceFeederCurrencyPairProviders = []byte("PriceFeederCurrencyPairProviders")
 )
 
 // Default parameter values
@@ -72,6 +73,17 @@ var (
 	}
 	DefaultSlashFraction     = sdk.NewDecWithPrec(1, 4) // 0.01%
 	DefaultMinValidPerWindow = sdk.NewDecWithPrec(5, 2) // 5%
+
+	DefaultPriceFeederCurrencyPairProviders = CurrencyPairProvidersList{
+		CurrencyPairProviders{
+			BaseDenom:  OjoSymbol,
+			QuoteDenom: USDDenom,
+			Providers: []string{
+				"binance",
+				"coinbase",
+			},
+		},
+	}
 )
 
 var _ paramstypes.ParamSet = &Params{}
@@ -97,19 +109,20 @@ func DefaultRewardBands() RewardBandList {
 // DefaultParams creates default oracle module parameters
 func DefaultParams() Params {
 	return Params{
-		VotePeriod:               DefaultVotePeriod,
-		VoteThreshold:            DefaultVoteThreshold,
-		RewardDistributionWindow: DefaultRewardDistributionWindow,
-		AcceptList:               DefaultAcceptList,
-		MandatoryList:            DefaultMandatoryList,
-		SlashFraction:            DefaultSlashFraction,
-		SlashWindow:              DefaultSlashWindow,
-		MinValidPerWindow:        DefaultMinValidPerWindow,
-		HistoricStampPeriod:      DefaultHistoricStampPeriod,
-		MedianStampPeriod:        DefaultMedianStampPeriod,
-		MaximumPriceStamps:       DefaultMaximumPriceStamps,
-		MaximumMedianStamps:      DefaultMaximumMedianStamps,
-		RewardBands:              DefaultRewardBands(),
+		VotePeriod:                       DefaultVotePeriod,
+		VoteThreshold:                    DefaultVoteThreshold,
+		RewardDistributionWindow:         DefaultRewardDistributionWindow,
+		AcceptList:                       DefaultAcceptList,
+		MandatoryList:                    DefaultMandatoryList,
+		SlashFraction:                    DefaultSlashFraction,
+		SlashWindow:                      DefaultSlashWindow,
+		MinValidPerWindow:                DefaultMinValidPerWindow,
+		HistoricStampPeriod:              DefaultHistoricStampPeriod,
+		MedianStampPeriod:                DefaultMedianStampPeriod,
+		MaximumPriceStamps:               DefaultMaximumPriceStamps,
+		MaximumMedianStamps:              DefaultMaximumMedianStamps,
+		RewardBands:              	      DefaultRewardBands(),
+		PriceFeederCurrencyPairProviders: DefaultPriceFeederCurrencyPairProviders,
 	}
 }
 
@@ -186,6 +199,11 @@ func (p *Params) ParamSetPairs() paramstypes.ParamSetPairs {
 			KeyMaximumMedianStamps,
 			&p.MaximumMedianStamps,
 			validateMaximumMedianStamps,
+		),
+		paramstypes.NewParamSetPair(
+			KeyPriceFeederCurrencyPairProviders,
+			&p.PriceFeederCurrencyPairProviders,
+			validatePriceFeederCurrencyPairProviders,
 		),
 	}
 }
@@ -443,6 +461,27 @@ func validateMaximumMedianStamps(i interface{}) error {
 
 	if v < 1 {
 		return fmt.Errorf("oracle parameter MaximumMedianStamps must be > 0")
+	}
+
+	return nil
+}
+
+func validatePriceFeederCurrencyPairProviders(i interface{}) error {
+	v, ok := i.(CurrencyPairProvidersList)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	for _, c := range v {
+		if len(c.BaseDenom) == 0 {
+			return fmt.Errorf("oracle parameter CurrencyPairProviders must have BaseDenom")
+		}
+		if len(c.QuoteDenom) == 0 {
+			return fmt.Errorf("oracle parameter CurrencyPairProviders must have QuoteDenom")
+		}
+		if len(c.Providers) < 1 {
+			return fmt.Errorf("oracle parameter CurrencyPairProviders must have at least 1 provider listed")
+		}
 	}
 
 	return nil

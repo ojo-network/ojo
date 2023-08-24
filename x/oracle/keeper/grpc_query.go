@@ -326,3 +326,22 @@ func (q querier) ValidatorRewardSet(
 		Validators: validatorRewardSet,
 	}, nil
 }
+
+// PriceFeederCurrencyPairProviders queries the Currency Pair Providers the
+// price feeder uses when starting up.
+func (q querier) PriceFeederCurrencyPairProviders(
+	goCtx context.Context,
+	req *types.QueryPriceFeederCurrencyPairProviders,
+) (*types.QueryPriceFeederCurrencyPairProvidersResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	pfCurrencyPairProviderList := q.PriceFeederCurrencyPairProvidersList(ctx)
+
+	return &types.QueryPriceFeederCurrencyPairProvidersResponse{
+		PriceFeederCurrencyPairProviders: pfCurrencyPairProviderList,
+	}, nil
+}

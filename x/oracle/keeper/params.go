@@ -175,3 +175,19 @@ func (k Keeper) MaximumMedianStamps(ctx sdk.Context) (res uint64) {
 func (k Keeper) SetMaximumMedianStamps(ctx sdk.Context, maximumMedianStamps uint64) {
 	k.paramSpace.Set(ctx, types.KeyMaximumMedianStamps, maximumMedianStamps)
 }
+
+// PriceFeederCurrencyPairProvidersList returns the current Currency Pair Providers the
+// price feeder will query when starting up.
+func (k Keeper) PriceFeederCurrencyPairProvidersList(ctx sdk.Context) (res types.CurrencyPairProvidersList) {
+	k.paramSpace.Get(ctx, types.KeyPriceFeederCurrencyPairProviders, &res)
+	return
+}
+
+// SetPriceFeederCurrencyPairProvidersList updates the current Currency Pair Providers the
+// price feeder will query when starting up.
+func (k Keeper) SetPriceFeederCurrencyPairProvidersList(
+	ctx sdk.Context,
+	priceFeederCurrencyPairProviders types.CurrencyPairProvidersList,
+) {
+	k.paramSpace.Set(ctx, types.KeyPriceFeederCurrencyPairProviders, priceFeederCurrencyPairProviders)
+}
