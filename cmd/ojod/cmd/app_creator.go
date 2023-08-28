@@ -18,13 +18,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/cosmos/cosmos-sdk/types/module/testutil"
+	"github.com/ojo-network/ojo/app/params"
 	ojoapp "github.com/ojo-network/ojo/app"
 	"github.com/spf13/cast"
 )
 
 type appCreator struct {
-	encCfg        testutil.TestEncodingConfig
+	encCfg        params.EncodingConfig
 	moduleManager module.BasicManager
 }
 
