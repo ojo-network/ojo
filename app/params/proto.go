@@ -2,8 +2,8 @@ package params
 
 import (
 	"github.com/cosmos/cosmos-sdk/types/module"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 )
 
 // MakeEncodingConfig creates an EncodingConfig for Amino-based tests.
