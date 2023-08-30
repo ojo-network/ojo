@@ -310,7 +310,7 @@ func (s *IntegrationTestSuite) TestQuerier_PriceFeederCurrencyPairProviders() {
 
 	pfCurrencyPairProvidersList := types.CurrencyPairProvidersList{
 		types.CurrencyPairProviders{
-			BaseDenom: "OJO",
+			BaseDenom:  "OJO",
 			QuoteDenom: "USD",
 			Providers: []string{
 				"binance",
@@ -318,7 +318,7 @@ func (s *IntegrationTestSuite) TestQuerier_PriceFeederCurrencyPairProviders() {
 			},
 		},
 		types.CurrencyPairProviders{
-			BaseDenom: "OJO",
+			BaseDenom:  "OJO",
 			QuoteDenom: "ATOM",
 			Providers: []string{
 				"osmosis",

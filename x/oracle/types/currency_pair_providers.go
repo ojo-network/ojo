@@ -14,7 +14,7 @@ func (cpp CurrencyPairProviders) String() string {
 }
 
 func (cpp CurrencyPairProviders) Equal(cpp2 *CurrencyPairProviders) bool {
-	if !strings.EqualFold(cpp.BaseDenom, cpp2.BaseDenom) || !strings.EqualFold(cpp.QuoteDenom, cpp2.QuoteDenom){
+	if !strings.EqualFold(cpp.BaseDenom, cpp2.BaseDenom) || !strings.EqualFold(cpp.QuoteDenom, cpp2.QuoteDenom) {
 		return false
 	}
 

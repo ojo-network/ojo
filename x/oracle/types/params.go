@@ -21,19 +21,19 @@ const (
 
 // Parameter keys
 var (
-	KeyVotePeriod               		= []byte("VotePeriod")
-	KeyVoteThreshold            		= []byte("VoteThreshold")
-	KeyRewardBands              		= []byte("RewardBands")
-	KeyRewardDistributionWindow 		= []byte("RewardDistributionWindow")
-	KeyAcceptList               		= []byte("AcceptList")
-	KeyMandatoryList            		= []byte("MandatoryList")
-	KeySlashFraction            		= []byte("SlashFraction")
-	KeySlashWindow              		= []byte("SlashWindow")
-	KeyMinValidPerWindow        		= []byte("MinValidPerWindow")
-	KeyHistoricStampPeriod      		= []byte("HistoricStampPeriod")
-	KeyMedianStampPeriod       		    = []byte("MedianStampPeriod")
-	KeyMaximumPriceStamps       		= []byte("MaximumPriceStamps")
-	KeyMaximumMedianStamps      		= []byte("MaximumMedianStamps")
+	KeyVotePeriod                       = []byte("VotePeriod")
+	KeyVoteThreshold                    = []byte("VoteThreshold")
+	KeyRewardBands                      = []byte("RewardBands")
+	KeyRewardDistributionWindow         = []byte("RewardDistributionWindow")
+	KeyAcceptList                       = []byte("AcceptList")
+	KeyMandatoryList                    = []byte("MandatoryList")
+	KeySlashFraction                    = []byte("SlashFraction")
+	KeySlashWindow                      = []byte("SlashWindow")
+	KeyMinValidPerWindow                = []byte("MinValidPerWindow")
+	KeyHistoricStampPeriod              = []byte("HistoricStampPeriod")
+	KeyMedianStampPeriod                = []byte("MedianStampPeriod")
+	KeyMaximumPriceStamps               = []byte("MaximumPriceStamps")
+	KeyMaximumMedianStamps              = []byte("MaximumMedianStamps")
 	KeyPriceFeederCurrencyPairProviders = []byte("PriceFeederCurrencyPairProviders")
 )
 
@@ -121,7 +121,7 @@ func DefaultParams() Params {
 		MedianStampPeriod:                DefaultMedianStampPeriod,
 		MaximumPriceStamps:               DefaultMaximumPriceStamps,
 		MaximumMedianStamps:              DefaultMaximumMedianStamps,
-		RewardBands:              	      DefaultRewardBands(),
+		RewardBands:                      DefaultRewardBands(),
 		PriceFeederCurrencyPairProviders: DefaultPriceFeederCurrencyPairProviders,
 	}
 }
