@@ -31,6 +31,7 @@ func (app App) RegisterUpgradeHandlers() {
 
 	app.registerUpgrade0_1_4(upgradeInfo)
 	app.registerUpgrade0_2_0(upgradeInfo)
+	app.registerUpgrade0_2_1(upgradeInfo)
 }
 
 // performs upgrade from v0.1.3 to v0.1.4
@@ -104,6 +105,19 @@ func (app *App) registerUpgrade0_2_0(upgradeInfo upgradetypes.Plan) {
 			crisistypes.ModuleName,
 		},
 	})
+}
+
+// performs upgrade from v0.2.0 to v0.2.1
+func (app *App) registerUpgrade0_2_1(_ upgradetypes.Plan) {
+	const planName = "v0.2.1"
+	app.UpgradeKeeper.SetUpgradeHandler(planName,
+		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			ctx.Logger().Info("Upgrade handler execution", "name", planName)
+			upgrader := oraclekeeper.NewMigrator(&app.OracleKeeper)
+			upgrader.MigratePriceFeederCurrencyPairProviders(ctx)
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		},
+	)
 }
 
 // helper function to check if the store loader should be upgraded
