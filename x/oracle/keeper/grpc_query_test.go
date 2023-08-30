@@ -318,11 +318,12 @@ func (s *IntegrationTestSuite) TestQuerier_PriceFeederCurrencyPairProviders() {
 			},
 		},
 		types.CurrencyPairProviders{
-			BaseDenom:  "OJO",
-			QuoteDenom: "ATOM",
+			BaseDenom:       "RETH",
+			QuoteDenom:      "WETH",
+			Address:         "address",
+			AddressProvider: "eth-uniswap",
 			Providers: []string{
-				"osmosis",
-				"mexc",
+				"eth-uniswap",
 			},
 		},
 	}
@@ -334,6 +335,29 @@ func (s *IntegrationTestSuite) TestQuerier_PriceFeederCurrencyPairProviders() {
 	)
 	s.Require().NoError(err)
 	s.Require().Equal(2, len(priceFeederCurrencyPairProvidersResp.PriceFeederCurrencyPairProviders))
+}
+
+func (s *IntegrationTestSuite) TestQuerier_PriceFeederCurrencyDeviationThresholds() {
+	app, ctx := s.app, s.ctx
+
+	pfCurrencyDeviationThresholdList := types.CurrencyDeviationThresholdList{
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "OJO",
+			Threshold: "1.5",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "RETH",
+			Threshold: "2",
+		},
+	}
+	app.OracleKeeper.SetPriceFeederCurrencyDeviationThresholdList(ctx, pfCurrencyDeviationThresholdList)
+
+	priceFeederCurrencyDeviationThresholdsResp, err := s.queryClient.PriceFeederCurrencyDeviationThresholds(
+		ctx.Context(),
+		&types.QueryPriceFeederCurrencyDeviationThresholds{},
+	)
+	s.Require().NoError(err)
+	s.Require().Equal(2, len(priceFeederCurrencyDeviationThresholdsResp.PriceFeederCurrencyDeviationThresholds))
 }
 
 func (s *IntegrationTestSuite) TestEmptyRequest() {

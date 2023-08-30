@@ -21,20 +21,21 @@ const (
 
 // Parameter keys
 var (
-	KeyVotePeriod                       = []byte("VotePeriod")
-	KeyVoteThreshold                    = []byte("VoteThreshold")
-	KeyRewardBands                      = []byte("RewardBands")
-	KeyRewardDistributionWindow         = []byte("RewardDistributionWindow")
-	KeyAcceptList                       = []byte("AcceptList")
-	KeyMandatoryList                    = []byte("MandatoryList")
-	KeySlashFraction                    = []byte("SlashFraction")
-	KeySlashWindow                      = []byte("SlashWindow")
-	KeyMinValidPerWindow                = []byte("MinValidPerWindow")
-	KeyHistoricStampPeriod              = []byte("HistoricStampPeriod")
-	KeyMedianStampPeriod                = []byte("MedianStampPeriod")
-	KeyMaximumPriceStamps               = []byte("MaximumPriceStamps")
-	KeyMaximumMedianStamps              = []byte("MaximumMedianStamps")
-	KeyPriceFeederCurrencyPairProviders = []byte("PriceFeederCurrencyPairProviders")
+	KeyVotePeriod                             = []byte("VotePeriod")
+	KeyVoteThreshold                          = []byte("VoteThreshold")
+	KeyRewardBands                            = []byte("RewardBands")
+	KeyRewardDistributionWindow               = []byte("RewardDistributionWindow")
+	KeyAcceptList                             = []byte("AcceptList")
+	KeyMandatoryList                          = []byte("MandatoryList")
+	KeySlashFraction                          = []byte("SlashFraction")
+	KeySlashWindow                            = []byte("SlashWindow")
+	KeyMinValidPerWindow                      = []byte("MinValidPerWindow")
+	KeyHistoricStampPeriod                    = []byte("HistoricStampPeriod")
+	KeyMedianStampPeriod                      = []byte("MedianStampPeriod")
+	KeyMaximumPriceStamps                     = []byte("MaximumPriceStamps")
+	KeyMaximumMedianStamps                    = []byte("MaximumMedianStamps")
+	KeyPriceFeederCurrencyPairProviders       = []byte("PriceFeederCurrencyPairProviders")
+	KeyPriceFeederCurrencyDeviationThresholds = []byte("PriceFeederCurrencyDeviationThresholds")
 )
 
 // Default parameter values
@@ -84,6 +85,13 @@ var (
 			},
 		},
 	}
+
+	DefaultPriceFeederCurrencyDeviationThresholds = CurrencyDeviationThresholdList{
+		CurrencyDeviationThreshold{
+			BaseDenom: OjoSymbol,
+			Threshold: "2",
+		},
+	}
 )
 
 var _ paramstypes.ParamSet = &Params{}
@@ -109,20 +117,21 @@ func DefaultRewardBands() RewardBandList {
 // DefaultParams creates default oracle module parameters
 func DefaultParams() Params {
 	return Params{
-		VotePeriod:                       DefaultVotePeriod,
-		VoteThreshold:                    DefaultVoteThreshold,
-		RewardDistributionWindow:         DefaultRewardDistributionWindow,
-		AcceptList:                       DefaultAcceptList,
-		MandatoryList:                    DefaultMandatoryList,
-		SlashFraction:                    DefaultSlashFraction,
-		SlashWindow:                      DefaultSlashWindow,
-		MinValidPerWindow:                DefaultMinValidPerWindow,
-		HistoricStampPeriod:              DefaultHistoricStampPeriod,
-		MedianStampPeriod:                DefaultMedianStampPeriod,
-		MaximumPriceStamps:               DefaultMaximumPriceStamps,
-		MaximumMedianStamps:              DefaultMaximumMedianStamps,
-		RewardBands:                      DefaultRewardBands(),
-		PriceFeederCurrencyPairProviders: DefaultPriceFeederCurrencyPairProviders,
+		VotePeriod:                             DefaultVotePeriod,
+		VoteThreshold:                          DefaultVoteThreshold,
+		RewardDistributionWindow:               DefaultRewardDistributionWindow,
+		AcceptList:                             DefaultAcceptList,
+		MandatoryList:                          DefaultMandatoryList,
+		SlashFraction:                          DefaultSlashFraction,
+		SlashWindow:                            DefaultSlashWindow,
+		MinValidPerWindow:                      DefaultMinValidPerWindow,
+		HistoricStampPeriod:                    DefaultHistoricStampPeriod,
+		MedianStampPeriod:                      DefaultMedianStampPeriod,
+		MaximumPriceStamps:                     DefaultMaximumPriceStamps,
+		MaximumMedianStamps:                    DefaultMaximumMedianStamps,
+		RewardBands:                            DefaultRewardBands(),
+		PriceFeederCurrencyPairProviders:       DefaultPriceFeederCurrencyPairProviders,
+		PriceFeederCurrencyDeviationThresholds: DefaultPriceFeederCurrencyDeviationThresholds,
 	}
 }
 
@@ -204,6 +213,11 @@ func (p *Params) ParamSetPairs() paramstypes.ParamSetPairs {
 			KeyPriceFeederCurrencyPairProviders,
 			&p.PriceFeederCurrencyPairProviders,
 			validatePriceFeederCurrencyPairProviders,
+		),
+		paramstypes.NewParamSetPair(
+			KeyPriceFeederCurrencyDeviationThresholds,
+			&p.PriceFeederCurrencyDeviationThresholds,
+			validatePriceFeederCurrencyDeviationThresholds,
 		),
 	}
 }
@@ -481,6 +495,24 @@ func validatePriceFeederCurrencyPairProviders(i interface{}) error {
 		}
 		if len(c.Providers) < 1 {
 			return fmt.Errorf("oracle parameter CurrencyPairProviders must have at least 1 provider listed")
+		}
+	}
+
+	return nil
+}
+
+func validatePriceFeederCurrencyDeviationThresholds(i interface{}) error {
+	v, ok := i.(CurrencyDeviationThresholdList)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	for _, c := range v {
+		if len(c.BaseDenom) == 0 {
+			return fmt.Errorf("oracle parameter CurrencyDeviationThreshold must have BaseDenom")
+		}
+		if len(c.Threshold) == 0 {
+			return fmt.Errorf("oracle parameter CurrencyDeviationThreshold must have Threshold")
 		}
 	}
 

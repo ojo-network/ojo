@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math/rand"
-	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -69,8 +68,8 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRatePrevote() {
 func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 	ctx := s.ctx
 
-	ratesStr := "ojo:123.2"
-	ratesStrInvalidCoin := "ojo:123.2,badcoin:234.5"
+	ratesStr := "OJO:123.2"
+	ratesStrInvalidCoin := "OJO:123.2,badcoin:234.5"
 	salt, err := GenerateSalt(32)
 	s.Require().NoError(err)
 	hash := oracletypes.GetAggregateVoteHash(salt, ratesStr, valAddr)
@@ -122,7 +121,7 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 	vote, err := s.app.OracleKeeper.GetAggregateExchangeRateVote(ctx, valAddr)
 	s.Require().Nil(err)
 	for _, v := range vote.ExchangeRates {
-		s.Require().Contains(acceptListFlat, strings.ToLower(v.Denom))
+		s.Require().Contains(acceptListFlat, v.Denom)
 	}
 
 	// Valid, but with an exchange rate which isn't in AcceptList
@@ -137,7 +136,7 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 	vote, err = s.app.OracleKeeper.GetAggregateExchangeRateVote(ctx, valAddr)
 	s.Require().NoError(err)
 	for _, v := range vote.ExchangeRates {
-		s.Require().Contains(acceptListFlat, strings.ToLower(v.Denom))
+		s.Require().Contains(acceptListFlat, v.Denom)
 	}
 }
 

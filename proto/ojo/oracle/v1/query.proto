@@ -105,6 +105,14 @@ service Query {
     option (google.api.http).get =
         "/ojo/oracle/v1/valdiators/price_feeder_currency_pair_providers";
   }
+
+  // PriceFeederCurrencyDeviationThresholds returns the deviation
+  // thresholds for each base currency the price feeder uses upon start up.
+  rpc PriceFeederCurrencyDeviationThresholds(QueryPriceFeederCurrencyDeviationThresholds)
+      returns (QueryPriceFeederCurrencyDeviationThresholdsResponse) {
+    option (google.api.http).get =
+        "/ojo/oracle/v1/valdiators/price_feeder_currency_deviation_thresholds";
+  }
 }
 
 // QueryExchangeRates is the request type for the Query/ExchangeRate RPC
@@ -308,6 +316,18 @@ message QueryPriceFeederCurrencyPairProviders {}
 // for the Query/PriceFeederCurrencyPairProviders RPC method.
 message QueryPriceFeederCurrencyPairProvidersResponse {
   repeated CurrencyPairProviders PriceFeederCurrencyPairProviders = 1 [
+    (gogoproto.nullable) = false
+  ];
+}
+
+// QueryPriceFeederCurrencyDeviationThresholds is the request type for the
+// Query/PriceFeederCurrencyDeviationThresholds RPC method.
+message QueryPriceFeederCurrencyDeviationThresholds {}
+
+// QueryPriceFeederCurrencyDeviationThresholdsResponse is the response type
+// for the Query/PriceFeederCurrencyDeviationThresholds RPC method.
+message QueryPriceFeederCurrencyDeviationThresholdsResponse {
+  repeated CurrencyDeviationThreshold PriceFeederCurrencyDeviationThresholds = 1 [
     (gogoproto.nullable) = false
   ];
 }

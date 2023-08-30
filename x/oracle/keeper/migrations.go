@@ -316,26 +316,144 @@ func (m Migrator) MigratePriceFeederCurrencyPairProviders(ctx sdk.Context) {
 			},
 		},
 		types.CurrencyPairProviders{
-			BaseDenom:  "RETH",
-			QuoteDenom: "WETH",
+			BaseDenom:       "RETH",
+			QuoteDenom:      "WETH",
+			Address:         "0xa4e0faA58465A2D369aa21B3e42d43374c6F9613",
+			AddressProvider: "eth-uniswap",
 			Providers: []string{
 				"eth-uniswap",
 			},
 		},
 		types.CurrencyPairProviders{
-			BaseDenom:  "WETH",
-			QuoteDenom: "USDC",
+			BaseDenom:       "WETH",
+			QuoteDenom:      "USDC",
+			Address:         "0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640",
+			AddressProvider: "eth-uniswap",
 			Providers: []string{
 				"eth-uniswap",
 			},
 		},
 		types.CurrencyPairProviders{
-			BaseDenom:  "CBETH",
-			QuoteDenom: "WETH",
+			BaseDenom:       "CBETH",
+			QuoteDenom:      "WETH",
+			Address:         "0x840deeef2f115cf50da625f7368c24af6fe74410",
+			AddressProvider: "eth-uniswap",
 			Providers: []string{
 				"eth-uniswap",
 			},
 		},
 	}
 	m.keeper.SetPriceFeederCurrencyPairProvidersList(ctx, priceFeederCurrencyPairProviders)
+}
+
+// MigratePriceFeederCurrencyDeviationThresholds adds the price feeder
+// currency deviation threshold list.
+func (m Migrator) MigratePriceFeederCurrencyDeviationThresholds(ctx sdk.Context) {
+	priceFeederCurrencyDeviationThresholds := types.CurrencyDeviationThresholdList{
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "USDT",
+			Threshold: "1.5",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "ATOM",
+			Threshold: "1.5",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "ETH",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "BTC",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "OSMO",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "stATOM",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "stOSMO",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "DAI",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "JUNO",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "stJUNO",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "SCRT",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "WBTC",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "USDC",
+			Threshold: "1.5",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "IST",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "BNB",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "LUNA",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "DOT",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "AXL",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "STARS",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "XRP",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "USK",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "KUJI",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "MNTA",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "RETH",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "WETH",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "CBETH",
+			Threshold: "2",
+		},
+	}
+	m.keeper.SetPriceFeederCurrencyDeviationThresholdList(ctx, priceFeederCurrencyDeviationThresholds)
 }

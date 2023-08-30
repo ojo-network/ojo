@@ -345,3 +345,22 @@ func (q querier) PriceFeederCurrencyPairProviders(
 		PriceFeederCurrencyPairProviders: pfCurrencyPairProviderList,
 	}, nil
 }
+
+// PriceFeederCurrencyDeviationThresholds queries the Currency Deviation Thesholds
+// the price feeder uses when starting up.
+func (q querier) PriceFeederCurrencyDeviationThresholds(
+	goCtx context.Context,
+	req *types.QueryPriceFeederCurrencyDeviationThresholds,
+) (*types.QueryPriceFeederCurrencyDeviationThresholdsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	pfCurrencyDeviationThresholdList := q.PriceFeederCurrencyDeviationThresholdList(ctx)
+
+	return &types.QueryPriceFeederCurrencyDeviationThresholdsResponse{
+		PriceFeederCurrencyDeviationThresholds: pfCurrencyDeviationThresholdList,
+	}, nil
+}

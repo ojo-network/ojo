@@ -8,17 +8,26 @@ import (
 
 func TestCurrencyPairProvidersString(t *testing.T) {
 	cpp := CurrencyPairProviders{
-		BaseDenom:  "OJO",
-		QuoteDenom: "USD",
+		BaseDenom:       "RETH",
+		QuoteDenom:      "WETH",
+		Address:         "address",
+		AddressProvider: "eth-uniswap",
 		Providers: []string{
-			"binance",
-			"coinbase",
+			"eth-uniswap",
 		},
 	}
-	require.Equal(t, cpp.String(), "base_denom: OJO\nquote_denom: USD\nproviders:\n    - binance\n    - coinbase\n")
+	require.Equal(
+		t,
+		cpp.String(),
+		"base_denom: RETH\nquote_denom: WETH\naddress: address\naddress_provider: eth-uniswap\nproviders:\n    - eth-uniswap\n",
+	)
 
 	cppl := CurrencyPairProvidersList{cpp}
-	require.Equal(t, cppl.String(), "base_denom: OJO\nquote_denom: USD\nproviders:\n    - binance\n    - coinbase")
+	require.Equal(
+		t,
+		cppl.String(),
+		"base_denom: RETH\nquote_denom: WETH\naddress: address\naddress_provider: eth-uniswap\nproviders:\n    - eth-uniswap",
+	)
 }
 
 func TestCurrencyPairProvidersEqual(t *testing.T) {

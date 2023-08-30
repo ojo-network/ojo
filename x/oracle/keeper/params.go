@@ -191,3 +191,19 @@ func (k Keeper) SetPriceFeederCurrencyPairProvidersList(
 ) {
 	k.paramSpace.Set(ctx, types.KeyPriceFeederCurrencyPairProviders, priceFeederCurrencyPairProviders)
 }
+
+// SetPriceFeederCurrencyDeviationThresholdList returns the current Currency Deviation Thesholds
+// the price feeder will query when starting up.
+func (k Keeper) PriceFeederCurrencyDeviationThresholdList(ctx sdk.Context) (res types.CurrencyDeviationThresholdList) {
+	k.paramSpace.Get(ctx, types.KeyPriceFeederCurrencyDeviationThresholds, &res)
+	return
+}
+
+// SetPriceFeederCurrencyDeviationThresholdList updates the current Currency Deviation Thesholds
+// the price feeder will query when starting up.
+func (k Keeper) SetPriceFeederCurrencyDeviationThresholdList(
+	ctx sdk.Context,
+	priceFeederCurrencyDeviationThresholds types.CurrencyDeviationThresholdList,
+) {
+	k.paramSpace.Set(ctx, types.KeyPriceFeederCurrencyDeviationThresholds, priceFeederCurrencyDeviationThresholds)
+}
