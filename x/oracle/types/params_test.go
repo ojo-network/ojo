@@ -140,6 +140,94 @@ func TestValidateMinValidPerWindow(t *testing.T) {
 	require.Nil(t, err)
 }
 
+func TestValidatePriceFeederCurrencyPairProviders(t *testing.T) {
+	err := validatePriceFeederCurrencyPairProviders("invalidSdkType")
+	require.ErrorContains(t, err, "invalid parameter type: string")
+
+	err = validatePriceFeederCurrencyPairProviders(
+		CurrencyPairProvidersList{
+			CurrencyPairProviders{
+				QuoteDenom: USDDenom,
+				Providers: []string{
+					"1",
+					"2",
+				},
+			},
+		},
+	)
+	require.ErrorContains(t, err, "oracle parameter CurrencyPairProviders must have BaseDenom")
+
+	err = validatePriceFeederCurrencyPairProviders(
+		CurrencyPairProvidersList{
+			CurrencyPairProviders{
+				BaseDenom: OjoDenom,
+				Providers: []string{
+					"1",
+					"2",
+				},
+			},
+		},
+	)
+	require.ErrorContains(t, err, "oracle parameter CurrencyPairProviders must have QuoteDenom")
+
+	err = validatePriceFeederCurrencyPairProviders(
+		CurrencyPairProvidersList{
+			CurrencyPairProviders{
+				BaseDenom:  OjoDenom,
+				QuoteDenom: USDDenom,
+			},
+		},
+	)
+	require.ErrorContains(t, err, "oracle parameter CurrencyPairProviders must have at least 1 provider listed")
+
+	err = validatePriceFeederCurrencyPairProviders(
+		CurrencyPairProvidersList{
+			CurrencyPairProviders{
+				BaseDenom:  OjoDenom,
+				QuoteDenom: USDDenom,
+				Providers: []string{
+					"1",
+					"2",
+				},
+			},
+		},
+	)
+	require.Nil(t, err)
+}
+
+func TestValidatePriceFeederCurrencyDeviationThresholds(t *testing.T) {
+	err := validatePriceFeederCurrencyDeviationThresholds("invalidSdkType")
+	require.ErrorContains(t, err, "invalid parameter type: string")
+
+	err = validatePriceFeederCurrencyDeviationThresholds(
+		CurrencyDeviationThresholdList{
+			CurrencyDeviationThreshold{
+				Threshold: "2",
+			},
+		},
+	)
+	require.ErrorContains(t, err, "oracle parameter CurrencyDeviationThreshold must have BaseDenom")
+
+	err = validatePriceFeederCurrencyDeviationThresholds(
+		CurrencyDeviationThresholdList{
+			CurrencyDeviationThreshold{
+				BaseDenom: OjoDenom,
+			},
+		},
+	)
+	require.ErrorContains(t, err, "oracle parameter CurrencyDeviationThreshold must have Threshold")
+
+	err = validatePriceFeederCurrencyDeviationThresholds(
+		CurrencyDeviationThresholdList{
+			CurrencyDeviationThreshold{
+				BaseDenom: OjoDenom,
+				Threshold: "2",
+			},
+		},
+	)
+	require.Nil(t, err)
+}
+
 func TestParamsEqual(t *testing.T) {
 	p1 := DefaultParams()
 	err := p1.Validate()
