@@ -303,3 +303,28 @@ func GetCmdQueryPriceFeederCurrencyPairProviders() *cobra.Command {
 	flags.AddQueryFlagsToCmd(cmd)
 	return cmd
 }
+
+// GetCmdQueryPriceFeederCurrencyDeviationThresholds implements the
+// price feeder currency deviation thresholds query command.
+func GetCmdQueryPriceFeederCurrencyDeviationThresholds() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "price-feeder-currency-deviation-thresholds",
+		Short: "Query the price feeder currency deviation thresholds",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+			queryClient := types.NewQueryClient(clientCtx)
+
+			res, err := queryClient.PriceFeederCurrencyDeviationThresholds(
+				cmd.Context(),
+				&types.QueryPriceFeederCurrencyDeviationThresholds{},
+			)
+			return cli.PrintOrErr(res, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
