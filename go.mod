@@ -20,7 +20,7 @@ require (
 	github.com/golangci/golangci-lint v1.54.2
 	github.com/gorilla/mux v1.8.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
-	github.com/mgechev/revive v1.3.2
+	github.com/mgechev/revive v1.3.3
 	github.com/ory/dockertest/v3 v3.10.0
 	github.com/rs/zerolog v1.30.0
 	github.com/spf13/cast v1.5.1
@@ -82,7 +82,7 @@ require (
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/charithe/durationcheck v0.0.10 // indirect
-	github.com/chavacava/garif v0.0.0-20230227094218-b8c73b2037b8 // indirect
+	github.com/chavacava/garif v0.0.0-20230608123814-4bd63c2919ab // indirect
 	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/cockroachdb/apd/v2 v2.0.2 // indirect
 	github.com/coinbase/rosetta-sdk-go v0.7.9 // indirect
