@@ -318,10 +318,14 @@ func (s *IntegrationTestSuite) TestQuerier_PriceFeederCurrencyPairProviders() {
 			},
 		},
 		types.CurrencyPairProviders{
-			BaseDenom:       "RETH",
-			QuoteDenom:      "WETH",
-			Address:         "address",
-			AddressProvider: "eth-uniswap",
+			BaseDenom:  "RETH",
+			QuoteDenom: "WETH",
+			PairAddress: []types.PairAddressProvider{
+				{
+					Address:         "address",
+					AddressProvider: "eth-uniswap",
+				},
+			},
 			Providers: []string{
 				"eth-uniswap",
 			},

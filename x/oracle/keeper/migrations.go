@@ -316,28 +316,40 @@ func (m Migrator) MigratePriceFeederCurrencyPairProviders(ctx sdk.Context) {
 			},
 		},
 		types.CurrencyPairProviders{
-			BaseDenom:       "RETH",
-			QuoteDenom:      "WETH",
-			Address:         "0xa4e0faA58465A2D369aa21B3e42d43374c6F9613",
-			AddressProvider: "eth-uniswap",
+			BaseDenom:  "RETH",
+			QuoteDenom: "WETH",
+			PairAddress: []types.PairAddressProvider{
+				{
+					Address:         "0xa4e0faA58465A2D369aa21B3e42d43374c6F9613",
+					AddressProvider: "eth-uniswap",
+				},
+			},
 			Providers: []string{
 				"eth-uniswap",
 			},
 		},
 		types.CurrencyPairProviders{
-			BaseDenom:       "WETH",
-			QuoteDenom:      "USDC",
-			Address:         "0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640",
-			AddressProvider: "eth-uniswap",
+			BaseDenom:  "WETH",
+			QuoteDenom: "USDC",
+			PairAddress: []types.PairAddressProvider{
+				{
+					Address:         "0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640",
+					AddressProvider: "eth-uniswap",
+				},
+			},
 			Providers: []string{
 				"eth-uniswap",
 			},
 		},
 		types.CurrencyPairProviders{
-			BaseDenom:       "CBETH",
-			QuoteDenom:      "WETH",
-			Address:         "0x840deeef2f115cf50da625f7368c24af6fe74410",
-			AddressProvider: "eth-uniswap",
+			BaseDenom:  "CBETH",
+			QuoteDenom: "WETH",
+			PairAddress: []types.PairAddressProvider{
+				{
+					Address:         "0x840deeef2f115cf50da625f7368c24af6fe74410",
+					AddressProvider: "eth-uniswap",
+				},
+			},
 			Providers: []string{
 				"eth-uniswap",
 			},

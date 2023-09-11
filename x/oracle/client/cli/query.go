@@ -33,6 +33,7 @@ func GetQueryCmd() *cobra.Command {
 		GetCmdQueryMissCounter(),
 		GetCmdQuerySlashWindow(),
 		GetCmdQueryPriceFeederCurrencyPairProviders(),
+		GetCmdQueryPriceFeederCurrencyDeviationThresholds(),
 	)
 
 	return cmd
