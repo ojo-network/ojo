@@ -157,6 +157,8 @@ message CurrencyPairProviders {
   repeated string providers = 4 [ (gogoproto.moretags) = "yaml:\"providers\"" ];
 }
 
+// PairAddressProvider defines the uniswap pair address and provider
+// for uniswap currency pair. 
 message PairAddressProvider {
   string address          = 1 [ (gogoproto.moretags) = "yaml:\"address\"" ];
   string address_provider = 2 [ (gogoproto.moretags) = "yaml:\"address_provider\"" ];
