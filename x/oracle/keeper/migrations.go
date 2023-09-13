@@ -95,14 +95,14 @@ func (m Migrator) MigrateCurrencyPairProviders(ctx sdk.Context) {
 			BaseDenom:  "OSMO",
 			QuoteDenom: "ATOM",
 			Providers: []string{
-				"osmosisv2",
+				"osmosis",
 			},
 		},
 		types.CurrencyPairProviders{
 			BaseDenom:  "stATOM",
 			QuoteDenom: "ATOM",
 			Providers: []string{
-				"osmosisv2",
+				"osmosis",
 				"crescent",
 			},
 		},
@@ -110,7 +110,7 @@ func (m Migrator) MigrateCurrencyPairProviders(ctx sdk.Context) {
 			BaseDenom:  "stOSMO",
 			QuoteDenom: "OSMO",
 			Providers: []string{
-				"osmosisv2",
+				"osmosis",
 			},
 		},
 		types.CurrencyPairProviders{
@@ -148,14 +148,14 @@ func (m Migrator) MigrateCurrencyPairProviders(ctx sdk.Context) {
 			BaseDenom:  "JUNO",
 			QuoteDenom: "ATOM",
 			Providers: []string{
-				"osmosisv2",
+				"osmosis",
 			},
 		},
 		types.CurrencyPairProviders{
 			BaseDenom:  "stJUNO",
 			QuoteDenom: "JUNO",
 			Providers: []string{
-				"osmosisv2",
+				"osmosis",
 			},
 		},
 		types.CurrencyPairProviders{
@@ -202,7 +202,7 @@ func (m Migrator) MigrateCurrencyPairProviders(ctx sdk.Context) {
 			BaseDenom:  "IST",
 			QuoteDenom: "OSMO",
 			Providers: []string{
-				"osmosisv2",
+				"osmosis",
 			},
 		},
 		types.CurrencyPairProviders{
@@ -260,21 +260,21 @@ func (m Migrator) MigrateCurrencyPairProviders(ctx sdk.Context) {
 			BaseDenom:  "AXL",
 			QuoteDenom: "OSMO",
 			Providers: []string{
-				"osmosisv2",
+				"osmosis",
 			},
 		},
 		types.CurrencyPairProviders{
 			BaseDenom:  "STARS",
 			QuoteDenom: "ATOM",
 			Providers: []string{
-				"osmosisv2",
+				"osmosis",
 			},
 		},
 		types.CurrencyPairProviders{
 			BaseDenom:  "STARS",
 			QuoteDenom: "OSMO",
 			Providers: []string{
-				"osmosisv2",
+				"osmosis",
 			},
 		},
 		types.CurrencyPairProviders{

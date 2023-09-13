@@ -33,6 +33,29 @@ genesis:
     staking:
       params:
         bond_denom: uojo
+    oracle:
+      params:
+        currency_pair_providers:
+          - base_denom: USDT
+            pair_address: []
+            providers:
+            - kraken
+            - coinbase
+            - crypto
+            - gate
+            quote_denom: USD
+          - base_denom: ATOM
+            pair_address: []
+            providers:
+            - okx
+            - bitget
+            - gate
+            quote_denom: USDT
+          - base_denom: ATOM
+            pair_address: []
+            providers:
+            - kraken
+            quote_denom: USD
   chain_id: ojo-testnet
 validators:
 - name: alice
