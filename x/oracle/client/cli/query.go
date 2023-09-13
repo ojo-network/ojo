@@ -32,8 +32,6 @@ func GetQueryCmd() *cobra.Command {
 		GetCmdQueryFeederDelegation(),
 		GetCmdQueryMissCounter(),
 		GetCmdQuerySlashWindow(),
-		GetCmdQueryCurrencyPairProviders(),
-		GetCmdQueryCurrencyDeviationThresholds(),
 	)
 
 	return cmd
@@ -272,56 +270,6 @@ func GetCmdQuerySlashWindow() *cobra.Command {
 			queryClient := types.NewQueryClient(clientCtx)
 
 			res, err := queryClient.SlashWindow(cmd.Context(), &types.QuerySlashWindow{})
-			return cli.PrintOrErr(res, err, clientCtx)
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
-	return cmd
-}
-
-// GetCmdQueryCurrencyPairProviders implements the
-// price feeder currency pair providers query command.
-func GetCmdQueryCurrencyPairProviders() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "price-feeder-currency-pair-providers",
-		Short: "Query the price feeder currency pair providers",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-			queryClient := types.NewQueryClient(clientCtx)
-
-			res, err := queryClient.CurrencyPairProviders(
-				cmd.Context(),
-				&types.QueryCurrencyPairProviders{},
-			)
-			return cli.PrintOrErr(res, err, clientCtx)
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
-	return cmd
-}
-
-// GetCmdQueryCurrencyDeviationThresholds implements the
-// price feeder currency deviation thresholds query command.
-func GetCmdQueryCurrencyDeviationThresholds() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "price-feeder-currency-deviation-thresholds",
-		Short: "Query the price feeder currency deviation thresholds",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-			queryClient := types.NewQueryClient(clientCtx)
-
-			res, err := queryClient.CurrencyDeviationThresholds(
-				cmd.Context(),
-				&types.QueryCurrencyDeviationThresholds{},
-			)
 			return cli.PrintOrErr(res, err, clientCtx)
 		},
 	}

@@ -305,65 +305,6 @@ func (s *IntegrationTestSuite) TestQuerier_ValidatorRewardSet() {
 	ctx = ctx.WithBlockHeight(originalBlockHeight)
 }
 
-func (s *IntegrationTestSuite) TestQuerier_CurrencyPairProviders() {
-	app, ctx := s.app, s.ctx
-
-	pfCurrencyPairProvidersList := types.CurrencyPairProvidersList{
-		types.CurrencyPairProviders{
-			BaseDenom:  "OJO",
-			QuoteDenom: "USD",
-			Providers: []string{
-				"binance",
-				"coinbase",
-			},
-		},
-		types.CurrencyPairProviders{
-			BaseDenom:  "RETH",
-			QuoteDenom: "WETH",
-			PairAddress: []types.PairAddressProvider{
-				{
-					Address:         "address",
-					AddressProvider: "eth-uniswap",
-				},
-			},
-			Providers: []string{
-				"eth-uniswap",
-			},
-		},
-	}
-	app.OracleKeeper.SetCurrencyPairProvidersList(ctx, pfCurrencyPairProvidersList)
-
-	CurrencyPairProvidersResp, err := s.queryClient.CurrencyPairProviders(
-		ctx.Context(),
-		&types.QueryCurrencyPairProviders{},
-	)
-	s.Require().NoError(err)
-	s.Require().Equal(2, len(CurrencyPairProvidersResp.CurrencyPairProviders))
-}
-
-func (s *IntegrationTestSuite) TestQuerier_CurrencyDeviationThresholds() {
-	app, ctx := s.app, s.ctx
-
-	pfCurrencyDeviationThresholdList := types.CurrencyDeviationThresholdList{
-		types.CurrencyDeviationThreshold{
-			BaseDenom: "OJO",
-			Threshold: "1.5",
-		},
-		types.CurrencyDeviationThreshold{
-			BaseDenom: "RETH",
-			Threshold: "2",
-		},
-	}
-	app.OracleKeeper.SetCurrencyDeviationThresholdList(ctx, pfCurrencyDeviationThresholdList)
-
-	CurrencyDeviationThresholdsResp, err := s.queryClient.CurrencyDeviationThresholds(
-		ctx.Context(),
-		&types.QueryCurrencyDeviationThresholds{},
-	)
-	s.Require().NoError(err)
-	s.Require().Equal(2, len(CurrencyDeviationThresholdsResp.CurrencyDeviationThresholds))
-}
-
 func (s *IntegrationTestSuite) TestEmptyRequest() {
 	q := keeper.NewQuerier(keeper.Keeper{})
 	const emptyRequestErrorMsg = "empty request"

@@ -97,22 +97,6 @@ service Query {
     option (google.api.http).get =
         "/ojo/oracle/v1/valdiators/validator_reward_set";
   }
-
-  // CurrencyPairProviders returns the currency provider pairs the
-  // price feeder uses upon start up for pricing data.
-  rpc CurrencyPairProviders(QueryCurrencyPairProviders)
-      returns (QueryCurrencyPairProvidersResponse) {
-    option (google.api.http).get =
-        "/ojo/oracle/v1/valdiators/currency_pair_providers";
-  }
-
-  // CurrencyDeviationThresholds returns the deviation
-  // thresholds for each base currency the price feeder uses upon start up.
-  rpc CurrencyDeviationThresholds(QueryCurrencyDeviationThresholds)
-      returns (QueryCurrencyDeviationThresholdsResponse) {
-    option (google.api.http).get =
-        "/ojo/oracle/v1/valdiators/currency_deviation_thresholds";
-  }
 }
 
 // QueryExchangeRates is the request type for the Query/ExchangeRate RPC
@@ -306,28 +290,4 @@ message QueryValidatorRewardSet {}
 // QueryValidatorRewardSetResponse is the response type for the Query/ValidatorRewardSet RPC method.
 message QueryValidatorRewardSetResponse {
   ValidatorRewardSet validators = 1 [(gogoproto.nullable) = false];
-}
-
-// QueryCurrencyPairProviders is the request type for the
-// Query/CurrencyPairProviders RPC method.
-message QueryCurrencyPairProviders {}
-
-// QueryCurrencyPairProvidersResponse is the response type
-// for the Query/CurrencyPairProviders RPC method.
-message QueryCurrencyPairProvidersResponse {
-  repeated CurrencyPairProviders CurrencyPairProviders = 1 [
-    (gogoproto.nullable) = false
-  ];
-}
-
-// QueryCurrencyDeviationThresholds is the request type for the
-// Query/CurrencyDeviationThresholds RPC method.
-message QueryCurrencyDeviationThresholds {}
-
-// QueryCurrencyDeviationThresholdsResponse is the response type
-// for the Query/CurrencyDeviationThresholds RPC method.
-message QueryCurrencyDeviationThresholdsResponse {
-  repeated CurrencyDeviationThreshold CurrencyDeviationThresholds = 1 [
-    (gogoproto.nullable) = false
-  ];
 }
