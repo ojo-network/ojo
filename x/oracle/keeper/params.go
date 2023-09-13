@@ -187,9 +187,9 @@ func (k Keeper) CurrencyPairProvidersList(ctx sdk.Context) (res types.CurrencyPa
 // will query when starting up.
 func (k Keeper) SetCurrencyPairProvidersList(
 	ctx sdk.Context,
-	CurrencyPairProviders types.CurrencyPairProvidersList,
+	currencyPairProviders types.CurrencyPairProvidersList,
 ) {
-	k.paramSpace.Set(ctx, types.KeyCurrencyPairProviders, CurrencyPairProviders)
+	k.paramSpace.Set(ctx, types.KeyCurrencyPairProviders, currencyPairProviders)
 }
 
 // SetCurrencyDeviationThresholdList returns the current Currency Deviation Thesholds the
@@ -203,7 +203,7 @@ func (k Keeper) CurrencyDeviationThresholdList(ctx sdk.Context) (res types.Curre
 // price feeder will query when starting up.
 func (k Keeper) SetCurrencyDeviationThresholdList(
 	ctx sdk.Context,
-	CurrencyDeviationThresholds types.CurrencyDeviationThresholdList,
+	currencyDeviationThresholds types.CurrencyDeviationThresholdList,
 ) {
-	k.paramSpace.Set(ctx, types.KeyCurrencyDeviationThresholds, CurrencyDeviationThresholds)
+	k.paramSpace.Set(ctx, types.KeyCurrencyDeviationThresholds, currencyDeviationThresholds)
 }
