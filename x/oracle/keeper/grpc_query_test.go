@@ -305,7 +305,7 @@ func (s *IntegrationTestSuite) TestQuerier_ValidatorRewardSet() {
 	ctx = ctx.WithBlockHeight(originalBlockHeight)
 }
 
-func (s *IntegrationTestSuite) TestQuerier_PriceFeederCurrencyPairProviders() {
+func (s *IntegrationTestSuite) TestQuerier_CurrencyPairProviders() {
 	app, ctx := s.app, s.ctx
 
 	pfCurrencyPairProvidersList := types.CurrencyPairProvidersList{
@@ -331,17 +331,17 @@ func (s *IntegrationTestSuite) TestQuerier_PriceFeederCurrencyPairProviders() {
 			},
 		},
 	}
-	app.OracleKeeper.SetPriceFeederCurrencyPairProvidersList(ctx, pfCurrencyPairProvidersList)
+	app.OracleKeeper.SetCurrencyPairProvidersList(ctx, pfCurrencyPairProvidersList)
 
-	priceFeederCurrencyPairProvidersResp, err := s.queryClient.PriceFeederCurrencyPairProviders(
+	CurrencyPairProvidersResp, err := s.queryClient.CurrencyPairProviders(
 		ctx.Context(),
-		&types.QueryPriceFeederCurrencyPairProviders{},
+		&types.QueryCurrencyPairProviders{},
 	)
 	s.Require().NoError(err)
-	s.Require().Equal(2, len(priceFeederCurrencyPairProvidersResp.PriceFeederCurrencyPairProviders))
+	s.Require().Equal(2, len(CurrencyPairProvidersResp.CurrencyPairProviders))
 }
 
-func (s *IntegrationTestSuite) TestQuerier_PriceFeederCurrencyDeviationThresholds() {
+func (s *IntegrationTestSuite) TestQuerier_CurrencyDeviationThresholds() {
 	app, ctx := s.app, s.ctx
 
 	pfCurrencyDeviationThresholdList := types.CurrencyDeviationThresholdList{
@@ -354,14 +354,14 @@ func (s *IntegrationTestSuite) TestQuerier_PriceFeederCurrencyDeviationThreshold
 			Threshold: "2",
 		},
 	}
-	app.OracleKeeper.SetPriceFeederCurrencyDeviationThresholdList(ctx, pfCurrencyDeviationThresholdList)
+	app.OracleKeeper.SetCurrencyDeviationThresholdList(ctx, pfCurrencyDeviationThresholdList)
 
-	priceFeederCurrencyDeviationThresholdsResp, err := s.queryClient.PriceFeederCurrencyDeviationThresholds(
+	CurrencyDeviationThresholdsResp, err := s.queryClient.CurrencyDeviationThresholds(
 		ctx.Context(),
-		&types.QueryPriceFeederCurrencyDeviationThresholds{},
+		&types.QueryCurrencyDeviationThresholds{},
 	)
 	s.Require().NoError(err)
-	s.Require().Equal(2, len(priceFeederCurrencyDeviationThresholdsResp.PriceFeederCurrencyDeviationThresholds))
+	s.Require().Equal(2, len(CurrencyDeviationThresholdsResp.CurrencyDeviationThresholds))
 }
 
 func (s *IntegrationTestSuite) TestEmptyRequest() {

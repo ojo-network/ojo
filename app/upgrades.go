@@ -114,8 +114,8 @@ func (app *App) registerUpgrade0_2_1(_ upgradetypes.Plan) {
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			ctx.Logger().Info("Upgrade handler execution", "name", planName)
 			upgrader := oraclekeeper.NewMigrator(&app.OracleKeeper)
-			upgrader.MigratePriceFeederCurrencyPairProviders(ctx)
-			upgrader.MigratePriceFeederCurrencyDeviationThresholds(ctx)
+			upgrader.MigrateCurrencyPairProviders(ctx)
+			upgrader.MigrateCurrencyDeviationThresholds(ctx)
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)

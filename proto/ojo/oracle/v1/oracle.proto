@@ -60,17 +60,17 @@ message Params {
   // Maximum Median Stamps represents the maximum amount of medians the
   // oracle module will store before pruning via FIFO.
   uint64 maximum_median_stamps = 13;
-  // Price Feeder Currency Pair Providers defines the currency provider
-  // pairs the price feeder uses upon start up for pricing data.
-  repeated CurrencyPairProviders price_feeder_currency_pair_providers = 14 [
-    (gogoproto.moretags) = "yaml:\"price_feeder_currency_pair_providers\"",
+  // Currency Pair Providers defines the currency provider pairs the 
+  // price feeder uses upon start up for pricing data.
+  repeated CurrencyPairProviders currency_pair_providers = 14 [
+    (gogoproto.moretags) = "yaml:\"currency_pair_providers\"",
     (gogoproto.castrepeated) = "CurrencyPairProvidersList",
     (gogoproto.nullable) = false
   ];
-  // Price Feeder Currency Deviation Thresholds defines the deviation
-  // thresholds for each base currency the price feeder uses upon start up.
-  repeated CurrencyDeviationThreshold price_feeder_currency_deviation_thresholds = 15 [
-    (gogoproto.moretags) = "yaml:\"price_feeder_currency_deviation_thresholds\"",
+  // Currency Deviation Thresholds defines the deviation thresholds
+  // for each base currency the price feeder uses upon start up.
+  repeated CurrencyDeviationThreshold currency_deviation_thresholds = 15 [
+    (gogoproto.moretags) = "yaml:\"currency_deviation_thresholds\"",
     (gogoproto.castrepeated) = "CurrencyDeviationThresholdList",
     (gogoproto.nullable) = false
   ];
@@ -158,7 +158,7 @@ message CurrencyPairProviders {
 }
 
 // PairAddressProvider defines the uniswap pair address and provider
-// for uniswap currency pair. 
+// for uniswap currency pair.
 message PairAddressProvider {
   string address          = 1 [ (gogoproto.moretags) = "yaml:\"address\"" ];
   string address_provider = 2 [ (gogoproto.moretags) = "yaml:\"address_provider\"" ];

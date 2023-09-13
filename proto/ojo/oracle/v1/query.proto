@@ -98,20 +98,20 @@ service Query {
         "/ojo/oracle/v1/valdiators/validator_reward_set";
   }
 
-  // PriceFeederCurrencyPairProviders returns the currency provider
-  // pairs the price feeder uses upon start up for pricing data.
-  rpc PriceFeederCurrencyPairProviders(QueryPriceFeederCurrencyPairProviders)
-      returns (QueryPriceFeederCurrencyPairProvidersResponse) {
+  // CurrencyPairProviders returns the currency provider pairs the
+  // price feeder uses upon start up for pricing data.
+  rpc CurrencyPairProviders(QueryCurrencyPairProviders)
+      returns (QueryCurrencyPairProvidersResponse) {
     option (google.api.http).get =
-        "/ojo/oracle/v1/valdiators/price_feeder_currency_pair_providers";
+        "/ojo/oracle/v1/valdiators/currency_pair_providers";
   }
 
-  // PriceFeederCurrencyDeviationThresholds returns the deviation
+  // CurrencyDeviationThresholds returns the deviation
   // thresholds for each base currency the price feeder uses upon start up.
-  rpc PriceFeederCurrencyDeviationThresholds(QueryPriceFeederCurrencyDeviationThresholds)
-      returns (QueryPriceFeederCurrencyDeviationThresholdsResponse) {
+  rpc CurrencyDeviationThresholds(QueryCurrencyDeviationThresholds)
+      returns (QueryCurrencyDeviationThresholdsResponse) {
     option (google.api.http).get =
-        "/ojo/oracle/v1/valdiators/price_feeder_currency_deviation_thresholds";
+        "/ojo/oracle/v1/valdiators/currency_deviation_thresholds";
   }
 }
 
@@ -308,26 +308,26 @@ message QueryValidatorRewardSetResponse {
   ValidatorRewardSet validators = 1 [(gogoproto.nullable) = false];
 }
 
-// QueryPriceFeederCurrencyPairProviders is the request type for the
-// Query/PriceFeederCurrencyPairProviders RPC method.
-message QueryPriceFeederCurrencyPairProviders {}
+// QueryCurrencyPairProviders is the request type for the
+// Query/CurrencyPairProviders RPC method.
+message QueryCurrencyPairProviders {}
 
-// QueryPriceFeederCurrencyPairProvidersResponse is the response type
-// for the Query/PriceFeederCurrencyPairProviders RPC method.
-message QueryPriceFeederCurrencyPairProvidersResponse {
-  repeated CurrencyPairProviders PriceFeederCurrencyPairProviders = 1 [
+// QueryCurrencyPairProvidersResponse is the response type
+// for the Query/CurrencyPairProviders RPC method.
+message QueryCurrencyPairProvidersResponse {
+  repeated CurrencyPairProviders CurrencyPairProviders = 1 [
     (gogoproto.nullable) = false
   ];
 }
 
-// QueryPriceFeederCurrencyDeviationThresholds is the request type for the
-// Query/PriceFeederCurrencyDeviationThresholds RPC method.
-message QueryPriceFeederCurrencyDeviationThresholds {}
+// QueryCurrencyDeviationThresholds is the request type for the
+// Query/CurrencyDeviationThresholds RPC method.
+message QueryCurrencyDeviationThresholds {}
 
-// QueryPriceFeederCurrencyDeviationThresholdsResponse is the response type
-// for the Query/PriceFeederCurrencyDeviationThresholds RPC method.
-message QueryPriceFeederCurrencyDeviationThresholdsResponse {
-  repeated CurrencyDeviationThreshold PriceFeederCurrencyDeviationThresholds = 1 [
+// QueryCurrencyDeviationThresholdsResponse is the response type
+// for the Query/CurrencyDeviationThresholds RPC method.
+message QueryCurrencyDeviationThresholdsResponse {
+  repeated CurrencyDeviationThreshold CurrencyDeviationThresholds = 1 [
     (gogoproto.nullable) = false
   ];
 }

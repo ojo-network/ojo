@@ -32,8 +32,8 @@ func GetQueryCmd() *cobra.Command {
 		GetCmdQueryFeederDelegation(),
 		GetCmdQueryMissCounter(),
 		GetCmdQuerySlashWindow(),
-		GetCmdQueryPriceFeederCurrencyPairProviders(),
-		GetCmdQueryPriceFeederCurrencyDeviationThresholds(),
+		GetCmdQueryCurrencyPairProviders(),
+		GetCmdQueryCurrencyDeviationThresholds(),
 	)
 
 	return cmd
@@ -280,9 +280,9 @@ func GetCmdQuerySlashWindow() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryPriceFeederCurrencyPairProviders implements the
+// GetCmdQueryCurrencyPairProviders implements the
 // price feeder currency pair providers query command.
-func GetCmdQueryPriceFeederCurrencyPairProviders() *cobra.Command {
+func GetCmdQueryCurrencyPairProviders() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "price-feeder-currency-pair-providers",
 		Short: "Query the price feeder currency pair providers",
@@ -293,9 +293,9 @@ func GetCmdQueryPriceFeederCurrencyPairProviders() *cobra.Command {
 			}
 			queryClient := types.NewQueryClient(clientCtx)
 
-			res, err := queryClient.PriceFeederCurrencyPairProviders(
+			res, err := queryClient.CurrencyPairProviders(
 				cmd.Context(),
-				&types.QueryPriceFeederCurrencyPairProviders{},
+				&types.QueryCurrencyPairProviders{},
 			)
 			return cli.PrintOrErr(res, err, clientCtx)
 		},
@@ -305,9 +305,9 @@ func GetCmdQueryPriceFeederCurrencyPairProviders() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryPriceFeederCurrencyDeviationThresholds implements the
+// GetCmdQueryCurrencyDeviationThresholds implements the
 // price feeder currency deviation thresholds query command.
-func GetCmdQueryPriceFeederCurrencyDeviationThresholds() *cobra.Command {
+func GetCmdQueryCurrencyDeviationThresholds() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "price-feeder-currency-deviation-thresholds",
 		Short: "Query the price feeder currency deviation thresholds",
@@ -318,9 +318,9 @@ func GetCmdQueryPriceFeederCurrencyDeviationThresholds() *cobra.Command {
 			}
 			queryClient := types.NewQueryClient(clientCtx)
 
-			res, err := queryClient.PriceFeederCurrencyDeviationThresholds(
+			res, err := queryClient.CurrencyDeviationThresholds(
 				cmd.Context(),
-				&types.QueryPriceFeederCurrencyDeviationThresholds{},
+				&types.QueryCurrencyDeviationThresholds{},
 			)
 			return cli.PrintOrErr(res, err, clientCtx)
 		},

@@ -21,10 +21,10 @@ func (m Migrator) MigrateValidatorSet(ctx sdk.Context) {
 	m.keeper.SetValidatorRewardSet(ctx)
 }
 
-// MigratePriceFeederCurrencyPairProviders adds the price feeder
+// MigrateCurrencyPairProviders adds the price feeder
 // currency pair provider list.
-func (m Migrator) MigratePriceFeederCurrencyPairProviders(ctx sdk.Context) {
-	priceFeederCurrencyPairProviders := types.CurrencyPairProvidersList{
+func (m Migrator) MigrateCurrencyPairProviders(ctx sdk.Context) {
+	CurrencyPairProviders := types.CurrencyPairProvidersList{
 		types.CurrencyPairProviders{
 			BaseDenom:  "USDT",
 			QuoteDenom: "USD",
@@ -355,13 +355,13 @@ func (m Migrator) MigratePriceFeederCurrencyPairProviders(ctx sdk.Context) {
 			},
 		},
 	}
-	m.keeper.SetPriceFeederCurrencyPairProvidersList(ctx, priceFeederCurrencyPairProviders)
+	m.keeper.SetCurrencyPairProvidersList(ctx, CurrencyPairProviders)
 }
 
-// MigratePriceFeederCurrencyDeviationThresholds adds the price feeder
+// MigrateCurrencyDeviationThresholds adds the price feeder
 // currency deviation threshold list.
-func (m Migrator) MigratePriceFeederCurrencyDeviationThresholds(ctx sdk.Context) {
-	priceFeederCurrencyDeviationThresholds := types.CurrencyDeviationThresholdList{
+func (m Migrator) MigrateCurrencyDeviationThresholds(ctx sdk.Context) {
+	CurrencyDeviationThresholds := types.CurrencyDeviationThresholdList{
 		types.CurrencyDeviationThreshold{
 			BaseDenom: "USDT",
 			Threshold: "1.5",
@@ -467,5 +467,5 @@ func (m Migrator) MigratePriceFeederCurrencyDeviationThresholds(ctx sdk.Context)
 			Threshold: "2",
 		},
 	}
-	m.keeper.SetPriceFeederCurrencyDeviationThresholdList(ctx, priceFeederCurrencyDeviationThresholds)
+	m.keeper.SetCurrencyDeviationThresholdList(ctx, CurrencyDeviationThresholds)
 }

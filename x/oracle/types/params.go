@@ -21,21 +21,21 @@ const (
 
 // Parameter keys
 var (
-	KeyVotePeriod                             = []byte("VotePeriod")
-	KeyVoteThreshold                          = []byte("VoteThreshold")
-	KeyRewardBands                            = []byte("RewardBands")
-	KeyRewardDistributionWindow               = []byte("RewardDistributionWindow")
-	KeyAcceptList                             = []byte("AcceptList")
-	KeyMandatoryList                          = []byte("MandatoryList")
-	KeySlashFraction                          = []byte("SlashFraction")
-	KeySlashWindow                            = []byte("SlashWindow")
-	KeyMinValidPerWindow                      = []byte("MinValidPerWindow")
-	KeyHistoricStampPeriod                    = []byte("HistoricStampPeriod")
-	KeyMedianStampPeriod                      = []byte("MedianStampPeriod")
-	KeyMaximumPriceStamps                     = []byte("MaximumPriceStamps")
-	KeyMaximumMedianStamps                    = []byte("MaximumMedianStamps")
-	KeyPriceFeederCurrencyPairProviders       = []byte("PriceFeederCurrencyPairProviders")
-	KeyPriceFeederCurrencyDeviationThresholds = []byte("PriceFeederCurrencyDeviationThresholds")
+	KeyVotePeriod                  = []byte("VotePeriod")
+	KeyVoteThreshold               = []byte("VoteThreshold")
+	KeyRewardBands                 = []byte("RewardBands")
+	KeyRewardDistributionWindow    = []byte("RewardDistributionWindow")
+	KeyAcceptList                  = []byte("AcceptList")
+	KeyMandatoryList               = []byte("MandatoryList")
+	KeySlashFraction               = []byte("SlashFraction")
+	KeySlashWindow                 = []byte("SlashWindow")
+	KeyMinValidPerWindow           = []byte("MinValidPerWindow")
+	KeyHistoricStampPeriod         = []byte("HistoricStampPeriod")
+	KeyMedianStampPeriod           = []byte("MedianStampPeriod")
+	KeyMaximumPriceStamps          = []byte("MaximumPriceStamps")
+	KeyMaximumMedianStamps         = []byte("MaximumMedianStamps")
+	KeyCurrencyPairProviders       = []byte("CurrencyPairProviders")
+	KeyCurrencyDeviationThresholds = []byte("CurrencyDeviationThresholds")
 )
 
 // Default parameter values
@@ -75,7 +75,7 @@ var (
 	DefaultSlashFraction     = sdk.NewDecWithPrec(1, 4) // 0.01%
 	DefaultMinValidPerWindow = sdk.NewDecWithPrec(5, 2) // 5%
 
-	DefaultPriceFeederCurrencyPairProviders = CurrencyPairProvidersList{
+	DefaultCurrencyPairProviders = CurrencyPairProvidersList{
 		CurrencyPairProviders{
 			BaseDenom:  OjoSymbol,
 			QuoteDenom: USDDenom,
@@ -86,7 +86,7 @@ var (
 		},
 	}
 
-	DefaultPriceFeederCurrencyDeviationThresholds = CurrencyDeviationThresholdList{
+	DefaultCurrencyDeviationThresholds = CurrencyDeviationThresholdList{
 		CurrencyDeviationThreshold{
 			BaseDenom: OjoSymbol,
 			Threshold: "2",
@@ -117,21 +117,21 @@ func DefaultRewardBands() RewardBandList {
 // DefaultParams creates default oracle module parameters
 func DefaultParams() Params {
 	return Params{
-		VotePeriod:                             DefaultVotePeriod,
-		VoteThreshold:                          DefaultVoteThreshold,
-		RewardDistributionWindow:               DefaultRewardDistributionWindow,
-		AcceptList:                             DefaultAcceptList,
-		MandatoryList:                          DefaultMandatoryList,
-		SlashFraction:                          DefaultSlashFraction,
-		SlashWindow:                            DefaultSlashWindow,
-		MinValidPerWindow:                      DefaultMinValidPerWindow,
-		HistoricStampPeriod:                    DefaultHistoricStampPeriod,
-		MedianStampPeriod:                      DefaultMedianStampPeriod,
-		MaximumPriceStamps:                     DefaultMaximumPriceStamps,
-		MaximumMedianStamps:                    DefaultMaximumMedianStamps,
-		RewardBands:                            DefaultRewardBands(),
-		PriceFeederCurrencyPairProviders:       DefaultPriceFeederCurrencyPairProviders,
-		PriceFeederCurrencyDeviationThresholds: DefaultPriceFeederCurrencyDeviationThresholds,
+		VotePeriod:                  DefaultVotePeriod,
+		VoteThreshold:               DefaultVoteThreshold,
+		RewardDistributionWindow:    DefaultRewardDistributionWindow,
+		AcceptList:                  DefaultAcceptList,
+		MandatoryList:               DefaultMandatoryList,
+		SlashFraction:               DefaultSlashFraction,
+		SlashWindow:                 DefaultSlashWindow,
+		MinValidPerWindow:           DefaultMinValidPerWindow,
+		HistoricStampPeriod:         DefaultHistoricStampPeriod,
+		MedianStampPeriod:           DefaultMedianStampPeriod,
+		MaximumPriceStamps:          DefaultMaximumPriceStamps,
+		MaximumMedianStamps:         DefaultMaximumMedianStamps,
+		RewardBands:                 DefaultRewardBands(),
+		CurrencyPairProviders:       DefaultCurrencyPairProviders,
+		CurrencyDeviationThresholds: DefaultCurrencyDeviationThresholds,
 	}
 }
 
@@ -210,13 +210,13 @@ func (p *Params) ParamSetPairs() paramstypes.ParamSetPairs {
 			validateMaximumMedianStamps,
 		),
 		paramstypes.NewParamSetPair(
-			KeyPriceFeederCurrencyPairProviders,
-			&p.PriceFeederCurrencyPairProviders,
+			KeyCurrencyPairProviders,
+			&p.CurrencyPairProviders,
 			validatePriceFeederCurrencyPairProviders,
 		),
 		paramstypes.NewParamSetPair(
-			KeyPriceFeederCurrencyDeviationThresholds,
-			&p.PriceFeederCurrencyDeviationThresholds,
+			KeyCurrencyDeviationThresholds,
+			&p.CurrencyDeviationThresholds,
 			validatePriceFeederCurrencyDeviationThresholds,
 		),
 	}

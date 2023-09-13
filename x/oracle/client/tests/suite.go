@@ -232,7 +232,7 @@ func (s *IntegrationTestSuite) TestQueryExchangeRate() {
 	}
 }
 
-func (s *IntegrationTestSuite) TestQueryPriceFeederCurrencyPairProviders() {
+func (s *IntegrationTestSuite) TestQueryCurrencyPairProviders() {
 	val := s.network.Validators[0]
 	clientCtx := val.ClientCtx
 
@@ -248,7 +248,7 @@ func (s *IntegrationTestSuite) TestQueryPriceFeederCurrencyPairProviders() {
 				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 			},
 			expectErr: false,
-			respType:  &types.QueryPriceFeederCurrencyPairProvidersResponse{},
+			respType:  &types.QueryCurrencyPairProvidersResponse{},
 		},
 	}
 
@@ -258,7 +258,7 @@ func (s *IntegrationTestSuite) TestQueryPriceFeederCurrencyPairProviders() {
 		s.Run(tc.name, func() {
 			out, err := clitestutil.ExecTestCLICmd(
 				clientCtx,
-				cli.GetCmdQueryPriceFeederCurrencyPairProviders(),
+				cli.GetCmdQueryCurrencyPairProviders(),
 				tc.args,
 			)
 			if tc.expectErr {
@@ -271,7 +271,7 @@ func (s *IntegrationTestSuite) TestQueryPriceFeederCurrencyPairProviders() {
 	}
 }
 
-func (s *IntegrationTestSuite) TestQueryPriceFeederCurrencyDeviationThresholds() {
+func (s *IntegrationTestSuite) TestQueryCurrencyDeviationThresholds() {
 	val := s.network.Validators[0]
 	clientCtx := val.ClientCtx
 
@@ -287,7 +287,7 @@ func (s *IntegrationTestSuite) TestQueryPriceFeederCurrencyDeviationThresholds()
 				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 			},
 			expectErr: false,
-			respType:  &types.QueryPriceFeederCurrencyDeviationThresholdsResponse{},
+			respType:  &types.QueryCurrencyDeviationThresholdsResponse{},
 		},
 	}
 
@@ -297,7 +297,7 @@ func (s *IntegrationTestSuite) TestQueryPriceFeederCurrencyDeviationThresholds()
 		s.Run(tc.name, func() {
 			out, err := clitestutil.ExecTestCLICmd(
 				clientCtx,
-				cli.GetCmdQueryPriceFeederCurrencyDeviationThresholds(),
+				cli.GetCmdQueryCurrencyDeviationThresholds(),
 				tc.args,
 			)
 			if tc.expectErr {

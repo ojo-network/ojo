@@ -327,40 +327,40 @@ func (q querier) ValidatorRewardSet(
 	}, nil
 }
 
-// PriceFeederCurrencyPairProviders queries the Currency Pair Providers the
+// CurrencyPairProviders queries the Currency Pair Providers the
 // price feeder uses when starting up.
-func (q querier) PriceFeederCurrencyPairProviders(
+func (q querier) CurrencyPairProviders(
 	goCtx context.Context,
-	req *types.QueryPriceFeederCurrencyPairProviders,
-) (*types.QueryPriceFeederCurrencyPairProvidersResponse, error) {
+	req *types.QueryCurrencyPairProviders,
+) (*types.QueryCurrencyPairProvidersResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	pfCurrencyPairProviderList := q.PriceFeederCurrencyPairProvidersList(ctx)
+	pfCurrencyPairProviderList := q.CurrencyPairProvidersList(ctx)
 
-	return &types.QueryPriceFeederCurrencyPairProvidersResponse{
-		PriceFeederCurrencyPairProviders: pfCurrencyPairProviderList,
+	return &types.QueryCurrencyPairProvidersResponse{
+		CurrencyPairProviders: pfCurrencyPairProviderList,
 	}, nil
 }
 
-// PriceFeederCurrencyDeviationThresholds queries the Currency Deviation Thesholds
+// CurrencyDeviationThresholds queries the Currency Deviation Thesholds
 // the price feeder uses when starting up.
-func (q querier) PriceFeederCurrencyDeviationThresholds(
+func (q querier) CurrencyDeviationThresholds(
 	goCtx context.Context,
-	req *types.QueryPriceFeederCurrencyDeviationThresholds,
-) (*types.QueryPriceFeederCurrencyDeviationThresholdsResponse, error) {
+	req *types.QueryCurrencyDeviationThresholds,
+) (*types.QueryCurrencyDeviationThresholdsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	pfCurrencyDeviationThresholdList := q.PriceFeederCurrencyDeviationThresholdList(ctx)
+	pfCurrencyDeviationThresholdList := q.CurrencyDeviationThresholdList(ctx)
 
-	return &types.QueryPriceFeederCurrencyDeviationThresholdsResponse{
-		PriceFeederCurrencyDeviationThresholds: pfCurrencyDeviationThresholdList,
+	return &types.QueryCurrencyDeviationThresholdsResponse{
+		CurrencyDeviationThresholds: pfCurrencyDeviationThresholdList,
 	}, nil
 }
