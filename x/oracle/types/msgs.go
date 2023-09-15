@@ -1,8 +1,6 @@
 package types
 
 import (
-	"fmt"
-
 	"github.com/cometbft/cometbft/crypto/tmhash"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -16,6 +14,7 @@ var (
 	_ sdk.Msg = &MsgAggregateExchangeRatePrevote{}
 	_ sdk.Msg = &MsgAggregateExchangeRateVote{}
 	_ sdk.Msg = &MsgGovUpdateParams{}
+	_ sdk.Msg = &MsgGovCancelUpdateParams{}
 )
 
 func NewMsgAggregateExchangeRatePrevote(
@@ -174,13 +173,12 @@ func (msg MsgDelegateFeedConsent) ValidateBasic() error {
 }
 
 // NewMsgUpdateParams will creates a new MsgUpdateParams instance
-func NewMsgUpdateParams(authority, title, description string, keys []string, changes Params) *MsgGovUpdateParams {
+func NewMsgUpdateParams(authority, title, description string, plan ParamUpdatePlan) *MsgGovUpdateParams {
 	return &MsgGovUpdateParams{
+		Authority:   authority,
 		Title:       title,
 		Description: description,
-		Authority:   authority,
-		Keys:        keys,
-		Changes:     changes,
+		Plan:        plan,
 	}
 }
 
@@ -212,77 +210,39 @@ func (msg MsgGovUpdateParams) ValidateBasic() error {
 		return err
 	}
 
-	for _, key := range msg.Keys {
-		switch key {
-		case string(KeyVotePeriod):
-			if err := validateVotePeriod(msg.Changes.VotePeriod); err != nil {
-				return err
-			}
+	return msg.Plan.ValidateBasic()
+}
 
-		case string(KeyVoteThreshold):
-			if err := validateVoteThreshold(msg.Changes.VoteThreshold); err != nil {
-				return err
-			}
-
-		case string(KeyRewardBands):
-			if err := validateRewardBands(msg.Changes.RewardBands); err != nil {
-				return err
-			}
-
-		case string(KeyRewardDistributionWindow):
-			if err := validateRewardDistributionWindow(msg.Changes.RewardDistributionWindow); err != nil {
-				return err
-			}
-
-		case string(KeyAcceptList):
-			if err := validateDenomList(msg.Changes.AcceptList); err != nil {
-				return err
-			}
-
-		case string(KeyMandatoryList):
-			if err := validateDenomList(msg.Changes.MandatoryList); err != nil {
-				return err
-			}
-
-		case string(KeySlashFraction):
-			if err := validateSlashFraction(msg.Changes.SlashFraction); err != nil {
-				return err
-			}
-
-		case string(KeySlashWindow):
-			if err := validateSlashWindow(msg.Changes.SlashWindow); err != nil {
-				return err
-			}
-
-		case string(KeyMinValidPerWindow):
-			if err := validateMinValidPerWindow(msg.Changes.MinValidPerWindow); err != nil {
-				return err
-			}
-
-		case string(KeyHistoricStampPeriod):
-			if err := validateHistoricStampPeriod(msg.Changes.HistoricStampPeriod); err != nil {
-				return err
-			}
-
-		case string(KeyMedianStampPeriod):
-			if err := validateMedianStampPeriod(msg.Changes.MedianStampPeriod); err != nil {
-				return err
-			}
-
-		case string(KeyMaximumPriceStamps):
-			if err := validateMaximumPriceStamps(msg.Changes.MaximumPriceStamps); err != nil {
-				return err
-			}
-
-		case string(KeyMaximumMedianStamps):
-			if err := validateMaximumMedianStamps(msg.Changes.MaximumMedianStamps); err != nil {
-				return err
-			}
-
-		default:
-			return fmt.Errorf("%s is not an existing oracle param key", key)
-		}
+// NewMsgCancelUpdateParams will creates a new MsgGovCancelUpdateParams instance
+func NewMsgCancelUpdateParams(authority, title, description string) *MsgGovCancelUpdateParams {
+	return &MsgGovCancelUpdateParams{
+		Authority:   authority,
+		Title:       title,
+		Description: description,
 	}
+}
 
-	return nil
+// Type implements Msg interface
+func (msg MsgGovCancelUpdateParams) Type() string { return sdk.MsgTypeURL(&msg) }
+
+// String implements the Stringer interface.
+func (msg MsgGovCancelUpdateParams) String() string {
+	out, _ := yaml.Marshal(msg)
+	return string(out)
+}
+
+// GetSignBytes implements Msg
+func (msg MsgGovCancelUpdateParams) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(&msg)
+	return sdk.MustSortJSON(bz)
+}
+
+// GetSigners implements Msg
+func (msg MsgGovCancelUpdateParams) GetSigners() []sdk.AccAddress {
+	return checkers.Signers(msg.Authority)
+}
+
+// ValidateBasic implements Msg
+func (msg MsgGovCancelUpdateParams) ValidateBasic() error {
+	return checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority)
 }

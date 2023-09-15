@@ -275,11 +275,13 @@ var xxx_messageInfo_MsgDelegateFeedConsentResponse proto.InternalMessageInfo
 // MsgGovUpdateParams defines the Msg/GovUpdateParams request type.
 type MsgGovUpdateParams struct {
 	// authority is the address of the governance account.
-	Authority   string   `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
-	Title       string   `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	Description string   `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Keys        []string `protobuf:"bytes,4,rep,name=keys,proto3" json:"keys,omitempty"`
-	Changes     Params   `protobuf:"bytes,5,opt,name=changes,proto3" json:"changes"`
+	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	// title of the proposal
+	Title string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	// description of the proposal
+	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	// plan is the param update plan
+	Plan ParamUpdatePlan `protobuf:"bytes,4,opt,name=plan,proto3" json:"plan"`
 }
 
 func (m *MsgGovUpdateParams) Reset()      { *m = MsgGovUpdateParams{} }
@@ -351,6 +353,85 @@ func (m *MsgGovUpdateParamsResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgGovUpdateParamsResponse proto.InternalMessageInfo
 
+// MsgGovCancelUpdateParams defines the Msg/GovCancelUpdateParams request type.
+type MsgGovCancelUpdateParams struct {
+	// authority is the address of the governance account.
+	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	// title of the proposal
+	Title string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	// description of the proposal
+	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+}
+
+func (m *MsgGovCancelUpdateParams) Reset()      { *m = MsgGovCancelUpdateParams{} }
+func (*MsgGovCancelUpdateParams) ProtoMessage() {}
+func (*MsgGovCancelUpdateParams) Descriptor() ([]byte, []int) {
+	return fileDescriptor_58d45810177a43e8, []int{8}
+}
+func (m *MsgGovCancelUpdateParams) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgGovCancelUpdateParams) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgGovCancelUpdateParams.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgGovCancelUpdateParams) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgGovCancelUpdateParams.Merge(m, src)
+}
+func (m *MsgGovCancelUpdateParams) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgGovCancelUpdateParams) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgGovCancelUpdateParams.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgGovCancelUpdateParams proto.InternalMessageInfo
+
+// MsgGovCancelUpdateParamsResponse defines the Msg/GovCancelUpdateParamsResponse response type.
+type MsgGovCancelUpdateParamsResponse struct {
+}
+
+func (m *MsgGovCancelUpdateParamsResponse) Reset()         { *m = MsgGovCancelUpdateParamsResponse{} }
+func (m *MsgGovCancelUpdateParamsResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgGovCancelUpdateParamsResponse) ProtoMessage()    {}
+func (*MsgGovCancelUpdateParamsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_58d45810177a43e8, []int{9}
+}
+func (m *MsgGovCancelUpdateParamsResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgGovCancelUpdateParamsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgGovCancelUpdateParamsResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgGovCancelUpdateParamsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgGovCancelUpdateParamsResponse.Merge(m, src)
+}
+func (m *MsgGovCancelUpdateParamsResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgGovCancelUpdateParamsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgGovCancelUpdateParamsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgGovCancelUpdateParamsResponse proto.InternalMessageInfo
+
 func init() {
 	proto.RegisterType((*MsgAggregateExchangeRatePrevote)(nil), "ojo.oracle.v1.MsgAggregateExchangeRatePrevote")
 	proto.RegisterType((*MsgAggregateExchangeRatePrevoteResponse)(nil), "ojo.oracle.v1.MsgAggregateExchangeRatePrevoteResponse")
@@ -360,56 +441,59 @@ func init() {
 	proto.RegisterType((*MsgDelegateFeedConsentResponse)(nil), "ojo.oracle.v1.MsgDelegateFeedConsentResponse")
 	proto.RegisterType((*MsgGovUpdateParams)(nil), "ojo.oracle.v1.MsgGovUpdateParams")
 	proto.RegisterType((*MsgGovUpdateParamsResponse)(nil), "ojo.oracle.v1.MsgGovUpdateParamsResponse")
+	proto.RegisterType((*MsgGovCancelUpdateParams)(nil), "ojo.oracle.v1.MsgGovCancelUpdateParams")
+	proto.RegisterType((*MsgGovCancelUpdateParamsResponse)(nil), "ojo.oracle.v1.MsgGovCancelUpdateParamsResponse")
 }
 
 func init() { proto.RegisterFile("ojo/oracle/v1/tx.proto", fileDescriptor_58d45810177a43e8) }
 
 var fileDescriptor_58d45810177a43e8 = []byte{
-	// 689 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x94, 0x4f, 0x4f, 0x13, 0x4f,
-	0x18, 0xc7, 0x77, 0x7f, 0x2d, 0xfc, 0xe8, 0x10, 0x44, 0x87, 0x82, 0x65, 0x43, 0x76, 0xeb, 0xfa,
-	0x8f, 0x6a, 0xd8, 0x0d, 0x10, 0x39, 0x70, 0x12, 0xfc, 0xc3, 0xa9, 0x89, 0x19, 0xa3, 0x07, 0x2f,
-	0x64, 0xe8, 0x8e, 0xd3, 0x85, 0xb6, 0xd3, 0xcc, 0x0c, 0x95, 0x1e, 0xbc, 0x18, 0x63, 0x3c, 0x7a,
-	0xf4, 0xc8, 0x3b, 0xd0, 0x83, 0x2f, 0x82, 0x23, 0xf1, 0x64, 0x62, 0xb2, 0x51, 0x38, 0x68, 0x62,
-	0xe2, 0xa1, 0xaf, 0xc0, 0xec, 0xce, 0xee, 0x52, 0x28, 0x50, 0x7a, 0x9b, 0x79, 0xbe, 0x9f, 0x99,
-	0xe7, 0xfb, 0x3c, 0xbb, 0xcf, 0x80, 0x29, 0xb6, 0xc9, 0x5c, 0xc6, 0x71, 0xa5, 0x46, 0xdc, 0xd6,
-	0xbc, 0x2b, 0x77, 0x9c, 0x26, 0x67, 0x92, 0xc1, 0x31, 0xb6, 0xc9, 0x1c, 0x15, 0x77, 0x5a, 0xf3,
-	0xc6, 0xd5, 0x0a, 0x13, 0x75, 0x26, 0xdc, 0xba, 0xa0, 0x21, 0x56, 0x17, 0x54, 0x71, 0xc6, 0xb4,
-	0x12, 0xd6, 0xa3, 0x9d, 0xab, 0x36, 0xb1, 0x94, 0xa7, 0x8c, 0x32, 0x15, 0x0f, 0x57, 0x71, 0xd4,
-	0x38, 0x9e, 0x30, 0x4e, 0x11, 0x69, 0xf6, 0x27, 0x1d, 0x58, 0x65, 0x41, 0x57, 0x28, 0xe5, 0x84,
-	0x62, 0x49, 0x1e, 0xed, 0x54, 0xaa, 0xb8, 0x41, 0x09, 0xc2, 0x92, 0x3c, 0xe1, 0xa4, 0xc5, 0x24,
-	0x81, 0xd7, 0x41, 0xb6, 0x8a, 0x45, 0xb5, 0xa0, 0x17, 0xf5, 0xd9, 0xdc, 0xea, 0x78, 0x27, 0xb0,
-	0x46, 0xdb, 0xb8, 0x5e, 0x5b, 0xb6, 0xc3, 0xa8, 0x8d, 0x22, 0x11, 0x96, 0xc0, 0xf0, 0x4b, 0x42,
-	0x3c, 0xc2, 0x0b, 0xff, 0x45, 0xd8, 0x95, 0x4e, 0x60, 0x8d, 0x29, 0x4c, 0xc5, 0x6d, 0x14, 0x03,
-	0x70, 0x01, 0xe4, 0x5a, 0xb8, 0xe6, 0x7b, 0x58, 0x32, 0x5e, 0xc8, 0x44, 0x74, 0xbe, 0x13, 0x58,
-	0x97, 0x15, 0x9d, 0x4a, 0x36, 0x3a, 0xc2, 0x96, 0x47, 0xde, 0xef, 0x5a, 0xda, 0xef, 0x5d, 0x4b,
-	0xb3, 0x4b, 0xe0, 0x76, 0x1f, 0xc3, 0x88, 0x88, 0x26, 0x6b, 0x08, 0x62, 0xff, 0xd5, 0xc1, 0xcc,
-	0x59, 0xec, 0xf3, 0xb8, 0x32, 0x81, 0x6b, 0xb2, 0xb7, 0xb2, 0x30, 0x6a, 0xa3, 0x48, 0x84, 0xf7,
-	0xc1, 0x25, 0x12, 0x1f, 0x5c, 0xe7, 0x58, 0x12, 0x11, 0x57, 0x38, 0xdd, 0x09, 0xac, 0x49, 0x85,
-	0x1f, 0xd7, 0x6d, 0x34, 0x46, 0xba, 0x32, 0x89, 0xae, 0xde, 0x64, 0x06, 0xea, 0x4d, 0x76, 0xd0,
-	0xde, 0xdc, 0x02, 0x37, 0xce, 0xab, 0x37, 0x6d, 0xcc, 0x5b, 0x1d, 0x4c, 0x95, 0x05, 0x7d, 0x48,
-	0x6a, 0x11, 0xf7, 0x98, 0x10, 0xef, 0x41, 0x28, 0x34, 0x24, 0x74, 0xc1, 0x08, 0x6b, 0x12, 0x1e,
-	0xe5, 0x57, 0x6d, 0x99, 0xe8, 0x04, 0xd6, 0xb8, 0xca, 0x9f, 0x28, 0x36, 0x4a, 0xa1, 0xf0, 0x80,
-	0x17, 0xdf, 0x13, 0x37, 0xa6, 0xeb, 0x40, 0xa2, 0xd8, 0x28, 0x85, 0xba, 0xec, 0x16, 0x81, 0x79,
-	0xba, 0x8b, 0xd4, 0xe8, 0x1f, 0x1d, 0xc0, 0xb2, 0xa0, 0x6b, 0xac, 0xf5, 0xac, 0xe9, 0x85, 0x5f,
-	0x18, 0x73, 0x5c, 0x17, 0x70, 0x09, 0xe4, 0xf0, 0xb6, 0xac, 0x32, 0xee, 0xcb, 0x76, 0xec, 0xb2,
-	0xf0, 0xf5, 0xcb, 0x5c, 0x3e, 0x1e, 0x86, 0x15, 0xcf, 0xe3, 0x44, 0x88, 0xa7, 0x92, 0xfb, 0x0d,
-	0x8a, 0x8e, 0x50, 0x98, 0x07, 0x43, 0xd2, 0x97, 0xb5, 0xd8, 0x28, 0x52, 0x1b, 0x58, 0x04, 0xa3,
-	0x1e, 0x11, 0x15, 0xee, 0x37, 0xa5, 0xcf, 0x1a, 0xea, 0x1b, 0xa1, 0xee, 0x10, 0x84, 0x20, 0xbb,
-	0x45, 0xda, 0xa2, 0x90, 0x2d, 0x66, 0x66, 0x73, 0x28, 0x5a, 0xc3, 0x7b, 0xe0, 0x7f, 0xd5, 0x5d,
-	0x51, 0x18, 0x2a, 0xea, 0xb3, 0xa3, 0x0b, 0x93, 0xce, 0xb1, 0x01, 0x76, 0x94, 0xd7, 0xd5, 0xec,
-	0x5e, 0x60, 0x69, 0x28, 0x61, 0x97, 0x8d, 0xb0, 0xfa, 0x8f, 0xaa, 0x03, 0xfa, 0x9b, 0x5f, 0x9f,
-	0xef, 0x1c, 0xd9, 0xb3, 0x67, 0x80, 0xd1, 0x5b, 0x6c, 0xd2, 0x8b, 0x85, 0xef, 0x19, 0x90, 0x29,
-	0x0b, 0x0a, 0xdf, 0xe9, 0x60, 0xe6, 0xdc, 0x79, 0x75, 0x4e, 0x18, 0xe9, 0x33, 0x2e, 0xc6, 0xd2,
-	0x60, 0x7c, 0x62, 0x08, 0xbe, 0x06, 0xd3, 0x67, 0x8f, 0xd6, 0xdd, 0x0b, 0x5e, 0x1a, 0xc2, 0xc6,
-	0xe2, 0x00, 0x70, 0x9a, 0x7e, 0x0b, 0x4c, 0x9c, 0xf6, 0x03, 0xdf, 0xec, 0xbd, 0xeb, 0x14, 0xcc,
-	0x98, 0xbb, 0x10, 0x96, 0x26, 0x5b, 0x07, 0xe3, 0x27, 0x7f, 0xc2, 0x6b, 0xbd, 0x37, 0x9c, 0x40,
-	0x8c, 0x52, 0x5f, 0x24, 0x49, 0xb0, 0xba, 0xb6, 0xf7, 0xd3, 0xd4, 0xf6, 0x0e, 0x4c, 0x7d, 0xff,
-	0xc0, 0xd4, 0x7f, 0x1c, 0x98, 0xfa, 0x87, 0x43, 0x53, 0xdb, 0x3f, 0x34, 0xb5, 0x6f, 0x87, 0xa6,
-	0xf6, 0xa2, 0x44, 0x7d, 0x59, 0xdd, 0xde, 0x70, 0x2a, 0xac, 0xee, 0xb2, 0x4d, 0x36, 0xd7, 0x20,
-	0xf2, 0x15, 0xe3, 0x5b, 0xe1, 0xda, 0xdd, 0x49, 0xde, 0x76, 0xd9, 0x6e, 0x12, 0xb1, 0x31, 0x1c,
-	0x3d, 0xec, 0x8b, 0xff, 0x02, 0x00, 0x00, 0xff, 0xff, 0xcf, 0x83, 0x4d, 0xef, 0x67, 0x06, 0x00,
-	0x00,
+	// 717 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x95, 0x4f, 0x4f, 0xd4, 0x4e,
+	0x18, 0xc7, 0xdb, 0x1f, 0xfb, 0x23, 0xf0, 0x10, 0x44, 0xcb, 0x82, 0x4b, 0x43, 0xda, 0xb5, 0xfe,
+	0xc1, 0xd5, 0xd0, 0x06, 0x48, 0x88, 0xe1, 0x24, 0xa0, 0x72, 0xda, 0xc4, 0xd4, 0xe8, 0xc1, 0x0b,
+	0x19, 0xb6, 0xe3, 0x6c, 0xa1, 0xdb, 0xa9, 0x33, 0xc3, 0x0a, 0x07, 0x2f, 0xc6, 0x18, 0x8f, 0x1e,
+	0x3d, 0x72, 0xf2, 0xaa, 0x07, 0x5f, 0x04, 0x27, 0x43, 0x3c, 0x19, 0x0f, 0x1b, 0x85, 0x83, 0x9e,
+	0x3c, 0xec, 0x2b, 0x30, 0xed, 0x74, 0xcb, 0xc2, 0x2e, 0x7f, 0xf6, 0xe4, 0xad, 0xf3, 0x7c, 0x3f,
+	0x33, 0xcf, 0xf7, 0x79, 0xa6, 0x4f, 0x0b, 0xe3, 0x74, 0x9d, 0x3a, 0x94, 0xa1, 0x4a, 0x80, 0x9d,
+	0xfa, 0x8c, 0x23, 0xb6, 0xec, 0x88, 0x51, 0x41, 0xb5, 0x61, 0xba, 0x4e, 0x6d, 0x19, 0xb7, 0xeb,
+	0x33, 0xfa, 0xe5, 0x0a, 0xe5, 0x35, 0xca, 0x9d, 0x1a, 0x27, 0x31, 0x56, 0xe3, 0x44, 0x72, 0xfa,
+	0x84, 0x14, 0x56, 0x93, 0x95, 0x23, 0x17, 0xa9, 0x94, 0x27, 0x94, 0x50, 0x19, 0x8f, 0x9f, 0xd2,
+	0xa8, 0x7e, 0x34, 0x61, 0x9a, 0x22, 0xd1, 0xac, 0x8f, 0x2a, 0x98, 0x65, 0x4e, 0x16, 0x09, 0x61,
+	0x98, 0x20, 0x81, 0xef, 0x6f, 0x55, 0xaa, 0x28, 0x24, 0xd8, 0x45, 0x02, 0x3f, 0x64, 0xb8, 0x4e,
+	0x05, 0xd6, 0xae, 0x42, 0xae, 0x8a, 0x78, 0xb5, 0xa0, 0x16, 0xd5, 0x9b, 0x83, 0x4b, 0x23, 0xcd,
+	0x86, 0x39, 0xb4, 0x8d, 0x6a, 0xc1, 0x82, 0x15, 0x47, 0x2d, 0x37, 0x11, 0xb5, 0x12, 0xf4, 0x3f,
+	0xc3, 0xd8, 0xc3, 0xac, 0xf0, 0x5f, 0x82, 0x5d, 0x6a, 0x36, 0xcc, 0x61, 0x89, 0xc9, 0xb8, 0xe5,
+	0xa6, 0x80, 0x36, 0x0b, 0x83, 0x75, 0x14, 0xf8, 0x1e, 0x12, 0x94, 0x15, 0xfa, 0x12, 0x3a, 0xdf,
+	0x6c, 0x98, 0x17, 0x25, 0x9d, 0x49, 0x96, 0x7b, 0x88, 0x2d, 0x0c, 0xbc, 0xdd, 0x31, 0x95, 0xdf,
+	0x3b, 0xa6, 0x62, 0x95, 0x60, 0xea, 0x0c, 0xc3, 0x2e, 0xe6, 0x11, 0x0d, 0x39, 0xb6, 0xfe, 0xa8,
+	0x30, 0x79, 0x12, 0xfb, 0x24, 0xad, 0x8c, 0xa3, 0x40, 0x74, 0x56, 0x16, 0x47, 0x2d, 0x37, 0x11,
+	0xb5, 0xbb, 0x70, 0x01, 0xa7, 0x1b, 0x57, 0x19, 0x12, 0x98, 0xa7, 0x15, 0x4e, 0x34, 0x1b, 0xe6,
+	0x98, 0xc4, 0x8f, 0xea, 0x96, 0x3b, 0x8c, 0xdb, 0x32, 0xf1, 0xb6, 0xde, 0xf4, 0xf5, 0xd4, 0x9b,
+	0x5c, 0xaf, 0xbd, 0xb9, 0x01, 0xd7, 0x4e, 0xab, 0x37, 0x6b, 0xcc, 0x6b, 0x15, 0xc6, 0xcb, 0x9c,
+	0xdc, 0xc3, 0x41, 0xc2, 0x3d, 0xc0, 0xd8, 0x5b, 0x8e, 0x85, 0x50, 0x68, 0x0e, 0x0c, 0xd0, 0x08,
+	0xb3, 0x24, 0xbf, 0x6c, 0xcb, 0x68, 0xb3, 0x61, 0x8e, 0xc8, 0xfc, 0x2d, 0xc5, 0x72, 0x33, 0x28,
+	0xde, 0xe0, 0xa5, 0xe7, 0xa4, 0x8d, 0x69, 0xdb, 0xd0, 0x52, 0x2c, 0x37, 0x83, 0xda, 0xec, 0x16,
+	0xc1, 0xe8, 0xee, 0x22, 0x33, 0xfa, 0x5d, 0x05, 0xad, 0xcc, 0xc9, 0x0a, 0xad, 0x3f, 0x8e, 0xbc,
+	0xf8, 0x86, 0x11, 0x43, 0x35, 0xae, 0xcd, 0xc3, 0x20, 0xda, 0x14, 0x55, 0xca, 0x7c, 0xb1, 0x9d,
+	0xba, 0x2c, 0x7c, 0xfd, 0x3c, 0x9d, 0x4f, 0x87, 0x61, 0xd1, 0xf3, 0x18, 0xe6, 0xfc, 0x91, 0x60,
+	0x7e, 0x48, 0xdc, 0x43, 0x54, 0xcb, 0xc3, 0xff, 0xc2, 0x17, 0x41, 0x6a, 0xd4, 0x95, 0x0b, 0xad,
+	0x08, 0x43, 0x1e, 0xe6, 0x15, 0xe6, 0x47, 0xc2, 0xa7, 0xa1, 0xbc, 0x23, 0xb7, 0x3d, 0xa4, 0xdd,
+	0x81, 0x5c, 0x14, 0xa0, 0x30, 0xb9, 0x90, 0xa1, 0x59, 0xc3, 0x3e, 0x32, 0xa9, 0x76, 0x62, 0x2a,
+	0xf5, 0x17, 0xa0, 0x70, 0x29, 0xb7, 0xdb, 0x30, 0x15, 0x37, 0xd9, 0xb1, 0xa0, 0xc7, 0xc5, 0xbe,
+	0x97, 0x05, 0xab, 0xaf, 0x7e, 0x7d, 0xba, 0x75, 0xe8, 0xc6, 0x9a, 0x04, 0xbd, 0xb3, 0xb6, 0xac,
+	0xf4, 0x0f, 0x2a, 0x14, 0xa4, 0xbc, 0x8c, 0xc2, 0x0a, 0x0e, 0xfe, 0x65, 0x03, 0x4e, 0x2d, 0xc3,
+	0x82, 0xe2, 0x49, 0x3e, 0x5b, 0xc5, 0xcc, 0x7e, 0xc9, 0x41, 0x5f, 0x99, 0x13, 0xed, 0x8d, 0x0a,
+	0x93, 0xa7, 0x7e, 0x6b, 0xec, 0x63, 0xbd, 0x3d, 0x63, 0xd4, 0xf5, 0xf9, 0xde, 0xf8, 0x96, 0x21,
+	0xed, 0x25, 0x4c, 0x9c, 0xfc, 0x59, 0xb8, 0x7d, 0xce, 0x43, 0x63, 0x58, 0x9f, 0xeb, 0x01, 0xce,
+	0xd2, 0x6f, 0xc0, 0x68, 0xb7, 0xe1, 0xbb, 0xde, 0x79, 0x56, 0x17, 0x4c, 0x9f, 0x3e, 0x17, 0x96,
+	0x25, 0x5b, 0x85, 0x91, 0xe3, 0x03, 0x74, 0xa5, 0xf3, 0x84, 0x63, 0x88, 0x5e, 0x3a, 0x13, 0xc9,
+	0x12, 0x3c, 0x87, 0xb1, 0xee, 0xaf, 0xe9, 0x54, 0xd7, 0x33, 0x3a, 0x41, 0xdd, 0x39, 0x27, 0xd8,
+	0x4a, 0xb9, 0xb4, 0xb2, 0xfb, 0xd3, 0x50, 0x76, 0xf7, 0x0d, 0x75, 0x6f, 0xdf, 0x50, 0x7f, 0xec,
+	0x1b, 0xea, 0xbb, 0x03, 0x43, 0xd9, 0x3b, 0x30, 0x94, 0x6f, 0x07, 0x86, 0xf2, 0xb4, 0x44, 0x7c,
+	0x51, 0xdd, 0x5c, 0xb3, 0x2b, 0xb4, 0xe6, 0xd0, 0x75, 0x3a, 0x1d, 0x62, 0xf1, 0x82, 0xb2, 0x8d,
+	0xf8, 0xd9, 0xd9, 0x6a, 0xfd, 0x0a, 0xc5, 0x76, 0x84, 0xf9, 0x5a, 0x7f, 0xf2, 0x1f, 0x9c, 0xfb,
+	0x1b, 0x00, 0x00, 0xff, 0xff, 0x53, 0xb4, 0xf8, 0x1e, 0x96, 0x07, 0x00, 0x00,
 }
 
 func (this *MsgGovUpdateParams) Equal(that interface{}) bool {
@@ -440,15 +524,37 @@ func (this *MsgGovUpdateParams) Equal(that interface{}) bool {
 	if this.Description != that1.Description {
 		return false
 	}
-	if len(this.Keys) != len(that1.Keys) {
+	if !this.Plan.Equal(&that1.Plan) {
 		return false
 	}
-	for i := range this.Keys {
-		if this.Keys[i] != that1.Keys[i] {
+	return true
+}
+func (this *MsgGovCancelUpdateParams) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*MsgGovCancelUpdateParams)
+	if !ok {
+		that2, ok := that.(MsgGovCancelUpdateParams)
+		if ok {
+			that1 = &that2
+		} else {
 			return false
 		}
 	}
-	if !this.Changes.Equal(&that1.Changes) {
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Authority != that1.Authority {
+		return false
+	}
+	if this.Title != that1.Title {
+		return false
+	}
+	if this.Description != that1.Description {
 		return false
 	}
 	return true
@@ -476,6 +582,8 @@ type MsgClient interface {
 	DelegateFeedConsent(ctx context.Context, in *MsgDelegateFeedConsent, opts ...grpc.CallOption) (*MsgDelegateFeedConsentResponse, error)
 	// GovUpdateParams updates the oracle parameters.
 	GovUpdateParams(ctx context.Context, in *MsgGovUpdateParams, opts ...grpc.CallOption) (*MsgGovUpdateParamsResponse, error)
+	// GovCancelUpdateParams cancels a plan to update the oracle parameters.
+	GovCancelUpdateParams(ctx context.Context, in *MsgGovCancelUpdateParams, opts ...grpc.CallOption) (*MsgGovCancelUpdateParamsResponse, error)
 }
 
 type msgClient struct {
@@ -522,6 +630,15 @@ func (c *msgClient) GovUpdateParams(ctx context.Context, in *MsgGovUpdateParams,
 	return out, nil
 }
 
+func (c *msgClient) GovCancelUpdateParams(ctx context.Context, in *MsgGovCancelUpdateParams, opts ...grpc.CallOption) (*MsgGovCancelUpdateParamsResponse, error) {
+	out := new(MsgGovCancelUpdateParamsResponse)
+	err := c.cc.Invoke(ctx, "/ojo.oracle.v1.Msg/GovCancelUpdateParams", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
 	// AggregateExchangeRatePrevote defines a method for submitting an aggregate
@@ -534,6 +651,8 @@ type MsgServer interface {
 	DelegateFeedConsent(context.Context, *MsgDelegateFeedConsent) (*MsgDelegateFeedConsentResponse, error)
 	// GovUpdateParams updates the oracle parameters.
 	GovUpdateParams(context.Context, *MsgGovUpdateParams) (*MsgGovUpdateParamsResponse, error)
+	// GovCancelUpdateParams cancels a plan to update the oracle parameters.
+	GovCancelUpdateParams(context.Context, *MsgGovCancelUpdateParams) (*MsgGovCancelUpdateParamsResponse, error)
 }
 
 // UnimplementedMsgServer can be embedded to have forward compatible implementations.
@@ -551,6 +670,9 @@ func (*UnimplementedMsgServer) DelegateFeedConsent(ctx context.Context, req *Msg
 }
 func (*UnimplementedMsgServer) GovUpdateParams(ctx context.Context, req *MsgGovUpdateParams) (*MsgGovUpdateParamsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GovUpdateParams not implemented")
+}
+func (*UnimplementedMsgServer) GovCancelUpdateParams(ctx context.Context, req *MsgGovCancelUpdateParams) (*MsgGovCancelUpdateParamsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GovCancelUpdateParams not implemented")
 }
 
 func RegisterMsgServer(s grpc1.Server, srv MsgServer) {
@@ -629,6 +751,24 @@ func _Msg_GovUpdateParams_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_GovCancelUpdateParams_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgGovCancelUpdateParams)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).GovCancelUpdateParams(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ojo.oracle.v1.Msg/GovCancelUpdateParams",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).GovCancelUpdateParams(ctx, req.(*MsgGovCancelUpdateParams))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Msg_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "ojo.oracle.v1.Msg",
 	HandlerType: (*MsgServer)(nil),
@@ -648,6 +788,10 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GovUpdateParams",
 			Handler:    _Msg_GovUpdateParams_Handler,
+		},
+		{
+			MethodName: "GovCancelUpdateParams",
+			Handler:    _Msg_GovCancelUpdateParams_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -876,7 +1020,7 @@ func (m *MsgGovUpdateParams) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	var l int
 	_ = l
 	{
-		size, err := m.Changes.MarshalToSizedBuffer(dAtA[:i])
+		size, err := m.Plan.MarshalToSizedBuffer(dAtA[:i])
 		if err != nil {
 			return 0, err
 		}
@@ -884,16 +1028,7 @@ func (m *MsgGovUpdateParams) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i = encodeVarintTx(dAtA, i, uint64(size))
 	}
 	i--
-	dAtA[i] = 0x2a
-	if len(m.Keys) > 0 {
-		for iNdEx := len(m.Keys) - 1; iNdEx >= 0; iNdEx-- {
-			i -= len(m.Keys[iNdEx])
-			copy(dAtA[i:], m.Keys[iNdEx])
-			i = encodeVarintTx(dAtA, i, uint64(len(m.Keys[iNdEx])))
-			i--
-			dAtA[i] = 0x22
-		}
-	}
+	dAtA[i] = 0x22
 	if len(m.Description) > 0 {
 		i -= len(m.Description)
 		copy(dAtA[i:], m.Description)
@@ -934,6 +1069,73 @@ func (m *MsgGovUpdateParamsResponse) MarshalTo(dAtA []byte) (int, error) {
 }
 
 func (m *MsgGovUpdateParamsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgGovCancelUpdateParams) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgGovCancelUpdateParams) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgGovCancelUpdateParams) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Description) > 0 {
+		i -= len(m.Description)
+		copy(dAtA[i:], m.Description)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Description)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Title) > 0 {
+		i -= len(m.Title)
+		copy(dAtA[i:], m.Title)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Title)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Authority) > 0 {
+		i -= len(m.Authority)
+		copy(dAtA[i:], m.Authority)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgGovCancelUpdateParamsResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgGovCancelUpdateParamsResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgGovCancelUpdateParamsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1060,18 +1262,42 @@ func (m *MsgGovUpdateParams) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
-	if len(m.Keys) > 0 {
-		for _, s := range m.Keys {
-			l = len(s)
-			n += 1 + l + sovTx(uint64(l))
-		}
-	}
-	l = m.Changes.Size()
+	l = m.Plan.Size()
 	n += 1 + l + sovTx(uint64(l))
 	return n
 }
 
 func (m *MsgGovUpdateParamsResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *MsgGovCancelUpdateParams) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Authority)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Title)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Description)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	return n
+}
+
+func (m *MsgGovCancelUpdateParamsResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1801,39 +2027,7 @@ func (m *MsgGovUpdateParams) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 4:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Keys", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthTx
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthTx
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Keys = append(m.Keys, string(dAtA[iNdEx:postIndex]))
-			iNdEx = postIndex
-		case 5:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Changes", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Plan", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -1860,7 +2054,7 @@ func (m *MsgGovUpdateParams) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := m.Changes.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.Plan.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -1912,6 +2106,202 @@ func (m *MsgGovUpdateParamsResponse) Unmarshal(dAtA []byte) error {
 		}
 		if fieldNum <= 0 {
 			return fmt.Errorf("proto: MsgGovUpdateParamsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgGovCancelUpdateParams) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgGovCancelUpdateParams: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgGovCancelUpdateParams: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Authority = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Title", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Title = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Description", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Description = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgGovCancelUpdateParamsResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgGovCancelUpdateParamsResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgGovCancelUpdateParamsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:
