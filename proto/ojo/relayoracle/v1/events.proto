@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package ojo.relayoracle.v1;
+
+import "ojo/relayoracle/v1/packet.proto";
+
+option go_package = "github.com/ojo-network/ojo/x/relayoracle/types";
+
+message EventNewRequest{
+  string client_id = 1;
+  uint64 request_id = 2;
+  uint64 request_height = 3;
+}
+
+
+message EventRequestResolve{
+    uint64  request_id = 1;
+    ResolveStatus status = 2;
+}
+
+
+//TODO : ibc request based updates

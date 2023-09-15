@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package ojo.relayoracle.v1;
+
+import "gogoproto/gogo.proto";
+import "ojo/relayoracle/v1/params.proto";
+
+option go_package = "github.com/ojo-network/ojo/x/relayoracle/types";
+
+// GenesisState defines the relayoracle module's genesis state.
+message GenesisState {
+  Params params  = 1 [(gogoproto.nullable) = false];
+  string port_id = 2;
+}

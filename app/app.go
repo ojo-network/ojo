@@ -101,6 +101,9 @@ import (
 	"github.com/ojo-network/ojo/x/oracle"
 	oraclekeeper "github.com/ojo-network/ojo/x/oracle/keeper"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
+	"github.com/ojo-network/ojo/x/relayoracle"
+	relayoraclekeeper "github.com/ojo-network/ojo/x/relayoracle/keeper"
+	relayoracletypes "github.com/ojo-network/ojo/x/relayoracle/types"
 
 	"github.com/ojo-network/ojo/x/airdrop"
 	airdropkeeper "github.com/ojo-network/ojo/x/airdrop/keeper"
@@ -156,6 +159,7 @@ var (
 		transfer.AppModuleBasic{},
 		vesting.AppModuleBasic{},
 		oracle.AppModuleBasic{},
+		relayoracle.AppModuleBasic{},
 		airdrop.AppModuleBasic{},
 		consensus.AppModuleBasic{},
 	)
@@ -164,6 +168,7 @@ var (
 	maccPerms = map[string][]string{
 		authtypes.FeeCollectorName:     nil,
 		distrtypes.ModuleName:          nil,
+		relayoracletypes.ModuleName:    nil,
 		minttypes.ModuleName:           {authtypes.Minter},
 		stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
 		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
@@ -225,13 +230,15 @@ type App struct {
 	FeeGrantKeeper        feegrantkeeper.Keeper
 	GroupKeeper           groupkeeper.Keeper
 	OracleKeeper          oraclekeeper.Keeper
+	RelayOracle           relayoraclekeeper.Keeper
 	AirdropKeeper         airdropkeeper.Keeper
 	ConsensusParamsKeeper consensusparamkeeper.Keeper
 
 	// make scoped keepers public for test purposes
-	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
-	ScopedTransferKeeper capabilitykeeper.ScopedKeeper
-	ScopedICAHostKeeper  capabilitykeeper.ScopedKeeper
+	ScopedIBCKeeper         capabilitykeeper.ScopedKeeper
+	ScopedTransferKeeper    capabilitykeeper.ScopedKeeper
+	ScopedRelayOracleKeeper capabilitykeeper.ScopedKeeper
+	ScopedICAHostKeeper     capabilitykeeper.ScopedKeeper
 
 	// mm is the module manager
 	mm *module.Manager
@@ -275,6 +282,7 @@ func New(
 		govtypes.StoreKey, paramstypes.StoreKey, ibcexported.StoreKey, upgradetypes.StoreKey,
 		feegrant.StoreKey, evidencetypes.StoreKey, ibctransfertypes.StoreKey, capabilitytypes.StoreKey,
 		consensusparamtypes.StoreKey, group.StoreKey, oracletypes.StoreKey, airdroptypes.StoreKey,
+		relayoracletypes.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -316,6 +324,7 @@ func New(
 	// grant capabilities for the ibc and ibc-transfer modules
 	scopedIBCKeeper := app.CapabilityKeeper.ScopeToModule(ibcexported.ModuleName)
 	scopedTransferKeeper := app.CapabilityKeeper.ScopeToModule(ibctransfertypes.ModuleName)
+	scopedRelayOracleKeeper := app.CapabilityKeeper.ScopeToModule(relayoracletypes.ModuleName)
 
 	// add keepers
 	app.AccountKeeper = authkeeper.NewAccountKeeper(
@@ -453,6 +462,16 @@ func New(
 		scopedIBCKeeper,
 	)
 
+	app.RelayOracle = relayoraclekeeper.NewKeeper(
+		appCodec,
+		keys[relayoracletypes.ModuleName],
+		app.GetSubspace(relayoracletypes.ModuleName),
+		app.OracleKeeper,
+		app.IBCKeeper.ChannelKeeper,
+		&app.IBCKeeper.PortKeeper,
+		scopedRelayOracleKeeper,
+	)
+
 	// Create Transfer Keepers
 	app.TransferKeeper = ibctransferkeeper.NewKeeper(
 		appCodec,
@@ -544,6 +563,7 @@ func New(
 		params.NewAppModule(app.ParamsKeeper),
 		transferModule,
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
+		relayoracle.NewAppModule(appCodec, app.RelayOracle),
 		airdrop.NewAppModule(appCodec, app.AirdropKeeper, app.AccountKeeper, app.BankKeeper),
 		consensus.NewAppModule(appCodec, app.ConsensusParamsKeeper),
 	)
@@ -600,6 +620,7 @@ func New(
 		vestingtypes.ModuleName,
 		oracletypes.ModuleName,
 		airdroptypes.ModuleName,
+		relayoracletypes.ModuleName,
 		consensusparamtypes.ModuleName,
 	)
 
@@ -614,7 +635,7 @@ func New(
 		minttypes.ModuleName, crisistypes.ModuleName, genutiltypes.ModuleName, ibctransfertypes.ModuleName,
 		ibcexported.ModuleName, evidencetypes.ModuleName, authz.ModuleName, feegrant.ModuleName,
 		group.ModuleName, paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
-		oracletypes.ModuleName, airdroptypes.ModuleName, consensusparamtypes.ModuleName,
+		oracletypes.ModuleName, airdroptypes.ModuleName, relayoracletypes.ModuleName, consensusparamtypes.ModuleName,
 	}
 	app.mm.SetOrderInitGenesis(genesisModuleOrder...)
 	app.mm.SetOrderExportGenesis(genesisModuleOrder...)
@@ -685,6 +706,7 @@ func New(
 
 	app.ScopedIBCKeeper = scopedIBCKeeper
 	app.ScopedTransferKeeper = scopedTransferKeeper
+	app.ScopedRelayOracleKeeper = scopedRelayOracleKeeper
 
 	return app
 }

@@ -1,0 +1,15 @@
+syntax = "proto3";
+package ojo.relayoracle.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/ojo-network/ojo/x/relayoracle/types";
+
+// Params defines the parameters for the module.
+message Params {
+  option (gogoproto.goproto_stringer) = false;
+  option (gogoproto.equal)            = true;
+
+  bool IbcRequestEnabled =1;
+  int64 PacketExpiry = 2;
+}

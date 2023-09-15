@@ -158,6 +158,11 @@ func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, sdk.D
 	}
 }
 
+func (k Keeper) HasActiveExchangeRate(ctx sdk.Context, denom string) bool {
+	store := ctx.KVStore(k.storeKey)
+	return store.Has(types.GetExchangeRateKey(denom))
+}
+
 func (k Keeper) ClearExchangeRates(ctx sdk.Context) {
 	store := ctx.KVStore(k.storeKey)
 	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixExchangeRate)
