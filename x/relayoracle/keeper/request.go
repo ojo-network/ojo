@@ -28,9 +28,9 @@ func (k Keeper) GetRequestCount(ctx sdk.Context) uint64 {
 	return sdk.BigEndianToUint64(store.Get(types.RequestCountKey))
 }
 
-func (k Keeper) SetRequestCount(ctx sdk.Context, id uint64) {
+func (k Keeper) SetRequestCount(ctx sdk.Context, count uint64) {
 	store := ctx.KVStore(k.storeKey)
-	store.Set(types.RequestCountKey, sdk.Uint64ToBigEndian(id))
+	store.Set(types.RequestCountKey, sdk.Uint64ToBigEndian(count))
 }
 
 func (k Keeper) SetRequest(ctx sdk.Context, id uint64, request types.Request) {
@@ -133,7 +133,7 @@ func (k Keeper) ProcessResult(ctx sdk.Context, requestID uint64, status types.Re
 		Result:          result,
 	})
 
-	expiryTime := k.PacketExpiry(ctx)
+	expiryTime := k.PacketExpiryBlockCount(ctx)
 	if req.IBCChannel != nil {
 		sourceChannel := req.IBCChannel.ChannelId
 		sourcePort := req.IBCChannel.PortId
@@ -153,7 +153,7 @@ func (k Keeper) ProcessResult(ctx sdk.Context, requestID uint64, status types.Re
 			sourcePort,
 			sourceChannel,
 			clienttypes.NewHeight(0, 0),
-			uint64(ctx.BlockTime().UnixNano()+expiryTime),
+			uint64(uint64(ctx.BlockTime().UnixNano())+expiryTime),
 			packetData.ToBytes(),
 		); err != nil {
 		}

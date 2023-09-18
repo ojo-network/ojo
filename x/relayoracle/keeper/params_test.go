@@ -1,19 +1,17 @@
 package keeper_test
 
 import (
-	"testing"
-
-	"github.com/stretchr/testify/require"
-
-	testkeeper "github.com/ojo-network/ojo/testutil/keeper"
 	"github.com/ojo-network/ojo/x/relayoracle/types"
 )
 
-func TestGetParams(t *testing.T) {
-	k, ctx := testkeeper.RelayoracleKeeper(t)
+func (s *IntegrationTestSuite) TestGetParams() {
+	app, ctx := s.app, s.ctx
+
 	params := types.DefaultParams()
+	params.PacketExpiryBlockCount = 20
+	params.IbcRequestEnabled = false
 
-	k.SetParams(ctx, params)
-
-	require.EqualValues(t, params, k.GetParams(ctx))
+	app.RelayOracle.SetParams(ctx, params)
+	s.Require().Equal(app.RelayOracle.IbcRequestEnabled(ctx), params.IbcRequestEnabled)
+	s.Require().Equal(app.RelayOracle.PacketExpiryBlockCount(ctx), params.PacketExpiryBlockCount)
 }

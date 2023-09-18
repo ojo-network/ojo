@@ -1,0 +1,31 @@
+syntax = "proto3";
+package ojo.relayoracle.v1;
+
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "github.com/ojo-network/ojo/x/relayoracle/types";
+
+message OracleRequestPacketData {
+  option (gogoproto.equal) = true;
+  string client_id = 1 [(gogoproto.customname) = "ClientID"];
+  string request_id = 2 [(gogoproto.customname) = "RequestID"];
+  bytes calldata = 3;
+}
+
+message RequestPrice{
+  string denom = 1;
+  PriceRequestType request= 2;
+}
+
+enum PriceRequestType{
+  option (gogoproto.goproto_enum_prefix) = false;
+  PRICE_REQUEST_RATE = 0 [(gogoproto.enumvalue_customname) = "PRICE_REQUEST_RATE"];
+  PRICE_REQUEST_MEDIAN = 1 [(gogoproto.enumvalue_customname) = "PRICE_REQUEST_MEDIAN"];
+  PRICE_REQUEST_DEVIATION = 2 [(gogoproto.enumvalue_customname) = "PRICE_REQUEST_DEVIATION"];
+}
+
+message PriceStamp {
+  repeated cosmos.base.v1beta1.DecCoin exchange_rate = 1 [(gogoproto.nullable) = false];
+  repeated uint64 block_num = 2;
+}

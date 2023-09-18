@@ -6,13 +6,6 @@ import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/ojo-network/ojo/x/relayoracle/types";
 
-message OracleRequestPacketData {
-    option (gogoproto.equal) = true;
-    string client_id = 1 [(gogoproto.customname) = "ClientID"];
-    string request_id = 2 [(gogoproto.customname) = "RequestID"];
-    bytes calldata = 3;
-}
-
 message OracleResponsePacketData {
     option (gogoproto.equal) = true;
     string client_id = 1 [(gogoproto.customname) = "ClientID"];
@@ -22,15 +15,6 @@ message OracleResponsePacketData {
     ResolveStatus resolve_status = 5;
     bytes result = 6;
 }
-
-enum ResolveStatus {
-    option (gogoproto.goproto_enum_prefix) = false;
-    RESOLVE_STATUS_OPEN_UNSPECIFIED = 0 [(gogoproto.enumvalue_customname) = "RESOLVE_STATUS_OPEN"];
-    RESOLVE_STATUS_SUCCESS = 1 [(gogoproto.enumvalue_customname) = "RESOLVE_STATUS_SUCCESS"];
-    RESOLVE_STATUS_FAILURE = 2 [(gogoproto.enumvalue_customname) = "RESOLVE_STATUS_FAILURE"];
-    RESOLVE_STATUS_EXPIRED = 3 [(gogoproto.enumvalue_customname) = "RESOLVE_STATUS_EXPIRED"];
-}
-
 
 message Request{
     bytes request_calldata = 1 [(gogoproto.customname) = "RequestCallData"];
@@ -50,32 +34,20 @@ message Result{
     bytes result = 7;
 }
 
-message RequestPrice{
-    string denom = 1;
-    PriceRequestType request= 2;
-}
-
-message PriceStamp {
-    repeated cosmos.base.v1beta1.DecCoin exchange_rate = 1 [(gogoproto.nullable) = false];
-    repeated uint64 block_num = 2;
-}
-
-enum PriceRequestType{
-    option (gogoproto.goproto_enum_prefix) = false;
-    PRICE_REQUEST_RATE = 0 [(gogoproto.enumvalue_customname) = "PRICE_REQUEST_RATE"];
-    PRICE_REQUEST_MEDIAN = 1 [(gogoproto.enumvalue_customname) = "PRICE_REQUEST_MEDIAN"];
-    PRICE_REQUEST_DEVIATION = 2 [(gogoproto.enumvalue_customname) = "PRICE_REQUEST_DEVIATION"];
-}
-
-// chain
 message IBCChannel {
     option (gogoproto.equal) = true;
     string channel_id = 1;
     string port_id = 2;
 }
 
+enum ResolveStatus {
+    option (gogoproto.goproto_enum_prefix) = false;
+    RESOLVE_STATUS_OPEN_UNSPECIFIED = 0 [(gogoproto.enumvalue_customname) = "RESOLVE_STATUS_OPEN"];
+    RESOLVE_STATUS_SUCCESS = 1 [(gogoproto.enumvalue_customname) = "RESOLVE_STATUS_SUCCESS"];
+    RESOLVE_STATUS_FAILURE = 2 [(gogoproto.enumvalue_customname) = "RESOLVE_STATUS_FAILURE"];
+    RESOLVE_STATUS_EXPIRED = 3 [(gogoproto.enumvalue_customname) = "RESOLVE_STATUS_EXPIRED"];
+}
 
-// send back to requester chain.
 message RequestPacketAcknowledgement {
     option (gogoproto.equal) = true;
     uint64 request_id = 1 [(gogoproto.customname) = "RequestID"];

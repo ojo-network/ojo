@@ -470,6 +470,7 @@ func New(
 		app.IBCKeeper.ChannelKeeper,
 		&app.IBCKeeper.PortKeeper,
 		scopedRelayOracleKeeper,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 
 	// Create Transfer Keepers
@@ -595,6 +596,7 @@ func New(
 		vestingtypes.ModuleName,
 		oracletypes.ModuleName,
 		airdroptypes.ModuleName,
+		relayoracletypes.ModuleName,
 		consensusparamtypes.ModuleName,
 	)
 
@@ -903,6 +905,7 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(ibctransfertypes.ModuleName)
 	paramsKeeper.Subspace(ibcexported.ModuleName)
 	paramsKeeper.Subspace(oracletypes.ModuleName)
+	paramsKeeper.Subspace(relayoracletypes.ModuleName)
 
 	return paramsKeeper
 }

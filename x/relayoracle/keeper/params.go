@@ -16,12 +16,20 @@ func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
 	k.paramstore.SetParamSet(ctx, &params)
 }
 
+func (k Keeper) SetIbcRequestEnabled(ctx sdk.Context, enabled bool) {
+	k.paramstore.Set(ctx, types.KeyIbcRequestEnabled, enabled)
+}
+
+func (k Keeper) SetPacketExpiryBlockCount(ctx sdk.Context, expiry uint64) {
+	k.paramstore.Set(ctx, types.KeyPacketExpiryBlockCount, expiry)
+}
+
 func (k Keeper) IbcRequestEnabled(ctx sdk.Context) (enabled bool) {
 	k.paramstore.Get(ctx, types.KeyIbcRequestEnabled, &enabled)
 	return
 }
 
-func (k Keeper) PacketExpiry(ctx sdk.Context) (expiry int64) {
-	k.paramstore.Get(ctx, types.KeyPacketExpiry, &expiry)
+func (k Keeper) PacketExpiryBlockCount(ctx sdk.Context) (expiry uint64) {
+	k.paramstore.Get(ctx, types.KeyPacketExpiryBlockCount, &expiry)
 	return
 }

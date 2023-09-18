@@ -20,7 +20,7 @@ service Msg {
 message MsgGovUpdateParams {
   option (gogoproto.equal)            = true;
   option (gogoproto.goproto_getters)  = false;
-  option (gogoproto.goproto_stringer) = true;
+  option (gogoproto.goproto_stringer) = false;
   option (cosmos.msg.v1.signer)       = "authority";
 
   // authority is the address of the governance account.
