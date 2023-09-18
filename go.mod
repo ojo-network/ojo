@@ -6,8 +6,15 @@ require (
 	cosmossdk.io/errors v1.0.0
 	cosmossdk.io/math v1.0.1
 	github.com/armon/go-metrics v0.4.1
+<<<<<<< HEAD
 	github.com/cosmos/cosmos-proto v1.0.0-beta.3
 	github.com/cosmos/cosmos-sdk v0.46.13
+=======
+	github.com/cometbft/cometbft v0.37.2
+	github.com/cometbft/cometbft-db v0.8.0
+	github.com/cosmos/cosmos-proto v1.0.0-beta.3
+	github.com/cosmos/cosmos-sdk v0.47.3
+>>>>>>> c5c40e5 (chore(deps): bump github.com/cosmos/cosmos-proto from 1.0.0-beta.2 to 1.0.0-beta.3 (#246))
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/ibc-go/v5 v5.3.1
 	github.com/gogo/protobuf v1.3.3
@@ -36,10 +43,20 @@ require (
 	cloud.google.com/go v0.110.0 // indirect
 	cloud.google.com/go/compute v1.19.1 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
+<<<<<<< HEAD
 	cloud.google.com/go/iam v0.13.0 // indirect
 	cloud.google.com/go/storage v1.28.1 // indirect
 	filippo.io/edwards25519 v1.0.0-rc.1 // indirect
 	github.com/4meepo/tagalign v1.2.2 // indirect
+=======
+	cloud.google.com/go/iam v1.1.1 // indirect
+	cloud.google.com/go/storage v1.30.1 // indirect
+	cosmossdk.io/core v0.6.1 // indirect
+	cosmossdk.io/depinject v1.0.0-alpha.3 // indirect
+	cosmossdk.io/log v1.1.0 // indirect
+	filippo.io/edwards25519 v1.0.0 // indirect
+	github.com/4meepo/tagalign v1.3.2 // indirect
+>>>>>>> c5c40e5 (chore(deps): bump github.com/cosmos/cosmos-proto from 1.0.0-beta.2 to 1.0.0-beta.3 (#246))
 	github.com/99designs/go-keychain v0.0.0-20191008050251-8e49817e8af4 // indirect
 	github.com/99designs/keyring v1.2.1 // indirect
 	github.com/Abirdcfly/dupword v0.0.11 // indirect
