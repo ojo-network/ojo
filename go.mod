@@ -10,7 +10,7 @@ require (
 	github.com/armon/go-metrics v0.4.1
 	github.com/cometbft/cometbft v0.37.2
 	github.com/cometbft/cometbft-db v0.8.0
-	github.com/cosmos/cosmos-proto v1.0.0-beta.2
+	github.com/cosmos/cosmos-proto v1.0.0-beta.3
 	github.com/cosmos/cosmos-sdk v0.47.3
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/gogoproto v1.4.10
@@ -41,7 +41,7 @@ require (
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/iam v1.1.1 // indirect
 	cloud.google.com/go/storage v1.30.1 // indirect
-	cosmossdk.io/core v0.5.1 // indirect
+	cosmossdk.io/core v0.6.1 // indirect
 	cosmossdk.io/depinject v1.0.0-alpha.3 // indirect
 	cosmossdk.io/log v1.1.0 // indirect
 	filippo.io/edwards25519 v1.0.0 // indirect
