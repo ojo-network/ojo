@@ -145,7 +145,10 @@ func (k Keeper) ExecuteParamUpdatePlan(ctx sdk.Context, plan types.ParamUpdatePl
 		}
 	}
 
-	ctx.EventManager().EmitTypedEvent(&types.EventParamUpdate{
+	err := ctx.EventManager().EmitTypedEvent(&types.EventParamUpdate{
 		Params: plan.Changes,
 	})
+	if err != nil {
+		k.Logger(ctx).With(err).Error("Error emitting Param Update Event")
+	}
 }
