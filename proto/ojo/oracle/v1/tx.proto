@@ -29,6 +29,10 @@ service Msg {
   // GovUpdateParams updates the oracle parameters.
   rpc GovUpdateParams(MsgGovUpdateParams)
       returns (MsgGovUpdateParamsResponse);
+
+  // GovCancelUpdateParams cancels a plan to update the oracle parameters.
+  rpc GovCancelUpdateParams(MsgGovCancelUpdateParams)
+      returns (MsgGovCancelUpdateParamsResponse);
 }
 
 // MsgAggregateExchangeRatePrevote represents a message to submit an aggregate
@@ -88,12 +92,37 @@ message MsgGovUpdateParams {
   option (cosmos.msg.v1.signer)       = "authority";
 
   // authority is the address of the governance account.
-  string authority    = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  string title        = 2;
-  string description  = 3;
-  repeated string keys = 4;
-  Params changes      = 5 [ (gogoproto.nullable) = false ];
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // title of the proposal
+  string title = 2;
+
+   // description of the proposal
+  string description = 3;
+
+  // plan is the param update plan
+  ParamUpdatePlan plan = 4 [(gogoproto.nullable) = false];
 }
 
 // MsgGovUpdateParamsResponse defines the Msg/GovUpdateParams response type.
 message MsgGovUpdateParamsResponse {}
+
+// MsgGovCancelUpdateParams defines the Msg/GovCancelUpdateParams request type.
+message MsgGovCancelUpdateParams {
+  option (gogoproto.equal)            = true;
+  option (gogoproto.goproto_getters)  = false;
+  option (gogoproto.goproto_stringer) = false;
+  option (cosmos.msg.v1.signer) = "authority";
+
+  // authority is the address of the governance account.
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // title of the proposal
+  string title = 2;
+
+   // description of the proposal
+  string description = 3;
+}
+
+// MsgGovCancelUpdateParamsResponse defines the Msg/GovCancelUpdateParamsResponse response type.
+message MsgGovCancelUpdateParamsResponse {}
