@@ -99,7 +99,8 @@ func (k Keeper) ValidateParamChanges(ctx sdk.Context, keys []string, changes typ
 	return params.Validate()
 }
 
-// ExecuteParamUpdatePlan will execute a given param update plan.
+// ExecuteParamUpdatePlan will execute a given param update plan and emit a param
+// update event.
 func (k Keeper) ExecuteParamUpdatePlan(ctx sdk.Context, plan types.ParamUpdatePlan) {
 	for _, key := range plan.Keys {
 		switch key {
@@ -143,4 +144,8 @@ func (k Keeper) ExecuteParamUpdatePlan(ctx sdk.Context, plan types.ParamUpdatePl
 			k.SetMaximumMedianStamps(ctx, plan.Changes.MaximumMedianStamps)
 		}
 	}
+
+	ctx.EventManager().EmitTypedEvent(&types.EventParamUpdate{
+		Params: plan.Changes,
+	})
 }

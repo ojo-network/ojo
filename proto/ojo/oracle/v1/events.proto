@@ -3,6 +3,7 @@ package ojo.oracle.v1;
 
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
+import "ojo/oracle/v1/oracle.proto";
 
 option go_package = "github.com/ojo-network/ojo/x/oracle/types";
 
@@ -26,4 +27,10 @@ message EventSetFxRate {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable) = false
   ];
+}
+
+// EventParamUpdate is emmited on param update
+message EventParamUpdate {
+  // params defines the new parameters of the update.
+  Params params = 1 [ (gogoproto.nullable) = false ];
 }
