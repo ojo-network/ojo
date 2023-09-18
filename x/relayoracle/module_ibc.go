@@ -71,7 +71,10 @@ func (im IBCModule) OnChanOpenTry(
 	}
 
 	if counterpartyVersion != types.Version {
-		return "", sdkerrors.Wrapf(types.ErrInvalidVersion, "invalid counterparty version: got: %s, expected %s", counterpartyVersion, types.Version)
+		return "", sdkerrors.Wrapf(
+			types.ErrInvalidVersion,
+			"invalid counterparty version: got: %s, expected %s", counterpartyVersion, types.Version,
+		)
 	}
 
 	// Module may have already claimed capability in OnChanOpenInit in the case of crossing hellos
@@ -97,7 +100,10 @@ func (im IBCModule) OnChanOpenAck(
 	counterpartyVersion string,
 ) error {
 	if counterpartyVersion != types.Version {
-		return sdkerrors.Wrapf(types.ErrInvalidVersion, "invalid counterparty version: %s, expected %s", counterpartyVersion, types.Version)
+		return sdkerrors.Wrapf(
+			types.ErrInvalidVersion,
+			"invalid counterparty version: %s, expected %s", counterpartyVersion, types.Version,
+		)
 	}
 
 	return nil
@@ -143,7 +149,9 @@ func (im IBCModule) OnRecvPacket(
 
 	var modulePacketData types.OracleRequestPacketData
 	if err := modulePacketData.Unmarshal(modulePacket.GetData()); err != nil {
-		return channeltypes.NewErrorAcknowledgement(sdkerrors.Wrapf(sdkerror.ErrUnknownRequest, "cannot unmarshal packet data: %s", err.Error()))
+		return channeltypes.NewErrorAcknowledgement(
+			sdkerrors.Wrapf(sdkerror.ErrUnknownRequest, "cannot unmarshal packet data: %s", err.Error()),
+		)
 	}
 
 	// process module packet data

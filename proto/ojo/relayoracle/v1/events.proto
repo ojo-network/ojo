@@ -19,4 +19,6 @@ message EventRequestResolve{
 }
 
 
-//TODO : ibc request based updates
+message EventPackedSendFailed{
+  string error = 1;
+}

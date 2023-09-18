@@ -65,13 +65,7 @@ func NewKeeper(
 
 // ChanCloseInit defines a wrapper function for the channel Keeper's function.
 func (k Keeper) ChanCloseInit(ctx sdk.Context, portID, channelID string) error {
-	//capName := host.ChannelCapabilityPath(portID, channelID)
-	//chanCap, ok := k.scopedKeeper.GetCapability(ctx, capName)
-	//if !ok {
-	//	return sdkerrors.Wrapf(channeltypes.ErrChannelCapabilityNotFound, "could not retrieve channel capability at: %s", capName)
-	//}
 	return nil
-	//return k.channelKeeper.ChanCloseInit(ctx, portID, channelID, chanCap)
 }
 
 // IsBound checks if the IBC app module is already bound to the desired port
@@ -83,9 +77,8 @@ func (k Keeper) IsBound(ctx sdk.Context, portID string) bool {
 // BindPort defines a wrapper function for the port Keeper's function in
 // order to expose it to module's InitGenesis function
 func (k Keeper) BindPort(ctx sdk.Context, portID string) error {
-	//cap := k.portKeeper.BindPort(ctx, portID)
-	return nil
-	//return k.ClaimCapability(ctx, cap, host.PortPath(portID))
+	cap := k.portKeeper.BindPort(ctx, portID)
+	return k.ClaimCapability(ctx, cap, host.PortPath(portID))
 }
 
 // GetPort returns the portID for the IBC app module. Used in ExportGenesis

@@ -27,7 +27,7 @@ const (
 var (
 	// PortKey defines the key to store the port ID in store
 	PortKey      = KeyPrefix("relayoracle-port-")
-	RequestIDKey = KeyPrefix("relayoracle-request.go-")
+	RequestIDKey = KeyPrefix("relayoracle-request-")
 
 	RequestStoreKeyPrefix = []byte{0x01}
 	ResultStoreKeyPrefix  = []byte{0x02}

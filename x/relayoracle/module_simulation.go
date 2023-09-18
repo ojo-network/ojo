@@ -1,7 +1,7 @@
 package relayoracle
 
 //
-//import (
+// import (
 //	"math/rand"
 //
 //	"github.com/ojo-network/ojo/testutil/sample"
@@ -15,7 +15,7 @@ package relayoracle
 //)
 //
 //// avoid unused import issue
-//var (
+// var (
 //	_ = sample.AccAddress
 //	_ = relayoraclesimulation.FindAccount
 //	_ = simulation.MsgEntryKind
@@ -23,11 +23,11 @@ package relayoracle
 //	_ = rand.Rand{}
 //)
 //
-//const (
+// const (
 //)
 //
 //// GenerateGenesisState creates a randomized GenState of the module.
-//func (AppModule) GenerateGenesisState(simState *module.SimulationState) {
+// func (AppModule) GenerateGenesisState(simState *module.SimulationState) {
 //	accs := make([]string, len(simState.Accounts))
 //	for i, acc := range simState.Accounts {
 //		accs[i] = acc.Address.String()
@@ -40,22 +40,22 @@ package relayoracle
 //}
 //
 //// RegisterStoreDecoder registers a decoder.
-//func (am AppModule) RegisterStoreDecoder(_ sdk.StoreDecoderRegistry) {}
+// func (am AppModule) RegisterStoreDecoder(_ sdk.StoreDecoderRegistry) {}
 //
 //// ProposalContents doesn't return any content functions for governance proposals.
-//func (AppModule) ProposalContents(_ module.SimulationState) []simtypes.WeightedProposalContent {
+// func (AppModule) ProposalContents(_ module.SimulationState) []simtypes.WeightedProposalContent {
 //	return nil
 //}
 //
 //// WeightedOperations returns the all the gov module operations with their respective weights.
-//func (am AppModule) WeightedOperations(simState module.SimulationState) []simtypes.WeightedOperation {
+// func (am AppModule) WeightedOperations(simState module.SimulationState) []simtypes.WeightedOperation {
 //	operations := make([]simtypes.WeightedOperation, 0)
 //
 //	return operations
 //}
 //
 //// ProposalMsgs returns msgs used for governance proposals for simulations.
-//func (am AppModule) ProposalMsgs(simState module.SimulationState) []simtypes.WeightedProposalMsg {
+// func (am AppModule) ProposalMsgs(simState module.SimulationState) []simtypes.WeightedProposalMsg {
 //	return []simtypes.WeightedProposalMsg{
 //	}
 //}

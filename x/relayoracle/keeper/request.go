@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	clienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
 	host "github.com/cosmos/ibc-go/v7/modules/core/24-host"
@@ -58,8 +60,12 @@ func (k Keeper) DeleteRequest(ctx sdk.Context, id uint64) {
 	ctx.KVStore(k.storeKey).Delete(types.RequestStoreKey(id))
 }
 
-func (k Keeper) PrepareRequest(ctx sdk.Context, ibc_channel *types.IBCChannel, data *types.OracleRequestPacketData) (uint64, error) {
-	req := types.NewRequest(data.GetCalldata(), data.GetClientID(), ibc_channel)
+func (k Keeper) PrepareRequest(
+	ctx sdk.Context,
+	ibcChannel *types.IBCChannel,
+	data *types.OracleRequestPacketData,
+) (uint64, error) {
+	req := types.NewRequest(data.GetCalldata(), data.GetClientID(), ibcChannel)
 	return k.AddRequest(ctx, req), nil
 }
 
@@ -78,12 +84,7 @@ func (k Keeper) GetPendingRequestList(ctx sdk.Context) []uint64 {
 
 func (k Keeper) SetPendingRequestList(ctx sdk.Context, reqIDS []uint64) {
 	store := ctx.KVStore(k.storeKey)
-	pendingList := make([]uint64, len(reqIDS))
-	for i, reqID := range reqIDS {
-		pendingList[i] = reqID
-	}
-
-	store.Set(types.PendingRequestListKey, k.cdc.MustMarshal(&types.PendingRequestList{RequestIds: pendingList}))
+	store.Set(types.PendingRequestListKey, k.cdc.MustMarshal(&types.PendingRequestList{RequestIds: reqIDS}))
 }
 
 func (k Keeper) AddRequestIDToPendingList(ctx sdk.Context, reqID uint64) {
@@ -140,7 +141,12 @@ func (k Keeper) ProcessResult(ctx sdk.Context, requestID uint64, status types.Re
 
 		channelCap, ok := k.scopedKeeper.GetCapability(ctx, host.ChannelCapabilityPath(sourcePort, sourceChannel))
 		if !ok {
-
+			err = ctx.EventManager().EmitTypedEvent(&types.EventPackedSendFailed{
+				Error: fmt.Sprintf("channel not found for port ID (%s) channel ID (%s)", sourcePort, sourceChannel),
+			})
+			if err != nil {
+				panic(err)
+			}
 		}
 
 		packetData := types.NewOracleResponsePacketData(
@@ -153,9 +159,16 @@ func (k Keeper) ProcessResult(ctx sdk.Context, requestID uint64, status types.Re
 			sourcePort,
 			sourceChannel,
 			clienttypes.NewHeight(0, 0),
-			uint64(uint64(ctx.BlockTime().UnixNano())+expiryTime),
+			uint64(ctx.BlockTime().UnixNano())+expiryTime,
 			packetData.ToBytes(),
 		); err != nil {
+			err = ctx.EventManager().EmitTypedEvents(&types.EventPackedSendFailed{
+				Error: fmt.Sprintf("unable to send packet %s", err),
+			})
+
+			if err != nil {
+				panic(err)
+			}
 		}
 	}
 }
@@ -191,6 +204,7 @@ func (k Keeper) ProcessRequestCalldata(ctx sdk.Context, request []byte) (result 
 		if err != nil {
 			return nil, types.RESOLVE_STATUS_FAILURE
 		}
+
 	case types.PRICE_REQUEST_DEVIATION:
 		var priceStamp types.PriceStamp
 		deviation, err := k.oracleKeeper.HistoricMedianDeviation(ctx, priceRequest.GetDenom())
@@ -210,5 +224,5 @@ func (k Keeper) ProcessRequestCalldata(ctx sdk.Context, request []byte) (result 
 		return nil, types.RESOLVE_STATUS_FAILURE
 	}
 
-	return
+	return result, types.RESOLVE_STATUS_SUCCESS
 }

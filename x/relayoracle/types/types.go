@@ -15,10 +15,10 @@ func NewIbcChannel(port, channel string) *IBCChannel {
 	}
 }
 
-func NewRequest(calldata []byte, client_id string, channel *IBCChannel) Request {
+func NewRequest(calldata []byte, clientID string, channel *IBCChannel) Request {
 	return Request{
 		RequestCallData: calldata,
-		ClientID:        client_id,
+		ClientID:        clientID,
 		IBCChannel:      channel,
 	}
 }
@@ -29,7 +29,14 @@ func NewRequestOracleAcknowledgement(id uint64) *RequestPacketAcknowledgement {
 	}
 }
 
-func NewOracleResponsePacketData(clientID string, requestID uint64, requestTime, resolveTime int64, resolveStatus ResolveStatus, result []byte) *OracleResponsePacketData {
+func NewOracleResponsePacketData(
+	clientID string,
+	requestID uint64,
+	requestTime,
+	resolveTime int64,
+	resolveStatus ResolveStatus,
+	result []byte,
+) *OracleResponsePacketData {
 	return &OracleResponsePacketData{
 		ClientID:      clientID,
 		RequestID:     requestID,

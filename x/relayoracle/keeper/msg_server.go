@@ -21,7 +21,10 @@ func NewMsgServerImpl(keeper Keeper) types.MsgServer {
 	return &msgServer{Keeper: keeper}
 }
 
-func (ms msgServer) GovUpdateParams(goCtx context.Context, msg *types.MsgGovUpdateParams) (*types.MsgGovUpdateParamsResponse, error) {
+func (ms msgServer) GovUpdateParams(
+	goCtx context.Context,
+	msg *types.MsgGovUpdateParams,
+) (*types.MsgGovUpdateParamsResponse, error) {
 	if ms.authority != msg.Authority {
 		err := errors.Wrapf(
 			govtypes.ErrInvalidSigner,
