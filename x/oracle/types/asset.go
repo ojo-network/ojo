@@ -8,10 +8,10 @@ import (
 
 const (
 	OjoDenom        string = appparams.BondDenom
-	OjoSymbol       string = "ojo"
+	OjoSymbol       string = "OJO"
 	OjoExponent            = uint32(6)
 	AtomDenom       string = "ibc/C4CFF46FD6DE35CA4CF4CE031E643C8FDC9BA4B99AE598E9B0ED98FE3A2319F9"
-	AtomSymbol      string = "atom"
+	AtomSymbol      string = "ATOM"
 	AtomExponent           = uint32(6)
 	USDDenom        string = "USD"
 	BlocksPerMinute        = uint64(10)
