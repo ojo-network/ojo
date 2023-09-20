@@ -33,4 +33,6 @@ message EventSetFxRate {
 message EventParamUpdate {
   // params defines the new parameters of the update.
   Params params = 1 [ (gogoproto.nullable) = false ];
+  // block defines the block height the param update occurs.
+  int64 block  = 2;
 }
