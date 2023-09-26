@@ -82,8 +82,13 @@ func (p ParamUpdatePlan) ValidateBasic() error {
 				return err
 			}
 
-		case string(KeyMaximumMedianStamps):
-			if err := validateMaximumMedianStamps(p.Changes.MaximumMedianStamps); err != nil {
+		case string(KeyCurrencyPairProviders):
+			if err := validateCurrencyPairProviders(p.Changes.CurrencyPairProviders); err != nil {
+				return err
+			}
+
+		case string(KeyCurrencyDeviationThresholds):
+			if err := validateCurrencyDeviationThresholds(p.Changes.CurrencyDeviationThresholds); err != nil {
 				return err
 			}
 

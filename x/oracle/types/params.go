@@ -212,12 +212,12 @@ func (p *Params) ParamSetPairs() paramstypes.ParamSetPairs {
 		paramstypes.NewParamSetPair(
 			KeyCurrencyPairProviders,
 			&p.CurrencyPairProviders,
-			validatePriceFeederCurrencyPairProviders,
+			validateCurrencyPairProviders,
 		),
 		paramstypes.NewParamSetPair(
 			KeyCurrencyDeviationThresholds,
 			&p.CurrencyDeviationThresholds,
-			validatePriceFeederCurrencyDeviationThresholds,
+			validateCurrencyDeviationThresholds,
 		),
 	}
 }
@@ -486,7 +486,7 @@ func validateMaximumMedianStamps(i interface{}) error {
 	return nil
 }
 
-func validatePriceFeederCurrencyPairProviders(i interface{}) error {
+func validateCurrencyPairProviders(i interface{}) error {
 	v, ok := i.(CurrencyPairProvidersList)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
@@ -507,7 +507,7 @@ func validatePriceFeederCurrencyPairProviders(i interface{}) error {
 	return nil
 }
 
-func validatePriceFeederCurrencyDeviationThresholds(i interface{}) error {
+func validateCurrencyDeviationThresholds(i interface{}) error {
 	v, ok := i.(CurrencyDeviationThresholdList)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)

@@ -93,6 +93,12 @@ func (k Keeper) ValidateParamChanges(ctx sdk.Context, keys []string, changes typ
 
 		case string(types.KeyMaximumMedianStamps):
 			params.MaximumMedianStamps = changes.MaximumMedianStamps
+
+		case string(types.KeyCurrencyPairProviders):
+			params.CurrencyPairProviders = changes.CurrencyPairProviders
+
+		case string(types.KeyCurrencyDeviationThresholds):
+			params.CurrencyDeviationThresholds = changes.CurrencyDeviationThresholds
 		}
 	}
 
@@ -142,6 +148,12 @@ func (k Keeper) ExecuteParamUpdatePlan(ctx sdk.Context, plan types.ParamUpdatePl
 
 		case string(types.KeyMaximumMedianStamps):
 			k.SetMaximumMedianStamps(ctx, plan.Changes.MaximumMedianStamps)
+
+		case string(types.KeyCurrencyPairProviders):
+			k.SetCurrencyPairProviders(ctx, plan.Changes.CurrencyPairProviders)
+
+		case string(types.KeyCurrencyDeviationThresholds):
+			k.SetCurrencyDeviationThresholds(ctx, plan.Changes.CurrencyDeviationThresholds)
 		}
 	}
 

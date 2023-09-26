@@ -355,7 +355,7 @@ func (m Migrator) MigrateCurrencyPairProviders(ctx sdk.Context) {
 			},
 		},
 	}
-	m.keeper.SetCurrencyPairProvidersList(ctx, CurrencyPairProviders)
+	m.keeper.SetCurrencyPairProviders(ctx, CurrencyPairProviders)
 }
 
 // MigrateCurrencyDeviationThresholds adds the price feeder
@@ -467,5 +467,5 @@ func (m Migrator) MigrateCurrencyDeviationThresholds(ctx sdk.Context) {
 			Threshold: "2",
 		},
 	}
-	m.keeper.SetCurrencyDeviationThresholdList(ctx, CurrencyDeviationThresholds)
+	m.keeper.SetCurrencyDeviationThresholds(ctx, CurrencyDeviationThresholds)
 }

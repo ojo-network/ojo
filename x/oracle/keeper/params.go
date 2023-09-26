@@ -176,32 +176,32 @@ func (k Keeper) SetMaximumMedianStamps(ctx sdk.Context, maximumMedianStamps uint
 	k.paramSpace.Set(ctx, types.KeyMaximumMedianStamps, maximumMedianStamps)
 }
 
-// CurrencyPairProvidersList returns the current Currency Pair Providers the price feeder
+// CurrencyPairProviders returns the current Currency Pair Providers the price feeder
 // will query when starting up.
-func (k Keeper) CurrencyPairProvidersList(ctx sdk.Context) (res types.CurrencyPairProvidersList) {
+func (k Keeper) CurrencyPairProviders(ctx sdk.Context) (res types.CurrencyPairProvidersList) {
 	k.paramSpace.Get(ctx, types.KeyCurrencyPairProviders, &res)
 	return
 }
 
-// SetCurrencyPairProvidersList updates the current Currency Pair Providers the price feeder
+// SetCurrencyPairProviders updates the current Currency Pair Providers the price feeder
 // will query when starting up.
-func (k Keeper) SetCurrencyPairProvidersList(
+func (k Keeper) SetCurrencyPairProviders(
 	ctx sdk.Context,
 	currencyPairProviders types.CurrencyPairProvidersList,
 ) {
 	k.paramSpace.Set(ctx, types.KeyCurrencyPairProviders, currencyPairProviders)
 }
 
-// SetCurrencyDeviationThresholdList returns the current Currency Deviation Thesholds the
+// CurrencyDeviationThresholds returns the current Currency Deviation Thesholds the
 // price feeder will query when starting up.
-func (k Keeper) CurrencyDeviationThresholdList(ctx sdk.Context) (res types.CurrencyDeviationThresholdList) {
+func (k Keeper) CurrencyDeviationThresholds(ctx sdk.Context) (res types.CurrencyDeviationThresholdList) {
 	k.paramSpace.Get(ctx, types.KeyCurrencyDeviationThresholds, &res)
 	return
 }
 
-// SetCurrencyDeviationThresholdList updates the current Currency Deviation Thesholds the
+// SetCurrencyDeviationThresholds updates the current Currency Deviation Thesholds the
 // price feeder will query when starting up.
-func (k Keeper) SetCurrencyDeviationThresholdList(
+func (k Keeper) SetCurrencyDeviationThresholds(
 	ctx sdk.Context,
 	currencyDeviationThresholds types.CurrencyDeviationThresholdList,
 ) {

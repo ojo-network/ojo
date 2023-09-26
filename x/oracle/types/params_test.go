@@ -140,11 +140,11 @@ func TestValidateMinValidPerWindow(t *testing.T) {
 	require.Nil(t, err)
 }
 
-func TestValidatePriceFeederCurrencyPairProviders(t *testing.T) {
-	err := validatePriceFeederCurrencyPairProviders("invalidSdkType")
+func TestValidateCurrencyPairProviders(t *testing.T) {
+	err := validateCurrencyPairProviders("invalidSdkType")
 	require.ErrorContains(t, err, "invalid parameter type: string")
 
-	err = validatePriceFeederCurrencyPairProviders(
+	err = validateCurrencyPairProviders(
 		CurrencyPairProvidersList{
 			CurrencyPairProviders{
 				QuoteDenom: USDDenom,
@@ -157,7 +157,7 @@ func TestValidatePriceFeederCurrencyPairProviders(t *testing.T) {
 	)
 	require.ErrorContains(t, err, "oracle parameter CurrencyPairProviders must have BaseDenom")
 
-	err = validatePriceFeederCurrencyPairProviders(
+	err = validateCurrencyPairProviders(
 		CurrencyPairProvidersList{
 			CurrencyPairProviders{
 				BaseDenom: OjoDenom,
@@ -170,7 +170,7 @@ func TestValidatePriceFeederCurrencyPairProviders(t *testing.T) {
 	)
 	require.ErrorContains(t, err, "oracle parameter CurrencyPairProviders must have QuoteDenom")
 
-	err = validatePriceFeederCurrencyPairProviders(
+	err = validateCurrencyPairProviders(
 		CurrencyPairProvidersList{
 			CurrencyPairProviders{
 				BaseDenom:  OjoDenom,
@@ -180,7 +180,7 @@ func TestValidatePriceFeederCurrencyPairProviders(t *testing.T) {
 	)
 	require.ErrorContains(t, err, "oracle parameter CurrencyPairProviders must have at least 1 provider listed")
 
-	err = validatePriceFeederCurrencyPairProviders(
+	err = validateCurrencyPairProviders(
 		CurrencyPairProvidersList{
 			CurrencyPairProviders{
 				BaseDenom:  OjoDenom,
@@ -195,11 +195,11 @@ func TestValidatePriceFeederCurrencyPairProviders(t *testing.T) {
 	require.Nil(t, err)
 }
 
-func TestValidatePriceFeederCurrencyDeviationThresholds(t *testing.T) {
-	err := validatePriceFeederCurrencyDeviationThresholds("invalidSdkType")
+func TestValidateCurrencyDeviationThresholds(t *testing.T) {
+	err := validateCurrencyDeviationThresholds("invalidSdkType")
 	require.ErrorContains(t, err, "invalid parameter type: string")
 
-	err = validatePriceFeederCurrencyDeviationThresholds(
+	err = validateCurrencyDeviationThresholds(
 		CurrencyDeviationThresholdList{
 			CurrencyDeviationThreshold{
 				Threshold: "2",
@@ -208,7 +208,7 @@ func TestValidatePriceFeederCurrencyDeviationThresholds(t *testing.T) {
 	)
 	require.ErrorContains(t, err, "oracle parameter CurrencyDeviationThreshold must have BaseDenom")
 
-	err = validatePriceFeederCurrencyDeviationThresholds(
+	err = validateCurrencyDeviationThresholds(
 		CurrencyDeviationThresholdList{
 			CurrencyDeviationThreshold{
 				BaseDenom: OjoDenom,
@@ -217,7 +217,7 @@ func TestValidatePriceFeederCurrencyDeviationThresholds(t *testing.T) {
 	)
 	require.ErrorContains(t, err, "oracle parameter CurrencyDeviationThreshold must have Threshold")
 
-	err = validatePriceFeederCurrencyDeviationThresholds(
+	err = validateCurrencyDeviationThresholds(
 		CurrencyDeviationThresholdList{
 			CurrencyDeviationThreshold{
 				BaseDenom: OjoDenom,
