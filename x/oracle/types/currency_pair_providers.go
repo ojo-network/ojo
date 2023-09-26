@@ -18,6 +18,10 @@ func (cpp CurrencyPairProviders) Equal(cpp2 *CurrencyPairProviders) bool {
 		return false
 	}
 
+	if !reflect.DeepEqual(cpp.PairAddress, cpp2.PairAddress) {
+		return false
+	}
+
 	return reflect.DeepEqual(cpp.Providers, cpp2.Providers)
 }
 

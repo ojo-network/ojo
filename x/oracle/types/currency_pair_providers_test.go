@@ -66,10 +66,25 @@ func TestCurrencyPairProvidersEqual(t *testing.T) {
 			"binance",
 		},
 	}
+	cpp5 := CurrencyPairProviders{
+		BaseDenom:  "OJO",
+		QuoteDenom: "ATOM",
+		Providers: []string{
+			"binance",
+			"coinbase",
+		},
+		PairAddress: []PairAddressProvider{
+			PairAddressProvider{
+				Address:         "address",
+				AddressProvider: "eth-uniswap",
+			},
+		},
+	}
 
 	require.True(t, cpp1.Equal(&cpp2))
 	require.False(t, cpp1.Equal(&cpp3))
 	require.False(t, cpp2.Equal(&cpp3))
 	require.False(t, cpp1.Equal(&cpp4))
 	require.False(t, cpp3.Equal(&cpp4))
+	require.False(t, cpp4.Equal(&cpp5))
 }
