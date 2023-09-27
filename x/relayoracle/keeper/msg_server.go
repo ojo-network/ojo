@@ -41,8 +41,8 @@ func (ms msgServer) GovUpdateParams(
 		case string(types.KeyIbcRequestEnabled):
 			ms.SetIbcRequestEnabled(ctx, msg.Changes.IbcRequestEnabled)
 
-		case string(types.KeyPacketExpiryBlockCount):
-			ms.SetPacketExpiryBlockCount(ctx, msg.Changes.PacketExpiryBlockCount)
+		case string(types.KeyPacketExpiry):
+			ms.SetPacketExpiryBlockCount(ctx, msg.Changes.PacketTimeout)
 
 		default:
 			return nil, fmt.Errorf("%s is not a relay oracle param key", key)

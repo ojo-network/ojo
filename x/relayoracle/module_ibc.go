@@ -1,6 +1,8 @@
 package relayoracle
 
 import (
+	"strings"
+
 	sdkerrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerror "github.com/cosmos/cosmos-sdk/types/errors"
@@ -39,6 +41,10 @@ func (im IBCModule) OnChanOpenInit(
 	boundPort := im.keeper.GetPort(ctx)
 	if boundPort != portID {
 		return "", sdkerrors.Wrapf(porttypes.ErrInvalidPort, "invalid port: %s, expected %s", portID, boundPort)
+	}
+
+	if strings.TrimSpace(version) == "" {
+		version = types.Version
 	}
 
 	if version != types.Version {

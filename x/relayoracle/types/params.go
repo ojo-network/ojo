@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"time"
 
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"gopkg.in/yaml.v2"
@@ -10,13 +11,13 @@ import (
 var _ paramtypes.ParamSet = (*Params)(nil)
 
 const (
-	DefaultIbcRequestEnabled      = true
-	DefaultPacketExpiryBlockCount = 10
+	DefaultIbcRequestEnabled = true
+	DefaultPacketTimeout     = uint64(10 * time.Minute)
 )
 
 var (
-	KeyIbcRequestEnabled      = []byte("IbcRequestEnabled")
-	KeyPacketExpiryBlockCount = []byte("PacketExpiryBlockCount")
+	KeyIbcRequestEnabled = []byte("IbcRequestEnabled")
+	KeyPacketExpiry      = []byte("PacketExpiry")
 )
 
 // ParamKeyTable the param key table for launch module
@@ -27,8 +28,8 @@ func ParamKeyTable() paramtypes.KeyTable {
 // NewParams creates a new Params instance
 func NewParams() Params {
 	return Params{
-		IbcRequestEnabled:      DefaultIbcRequestEnabled,
-		PacketExpiryBlockCount: DefaultPacketExpiryBlockCount,
+		IbcRequestEnabled: DefaultIbcRequestEnabled,
+		PacketTimeout:     DefaultPacketTimeout,
 	}
 }
 
@@ -41,7 +42,7 @@ func DefaultParams() Params {
 func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 	return paramtypes.ParamSetPairs{
 		paramtypes.NewParamSetPair(KeyIbcRequestEnabled, &p.IbcRequestEnabled, validateBool),
-		paramtypes.NewParamSetPair(KeyPacketExpiryBlockCount, &p.PacketExpiryBlockCount, validateUint64),
+		paramtypes.NewParamSetPair(KeyPacketExpiry, &p.PacketTimeout, validateUint64),
 	}
 }
 

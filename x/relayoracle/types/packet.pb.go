@@ -6,7 +6,7 @@ package types
 import (
 	bytes "bytes"
 	fmt "fmt"
-	_ "github.com/cosmos/cosmos-sdk/types"
+	types "github.com/cosmos/cosmos-sdk/types"
 	proto "github.com/cosmos/gogoproto/proto"
 	_ "github.com/gogo/protobuf/gogoproto"
 	io "io"
@@ -56,6 +56,86 @@ func (ResolveStatus) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_7244ae751175b020, []int{0}
 }
 
+type PriceRequestType int32
+
+const (
+	PRICE_REQUEST_RATE      PriceRequestType = 0
+	PRICE_REQUEST_MEDIAN    PriceRequestType = 1
+	PRICE_REQUEST_DEVIATION PriceRequestType = 2
+)
+
+var PriceRequestType_name = map[int32]string{
+	0: "PRICE_REQUEST_RATE",
+	1: "PRICE_REQUEST_MEDIAN",
+	2: "PRICE_REQUEST_DEVIATION",
+}
+
+var PriceRequestType_value = map[string]int32{
+	"PRICE_REQUEST_RATE":      0,
+	"PRICE_REQUEST_MEDIAN":    1,
+	"PRICE_REQUEST_DEVIATION": 2,
+}
+
+func (x PriceRequestType) String() string {
+	return proto.EnumName(PriceRequestType_name, int32(x))
+}
+
+func (PriceRequestType) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_7244ae751175b020, []int{1}
+}
+
+type OracleRequestPacketData struct {
+	ClientID string `protobuf:"bytes,1,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
+	Calldata []byte `protobuf:"bytes,3,opt,name=calldata,proto3" json:"calldata,omitempty"`
+}
+
+func (m *OracleRequestPacketData) Reset()         { *m = OracleRequestPacketData{} }
+func (m *OracleRequestPacketData) String() string { return proto.CompactTextString(m) }
+func (*OracleRequestPacketData) ProtoMessage()    {}
+func (*OracleRequestPacketData) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7244ae751175b020, []int{0}
+}
+func (m *OracleRequestPacketData) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *OracleRequestPacketData) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_OracleRequestPacketData.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *OracleRequestPacketData) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_OracleRequestPacketData.Merge(m, src)
+}
+func (m *OracleRequestPacketData) XXX_Size() int {
+	return m.Size()
+}
+func (m *OracleRequestPacketData) XXX_DiscardUnknown() {
+	xxx_messageInfo_OracleRequestPacketData.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_OracleRequestPacketData proto.InternalMessageInfo
+
+func (m *OracleRequestPacketData) GetClientID() string {
+	if m != nil {
+		return m.ClientID
+	}
+	return ""
+}
+
+func (m *OracleRequestPacketData) GetCalldata() []byte {
+	if m != nil {
+		return m.Calldata
+	}
+	return nil
+}
+
 type OracleResponsePacketData struct {
 	ClientID      string        `protobuf:"bytes,1,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
 	RequestID     uint64        `protobuf:"varint,2,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
@@ -69,7 +149,7 @@ func (m *OracleResponsePacketData) Reset()         { *m = OracleResponsePacketDa
 func (m *OracleResponsePacketData) String() string { return proto.CompactTextString(m) }
 func (*OracleResponsePacketData) ProtoMessage()    {}
 func (*OracleResponsePacketData) Descriptor() ([]byte, []int) {
-	return fileDescriptor_7244ae751175b020, []int{0}
+	return fileDescriptor_7244ae751175b020, []int{1}
 }
 func (m *OracleResponsePacketData) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -140,104 +220,23 @@ func (m *OracleResponsePacketData) GetResult() []byte {
 	return nil
 }
 
-type Request struct {
-	RequestCallData []byte      `protobuf:"bytes,1,opt,name=request_calldata,json=requestCalldata,proto3" json:"request_calldata,omitempty"`
-	ClientID        string      `protobuf:"bytes,2,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
-	RequestHeight   int64       `protobuf:"varint,3,opt,name=request_height,json=requestHeight,proto3" json:"request_height,omitempty"`
-	RequestTime     int64       `protobuf:"varint,4,opt,name=request_time,json=requestTime,proto3" json:"request_time,omitempty"`
-	IBCChannel      *IBCChannel `protobuf:"bytes,5,opt,name=ibc_channel,json=ibcChannel,proto3" json:"ibc_channel,omitempty"`
+type RequestPrice struct {
+	Denoms  []string         `protobuf:"bytes,1,rep,name=denoms,proto3" json:"denoms,omitempty"`
+	Request PriceRequestType `protobuf:"varint,2,opt,name=request,proto3,enum=ojo.relayoracle.v1.PriceRequestType" json:"request,omitempty"`
 }
 
-func (m *Request) Reset()         { *m = Request{} }
-func (m *Request) String() string { return proto.CompactTextString(m) }
-func (*Request) ProtoMessage()    {}
-func (*Request) Descriptor() ([]byte, []int) {
-	return fileDescriptor_7244ae751175b020, []int{1}
-}
-func (m *Request) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *Request) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_Request.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *Request) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Request.Merge(m, src)
-}
-func (m *Request) XXX_Size() int {
-	return m.Size()
-}
-func (m *Request) XXX_DiscardUnknown() {
-	xxx_messageInfo_Request.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_Request proto.InternalMessageInfo
-
-func (m *Request) GetRequestCallData() []byte {
-	if m != nil {
-		return m.RequestCallData
-	}
-	return nil
-}
-
-func (m *Request) GetClientID() string {
-	if m != nil {
-		return m.ClientID
-	}
-	return ""
-}
-
-func (m *Request) GetRequestHeight() int64 {
-	if m != nil {
-		return m.RequestHeight
-	}
-	return 0
-}
-
-func (m *Request) GetRequestTime() int64 {
-	if m != nil {
-		return m.RequestTime
-	}
-	return 0
-}
-
-func (m *Request) GetIBCChannel() *IBCChannel {
-	if m != nil {
-		return m.IBCChannel
-	}
-	return nil
-}
-
-type Result struct {
-	RequestID       uint64        `protobuf:"varint,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
-	RequestCallData []byte        `protobuf:"bytes,2,opt,name=request_calldata,json=requestCalldata,proto3" json:"request_calldata,omitempty"`
-	ClientID        string        `protobuf:"bytes,3,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
-	RequestHeight   int64         `protobuf:"varint,4,opt,name=request_height,json=requestHeight,proto3" json:"request_height,omitempty"`
-	RequestTime     int64         `protobuf:"varint,5,opt,name=request_time,json=requestTime,proto3" json:"request_time,omitempty"`
-	Status          ResolveStatus `protobuf:"varint,6,opt,name=status,proto3,enum=ojo.relayoracle.v1.ResolveStatus" json:"status,omitempty"`
-	Result          []byte        `protobuf:"bytes,7,opt,name=result,proto3" json:"result,omitempty"`
-}
-
-func (m *Result) Reset()         { *m = Result{} }
-func (m *Result) String() string { return proto.CompactTextString(m) }
-func (*Result) ProtoMessage()    {}
-func (*Result) Descriptor() ([]byte, []int) {
+func (m *RequestPrice) Reset()         { *m = RequestPrice{} }
+func (m *RequestPrice) String() string { return proto.CompactTextString(m) }
+func (*RequestPrice) ProtoMessage()    {}
+func (*RequestPrice) Descriptor() ([]byte, []int) {
 	return fileDescriptor_7244ae751175b020, []int{2}
 }
-func (m *Result) XXX_Unmarshal(b []byte) error {
+func (m *RequestPrice) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *Result) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *RequestPrice) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_Result.Marshal(b, m, deterministic)
+		return xxx_messageInfo_RequestPrice.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -247,84 +246,48 @@ func (m *Result) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 		return b[:n], nil
 	}
 }
-func (m *Result) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Result.Merge(m, src)
+func (m *RequestPrice) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RequestPrice.Merge(m, src)
 }
-func (m *Result) XXX_Size() int {
+func (m *RequestPrice) XXX_Size() int {
 	return m.Size()
 }
-func (m *Result) XXX_DiscardUnknown() {
-	xxx_messageInfo_Result.DiscardUnknown(m)
+func (m *RequestPrice) XXX_DiscardUnknown() {
+	xxx_messageInfo_RequestPrice.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_Result proto.InternalMessageInfo
+var xxx_messageInfo_RequestPrice proto.InternalMessageInfo
 
-func (m *Result) GetRequestID() uint64 {
+func (m *RequestPrice) GetDenoms() []string {
 	if m != nil {
-		return m.RequestID
-	}
-	return 0
-}
-
-func (m *Result) GetRequestCallData() []byte {
-	if m != nil {
-		return m.RequestCallData
+		return m.Denoms
 	}
 	return nil
 }
 
-func (m *Result) GetClientID() string {
+func (m *RequestPrice) GetRequest() PriceRequestType {
 	if m != nil {
-		return m.ClientID
+		return m.Request
 	}
-	return ""
+	return PRICE_REQUEST_RATE
 }
 
-func (m *Result) GetRequestHeight() int64 {
-	if m != nil {
-		return m.RequestHeight
-	}
-	return 0
+type OracleRequestResult struct {
+	PriceData []OracleData `protobuf:"bytes,1,rep,name=price_data,json=priceData,proto3" json:"price_data"`
 }
 
-func (m *Result) GetRequestTime() int64 {
-	if m != nil {
-		return m.RequestTime
-	}
-	return 0
-}
-
-func (m *Result) GetStatus() ResolveStatus {
-	if m != nil {
-		return m.Status
-	}
-	return RESOLVE_STATUS_OPEN
-}
-
-func (m *Result) GetResult() []byte {
-	if m != nil {
-		return m.Result
-	}
-	return nil
-}
-
-type IBCChannel struct {
-	ChannelId string `protobuf:"bytes,1,opt,name=channel_id,json=channelId,proto3" json:"channel_id,omitempty"`
-	PortId    string `protobuf:"bytes,2,opt,name=port_id,json=portId,proto3" json:"port_id,omitempty"`
-}
-
-func (m *IBCChannel) Reset()         { *m = IBCChannel{} }
-func (m *IBCChannel) String() string { return proto.CompactTextString(m) }
-func (*IBCChannel) ProtoMessage()    {}
-func (*IBCChannel) Descriptor() ([]byte, []int) {
+func (m *OracleRequestResult) Reset()         { *m = OracleRequestResult{} }
+func (m *OracleRequestResult) String() string { return proto.CompactTextString(m) }
+func (*OracleRequestResult) ProtoMessage()    {}
+func (*OracleRequestResult) Descriptor() ([]byte, []int) {
 	return fileDescriptor_7244ae751175b020, []int{3}
 }
-func (m *IBCChannel) XXX_Unmarshal(b []byte) error {
+func (m *OracleRequestResult) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *IBCChannel) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *OracleRequestResult) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_IBCChannel.Marshal(b, m, deterministic)
+		return xxx_messageInfo_OracleRequestResult.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -334,48 +297,93 @@ func (m *IBCChannel) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 		return b[:n], nil
 	}
 }
-func (m *IBCChannel) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_IBCChannel.Merge(m, src)
+func (m *OracleRequestResult) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_OracleRequestResult.Merge(m, src)
 }
-func (m *IBCChannel) XXX_Size() int {
+func (m *OracleRequestResult) XXX_Size() int {
 	return m.Size()
 }
-func (m *IBCChannel) XXX_DiscardUnknown() {
-	xxx_messageInfo_IBCChannel.DiscardUnknown(m)
+func (m *OracleRequestResult) XXX_DiscardUnknown() {
+	xxx_messageInfo_OracleRequestResult.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_IBCChannel proto.InternalMessageInfo
+var xxx_messageInfo_OracleRequestResult proto.InternalMessageInfo
 
-func (m *IBCChannel) GetChannelId() string {
+func (m *OracleRequestResult) GetPriceData() []OracleData {
 	if m != nil {
-		return m.ChannelId
+		return m.PriceData
 	}
-	return ""
+	return nil
 }
 
-func (m *IBCChannel) GetPortId() string {
+type OracleData struct {
+	ExchangeRate []types.DecCoin `protobuf:"bytes,2,rep,name=exchange_rate,json=exchangeRate,proto3" json:"exchange_rate"`
+	BlockNum     []uint64        `protobuf:"varint,3,rep,packed,name=block_num,json=blockNum,proto3" json:"block_num,omitempty"`
+}
+
+func (m *OracleData) Reset()         { *m = OracleData{} }
+func (m *OracleData) String() string { return proto.CompactTextString(m) }
+func (*OracleData) ProtoMessage()    {}
+func (*OracleData) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7244ae751175b020, []int{4}
+}
+func (m *OracleData) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *OracleData) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_OracleData.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *OracleData) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_OracleData.Merge(m, src)
+}
+func (m *OracleData) XXX_Size() int {
+	return m.Size()
+}
+func (m *OracleData) XXX_DiscardUnknown() {
+	xxx_messageInfo_OracleData.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_OracleData proto.InternalMessageInfo
+
+func (m *OracleData) GetExchangeRate() []types.DecCoin {
 	if m != nil {
-		return m.PortId
+		return m.ExchangeRate
 	}
-	return ""
+	return nil
 }
 
-type RequestPacketAcknowledgement struct {
+func (m *OracleData) GetBlockNum() []uint64 {
+	if m != nil {
+		return m.BlockNum
+	}
+	return nil
+}
+
+type OracleRequestPacketAcknowledgement struct {
 	RequestID uint64 `protobuf:"varint,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 }
 
-func (m *RequestPacketAcknowledgement) Reset()         { *m = RequestPacketAcknowledgement{} }
-func (m *RequestPacketAcknowledgement) String() string { return proto.CompactTextString(m) }
-func (*RequestPacketAcknowledgement) ProtoMessage()    {}
-func (*RequestPacketAcknowledgement) Descriptor() ([]byte, []int) {
-	return fileDescriptor_7244ae751175b020, []int{4}
+func (m *OracleRequestPacketAcknowledgement) Reset()         { *m = OracleRequestPacketAcknowledgement{} }
+func (m *OracleRequestPacketAcknowledgement) String() string { return proto.CompactTextString(m) }
+func (*OracleRequestPacketAcknowledgement) ProtoMessage()    {}
+func (*OracleRequestPacketAcknowledgement) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7244ae751175b020, []int{5}
 }
-func (m *RequestPacketAcknowledgement) XXX_Unmarshal(b []byte) error {
+func (m *OracleRequestPacketAcknowledgement) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *RequestPacketAcknowledgement) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *OracleRequestPacketAcknowledgement) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_RequestPacketAcknowledgement.Marshal(b, m, deterministic)
+		return xxx_messageInfo_OracleRequestPacketAcknowledgement.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -385,130 +393,116 @@ func (m *RequestPacketAcknowledgement) XXX_Marshal(b []byte, deterministic bool)
 		return b[:n], nil
 	}
 }
-func (m *RequestPacketAcknowledgement) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RequestPacketAcknowledgement.Merge(m, src)
+func (m *OracleRequestPacketAcknowledgement) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_OracleRequestPacketAcknowledgement.Merge(m, src)
 }
-func (m *RequestPacketAcknowledgement) XXX_Size() int {
+func (m *OracleRequestPacketAcknowledgement) XXX_Size() int {
 	return m.Size()
 }
-func (m *RequestPacketAcknowledgement) XXX_DiscardUnknown() {
-	xxx_messageInfo_RequestPacketAcknowledgement.DiscardUnknown(m)
+func (m *OracleRequestPacketAcknowledgement) XXX_DiscardUnknown() {
+	xxx_messageInfo_OracleRequestPacketAcknowledgement.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_RequestPacketAcknowledgement proto.InternalMessageInfo
+var xxx_messageInfo_OracleRequestPacketAcknowledgement proto.InternalMessageInfo
 
-func (m *RequestPacketAcknowledgement) GetRequestID() uint64 {
+func (m *OracleRequestPacketAcknowledgement) GetRequestID() uint64 {
 	if m != nil {
 		return m.RequestID
 	}
 	return 0
-}
-
-type PendingRequestList struct {
-	RequestIds []uint64 `protobuf:"varint,1,rep,packed,name=request_ids,json=requestIds,proto3" json:"request_ids,omitempty"`
-}
-
-func (m *PendingRequestList) Reset()         { *m = PendingRequestList{} }
-func (m *PendingRequestList) String() string { return proto.CompactTextString(m) }
-func (*PendingRequestList) ProtoMessage()    {}
-func (*PendingRequestList) Descriptor() ([]byte, []int) {
-	return fileDescriptor_7244ae751175b020, []int{5}
-}
-func (m *PendingRequestList) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *PendingRequestList) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_PendingRequestList.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *PendingRequestList) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_PendingRequestList.Merge(m, src)
-}
-func (m *PendingRequestList) XXX_Size() int {
-	return m.Size()
-}
-func (m *PendingRequestList) XXX_DiscardUnknown() {
-	xxx_messageInfo_PendingRequestList.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_PendingRequestList proto.InternalMessageInfo
-
-func (m *PendingRequestList) GetRequestIds() []uint64 {
-	if m != nil {
-		return m.RequestIds
-	}
-	return nil
 }
 
 func init() {
 	proto.RegisterEnum("ojo.relayoracle.v1.ResolveStatus", ResolveStatus_name, ResolveStatus_value)
+	proto.RegisterEnum("ojo.relayoracle.v1.PriceRequestType", PriceRequestType_name, PriceRequestType_value)
+	proto.RegisterType((*OracleRequestPacketData)(nil), "ojo.relayoracle.v1.OracleRequestPacketData")
 	proto.RegisterType((*OracleResponsePacketData)(nil), "ojo.relayoracle.v1.OracleResponsePacketData")
-	proto.RegisterType((*Request)(nil), "ojo.relayoracle.v1.Request")
-	proto.RegisterType((*Result)(nil), "ojo.relayoracle.v1.Result")
-	proto.RegisterType((*IBCChannel)(nil), "ojo.relayoracle.v1.IBCChannel")
-	proto.RegisterType((*RequestPacketAcknowledgement)(nil), "ojo.relayoracle.v1.RequestPacketAcknowledgement")
-	proto.RegisterType((*PendingRequestList)(nil), "ojo.relayoracle.v1.PendingRequestList")
+	proto.RegisterType((*RequestPrice)(nil), "ojo.relayoracle.v1.RequestPrice")
+	proto.RegisterType((*OracleRequestResult)(nil), "ojo.relayoracle.v1.OracleRequestResult")
+	proto.RegisterType((*OracleData)(nil), "ojo.relayoracle.v1.OracleData")
+	proto.RegisterType((*OracleRequestPacketAcknowledgement)(nil), "ojo.relayoracle.v1.OracleRequestPacketAcknowledgement")
 }
 
 func init() { proto.RegisterFile("ojo/relayoracle/v1/packet.proto", fileDescriptor_7244ae751175b020) }
 
 var fileDescriptor_7244ae751175b020 = []byte{
-	// 708 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x94, 0x51, 0x6f, 0xd2, 0x50,
-	0x14, 0xc7, 0xb9, 0xc0, 0xd8, 0xb8, 0xc0, 0x46, 0x3a, 0xb3, 0x11, 0xa2, 0x6d, 0x47, 0x62, 0x82,
-	0x46, 0x69, 0x36, 0xa3, 0x89, 0xc6, 0x98, 0x0c, 0xe8, 0xb2, 0x9a, 0x65, 0x90, 0xdb, 0x61, 0x8c,
-	0x2f, 0xa4, 0xb4, 0x37, 0xd0, 0xad, 0xf4, 0x62, 0xef, 0x65, 0x73, 0xdf, 0xc0, 0xec, 0x45, 0xbf,
-	0xc0, 0x12, 0x8d, 0xdf, 0xc3, 0x67, 0x1f, 0xf7, 0xe8, 0x13, 0x31, 0xec, 0xc5, 0xef, 0xe0, 0x8b,
-	0xa1, 0xbd, 0x0c, 0x36, 0xaa, 0x6e, 0xbe, 0xdd, 0xf3, 0x3f, 0xff, 0x73, 0xda, 0xfe, 0xce, 0xe9,
-	0x85, 0x12, 0xd9, 0x27, 0x8a, 0x87, 0x1d, 0xe3, 0x98, 0x78, 0x86, 0xe9, 0x60, 0xe5, 0x70, 0x5d,
-	0xe9, 0x19, 0xe6, 0x01, 0x66, 0xa5, 0x9e, 0x47, 0x18, 0x11, 0x04, 0xb2, 0x4f, 0x4a, 0x53, 0x86,
-	0xd2, 0xe1, 0x7a, 0xfe, 0x56, 0x9b, 0xb4, 0x89, 0x9f, 0x56, 0x46, 0xa7, 0xc0, 0x99, 0x17, 0x4d,
-	0x42, 0xbb, 0x84, 0x2a, 0x2d, 0x83, 0x8e, 0xda, 0xb4, 0x30, 0x33, 0xd6, 0x15, 0x93, 0xd8, 0x6e,
-	0x90, 0x2f, 0x7c, 0x8e, 0xc2, 0x5c, 0xcd, 0xef, 0x81, 0x30, 0xed, 0x11, 0x97, 0xe2, 0xba, 0xff,
-	0xa0, 0xaa, 0xc1, 0x0c, 0xe1, 0x1e, 0x4c, 0x9a, 0x8e, 0x8d, 0x5d, 0xd6, 0xb4, 0xad, 0x1c, 0x90,
-	0x41, 0x31, 0x59, 0x4e, 0x0f, 0x07, 0xd2, 0x42, 0xc5, 0x17, 0xb5, 0x2a, 0x5a, 0x08, 0xd2, 0x9a,
-	0x25, 0x3c, 0x80, 0xd0, 0xc3, 0x6f, 0xfb, 0x98, 0xfa, 0xde, 0xa8, 0x0c, 0x8a, 0xf1, 0x72, 0x66,
-	0x38, 0x90, 0x92, 0x28, 0x50, 0xb5, 0x2a, 0x4a, 0x72, 0x83, 0x66, 0x09, 0x6b, 0x30, 0x3d, 0x76,
-	0x33, 0xbb, 0x8b, 0x73, 0x31, 0x19, 0x14, 0x63, 0x28, 0xc5, 0xb5, 0x3d, 0xbb, 0x8b, 0x03, 0x0b,
-	0x25, 0xce, 0x21, 0x0e, 0x2c, 0xf1, 0xb1, 0xc5, 0xd7, 0x7c, 0xcb, 0x36, 0x5c, 0x1c, 0x5b, 0x28,
-	0x33, 0x58, 0x9f, 0xe6, 0xe6, 0x64, 0x50, 0x5c, 0xdc, 0x58, 0x2b, 0xcd, 0xe2, 0x29, 0xa1, 0xc0,
-	0xa9, 0xfb, 0x46, 0x94, 0xf1, 0xa6, 0x43, 0x61, 0x05, 0x26, 0x3c, 0x4c, 0xfb, 0x0e, 0xcb, 0x25,
-	0x64, 0x50, 0x4c, 0x23, 0x1e, 0x3d, 0x8b, 0xff, 0xfc, 0x24, 0x81, 0xc2, 0x87, 0x28, 0x9c, 0xe7,
-	0x9f, 0x21, 0xbc, 0x80, 0xd9, 0xf1, 0x9b, 0x9b, 0x86, 0xe3, 0x58, 0x06, 0x33, 0x7c, 0x32, 0xe9,
-	0xf2, 0xf2, 0x70, 0x20, 0x2d, 0x71, 0x5b, 0xc5, 0x70, 0x9c, 0x11, 0x41, 0xb4, 0xe4, 0x4d, 0x04,
-	0x6b, 0x06, 0x69, 0xf4, 0xaf, 0x48, 0xef, 0x8e, 0x3e, 0x2f, 0x78, 0x54, 0x07, 0xdb, 0xed, 0x0e,
-	0xe3, 0x98, 0x32, 0x5c, 0xdd, 0xf6, 0xc5, 0x19, 0x96, 0xf1, 0x59, 0x96, 0x35, 0x98, 0xb2, 0x5b,
-	0x66, 0xd3, 0xec, 0x18, 0xae, 0x8b, 0x1d, 0x9f, 0x52, 0x6a, 0x43, 0x0c, 0xa3, 0xa4, 0x95, 0x2b,
-	0x95, 0xc0, 0x55, 0x5e, 0x1c, 0x0e, 0x24, 0x38, 0x89, 0x11, 0xb4, 0x5b, 0x26, 0x3f, 0x17, 0xbe,
-	0x46, 0x61, 0x02, 0xf9, 0x88, 0xae, 0x0c, 0x1e, 0xfc, 0x63, 0xf0, 0x61, 0xf8, 0xa2, 0xff, 0x8b,
-	0x2f, 0x76, 0x43, 0x7c, 0xf1, 0xeb, 0xe0, 0x9b, 0x9b, 0xc5, 0xf7, 0x14, 0x26, 0xf8, 0x7e, 0x25,
-	0xae, 0xbb, 0x5f, 0xbc, 0x60, 0x6a, 0xb1, 0xe6, 0xa7, 0x17, 0xab, 0xf0, 0x12, 0x4e, 0xa1, 0x15,
-	0xee, 0x40, 0xc8, 0x67, 0x73, 0xf1, 0xa3, 0xa1, 0x24, 0x57, 0x34, 0x4b, 0x58, 0x85, 0xf3, 0x3d,
-	0xe2, 0x4d, 0x36, 0x06, 0x25, 0x46, 0xa1, 0x66, 0xf1, 0xf5, 0x44, 0xf0, 0x36, 0xe7, 0x16, 0xfc,
-	0xba, 0x9b, 0xe6, 0x81, 0x4b, 0x8e, 0x1c, 0x6c, 0xb5, 0x71, 0x17, 0xbb, 0x37, 0x9c, 0x10, 0xef,
-	0xf9, 0x18, 0x0a, 0x75, 0xec, 0x5a, 0xb6, 0xdb, 0xe6, 0xa6, 0x1d, 0x9b, 0x32, 0x41, 0x82, 0xa9,
-	0x49, 0x27, 0x9a, 0x03, 0x72, 0xac, 0x18, 0x47, 0xf0, 0xa2, 0x96, 0xde, 0xff, 0x05, 0x60, 0xe6,
-	0x12, 0x08, 0xe1, 0x39, 0x94, 0x90, 0xaa, 0xd7, 0x76, 0x5e, 0xa9, 0x4d, 0x7d, 0x6f, 0x73, 0xaf,
-	0xa1, 0x37, 0x6b, 0x75, 0x75, 0xb7, 0xd9, 0xd8, 0xd5, 0xeb, 0x6a, 0x45, 0xdb, 0xd2, 0xd4, 0x6a,
-	0x36, 0x92, 0x5f, 0x3d, 0x39, 0x95, 0x97, 0x43, 0x6c, 0xc2, 0x13, 0xb8, 0x72, 0x45, 0xd6, 0x1b,
-	0x95, 0x8a, 0xaa, 0xeb, 0x59, 0x90, 0xcf, 0x9f, 0x9c, 0xca, 0x7f, 0xc8, 0x86, 0xd4, 0x6d, 0x6d,
-	0x6a, 0x3b, 0x0d, 0xa4, 0x66, 0xa3, 0xa1, 0x75, 0x3c, 0x1b, 0x52, 0xa7, 0xbe, 0xae, 0x6b, 0x48,
-	0xad, 0x66, 0x63, 0xa1, 0x75, 0x3c, 0x9b, 0x8f, 0xbf, 0xff, 0x22, 0x46, 0xca, 0xdb, 0xdf, 0x86,
-	0x22, 0x38, 0x1b, 0x8a, 0xe0, 0xc7, 0x50, 0x04, 0x1f, 0xcf, 0xc5, 0xc8, 0xd9, 0xb9, 0x18, 0xf9,
-	0x7e, 0x2e, 0x46, 0xde, 0x94, 0xda, 0x36, 0xeb, 0xf4, 0x5b, 0x25, 0x93, 0x74, 0x15, 0xb2, 0x4f,
-	0x1e, 0xba, 0x98, 0x1d, 0x11, 0xef, 0x60, 0x74, 0x56, 0xde, 0x5d, 0xba, 0xe9, 0xd9, 0x71, 0x0f,
-	0xd3, 0x56, 0xc2, 0xbf, 0x9c, 0x1f, 0xfd, 0x0e, 0x00, 0x00, 0xff, 0xff, 0x9b, 0x9d, 0x04, 0x41,
-	0x09, 0x06, 0x00, 0x00,
+	// 750 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x54, 0xcd, 0x6e, 0xeb, 0x44,
+	0x14, 0x8e, 0x93, 0x50, 0x92, 0xb9, 0x49, 0x65, 0xcd, 0xbd, 0x6a, 0x2d, 0x17, 0x39, 0x6e, 0xc4,
+	0x22, 0x54, 0x60, 0xab, 0x41, 0x42, 0x08, 0x21, 0xa4, 0x24, 0x76, 0xa9, 0xa5, 0x92, 0x84, 0x71,
+	0x52, 0x55, 0xdd, 0x58, 0x8e, 0x33, 0x4d, 0xdd, 0xd8, 0x9e, 0x60, 0x4f, 0xfa, 0xf3, 0x06, 0x28,
+	0x2b, 0x5e, 0x20, 0x12, 0x88, 0x77, 0xe0, 0x19, 0xba, 0xec, 0x92, 0x55, 0x85, 0xd2, 0x0d, 0xef,
+	0xc0, 0x06, 0x79, 0xec, 0x40, 0x53, 0x5c, 0x16, 0x77, 0xe7, 0xf9, 0x7e, 0xce, 0x39, 0x9e, 0xf3,
+	0x69, 0x40, 0x8d, 0x5c, 0x11, 0x35, 0xc4, 0x9e, 0x7d, 0x47, 0x42, 0xdb, 0xf1, 0xb0, 0x7a, 0x7d,
+	0xa8, 0xce, 0x6c, 0x67, 0x8a, 0xa9, 0x32, 0x0b, 0x09, 0x25, 0x10, 0x92, 0x2b, 0xa2, 0x3c, 0x13,
+	0x28, 0xd7, 0x87, 0xe2, 0xbb, 0x09, 0x99, 0x10, 0x46, 0xab, 0xf1, 0x57, 0xa2, 0x14, 0x25, 0x87,
+	0x44, 0x3e, 0x89, 0xd4, 0x91, 0x1d, 0xc5, 0x65, 0x46, 0x98, 0xda, 0x87, 0xaa, 0x43, 0xdc, 0x20,
+	0xe1, 0xeb, 0x17, 0x60, 0xb7, 0xc7, 0x4a, 0x20, 0xfc, 0xc3, 0x1c, 0x47, 0xb4, 0xcf, 0xda, 0x68,
+	0x36, 0xb5, 0xe1, 0x27, 0xa0, 0xec, 0x78, 0x2e, 0x0e, 0xa8, 0xe5, 0x8e, 0x05, 0x4e, 0xe6, 0x1a,
+	0xe5, 0x76, 0x65, 0xf5, 0x58, 0x2b, 0x75, 0x18, 0x68, 0x68, 0xa8, 0x94, 0xd0, 0xc6, 0x18, 0x8a,
+	0xa0, 0xe4, 0xd8, 0x9e, 0x37, 0xb6, 0xa9, 0x2d, 0x14, 0x64, 0xae, 0x51, 0x41, 0xff, 0x9c, 0xbf,
+	0x2a, 0xfe, 0xf9, 0x73, 0x8d, 0xab, 0xff, 0x92, 0x07, 0xc2, 0xba, 0x51, 0x34, 0x23, 0x41, 0x84,
+	0xdf, 0xaf, 0xd3, 0xa7, 0x00, 0x84, 0xc9, 0xa4, 0xb1, 0x36, 0x2f, 0x73, 0x8d, 0x62, 0xbb, 0xba,
+	0x7a, 0xac, 0x95, 0xd3, 0xf9, 0x0d, 0x0d, 0x95, 0x53, 0x81, 0x31, 0x86, 0xfb, 0xa0, 0xb2, 0x56,
+	0x53, 0xd7, 0xc7, 0x6c, 0xb6, 0x02, 0x7a, 0x93, 0x62, 0x03, 0xd7, 0xc7, 0x89, 0x24, 0x22, 0xde,
+	0x35, 0x4e, 0x24, 0xc5, 0xb5, 0x84, 0x61, 0x4c, 0x72, 0x0c, 0xb6, 0xd7, 0x92, 0x88, 0xda, 0x74,
+	0x1e, 0x09, 0x1f, 0xc8, 0x5c, 0x63, 0xbb, 0xb9, 0xaf, 0xfc, 0x77, 0x0d, 0x0a, 0x4a, 0x94, 0x26,
+	0x13, 0xa2, 0x6a, 0xf8, 0xfc, 0x08, 0x77, 0xc0, 0x56, 0x88, 0xa3, 0xb9, 0x47, 0x85, 0x2d, 0x76,
+	0x4b, 0xe9, 0x29, 0xbd, 0xa3, 0x0b, 0x50, 0x59, 0x6f, 0x21, 0x74, 0x1d, 0x1c, 0xab, 0xc7, 0x38,
+	0x20, 0x7e, 0x24, 0x70, 0x72, 0xa1, 0x51, 0x46, 0xe9, 0x09, 0x7e, 0x03, 0x3e, 0x4c, 0xff, 0x80,
+	0x5d, 0xc0, 0x76, 0xf3, 0xe3, 0xac, 0x41, 0x58, 0x8d, 0xb4, 0xde, 0xe0, 0x6e, 0x86, 0xd1, 0xda,
+	0x54, 0x3f, 0x07, 0x6f, 0x37, 0x76, 0x8e, 0xd8, 0x10, 0xb0, 0x03, 0xc0, 0x2c, 0xf6, 0x58, 0x6c,
+	0x8d, 0x71, 0xcb, 0x37, 0x4d, 0x29, 0xab, 0x72, 0x62, 0x8e, 0x37, 0xd7, 0x2e, 0xde, 0x3f, 0xd6,
+	0x72, 0xa8, 0xcc, 0x7c, 0x31, 0x50, 0x0f, 0x01, 0xf8, 0x97, 0x86, 0xdf, 0x82, 0x2a, 0xbe, 0x75,
+	0x2e, 0xed, 0x60, 0x82, 0xad, 0xd0, 0xa6, 0x58, 0xc8, 0xb3, 0xaa, 0x1f, 0x29, 0x49, 0x2a, 0x95,
+	0x38, 0x95, 0x4a, 0x9a, 0x4a, 0x45, 0xc3, 0x4e, 0x87, 0xb8, 0x41, 0x5a, 0xb3, 0xb2, 0x36, 0x22,
+	0x9b, 0x62, 0xb8, 0x07, 0xca, 0x23, 0x8f, 0x38, 0x53, 0x2b, 0x98, 0xfb, 0x42, 0x41, 0x2e, 0x34,
+	0x8a, 0xa8, 0xc4, 0x80, 0xee, 0xdc, 0xaf, 0x9f, 0x81, 0x7a, 0x46, 0x86, 0x5b, 0xce, 0x34, 0x20,
+	0x37, 0x1e, 0x1e, 0x4f, 0xb0, 0x8f, 0x03, 0xfa, 0x22, 0x39, 0xdc, 0xff, 0x27, 0x27, 0xd9, 0xc8,
+	0xc1, 0x5f, 0x1c, 0xa8, 0x6e, 0x2c, 0x14, 0x7e, 0x0d, 0x6a, 0x48, 0x37, 0x7b, 0x27, 0xa7, 0xba,
+	0x65, 0x0e, 0x5a, 0x83, 0xa1, 0x69, 0xf5, 0xfa, 0x7a, 0xd7, 0x1a, 0x76, 0xcd, 0xbe, 0xde, 0x31,
+	0x8e, 0x0c, 0x5d, 0xe3, 0x73, 0xe2, 0xee, 0x62, 0x29, 0xbf, 0xcd, 0x90, 0xc1, 0x2f, 0xc0, 0xce,
+	0x0b, 0xd8, 0x1c, 0x76, 0x3a, 0xba, 0x69, 0xf2, 0x9c, 0x28, 0x2e, 0x96, 0xf2, 0x2b, 0x6c, 0x86,
+	0xef, 0xa8, 0x65, 0x9c, 0x0c, 0x91, 0xce, 0xe7, 0x33, 0x7d, 0x29, 0x9b, 0xe1, 0xd3, 0xcf, 0xfa,
+	0x06, 0xd2, 0x35, 0xbe, 0x90, 0xe9, 0x4b, 0x59, 0xb1, 0xf8, 0xe3, 0xaf, 0x52, 0xee, 0xe0, 0x37,
+	0x0e, 0xf0, 0x2f, 0x53, 0x04, 0x15, 0x00, 0xfb, 0xc8, 0xe8, 0xe8, 0x16, 0xd2, 0xbf, 0x1f, 0xea,
+	0xe6, 0xc0, 0x42, 0xad, 0x81, 0xce, 0xe7, 0xc4, 0x9d, 0xc5, 0x52, 0xce, 0x60, 0x60, 0x13, 0xbc,
+	0xdb, 0x44, 0xbf, 0xd3, 0x35, 0xa3, 0xd5, 0xe5, 0x39, 0x51, 0x58, 0x2c, 0xe5, 0x4c, 0x0e, 0x7e,
+	0x09, 0x76, 0x37, 0x71, 0x4d, 0x3f, 0x35, 0x5a, 0x03, 0xa3, 0xd7, 0xe5, 0xf3, 0xe2, 0xde, 0x62,
+	0x29, 0xbf, 0x46, 0x27, 0x83, 0xb7, 0x8f, 0xef, 0x57, 0x12, 0xf7, 0xb0, 0x92, 0xb8, 0x3f, 0x56,
+	0x12, 0xf7, 0xd3, 0x93, 0x94, 0x7b, 0x78, 0x92, 0x72, 0xbf, 0x3f, 0x49, 0xb9, 0x73, 0x65, 0xe2,
+	0xd2, 0xcb, 0xf9, 0x48, 0x71, 0x88, 0xaf, 0x92, 0x2b, 0xf2, 0x59, 0x80, 0xe9, 0x0d, 0x09, 0xa7,
+	0xf1, 0xb7, 0x7a, 0xbb, 0xf1, 0xe4, 0xd2, 0xbb, 0x19, 0x8e, 0x46, 0x5b, 0xec, 0x95, 0xfc, 0xfc,
+	0xef, 0x00, 0x00, 0x00, 0xff, 0xff, 0x56, 0x8b, 0xbd, 0xae, 0x92, 0x05, 0x00, 0x00,
 }
 
+func (this *OracleRequestPacketData) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*OracleRequestPacketData)
+	if !ok {
+		that2, ok := that.(OracleRequestPacketData)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.ClientID != that1.ClientID {
+		return false
+	}
+	if !bytes.Equal(this.Calldata, that1.Calldata) {
+		return false
+	}
+	return true
+}
 func (this *OracleResponsePacketData) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -548,41 +542,14 @@ func (this *OracleResponsePacketData) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *IBCChannel) Equal(that interface{}) bool {
+func (this *OracleRequestPacketAcknowledgement) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*IBCChannel)
+	that1, ok := that.(*OracleRequestPacketAcknowledgement)
 	if !ok {
-		that2, ok := that.(IBCChannel)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if this.ChannelId != that1.ChannelId {
-		return false
-	}
-	if this.PortId != that1.PortId {
-		return false
-	}
-	return true
-}
-func (this *RequestPacketAcknowledgement) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*RequestPacketAcknowledgement)
-	if !ok {
-		that2, ok := that.(RequestPacketAcknowledgement)
+		that2, ok := that.(OracleRequestPacketAcknowledgement)
 		if ok {
 			that1 = &that2
 		} else {
@@ -599,6 +566,43 @@ func (this *RequestPacketAcknowledgement) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (m *OracleRequestPacketData) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *OracleRequestPacketData) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *OracleRequestPacketData) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Calldata) > 0 {
+		i -= len(m.Calldata)
+		copy(dAtA[i:], m.Calldata)
+		i = encodeVarintPacket(dAtA, i, uint64(len(m.Calldata)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.ClientID) > 0 {
+		i -= len(m.ClientID)
+		copy(dAtA[i:], m.ClientID)
+		i = encodeVarintPacket(dAtA, i, uint64(len(m.ClientID)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func (m *OracleResponsePacketData) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -656,7 +660,7 @@ func (m *OracleResponsePacketData) MarshalToSizedBuffer(dAtA []byte) (int, error
 	return len(dAtA) - i, nil
 }
 
-func (m *Request) Marshal() (dAtA []byte, err error) {
+func (m *RequestPrice) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -666,56 +670,34 @@ func (m *Request) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *Request) MarshalTo(dAtA []byte) (int, error) {
+func (m *RequestPrice) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *Request) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *RequestPrice) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if m.IBCChannel != nil {
-		{
-			size, err := m.IBCChannel.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintPacket(dAtA, i, uint64(size))
+	if m.Request != 0 {
+		i = encodeVarintPacket(dAtA, i, uint64(m.Request))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Denoms) > 0 {
+		for iNdEx := len(m.Denoms) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.Denoms[iNdEx])
+			copy(dAtA[i:], m.Denoms[iNdEx])
+			i = encodeVarintPacket(dAtA, i, uint64(len(m.Denoms[iNdEx])))
+			i--
+			dAtA[i] = 0xa
 		}
-		i--
-		dAtA[i] = 0x2a
-	}
-	if m.RequestTime != 0 {
-		i = encodeVarintPacket(dAtA, i, uint64(m.RequestTime))
-		i--
-		dAtA[i] = 0x20
-	}
-	if m.RequestHeight != 0 {
-		i = encodeVarintPacket(dAtA, i, uint64(m.RequestHeight))
-		i--
-		dAtA[i] = 0x18
-	}
-	if len(m.ClientID) > 0 {
-		i -= len(m.ClientID)
-		copy(dAtA[i:], m.ClientID)
-		i = encodeVarintPacket(dAtA, i, uint64(len(m.ClientID)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.RequestCallData) > 0 {
-		i -= len(m.RequestCallData)
-		copy(dAtA[i:], m.RequestCallData)
-		i = encodeVarintPacket(dAtA, i, uint64(len(m.RequestCallData)))
-		i--
-		dAtA[i] = 0xa
 	}
 	return len(dAtA) - i, nil
 }
 
-func (m *Result) Marshal() (dAtA []byte, err error) {
+func (m *OracleRequestResult) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -725,162 +707,112 @@ func (m *Result) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *Result) MarshalTo(dAtA []byte) (int, error) {
+func (m *OracleRequestResult) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *Result) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *OracleRequestResult) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if len(m.Result) > 0 {
-		i -= len(m.Result)
-		copy(dAtA[i:], m.Result)
-		i = encodeVarintPacket(dAtA, i, uint64(len(m.Result)))
-		i--
-		dAtA[i] = 0x3a
+	if len(m.PriceData) > 0 {
+		for iNdEx := len(m.PriceData) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.PriceData[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintPacket(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
 	}
-	if m.Status != 0 {
-		i = encodeVarintPacket(dAtA, i, uint64(m.Status))
-		i--
-		dAtA[i] = 0x30
+	return len(dAtA) - i, nil
+}
+
+func (m *OracleData) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
 	}
-	if m.RequestTime != 0 {
-		i = encodeVarintPacket(dAtA, i, uint64(m.RequestTime))
-		i--
-		dAtA[i] = 0x28
-	}
-	if m.RequestHeight != 0 {
-		i = encodeVarintPacket(dAtA, i, uint64(m.RequestHeight))
-		i--
-		dAtA[i] = 0x20
-	}
-	if len(m.ClientID) > 0 {
-		i -= len(m.ClientID)
-		copy(dAtA[i:], m.ClientID)
-		i = encodeVarintPacket(dAtA, i, uint64(len(m.ClientID)))
+	return dAtA[:n], nil
+}
+
+func (m *OracleData) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *OracleData) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.BlockNum) > 0 {
+		dAtA2 := make([]byte, len(m.BlockNum)*10)
+		var j1 int
+		for _, num := range m.BlockNum {
+			for num >= 1<<7 {
+				dAtA2[j1] = uint8(uint64(num)&0x7f | 0x80)
+				num >>= 7
+				j1++
+			}
+			dAtA2[j1] = uint8(num)
+			j1++
+		}
+		i -= j1
+		copy(dAtA[i:], dAtA2[:j1])
+		i = encodeVarintPacket(dAtA, i, uint64(j1))
 		i--
 		dAtA[i] = 0x1a
 	}
-	if len(m.RequestCallData) > 0 {
-		i -= len(m.RequestCallData)
-		copy(dAtA[i:], m.RequestCallData)
-		i = encodeVarintPacket(dAtA, i, uint64(len(m.RequestCallData)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if m.RequestID != 0 {
-		i = encodeVarintPacket(dAtA, i, uint64(m.RequestID))
-		i--
-		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *IBCChannel) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *IBCChannel) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *IBCChannel) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.PortId) > 0 {
-		i -= len(m.PortId)
-		copy(dAtA[i:], m.PortId)
-		i = encodeVarintPacket(dAtA, i, uint64(len(m.PortId)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.ChannelId) > 0 {
-		i -= len(m.ChannelId)
-		copy(dAtA[i:], m.ChannelId)
-		i = encodeVarintPacket(dAtA, i, uint64(len(m.ChannelId)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *RequestPacketAcknowledgement) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *RequestPacketAcknowledgement) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *RequestPacketAcknowledgement) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.RequestID != 0 {
-		i = encodeVarintPacket(dAtA, i, uint64(m.RequestID))
-		i--
-		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *PendingRequestList) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *PendingRequestList) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *PendingRequestList) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.RequestIds) > 0 {
-		dAtA3 := make([]byte, len(m.RequestIds)*10)
-		var j2 int
-		for _, num := range m.RequestIds {
-			for num >= 1<<7 {
-				dAtA3[j2] = uint8(uint64(num)&0x7f | 0x80)
-				num >>= 7
-				j2++
+	if len(m.ExchangeRate) > 0 {
+		for iNdEx := len(m.ExchangeRate) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.ExchangeRate[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintPacket(dAtA, i, uint64(size))
 			}
-			dAtA3[j2] = uint8(num)
-			j2++
+			i--
+			dAtA[i] = 0x12
 		}
-		i -= j2
-		copy(dAtA[i:], dAtA3[:j2])
-		i = encodeVarintPacket(dAtA, i, uint64(j2))
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *OracleRequestPacketAcknowledgement) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *OracleRequestPacketAcknowledgement) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *OracleRequestPacketAcknowledgement) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.RequestID != 0 {
+		i = encodeVarintPacket(dAtA, i, uint64(m.RequestID))
 		i--
-		dAtA[i] = 0xa
+		dAtA[i] = 0x8
 	}
 	return len(dAtA) - i, nil
 }
@@ -896,6 +828,23 @@ func encodeVarintPacket(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
+func (m *OracleRequestPacketData) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.ClientID)
+	if l > 0 {
+		n += 1 + l + sovPacket(uint64(l))
+	}
+	l = len(m.Calldata)
+	if l > 0 {
+		n += 1 + l + sovPacket(uint64(l))
+	}
+	return n
+}
+
 func (m *OracleResponsePacketData) Size() (n int) {
 	if m == nil {
 		return 0
@@ -925,107 +874,69 @@ func (m *OracleResponsePacketData) Size() (n int) {
 	return n
 }
 
-func (m *Request) Size() (n int) {
+func (m *RequestPrice) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	l = len(m.RequestCallData)
-	if l > 0 {
-		n += 1 + l + sovPacket(uint64(l))
+	if len(m.Denoms) > 0 {
+		for _, s := range m.Denoms {
+			l = len(s)
+			n += 1 + l + sovPacket(uint64(l))
+		}
 	}
-	l = len(m.ClientID)
-	if l > 0 {
-		n += 1 + l + sovPacket(uint64(l))
-	}
-	if m.RequestHeight != 0 {
-		n += 1 + sovPacket(uint64(m.RequestHeight))
-	}
-	if m.RequestTime != 0 {
-		n += 1 + sovPacket(uint64(m.RequestTime))
-	}
-	if m.IBCChannel != nil {
-		l = m.IBCChannel.Size()
-		n += 1 + l + sovPacket(uint64(l))
+	if m.Request != 0 {
+		n += 1 + sovPacket(uint64(m.Request))
 	}
 	return n
 }
 
-func (m *Result) Size() (n int) {
+func (m *OracleRequestResult) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	if m.RequestID != 0 {
-		n += 1 + sovPacket(uint64(m.RequestID))
-	}
-	l = len(m.RequestCallData)
-	if l > 0 {
-		n += 1 + l + sovPacket(uint64(l))
-	}
-	l = len(m.ClientID)
-	if l > 0 {
-		n += 1 + l + sovPacket(uint64(l))
-	}
-	if m.RequestHeight != 0 {
-		n += 1 + sovPacket(uint64(m.RequestHeight))
-	}
-	if m.RequestTime != 0 {
-		n += 1 + sovPacket(uint64(m.RequestTime))
-	}
-	if m.Status != 0 {
-		n += 1 + sovPacket(uint64(m.Status))
-	}
-	l = len(m.Result)
-	if l > 0 {
-		n += 1 + l + sovPacket(uint64(l))
+	if len(m.PriceData) > 0 {
+		for _, e := range m.PriceData {
+			l = e.Size()
+			n += 1 + l + sovPacket(uint64(l))
+		}
 	}
 	return n
 }
 
-func (m *IBCChannel) Size() (n int) {
+func (m *OracleData) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	l = len(m.ChannelId)
-	if l > 0 {
-		n += 1 + l + sovPacket(uint64(l))
+	if len(m.ExchangeRate) > 0 {
+		for _, e := range m.ExchangeRate {
+			l = e.Size()
+			n += 1 + l + sovPacket(uint64(l))
+		}
 	}
-	l = len(m.PortId)
-	if l > 0 {
-		n += 1 + l + sovPacket(uint64(l))
-	}
-	return n
-}
-
-func (m *RequestPacketAcknowledgement) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.RequestID != 0 {
-		n += 1 + sovPacket(uint64(m.RequestID))
-	}
-	return n
-}
-
-func (m *PendingRequestList) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if len(m.RequestIds) > 0 {
+	if len(m.BlockNum) > 0 {
 		l = 0
-		for _, e := range m.RequestIds {
+		for _, e := range m.BlockNum {
 			l += sovPacket(uint64(e))
 		}
 		n += 1 + sovPacket(uint64(l)) + l
+	}
+	return n
+}
+
+func (m *OracleRequestPacketAcknowledgement) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.RequestID != 0 {
+		n += 1 + sovPacket(uint64(m.RequestID))
 	}
 	return n
 }
@@ -1035,6 +946,122 @@ func sovPacket(x uint64) (n int) {
 }
 func sozPacket(x uint64) (n int) {
 	return sovPacket(uint64((x << 1) ^ uint64((int64(x) >> 63))))
+}
+func (m *OracleRequestPacketData) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPacket
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: OracleRequestPacketData: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: OracleRequestPacketData: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ClientID", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPacket
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPacket
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPacket
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ClientID = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Calldata", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPacket
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthPacket
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPacket
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Calldata = append(m.Calldata[:0], dAtA[iNdEx:postIndex]...)
+			if m.Calldata == nil {
+				m.Calldata = []byte{}
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPacket(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPacket
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
 }
 func (m *OracleResponsePacketData) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
@@ -1228,7 +1255,7 @@ func (m *OracleResponsePacketData) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *Request) Unmarshal(dAtA []byte) error {
+func (m *RequestPrice) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1251,49 +1278,15 @@ func (m *Request) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: Request: wiretype end group for non-group")
+			return fmt.Errorf("proto: RequestPrice: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: Request: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: RequestPrice: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field RequestCallData", wireType)
-			}
-			var byteLen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowPacket
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				byteLen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if byteLen < 0 {
-				return ErrInvalidLengthPacket
-			}
-			postIndex := iNdEx + byteLen
-			if postIndex < 0 {
-				return ErrInvalidLengthPacket
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.RequestCallData = append(m.RequestCallData[:0], dAtA[iNdEx:postIndex]...)
-			if m.RequestCallData == nil {
-				m.RequestCallData = []byte{}
-			}
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ClientID", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Denoms", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -1321,13 +1314,13 @@ func (m *Request) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.ClientID = string(dAtA[iNdEx:postIndex])
+			m.Denoms = append(m.Denoms, string(dAtA[iNdEx:postIndex]))
 			iNdEx = postIndex
-		case 3:
+		case 2:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field RequestHeight", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Request", wireType)
 			}
-			m.RequestHeight = 0
+			m.Request = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowPacket
@@ -1337,33 +1330,64 @@ func (m *Request) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.RequestHeight |= int64(b&0x7F) << shift
+				m.Request |= PriceRequestType(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-		case 4:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field RequestTime", wireType)
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPacket(dAtA[iNdEx:])
+			if err != nil {
+				return err
 			}
-			m.RequestTime = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowPacket
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.RequestTime |= int64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPacket
 			}
-		case 5:
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *OracleRequestResult) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPacket
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: OracleRequestResult: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: OracleRequestResult: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field IBCChannel", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field PriceData", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -1390,10 +1414,8 @@ func (m *Request) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.IBCChannel == nil {
-				m.IBCChannel = &IBCChannel{}
-			}
-			if err := m.IBCChannel.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			m.PriceData = append(m.PriceData, OracleData{})
+			if err := m.PriceData[len(m.PriceData)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -1418,7 +1440,7 @@ func (m *Request) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *Result) Unmarshal(dAtA []byte) error {
+func (m *OracleData) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1441,36 +1463,17 @@ func (m *Result) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: Result: wiretype end group for non-group")
+			return fmt.Errorf("proto: OracleData: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: Result: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: OracleData: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
-		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field RequestID", wireType)
-			}
-			m.RequestID = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowPacket
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.RequestID |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field RequestCallData", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field ExchangeRate", wireType)
 			}
-			var byteLen int
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowPacket
@@ -1480,383 +1483,27 @@ func (m *Result) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				byteLen |= int(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if byteLen < 0 {
+			if msglen < 0 {
 				return ErrInvalidLengthPacket
 			}
-			postIndex := iNdEx + byteLen
+			postIndex := iNdEx + msglen
 			if postIndex < 0 {
 				return ErrInvalidLengthPacket
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.RequestCallData = append(m.RequestCallData[:0], dAtA[iNdEx:postIndex]...)
-			if m.RequestCallData == nil {
-				m.RequestCallData = []byte{}
+			m.ExchangeRate = append(m.ExchangeRate, types.DecCoin{})
+			if err := m.ExchangeRate[len(m.ExchangeRate)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
 			}
 			iNdEx = postIndex
 		case 3:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ClientID", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowPacket
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthPacket
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthPacket
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.ClientID = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 4:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field RequestHeight", wireType)
-			}
-			m.RequestHeight = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowPacket
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.RequestHeight |= int64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 5:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field RequestTime", wireType)
-			}
-			m.RequestTime = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowPacket
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.RequestTime |= int64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 6:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Status", wireType)
-			}
-			m.Status = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowPacket
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Status |= ResolveStatus(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 7:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Result", wireType)
-			}
-			var byteLen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowPacket
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				byteLen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if byteLen < 0 {
-				return ErrInvalidLengthPacket
-			}
-			postIndex := iNdEx + byteLen
-			if postIndex < 0 {
-				return ErrInvalidLengthPacket
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Result = append(m.Result[:0], dAtA[iNdEx:postIndex]...)
-			if m.Result == nil {
-				m.Result = []byte{}
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipPacket(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthPacket
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *IBCChannel) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowPacket
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: IBCChannel: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: IBCChannel: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ChannelId", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowPacket
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthPacket
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthPacket
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.ChannelId = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field PortId", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowPacket
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthPacket
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthPacket
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.PortId = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipPacket(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthPacket
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *RequestPacketAcknowledgement) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowPacket
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: RequestPacketAcknowledgement: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: RequestPacketAcknowledgement: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field RequestID", wireType)
-			}
-			m.RequestID = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowPacket
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.RequestID |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		default:
-			iNdEx = preIndex
-			skippy, err := skipPacket(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthPacket
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *PendingRequestList) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowPacket
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: PendingRequestList: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: PendingRequestList: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
 			if wireType == 0 {
 				var v uint64
 				for shift := uint(0); ; shift += 7 {
@@ -1873,7 +1520,7 @@ func (m *PendingRequestList) Unmarshal(dAtA []byte) error {
 						break
 					}
 				}
-				m.RequestIds = append(m.RequestIds, v)
+				m.BlockNum = append(m.BlockNum, v)
 			} else if wireType == 2 {
 				var packedLen int
 				for shift := uint(0); ; shift += 7 {
@@ -1908,8 +1555,8 @@ func (m *PendingRequestList) Unmarshal(dAtA []byte) error {
 					}
 				}
 				elementCount = count
-				if elementCount != 0 && len(m.RequestIds) == 0 {
-					m.RequestIds = make([]uint64, 0, elementCount)
+				if elementCount != 0 && len(m.BlockNum) == 0 {
+					m.BlockNum = make([]uint64, 0, elementCount)
 				}
 				for iNdEx < postIndex {
 					var v uint64
@@ -1927,10 +1574,79 @@ func (m *PendingRequestList) Unmarshal(dAtA []byte) error {
 							break
 						}
 					}
-					m.RequestIds = append(m.RequestIds, v)
+					m.BlockNum = append(m.BlockNum, v)
 				}
 			} else {
-				return fmt.Errorf("proto: wrong wireType = %d for field RequestIds", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field BlockNum", wireType)
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPacket(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPacket
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *OracleRequestPacketAcknowledgement) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPacket
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: OracleRequestPacketAcknowledgement: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: OracleRequestPacketAcknowledgement: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RequestID", wireType)
+			}
+			m.RequestID = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPacket
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.RequestID |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
 			}
 		default:
 			iNdEx = preIndex

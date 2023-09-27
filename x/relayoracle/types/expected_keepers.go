@@ -9,9 +9,10 @@ import (
 
 type OracleKeeper interface {
 	GetExchangeRate(ctx sdk.Context, denom string) (sdk.Dec, error)
-	HistoricMedianDeviation(ctx sdk.Context, denom string) (*oracleTypes.PriceStamp, error)
-	HistoricMedians(ctx sdk.Context, denom string, numStamps uint64) oracleTypes.PriceStamps
-	HasActiveExchangeRate(ctx sdk.Context, denom string) bool
+	IterateExchangeRatesWithDenoms(ctx sdk.Context, denoms []string, blocknum uint64) (oracleTypes.PriceStamps, error)
+	IterateHistoricPricesForDenoms(ctx sdk.Context, prefix []byte, denoms []string, numStamps uint) oracleTypes.PriceStamps
+	HasActiveExchangeRate(ctx sdk.Context, denom []string) bool
+	MaximumMedianStamps(ctx sdk.Context) (res uint64)
 }
 
 // AccountKeeper defines the expected account keeper used for simulations (noalias)

@@ -17,7 +17,7 @@ CWD="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 NODE_BIN="${1:-$CWD/../build/ojod}"
 
 # These options can be overridden by env
-CHAIN_ID="${CHAIN_ID:-ojotest-1}"
+CHAIN_ID="${CHAIN_ID:-ojo-testnet}"
 CHAIN_DIR="${CHAIN_DIR:-$CWD/node-data}"
 DENOM="${DENOM:-uojo}"
 STAKE_DENOM="${STAKE_DENOM:-$DENOM}"
@@ -88,11 +88,11 @@ if [[ ! -d "$hdir" ]]; then
 
   # Build genesis file and create accounts
   if [[ "$STAKE_DENOM" != "$DENOM" ]]; then
-    coins="1000000$SCALE_FACTOR$STAKE_DENOM,1000000$SCALE_FACTOR$DENOM"
+    coins="1000000000000000000$SCALE_FACTOR$STAKE_DENOM,1000000000000000000$SCALE_FACTOR$DENOM"
   else
-    coins="1000000$SCALE_FACTOR$DENOM"
+    coins="1000000000000000000$SCALE_FACTOR$DENOM"
   fi
-  coins_user="1000000$SCALE_FACTOR$DENOM"
+  coins_user="1000000000000000000$SCALE_FACTOR$DENOM"
 
   echo "--- Initializing home..."
 
@@ -177,7 +177,7 @@ echo
 echo "Command Line Access:"
 echo "  * $NODE_BIN --home $hdir status"
 
-$NODE_BIN $home0 start --api.enable true --grpc.address="0.0.0.0:9090" --grpc-web.enable=false --log_level trace > $log_path 2>&1 &
+$NODE_BIN $home0 start --api.enable true  --rpc.laddr "tcp://127.0.0.1:26657"  --grpc.address="0.0.0.0:9090" --grpc-web.enable=false --log_level trace > $log_path 2>&1 &
 
 # Adds 1 sec to create the log and makes it easier to debug it on CI
 sleep 1

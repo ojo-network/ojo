@@ -363,3 +363,29 @@ func (k Keeper) PruneMedianDeviationsBeforeBlock(ctx sdk.Context, blockNum uint6
 		return false
 	})
 }
+
+func (k Keeper) IterateHistoricPricesForDenoms(
+	ctx sdk.Context,
+	prefix []byte,
+	denoms []string,
+	numStamps uint,
+) types.PriceStamps {
+	store := ctx.KVStore(k.storeKey)
+	prices := types.PriceStamps{}
+	// make sure we have one zero byte to correctly separate denoms
+	for _, denom := range denoms {
+		prefix := util.ConcatBytes(1, prefix, []byte(denom))
+		iter := sdk.KVStoreReversePrefixIteratorPaginated(store, prefix, 1, numStamps)
+		defer iter.Close()
+
+		for ; iter.Valid(); iter.Next() {
+			denom, block := types.ParseDenomAndBlockFromKey(iter.Key(), types.KeyPrefixMedian)
+			decProto := sdk.DecProto{}
+			k.cdc.MustUnmarshal(iter.Value(), &decProto)
+			price := types.NewPriceStamp(decProto.Dec, denom, block)
+			prices = append(prices, *price)
+		}
+	}
+
+	return prices
+}

@@ -3,11 +3,10 @@ package keeper
 import (
 	"fmt"
 
+	sdkerrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	clienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
 	host "github.com/cosmos/ibc-go/v7/modules/core/24-host"
-
-	sdkerrors "cosmossdk.io/errors"
 
 	"github.com/ojo-network/ojo/x/relayoracle/types"
 )
@@ -36,7 +35,7 @@ func (k Keeper) SetRequestCount(ctx sdk.Context, count uint64) {
 }
 
 func (k Keeper) SetRequest(ctx sdk.Context, id uint64, request types.Request) {
-	ctx.KVStore(k.storeKey).Set(types.ResultStoreKey(id), k.cdc.MustMarshal(&request))
+	ctx.KVStore(k.storeKey).Set(types.RequestStoreKey(id), k.cdc.MustMarshal(&request))
 }
 
 func (k Keeper) GetRequest(ctx sdk.Context, id uint64) (types.Request, error) {
@@ -134,7 +133,7 @@ func (k Keeper) ProcessResult(ctx sdk.Context, requestID uint64, status types.Re
 		Result:          result,
 	})
 
-	expiryTime := k.PacketExpiryBlockCount(ctx)
+	expiry := k.PacketExpiry(ctx)
 	if req.IBCChannel != nil {
 		sourceChannel := req.IBCChannel.ChannelId
 		sourcePort := req.IBCChannel.PortId
@@ -153,13 +152,17 @@ func (k Keeper) ProcessResult(ctx sdk.Context, requestID uint64, status types.Re
 			req.ClientID, requestID, req.RequestTime, ctx.BlockTime().Unix(), status, result,
 		)
 
+		//TODO: change this log
+		ctx.Logger().Info("inside save reequest", "source channle", sourceChannel, "source port", sourcePort, "packet data", packetData.String(),
+			"binary", packetData.ToBytes(), "json", types.ModuleCdc.MustMarshalJSON(packetData))
+
 		if _, err := k.channelKeeper.SendPacket(
 			ctx,
 			channelCap,
 			sourcePort,
 			sourceChannel,
 			clienttypes.NewHeight(0, 0),
-			uint64(ctx.BlockTime().UnixNano())+expiryTime,
+			uint64(ctx.BlockTime().UnixNano()+int64(expiry)),
 			packetData.ToBytes(),
 		); err != nil {
 			err = ctx.EventManager().EmitTypedEvents(&types.EventPackedSendFailed{
@@ -173,56 +176,70 @@ func (k Keeper) ProcessResult(ctx sdk.Context, requestID uint64, status types.Re
 	}
 }
 
-func (k Keeper) ProcessRequestCalldata(ctx sdk.Context, request []byte) (result []byte, status types.ResolveStatus) {
-	var priceRequest types.RequestPrice
-	err := k.cdc.Unmarshal(request, &priceRequest)
+func (k Keeper) ProcessRequestCalldata(ctx sdk.Context, requestEncoded []byte) (resultEncoded []byte, status types.ResolveStatus) {
+	var request types.RequestPrice
+	err := k.cdc.Unmarshal(requestEncoded, &request)
 	if err != nil {
 		return nil, types.RESOLVE_STATUS_FAILURE
 	}
 
-	switch priceRequest.Request {
-	case types.PRICE_REQUEST_RATE:
-		price, err := k.oracleKeeper.GetExchangeRate(ctx, priceRequest.GetDenom())
-		if err != nil {
-			return nil, types.RESOLVE_STATUS_FAILURE
-		}
-
-		result, err = price.Marshal()
-		if err != nil {
-			return nil, types.RESOLVE_STATUS_FAILURE
-		}
-	case types.PRICE_REQUEST_MEDIAN:
-		medians := k.oracleKeeper.HistoricMedians(ctx, priceRequest.GetDenom(), 0)
-		medians.Sort()
-		var priceStamps types.PriceStamp
-		for _, median := range medians {
-			priceStamps.ExchangeRate = append(priceStamps.ExchangeRate, *median.ExchangeRate)
-			priceStamps.BlockNum = append(priceStamps.BlockNum, median.BlockNum)
-		}
-
-		result, err = priceStamps.Marshal()
-		if err != nil {
-			return nil, types.RESOLVE_STATUS_FAILURE
-		}
-
-	case types.PRICE_REQUEST_DEVIATION:
-		var priceStamp types.PriceStamp
-		deviation, err := k.oracleKeeper.HistoricMedianDeviation(ctx, priceRequest.GetDenom())
-		if err != nil {
-			return nil, types.RESOLVE_STATUS_FAILURE
-		}
-
-		priceStamp.ExchangeRate = []sdk.DecCoin{*deviation.ExchangeRate}
-		priceStamp.BlockNum = []uint64{deviation.BlockNum}
-
-		result, err = priceStamp.Marshal()
-		if err != nil {
-			return nil, types.RESOLVE_STATUS_FAILURE
-		}
+	//TODO: Add denoms request limit
+	switch request.Request {
+	//case types.PRICE_REQUEST_RATE:
+	//	prices, err := k.oracleKeeper.IterateExchangeRatesWithDenoms(ctx, request.GetDenoms(), uint64(ctx.BlockHeight()))
+	//	if err != nil {
+	//		return nil, types.RESOLVE_STATUS_FAILURE
+	//	}
+	//
+	//
+	//	result :=types.OracleRequestResult{}
+	//	for _, price := range prices {
+	//		result.ExchangeRate= append(result.ExchangeRate, types.ExchangeRate{
+	//			ExchangeRate: []sdk.DecCoin{*price.ExchangeRate},
+	//			BlockNum:     []uint64{price.BlockNum},
+	//		})
+	//	}
+	//
+	//	resultEncoded,err= result.Marshal()
+	//	if err!=nil{
+	//		return nil, types.RESOLVE_STATUS_FAILURE
+	//	}
+	//
+	//case types.PRICE_REQUEST_MEDIAN:
+	//	numStamps:= k.oracleKeeper.MaximumMedianStamps(ctx)
+	//	medians := k.oracleKeeper.IterateHistoricPricesForDenoms(ctx, oracleTypes.KeyPrefixMedian,request.GetDenoms(), numStamps)
+	//
+	//	result :=types.OracleRequestResult{}
+	//	for _, price := range prices {
+	//		result.ExchangeRate= append(result.ExchangeRate, types.ExchangeRate{
+	//			ExchangeRate: []sdk.DecCoin{*price.ExchangeRate},
+	//			BlockNum:     []uint64{price.BlockNum},
+	//		})
+	//	}
+	//
+	//	result, err = priceStamps.
+	//	if err != nil {
+	//		return nil, types.RESOLVE_STATUS_FAILURE
+	//	}
+	//
+	//case types.PRICE_REQUEST_DEVIATION:
+	//	var priceStamp types.PriceStamp
+	//	deviation, err := k.oracleKeeper.HistoricMedianDeviation(ctx, priceRequest.GetDenom())
+	//	if err != nil {
+	//		return nil, types.RESOLVE_STATUS_FAILURE
+	//	}
+	//
+	//	priceStamp.ExchangeRate = []sdk.DecCoin{*deviation.ExchangeRate}
+	//	priceStamp.BlockNum = []uint64{deviation.BlockNum}
+	//
+	//	result, err = priceStamp.Marshal()
+	//	if err != nil {
+	//		return nil, types.RESOLVE_STATUS_FAILURE
+	//	}
 
 	default:
 		return nil, types.RESOLVE_STATUS_FAILURE
 	}
 
-	return result, types.RESOLVE_STATUS_SUCCESS
+	//return result, types.RESOLVE_STATUS_SUCCESS
 }

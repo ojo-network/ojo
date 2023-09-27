@@ -121,7 +121,7 @@ func (k Keeper) OnRecvPacket(
 	}
 
 	// check if denom exists
-	found := k.oracleKeeper.HasActiveExchangeRate(ctx, request.GetDenom())
+	found := k.oracleKeeper.HasActiveExchangeRate(ctx, request.GetDenoms())
 	if !found {
 		return 0, types.ErrNoActiveExchangeRate
 	}

@@ -358,3 +358,23 @@ func (k Keeper) ValidateFeeder(ctx sdk.Context, feederAddr sdk.AccAddress, valAd
 
 	return nil
 }
+
+func (k Keeper) IterateExchangeRatesWithDenoms(ctx sdk.Context, denoms []string, blocknum uint64) (types.PriceStamps, error) {
+	prices := types.PriceStamps{}
+	store := ctx.KVStore(k.storeKey)
+	for _, symbol := range denoms {
+		symbol = strings.ToUpper(symbol)
+		b := store.Get(types.GetExchangeRateKey(symbol))
+		if b == nil {
+			return nil, types.ErrUnknownDenom.Wrap(symbol)
+		}
+
+		decProto := sdk.DecProto{}
+		k.cdc.MustUnmarshal(b, &decProto)
+
+		price := types.NewPriceStamp(decProto.Dec, symbol, blocknum)
+		prices = append(prices, *price)
+	}
+
+	return prices, nil
+}

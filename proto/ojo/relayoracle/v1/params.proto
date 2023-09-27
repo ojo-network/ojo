@@ -11,5 +11,5 @@ message Params {
   option (gogoproto.equal)            = true;
 
   bool IbcRequestEnabled =1;
-  uint64 PacketExpiryBlockCount = 2;
+  uint64 PacketTimeout = 2;
 }

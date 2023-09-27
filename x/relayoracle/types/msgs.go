@@ -57,8 +57,8 @@ func (msg MsgGovUpdateParams) ValidateBasic() error {
 		case string(KeyIbcRequestEnabled):
 			return validateBool(msg.Changes.IbcRequestEnabled)
 
-		case string(KeyPacketExpiryBlockCount):
-			return validateUint64(msg.Changes.PacketExpiryBlockCount)
+		case string(KeyPacketExpiry):
+			return validateUint64(msg.Changes.PacketTimeout)
 
 		default:
 			return fmt.Errorf("%s is not a relay oracle param key", key)

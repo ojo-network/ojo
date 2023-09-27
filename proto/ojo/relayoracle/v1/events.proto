@@ -12,12 +12,10 @@ message EventNewRequest{
   uint64 request_height = 3;
 }
 
-
 message EventRequestResolve{
     uint64  request_id = 1;
     ResolveStatus status = 2;
 }
-
 
 message EventPackedSendFailed{
   string error = 1;

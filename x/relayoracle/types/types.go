@@ -23,8 +23,8 @@ func NewRequest(calldata []byte, clientID string, channel *IBCChannel) Request {
 	}
 }
 
-func NewRequestOracleAcknowledgement(id uint64) *RequestPacketAcknowledgement {
-	return &RequestPacketAcknowledgement{
+func NewRequestOracleAcknowledgement(id uint64) *OracleRequestPacketAcknowledgement {
+	return &OracleRequestPacketAcknowledgement{
 		RequestID: id,
 	}
 }
@@ -48,5 +48,5 @@ func NewOracleResponsePacketData(
 }
 
 func (o *OracleResponsePacketData) ToBytes() []byte {
-	return sdk.MustSortJSON(ModuleCdc.MustMarshal(o))
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(o))
 }

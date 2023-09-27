@@ -3,29 +3,34 @@ package ojo.relayoracle.v1;
 
 import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
+import "ojo/relayoracle/v1/packet.proto";
 
 option go_package = "github.com/ojo-network/ojo/x/relayoracle/types";
 
-message OracleRequestPacketData {
-  option (gogoproto.equal) = true;
-  string client_id = 1 [(gogoproto.customname) = "ClientID"];
-  string request_id = 2 [(gogoproto.customname) = "RequestID"];
-  bytes calldata = 3;
+message Request{
+    bytes request_calldata = 1 [(gogoproto.customname) = "RequestCallData"];
+    string client_id = 2 [(gogoproto.customname) = "ClientID"];
+    int64 request_height = 3;
+    int64 request_time = 4;
+    IBCChannel ibc_channel = 5 [(gogoproto.customname) = "IBCChannel"];
 }
 
-message RequestPrice{
-  string denom = 1;
-  PriceRequestType request= 2;
+message Result{
+    uint64 request_id = 1 [(gogoproto.customname) = "RequestID"];
+    bytes request_calldata = 2 [(gogoproto.customname) = "RequestCallData"];
+    string client_id = 3 [(gogoproto.customname) = "ClientID"];
+    int64 request_height = 4;
+    int64 request_time = 5;
+    ResolveStatus status =6 ;
+    bytes result = 7;
 }
 
-enum PriceRequestType{
-  option (gogoproto.goproto_enum_prefix) = false;
-  PRICE_REQUEST_RATE = 0 [(gogoproto.enumvalue_customname) = "PRICE_REQUEST_RATE"];
-  PRICE_REQUEST_MEDIAN = 1 [(gogoproto.enumvalue_customname) = "PRICE_REQUEST_MEDIAN"];
-  PRICE_REQUEST_DEVIATION = 2 [(gogoproto.enumvalue_customname) = "PRICE_REQUEST_DEVIATION"];
+message IBCChannel {
+    option (gogoproto.equal) = true;
+    string channel_id = 1;
+    string port_id = 2;
 }
 
-message PriceStamp {
-  repeated cosmos.base.v1beta1.DecCoin exchange_rate = 1 [(gogoproto.nullable) = false];
-  repeated uint64 block_num = 2;
+message PendingRequestList{
+    repeated uint64 request_ids = 1;
 }

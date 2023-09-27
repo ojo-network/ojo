@@ -5,27 +5,32 @@ build:
   proto:
     path: proto
     third_party_paths:
-    - third_party/proto
-    - proto_vendor
+      - third_party/proto
+      - proto_vendor
 accounts:
-- name: alice
-  coins:
-  - 39000000000000uojo
-  mnemonic: entry garbage bike poem grunt negative easily annual miss happy license
-    blur false fringe program picture inner tape dismiss eagle include quality drill
-    master
-- name: bob
-  coins:
-  - 5500000000000uojo
-- name: faucet
-  coins:
-  - 5500000000000uojo
+  - name: alice
+    coins:
+      - 39000000000000uojo
+    mnemonic: entry garbage bike poem grunt negative easily annual miss happy license
+      blur false fringe program picture inner tape dismiss eagle include quality drill
+      master
+  - name: bob
+    coins:
+      - 5500000000000uojo
+  - name: relayer
+    coins:
+      - 39000000000000uojo
+    mnemonic: pony glide frown crisp unfold lawn cup loan trial govern usual matrix theory
+      wash fresh address pioneer between meadow visa buffalo keep gallery swear
+  - name: faucet
+    coins:
+      - 5500000000000uojo
 faucet:
   name: faucet
   coins:
-  - 5500000000000uojo
+    - 5500000000000uojo
   coins_max:
-  - 1000000000uojo
+    - 1000000000uojo
   host: 0.0.0.0:4500
   port: 4500
 genesis:
@@ -35,5 +40,10 @@ genesis:
         bond_denom: uojo
   chain_id: ojo-testnet
 validators:
-- name: alice
-  bonded: 33500000000000uojo
+  - name: alice
+    bonded: 33500000000000uojo
+    app:
+      grpc:
+        address: :9093
+      grpc-web:
+        address: :9094
