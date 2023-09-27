@@ -6,15 +6,14 @@ import (
 	"github.com/ojo-network/ojo/x/relayoracle/keeper"
 )
 
-// TODO: this might not be necessary, could return the data immediately?
-// bcz, the new rates for oracle updated at their end block
-// // handleEndBlock cleans up the state during end block. See comment in the implementation!
+// Process all requests in the endblocker, after oracle module end blocker
+// EndBlocker resolves all the pending requests
 func EndBlocker(ctx sdk.Context, k keeper.Keeper) {
-	// Loops through all requests in the resolvable list to resolve all of them!
+	// Resolve all the pending requests
 	for _, reqID := range k.GetPendingRequestList(ctx) {
 		k.ResolveRequest(ctx, reqID)
 	}
 
-	// Once all the requests are resolved, we can clear the list.
+	// Clear all pending requests
 	k.FlushPendingRequestList(ctx)
 }
