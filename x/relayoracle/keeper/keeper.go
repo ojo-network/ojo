@@ -120,7 +120,7 @@ func (k Keeper) OnRecvPacket(
 		return 0, err
 	}
 
-	if len(request.GetDenoms()) <= 0 {
+	if len(request.GetDenoms()) == 0 {
 		return 0, types.ErrNoDenoms
 	}
 

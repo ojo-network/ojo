@@ -153,8 +153,9 @@ func (k Keeper) ProcessResult(ctx sdk.Context, requestID uint64, status types.Re
 			req.ClientID, requestID, req.RequestTime, ctx.BlockTime().Unix(), status, result,
 		)
 
-		//TODO: change this log
-		ctx.Logger().Info("inside save reequest", "source channle", sourceChannel, "source port", sourcePort, "packet data", packetData.String(),
+		//TODO: remove log
+		ctx.Logger().Info("inside save request", "source channel", sourceChannel,
+			"source port", sourcePort, "packet data", packetData.String(),
 			"binary", packetData.ToBytes(), "json", types.ModuleCdc.MustMarshalJSON(packetData))
 
 		if _, err := k.channelKeeper.SendPacket(
@@ -177,7 +178,10 @@ func (k Keeper) ProcessResult(ctx sdk.Context, requestID uint64, status types.Re
 	}
 }
 
-func (k Keeper) ProcessRequestCalldata(ctx sdk.Context, requestEncoded []byte) (resultEncoded []byte, status types.ResolveStatus) {
+func (k Keeper) ProcessRequestCalldata(
+	ctx sdk.Context,
+	requestEncoded []byte,
+) (resultEncoded []byte, status types.ResolveStatus) {
 	var request types.RequestPrice
 	err := k.cdc.Unmarshal(requestEncoded, &request)
 	if err != nil {

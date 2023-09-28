@@ -99,12 +99,15 @@ func (p PriceStamps) MapDenoms() map[string]AggegatedPriceStamp {
 	aggregator := make(map[string]AggegatedPriceStamp)
 	for _, priceStamp := range p {
 		denom := priceStamp.ExchangeRate.Denom
-		if _, found := aggregator[denom]; !found {
-			aggregator[denom] = AggegatedPriceStamp{}
+		aggPriceStamp, found := aggregator[denom]
+		if !found {
+			aggPriceStamp = AggegatedPriceStamp{}
 		}
-		prices := aggregator[denom]
-		prices.Rates = append(aggregator[denom].Rates, *priceStamp.ExchangeRate)
-		prices.BlockNums = append(aggregator[denom].BlockNums, priceStamp.BlockNum)
+
+		aggPriceStamp.Rates = append(aggPriceStamp.Rates, *priceStamp.ExchangeRate)
+		aggPriceStamp.BlockNums = append(aggPriceStamp.BlockNums, priceStamp.BlockNum)
+
+		aggregator[denom] = aggPriceStamp
 	}
 
 	return aggregator
