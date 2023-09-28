@@ -373,7 +373,7 @@ func (k Keeper) ValidateFeeder(ctx sdk.Context, feederAddr sdk.AccAddress, valAd
 	return nil
 }
 
-func (k Keeper) IterateExchangeRatesWithDenoms(ctx sdk.Context, denoms []string) (types.PriceStamps, error) {
+func (k Keeper) IterateExchangeRatesForDenoms(ctx sdk.Context, denoms []string) (types.PriceStamps, error) {
 	prices := types.PriceStamps{}
 	store := ctx.KVStore(k.storeKey)
 	for _, symbol := range denoms {

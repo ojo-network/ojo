@@ -13,11 +13,14 @@ var _ paramtypes.ParamSet = (*Params)(nil)
 const (
 	DefaultIbcRequestEnabled = true
 	DefaultPacketTimeout     = uint64(10 * time.Minute)
+	DefaultMaxAllowedDenoms  = uint64(10)
 )
 
 var (
 	KeyIbcRequestEnabled = []byte("IbcRequestEnabled")
 	KeyPacketTimeout     = []byte("PacketTimeout")
+	KeyMaxHistorical     = []byte("MaxAllowedDenomsHistoricalQuery")
+	KeyMaxExchange       = []byte("MaxAllowedDenomsExchangeQuery")
 )
 
 // ParamKeyTable the param key table for launch module
@@ -28,8 +31,10 @@ func ParamKeyTable() paramtypes.KeyTable {
 // NewParams creates a new Params instance
 func NewParams() Params {
 	return Params{
-		IbcRequestEnabled: DefaultIbcRequestEnabled,
-		PacketTimeout:     DefaultPacketTimeout,
+		IbcRequestEnabled:               DefaultIbcRequestEnabled,
+		PacketTimeout:                   DefaultPacketTimeout,
+		MaxAllowedDenomsExchangeQuery:   DefaultMaxAllowedDenoms,
+		MaxAllowedDenomsHistoricalQuery: DefaultMaxAllowedDenoms,
 	}
 }
 
@@ -43,6 +48,8 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 	return paramtypes.ParamSetPairs{
 		paramtypes.NewParamSetPair(KeyIbcRequestEnabled, &p.IbcRequestEnabled, validateBool),
 		paramtypes.NewParamSetPair(KeyPacketTimeout, &p.PacketTimeout, validateUint64),
+		paramtypes.NewParamSetPair(KeyMaxHistorical, &p.MaxAllowedDenomsHistoricalQuery, validateUint64),
+		paramtypes.NewParamSetPair(KeyMaxExchange, &p.MaxAllowedDenomsExchangeQuery, validateUint64),
 	}
 }
 

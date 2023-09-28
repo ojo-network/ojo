@@ -8,6 +8,11 @@ import (
 
 type PriceStamps []PriceStamp
 
+type AggegatedPriceStamp struct {
+	Rates     []sdk.DecCoin
+	BlockNums []uint64
+}
+
 func NewPriceStamp(exchangeRate sdk.Dec, denom string, blockNum uint64) *PriceStamp {
 	return &PriceStamp{
 		ExchangeRate: &sdk.DecCoin{
@@ -88,4 +93,19 @@ func (p PriceStamps) ExchangeRates() sdk.DecCoins {
 	}
 
 	return exchangeRates
+}
+
+func (p PriceStamps) MapDenoms() map[string]AggegatedPriceStamp {
+	aggregator := make(map[string]AggegatedPriceStamp)
+	for _, priceStamp := range p {
+		denom := priceStamp.ExchangeRate.Denom
+		if _, found := aggregator[denom]; !found {
+			aggregator[denom] = AggegatedPriceStamp{}
+		}
+		prices := aggregator[denom]
+		prices.Rates = append(aggregator[denom].Rates, *priceStamp.ExchangeRate)
+		prices.BlockNums = append(aggregator[denom].BlockNums, priceStamp.BlockNum)
+	}
+
+	return aggregator
 }

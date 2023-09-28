@@ -12,4 +12,6 @@ message Params {
 
   bool IbcRequestEnabled =1;
   uint64 PacketTimeout = 2;
+  uint64 MaxAllowedDenomsHistoricalQuery = 3;
+  uint64 MaxAllowedDenomsExchangeQuery = 4;
 }

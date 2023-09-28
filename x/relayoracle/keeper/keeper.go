@@ -120,7 +120,23 @@ func (k Keeper) OnRecvPacket(
 		return 0, err
 	}
 
-	// check if denom exists
+	if len(request.GetDenoms()) <= 0 {
+		return 0, types.ErrNoDenoms
+	}
+
+	switch request.Request {
+	case types.PRICE_REQUEST_RATE:
+		if len(request.GetDenoms()) > int(k.GetMaxQueryForExchangeRate(ctx)) {
+			return 0, types.ErrTooManyDenoms
+		}
+
+	default:
+		if len(request.GetDenoms()) > int(k.GetMaxQueryForHistorical(ctx)) {
+			return 0, types.ErrTooManyDenoms
+		}
+	}
+
+	// TODO: add different historical check for denoms
 	found, err := k.oracleKeeper.HasActiveExchangeRates(ctx, request.GetDenoms())
 	if !found {
 		return 0, err

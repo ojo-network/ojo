@@ -8,6 +8,7 @@ import (
 	clienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
 	host "github.com/cosmos/ibc-go/v7/modules/core/24-host"
 
+	oracleTypes "github.com/ojo-network/ojo/x/oracle/types"
 	"github.com/ojo-network/ojo/x/relayoracle/types"
 )
 
@@ -183,63 +184,77 @@ func (k Keeper) ProcessRequestCalldata(ctx sdk.Context, requestEncoded []byte) (
 		return nil, types.RESOLVE_STATUS_FAILURE
 	}
 
-	//TODO: Add denoms request limit
 	switch request.Request {
-	//case types.PRICE_REQUEST_RATE:
-	//	prices, err := k.oracleKeeper.IterateExchangeRatesWithDenoms(ctx, request.GetDenoms(), uint64(ctx.BlockHeight()))
-	//	if err != nil {
-	//		return nil, types.RESOLVE_STATUS_FAILURE
-	//	}
-	//
-	//
-	//	result :=types.OracleRequestResult{}
-	//	for _, price := range prices {
-	//		result.ExchangeRate= append(result.ExchangeRate, types.ExchangeRate{
-	//			ExchangeRate: []sdk.DecCoin{*price.ExchangeRate},
-	//			BlockNum:     []uint64{price.BlockNum},
-	//		})
-	//	}
-	//
-	//	resultEncoded,err= result.Marshal()
-	//	if err!=nil{
-	//		return nil, types.RESOLVE_STATUS_FAILURE
-	//	}
-	//
-	//case types.PRICE_REQUEST_MEDIAN:
-	//	numStamps:= k.oracleKeeper.MaximumMedianStamps(ctx)
-	//	medians := k.oracleKeeper.IterateHistoricPricesForDenoms(ctx, oracleTypes.KeyPrefixMedian,request.GetDenoms(), numStamps)
-	//
-	//	result :=types.OracleRequestResult{}
-	//	for _, price := range prices {
-	//		result.ExchangeRate= append(result.ExchangeRate, types.ExchangeRate{
-	//			ExchangeRate: []sdk.DecCoin{*price.ExchangeRate},
-	//			BlockNum:     []uint64{price.BlockNum},
-	//		})
-	//	}
-	//
-	//	result, err = priceStamps.
-	//	if err != nil {
-	//		return nil, types.RESOLVE_STATUS_FAILURE
-	//	}
-	//
-	//case types.PRICE_REQUEST_DEVIATION:
-	//	var priceStamp types.PriceStamp
-	//	deviation, err := k.oracleKeeper.HistoricMedianDeviation(ctx, priceRequest.GetDenom())
-	//	if err != nil {
-	//		return nil, types.RESOLVE_STATUS_FAILURE
-	//	}
-	//
-	//	priceStamp.ExchangeRate = []sdk.DecCoin{*deviation.ExchangeRate}
-	//	priceStamp.BlockNum = []uint64{deviation.BlockNum}
-	//
-	//	result, err = priceStamp.Marshal()
-	//	if err != nil {
-	//		return nil, types.RESOLVE_STATUS_FAILURE
-	//	}
+	case types.PRICE_REQUEST_RATE:
+		priceStamps, err := k.oracleKeeper.IterateExchangeRatesForDenoms(ctx, request.GetDenoms())
+		if err != nil {
+			return nil, types.RESOLVE_STATUS_FAILURE
+		}
+
+		result := types.OracleRequestResult{}
+		for _, price := range priceStamps {
+			result.PriceData = append(result.PriceData, types.OracleData{
+				ExchangeRate: []sdk.DecCoin{*price.ExchangeRate},
+				BlockNum:     []uint64{price.BlockNum},
+			})
+		}
+
+		resultEncoded, err = result.Marshal()
+		if err != nil {
+			return nil, types.RESOLVE_STATUS_FAILURE
+		}
+
+	case types.PRICE_REQUEST_MEDIAN:
+		numStamps := k.oracleKeeper.MaximumMedianStamps(ctx)
+		mediansPriceStamps := k.oracleKeeper.IterateHistoricPricesForDenoms(
+			ctx,
+			oracleTypes.KeyPrefixMedian,
+			request.GetDenoms(),
+			uint(numStamps),
+		)
+		mediansPriceStamps.Sort()
+		medianData := mediansPriceStamps.MapDenoms()
+
+		result := types.OracleRequestResult{}
+		for _, medians := range medianData {
+			result.PriceData = append(result.PriceData, types.OracleData{
+				ExchangeRate: medians.Rates,
+				BlockNum:     medians.BlockNums,
+			})
+		}
+
+		resultEncoded, err = result.Marshal()
+		if err != nil {
+			return nil, types.RESOLVE_STATUS_FAILURE
+		}
+
+	case types.PRICE_REQUEST_DEVIATION:
+		numStamps := k.oracleKeeper.MaximumMedianStamps(ctx)
+		deviationsPriceStamps := k.oracleKeeper.IterateHistoricPricesForDenoms(
+			ctx,
+			oracleTypes.KeyPrefixMedianDeviation,
+			request.GetDenoms(),
+			uint(numStamps),
+		)
+		deviationsPriceStamps.Sort()
+		deviationData := deviationsPriceStamps.MapDenoms()
+
+		result := types.OracleRequestResult{}
+		for _, deviations := range deviationData {
+			result.PriceData = append(result.PriceData, types.OracleData{
+				ExchangeRate: deviations.Rates,
+				BlockNum:     deviations.BlockNums,
+			})
+		}
+
+		resultEncoded, err = result.Marshal()
+		if err != nil {
+			return nil, types.RESOLVE_STATUS_FAILURE
+		}
 
 	default:
 		return nil, types.RESOLVE_STATUS_FAILURE
 	}
 
-	//return result, types.RESOLVE_STATUS_SUCCESS
+	return resultEncoded, types.RESOLVE_STATUS_SUCCESS
 }
