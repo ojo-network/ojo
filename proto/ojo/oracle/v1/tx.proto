@@ -31,8 +31,8 @@ service Msg {
       returns (MsgGovUpdateParamsResponse);
 
   // GovAddDenom updates the oracle parameters to include a new token.
-  rpc GovAddDenom(MsgGovAddDenom)
-      returns (MsgGovAddDenomResponse);
+  rpc GovAddDenoms(MsgGovAddDenoms)
+      returns (MsgGovAddDenomsResponse);
 
   // GovCancelUpdateParams cancels a plan to update the oracle parameters.
   rpc GovCancelUpdateParams(MsgGovCancelUpdateParams)
@@ -112,8 +112,8 @@ message MsgGovUpdateParams {
 message MsgGovUpdateParamsResponse {}
 
 
-// MsgGovAddDenom defines the Msg/GovAddDenom request type.
-message MsgGovAddDenom {
+// MsgGovAddDenoms defines the Msg/GovAddDenom request type.
+message MsgGovAddDenoms {
   option (gogoproto.equal)            = true;
   option (gogoproto.goproto_getters)  = false;
   option (gogoproto.goproto_stringer) = false;
@@ -131,15 +131,17 @@ message MsgGovAddDenom {
   // height at which the param update must be performed
   int64 height   = 4;
 
-  // denom to be added to the registry
-  Denom denom = 5;
+  repeated Denom denom_list = 5 [
+    (gogoproto.castrepeated) = "DenomList",
+    (gogoproto.nullable) = false
+  ];
 
   // whether or not the asset should be mandatory
   bool mandatory = 6;
 }
 
 // MsgGovAddDenomResponse defines the Msg/GovAddDenomResponse response type.
-message MsgGovAddDenomResponse {}
+message MsgGovAddDenomsResponse {}
 
 // MsgGovCancelUpdateParams defines the Msg/GovCancelUpdateParams request type.
 message MsgGovCancelUpdateParams {

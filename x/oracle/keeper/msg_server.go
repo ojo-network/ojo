@@ -161,12 +161,12 @@ func (ms msgServer) GovUpdateParams(
 	return &types.MsgGovUpdateParamsResponse{}, nil
 }
 
-// GovAddDenom adds a new asset to the AcceptList, and adds
+// GovAddDenoms adds new assets to the AcceptList, and adds
 // it to the MandatoryList if specified.
-func (ms msgServer) GovAddDenom(
+func (ms msgServer) GovAddDenoms(
 	goCtx context.Context,
-	msg *types.MsgGovAddDenom,
-) (*types.MsgGovAddDenomResponse, error) {
+	msg *types.MsgGovAddDenoms,
+) (*types.MsgGovAddDenomsResponse, error) {
 	if msg.Authority != ms.authority {
 		err := errors.Wrapf(
 			types.ErrNoGovAuthority,
@@ -179,39 +179,41 @@ func (ms msgServer) GovAddDenom(
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	params := ms.GetParams(ctx)
 
-	// if the AcceptList already contains this denom, and we're not
-	// adding it to the "mandatory" list, error out.
-	if params.AcceptList.Contains(msg.Denom.SymbolDenom) && !msg.Mandatory {
-		err := errors.Wrapf(
-			types.ErrInvalidParamValue,
-			"denom already exists in acceptList: %s",
-			msg.Denom.SymbolDenom,
-		)
-		return nil, err
-		// if the MandatoryList already contains this denom, and we're trying to
-		// add it to the "mandatory" list, error out.
-	} else if params.MandatoryList.Contains(msg.Denom.SymbolDenom) && msg.Mandatory {
-		err := errors.Wrapf(
-			types.ErrInvalidParamValue,
-			"denom already exists in mandatoryList: %s",
-			msg.Denom.SymbolDenom,
-		)
-		return nil, err
-	}
-
 	plan := types.ParamUpdatePlan{
 		Keys:    []string{},
 		Height:  msg.Height,
 		Changes: params,
 	}
-	// add to AcceptList
-	if !plan.Changes.AcceptList.Contains(msg.Denom.SymbolDenom) {
-		plan.Changes.AcceptList = append(plan.Changes.AcceptList, *msg.Denom)
-		plan.Keys = append(plan.Keys, string(types.KeyAcceptList))
-	}
-	if msg.Mandatory {
-		plan.Changes.MandatoryList = append(plan.Changes.MandatoryList, *msg.Denom)
-		plan.Keys = append(plan.Keys, string(types.KeyMandatoryList))
+	for _, denom := range msg.DenomList {
+		// if the AcceptList already contains this denom, and we're not
+		// adding it to the "mandatory" list, error out.
+		if plan.Changes.AcceptList.Contains(denom.SymbolDenom) && !msg.Mandatory {
+			err := errors.Wrapf(
+				types.ErrInvalidParamValue,
+				"denom already exists in acceptList: %s",
+				denom.SymbolDenom,
+			)
+			return nil, err
+			// if the MandatoryList already contains this denom, and we're trying to
+			// add it to the "mandatory" list, error out.
+		} else if plan.Changes.MandatoryList.Contains(denom.SymbolDenom) && msg.Mandatory {
+			err := errors.Wrapf(
+				types.ErrInvalidParamValue,
+				"denom already exists in mandatoryList: %s",
+				denom.SymbolDenom,
+			)
+			return nil, err
+		}
+
+		// add to AcceptList & MandatoryList if necessary
+		if !plan.Changes.AcceptList.Contains(denom.SymbolDenom) {
+			plan.Changes.AcceptList = append(plan.Changes.AcceptList, denom)
+			plan.Keys = append(plan.Keys, string(types.KeyAcceptList))
+		}
+		if msg.Mandatory {
+			plan.Changes.MandatoryList = append(plan.Changes.MandatoryList, denom)
+			plan.Keys = append(plan.Keys, string(types.KeyMandatoryList))
+		}
 	}
 
 	err := ms.ScheduleParamUpdatePlan(ctx, plan)
@@ -219,7 +221,7 @@ func (ms msgServer) GovAddDenom(
 		return nil, err
 	}
 
-	return &types.MsgGovAddDenomResponse{}, nil
+	return &types.MsgGovAddDenomsResponse{}, nil
 }
 
 func (ms msgServer) GovCancelUpdateParams(

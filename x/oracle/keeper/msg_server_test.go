@@ -506,6 +506,160 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 	}
 }
 
+func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
+	govAccAddr := s.app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String()
+	foo := &oracletypes.Denom{
+		SymbolDenom: "FOO",
+		BaseDenom:   "FOO",
+		Exponent:    6,
+	}
+	bar := &oracletypes.Denom{
+		SymbolDenom: "BAR",
+		BaseDenom:   "BAR",
+		Exponent:    6,
+	}
+
+	testCases := []struct {
+		name      string
+		req       *types.MsgGovAddDenoms
+		expectErr bool
+		errMsg    string
+	}{
+		{
+			"valid denom addition",
+			&types.MsgGovAddDenoms{
+				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
+				Height:      9,
+				DenomList:   append(types.DenomList{}, *foo, *bar),
+				Mandatory:   false,
+			},
+			false,
+			"",
+		},
+		{
+			"valid mandatory denom addition",
+			&types.MsgGovAddDenoms{
+				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
+				Height:      9,
+				DenomList:   append(types.DenomList{}, *foo, *bar),
+				Mandatory:   true,
+			},
+			false,
+			"",
+		},
+		{
+			"invalid multiple addition",
+			&types.MsgGovAddDenoms{
+				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
+				Height:      9,
+				DenomList:   append(types.DenomList{}, *foo, *foo),
+				Mandatory:   false,
+			},
+			true,
+			"denom already exists in acceptList: FOO",
+		},
+		{
+			"invalid multiple addition mandatory",
+			&types.MsgGovAddDenoms{
+				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
+				Height:      9,
+				DenomList:   append(types.DenomList{}, *bar, *bar),
+				Mandatory:   true,
+			},
+			true,
+			"denom already exists in mandatoryList: BAR",
+		},
+		{
+			"invalid existing addition",
+			&types.MsgGovAddDenoms{
+				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
+				Height:      9,
+				DenomList: append(types.DenomList{}, types.Denom{
+					SymbolDenom: "OJO",
+					BaseDenom:   "OJO",
+					Exponent:    6,
+				}),
+				Mandatory: false,
+			},
+			true,
+			"denom already exists in acceptList: OJO",
+		},
+		{
+			"invalid existing mandatory addition",
+			&types.MsgGovAddDenoms{
+				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
+				Height:      9,
+				DenomList: append(types.DenomList{}, types.Denom{
+					SymbolDenom: "ATOM",
+					BaseDenom:   "ATOM",
+					Exponent:    6,
+				}),
+				Mandatory: true,
+			},
+			true,
+			"denom already exists in mandatoryList: ATOM",
+		},
+		{
+			"invalid empty denom",
+			&types.MsgGovAddDenoms{
+				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
+				Height:      9,
+				DenomList:   append(types.DenomList{}, types.Denom{}),
+				Mandatory:   true,
+			},
+			true,
+			"invalid oracle param value",
+		},
+	}
+
+	for _, tc := range testCases {
+		s.Run(tc.name, func() {
+			err := tc.req.ValidateBasic()
+			if err == nil {
+				_, err = s.msgServer.GovAddDenoms(s.ctx, tc.req)
+				oracle.EndBlocker(s.ctx, s.app.OracleKeeper)
+			}
+			if tc.expectErr {
+				s.Require().ErrorContains(err, tc.errMsg)
+			} else {
+				s.Require().NoError(err)
+
+				switch tc.name {
+				case "valid denom addition":
+					al := s.app.OracleKeeper.AcceptList(s.ctx)
+					s.Require().True(
+						al.Contains(foo.SymbolDenom) && al.Contains(bar.SymbolDenom),
+					)
+
+				case "valid mandatory denom addition":
+					al := s.app.OracleKeeper.AcceptList(s.ctx)
+					s.Require().True(
+						al.Contains(foo.SymbolDenom) && al.Contains(bar.SymbolDenom),
+					)
+					ml := s.app.OracleKeeper.MandatoryList(s.ctx)
+					s.Require().True(
+						ml.Contains(foo.SymbolDenom) && ml.Contains(bar.SymbolDenom),
+					)
+				}
+			}
+		})
+	}
+}
+
 func (s *IntegrationTestSuite) TestMsgServer_CancelUpdateGovParams() {
 	govAccAddr := s.app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String()
 
