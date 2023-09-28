@@ -230,9 +230,10 @@ func IntegrationTestNetworkConfig() network.Config {
 	// execute ballot voting and thus clear out previous exchange rates, since we
 	// are not running a price-feeder.
 	oracleGenState.Params.VotePeriod = 1000
-	oracleGenState.ExchangeRates = append(oracleGenState.ExchangeRates, sdk.NewDecCoinFromDec(
-		params.DisplayDenom, sdk.MustNewDecFromStr("34.21"),
-	))
+
+	oracleGenState.ExchangeRates = append(oracleGenState.ExchangeRates, *oracletypes.NewPriceStamp(
+		sdk.MustNewDecFromStr("34.21"), params.DisplayDenom, 0),
+	)
 
 	bz, err := cdc.MarshalJSON(&oracleGenState)
 	if err != nil {

@@ -57,7 +57,7 @@ func (msg MsgGovUpdateParams) ValidateBasic() error {
 		case string(KeyIbcRequestEnabled):
 			return validateBool(msg.Changes.IbcRequestEnabled)
 
-		case string(KeyPacketExpiry):
+		case string(KeyPacketTimeout):
 			return validateUint64(msg.Changes.PacketTimeout)
 
 		default:

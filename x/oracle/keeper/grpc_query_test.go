@@ -12,19 +12,19 @@ import (
 )
 
 func (s *IntegrationTestSuite) TestQuerier_ActiveExchangeRates() {
-	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec())
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, *types.NewPriceStamp(sdk.OneDec(), displayDenom, 0))
 	res, err := s.queryClient.ActiveExchangeRates(s.ctx.Context(), &types.QueryActiveExchangeRates{})
 	s.Require().NoError(err)
 	s.Require().Equal([]string{displayDenom}, res.ActiveRates)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_ExchangeRates() {
-	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec())
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, *types.NewPriceStamp(sdk.OneDec(), displayDenom, 0))
 	res, err := s.queryClient.ExchangeRates(s.ctx.Context(), &types.QueryExchangeRates{})
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.DecCoins{
 		sdk.NewDecCoinFromDec(displayDenom, sdk.OneDec()),
-	}, res.ExchangeRates)
+	}, types.PriceStamps(res.ExchangeRates).ExchangeRates())
 
 	res, err = s.queryClient.ExchangeRates(s.ctx.Context(), &types.QueryExchangeRates{
 		Denom: displayDenom,
@@ -32,7 +32,7 @@ func (s *IntegrationTestSuite) TestQuerier_ExchangeRates() {
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.DecCoins{
 		sdk.NewDecCoinFromDec(displayDenom, sdk.OneDec()),
-	}, res.ExchangeRates)
+	}, types.PriceStamps(res.ExchangeRates).ExchangeRates())
 }
 
 func (s *IntegrationTestSuite) TestQuerier_FeeederDelegation() {
@@ -194,7 +194,7 @@ func (s *IntegrationTestSuite) TestQuerier_AggregatePrevotesAppendVotes() {
 
 func (s *IntegrationTestSuite) TestQuerier_AggregateVotesAppendVotes() {
 	s.app.OracleKeeper.SetAggregateExchangeRateVote(s.ctx, valAddr, types.NewAggregateExchangeRateVote(
-		types.DefaultGenesisState().ExchangeRates,
+		types.PriceStamps(types.DefaultGenesisState().ExchangeRates).ExchangeRates(),
 		valAddr,
 	))
 

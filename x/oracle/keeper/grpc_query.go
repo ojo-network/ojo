@@ -50,23 +50,22 @@ func (q querier) ExchangeRates(
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	var exchangeRates sdk.DecCoins
-
+	priceStamps := types.PriceStamps{}
 	if len(req.Denom) > 0 {
-		exchangeRate, err := q.GetExchangeRate(ctx, req.Denom)
+		priceStamp, err := q.GetExchangeRate(ctx, req.Denom)
 		if err != nil {
 			return nil, err
 		}
 
-		exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(req.Denom, exchangeRate))
+		priceStamps = append(priceStamps, priceStamp)
 	} else {
-		q.IterateExchangeRates(ctx, func(denom string, rate sdk.Dec) (stop bool) {
-			exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(denom, rate))
+		q.IterateExchangeRates(ctx, func(denom string, priceStamp types.PriceStamp) (stop bool) {
+			priceStamps = append(priceStamps, priceStamp)
 			return false
 		})
 	}
 
-	return &types.QueryExchangeRatesResponse{ExchangeRates: exchangeRates}, nil
+	return &types.QueryExchangeRatesResponse{ExchangeRates: priceStamps}, nil
 }
 
 // ActiveExchangeRates queries all denoms for which exchange rates exist.
@@ -81,8 +80,8 @@ func (q querier) ActiveExchangeRates(
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	denoms := []string{}
-	q.IterateExchangeRates(ctx, func(denom string, _ sdk.Dec) (stop bool) {
-		denoms = append(denoms, denom)
+	q.IterateExchangeRates(ctx, func(denom string, priceStamp types.PriceStamp) (stop bool) {
+		denoms = append(denoms, priceStamp.ExchangeRate.Denom)
 		return false
 	})
 

@@ -3,9 +3,10 @@ package grpc
 import (
 	"fmt"
 
+	"github.com/rs/zerolog/log"
+
 	"github.com/ojo-network/ojo/client"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
-	"github.com/rs/zerolog/log"
 )
 
 // listenFofPrices listens for price updates at the correct blocks based
@@ -29,13 +30,13 @@ func listenForPrices(
 	for i := 0; i < int(params.MedianStampPeriod); i++ {
 		height := <-chainHeight.HeightChanged
 		if isPeriodFirstBlock(height, params.HistoricStampPeriod) {
-			exchangeRates, err := ojoClient.QueryClient.QueryExchangeRates()
-			log.Info().Msgf("block %d stamp: %+v", height, exchangeRates)
+			priceStamps, err := ojoClient.QueryClient.QueryExchangeRates()
+			log.Info().Msgf("block %d stamp: %+v", height, priceStamps)
 			if err != nil {
 				return nil, err
 			}
-			for _, rate := range exchangeRates {
-				priceStore.addStamp(rate.Denom, rate.Amount)
+			for _, priceStamp := range priceStamps {
+				priceStore.addStamp(priceStamp.ExchangeRate.Denom, priceStamp.ExchangeRate.Amount)
 			}
 		}
 	}

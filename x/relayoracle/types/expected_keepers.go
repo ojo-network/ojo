@@ -8,10 +8,9 @@ import (
 )
 
 type OracleKeeper interface {
-	GetExchangeRate(ctx sdk.Context, denom string) (sdk.Dec, error)
-	IterateExchangeRatesWithDenoms(ctx sdk.Context, denoms []string, blocknum uint64) (oracleTypes.PriceStamps, error)
+	IterateExchangeRatesWithDenoms(ctx sdk.Context, denoms []string) (oracleTypes.PriceStamps, error)
 	IterateHistoricPricesForDenoms(ctx sdk.Context, prefix []byte, denoms []string, numStamps uint) oracleTypes.PriceStamps
-	HasActiveExchangeRate(ctx sdk.Context, denom []string) bool
+	HasActiveExchangeRates(ctx sdk.Context, denom []string) (bool, error)
 	MaximumMedianStamps(ctx sdk.Context) (res uint64)
 }
 

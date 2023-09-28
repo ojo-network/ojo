@@ -26,4 +26,7 @@ message EventSetFxRate {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable) = false
   ];
+
+  // block num on which exchange rate was updated
+  uint64 block_num = 3;
 }

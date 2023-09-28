@@ -176,8 +176,8 @@ func (s *IntegrationTestSuite) TestQueryExchangeRates() {
 	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &res))
 
 	s.Require().Len(res.ExchangeRates, 1)
-	s.Require().Equal(res.ExchangeRates[0].Denom, appparams.DisplayDenom)
-	s.Require().False(res.ExchangeRates[0].Amount.IsZero())
+	s.Require().Equal(res.ExchangeRates[0].ExchangeRate.Denom, appparams.DisplayDenom)
+	s.Require().False(res.ExchangeRates[0].ExchangeRate.Amount.IsZero())
 }
 
 func (s *IntegrationTestSuite) TestQueryParams() {

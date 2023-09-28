@@ -17,7 +17,7 @@ const (
 
 var (
 	KeyIbcRequestEnabled = []byte("IbcRequestEnabled")
-	KeyPacketExpiry      = []byte("PacketExpiry")
+	KeyPacketTimeout     = []byte("PacketTimeout")
 )
 
 // ParamKeyTable the param key table for launch module
@@ -42,7 +42,7 @@ func DefaultParams() Params {
 func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 	return paramtypes.ParamSetPairs{
 		paramtypes.NewParamSetPair(KeyIbcRequestEnabled, &p.IbcRequestEnabled, validateBool),
-		paramtypes.NewParamSetPair(KeyPacketExpiry, &p.PacketTimeout, validateUint64),
+		paramtypes.NewParamSetPair(KeyPacketTimeout, &p.PacketTimeout, validateUint64),
 	}
 }
 

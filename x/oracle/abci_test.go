@@ -170,7 +170,7 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		rate, err := app.OracleKeeper.GetExchangeRate(ctx, denom.SymbolDenom)
 		s.Require().NoError(err)
-		s.Require().Equal(sdk.MustNewDecFromStr("1.0"), rate)
+		s.Require().Equal(sdk.MustNewDecFromStr("1.0"), rate.ExchangeRate.Amount)
 	}
 
 	// Test: only val2 votes (has 39% vote power).
@@ -190,7 +190,7 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		rate, err := app.OracleKeeper.GetExchangeRate(ctx, denom.SymbolDenom)
 		s.Require().ErrorIs(err, types.ErrUnknownDenom.Wrap(denom.SymbolDenom))
-		s.Require().Equal(sdk.ZeroDec(), rate)
+		s.Require().Nil(rate.ExchangeRate)
 	}
 
 	// Test: val2 and val3 votes.
@@ -212,7 +212,7 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		rate, err := app.OracleKeeper.GetExchangeRate(ctx, denom.SymbolDenom)
 		s.Require().NoError(err)
-		s.Require().Equal(sdk.MustNewDecFromStr("0.5"), rate)
+		s.Require().Equal(sdk.MustNewDecFromStr("0.5"), rate.ExchangeRate.Amount)
 	}
 
 	// Test: val1 and val2 vote again
@@ -240,10 +240,10 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 
 	rate, err := app.OracleKeeper.GetExchangeRate(ctx, "ojo")
 	s.Require().NoError(err)
-	s.Require().Equal(sdk.MustNewDecFromStr("1.0"), rate)
+	s.Require().Equal(sdk.MustNewDecFromStr("1.0"), rate.ExchangeRate.Amount)
 	rate, err = app.OracleKeeper.GetExchangeRate(ctx, "atom")
 	s.Require().ErrorIs(err, types.ErrUnknownDenom.Wrap("atom"))
-	s.Require().Equal(sdk.ZeroDec(), rate)
+	s.Require().Nil(rate.ExchangeRate)
 }
 
 func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {

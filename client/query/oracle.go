@@ -3,7 +3,6 @@ package query
 import (
 	"context"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
 
@@ -26,7 +25,7 @@ func (c *Client) QueryParams() (oracletypes.Params, error) {
 }
 
 // QueryExchangeRates returns the exchange rates from the oracle module
-func (c *Client) QueryExchangeRates() ([]sdk.DecCoin, error) {
+func (c *Client) QueryExchangeRates() ([]oracletypes.PriceStamp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), queryTimeout)
 	defer cancel()
 

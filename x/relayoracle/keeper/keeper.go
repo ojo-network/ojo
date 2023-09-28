@@ -121,9 +121,9 @@ func (k Keeper) OnRecvPacket(
 	}
 
 	// check if denom exists
-	found := k.oracleKeeper.HasActiveExchangeRate(ctx, request.GetDenoms())
+	found, err := k.oracleKeeper.HasActiveExchangeRates(ctx, request.GetDenoms())
 	if !found {
-		return 0, types.ErrNoActiveExchangeRate
+		return 0, err
 	}
 
 	ibcChannel := types.NewIbcChannel(packet.DestinationPort, packet.DestinationChannel)

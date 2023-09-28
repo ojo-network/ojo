@@ -20,8 +20,8 @@ func (k Keeper) SetIbcRequestEnabled(ctx sdk.Context, enabled bool) {
 	k.paramstore.Set(ctx, types.KeyIbcRequestEnabled, enabled)
 }
 
-func (k Keeper) SetPacketExpiryBlockCount(ctx sdk.Context, expiry uint64) {
-	k.paramstore.Set(ctx, types.KeyPacketExpiry, expiry)
+func (k Keeper) SetPacketTimeout(ctx sdk.Context, expiry uint64) {
+	k.paramstore.Set(ctx, types.KeyPacketTimeout, expiry)
 }
 
 func (k Keeper) IbcRequestEnabled(ctx sdk.Context) (enabled bool) {
@@ -29,7 +29,7 @@ func (k Keeper) IbcRequestEnabled(ctx sdk.Context) (enabled bool) {
 	return
 }
 
-func (k Keeper) PacketExpiry(ctx sdk.Context) (expiry uint64) {
-	k.paramstore.Get(ctx, types.KeyPacketExpiry, &expiry)
+func (k Keeper) PacketTimeout(ctx sdk.Context) (expiry uint64) {
+	k.paramstore.Get(ctx, types.KeyPacketTimeout, &expiry)
 	return
 }

@@ -114,10 +114,7 @@ message QueryExchangeRates {
 message QueryExchangeRatesResponse {
   // exchange_rates defines a list of the exchange rate for all whitelisted
   // denoms.
-  repeated cosmos.base.v1beta1.DecCoin exchange_rates = 1 [
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins",
-    (gogoproto.nullable) = false
-  ];
+  repeated PriceStamp exchange_rates = 1 [(gogoproto.nullable) = false];
 }
 
 // QueryActiveExchangeRates is the request type for the

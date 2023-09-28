@@ -80,3 +80,12 @@ func (p *PriceStamps) NewestBlockNum() uint64 {
 	}
 	return blockNum
 }
+
+func (p PriceStamps) ExchangeRates() sdk.DecCoins {
+	exchangeRates := sdk.DecCoins{}
+	for _, priceStamp := range p {
+		exchangeRates = exchangeRates.Add(*priceStamp.ExchangeRate)
+	}
+
+	return exchangeRates
+}

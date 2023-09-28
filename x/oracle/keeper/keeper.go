@@ -79,18 +79,18 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 
 // GetExchangeRate gets the consensus exchange rate of USD denominated in the
 // denom asset from the store.
-func (k Keeper) GetExchangeRate(ctx sdk.Context, symbol string) (sdk.Dec, error) {
+func (k Keeper) GetExchangeRate(ctx sdk.Context, symbol string) (types.PriceStamp, error) {
 	store := ctx.KVStore(k.storeKey)
 	symbol = strings.ToUpper(symbol)
 	b := store.Get(types.GetExchangeRateKey(symbol))
 	if b == nil {
-		return sdk.ZeroDec(), types.ErrUnknownDenom.Wrap(symbol)
+		return types.PriceStamp{}, types.ErrUnknownDenom.Wrap(symbol)
 	}
 
-	decProto := sdk.DecProto{}
-	k.cdc.MustUnmarshal(b, &decProto)
+	priceStamp := types.PriceStamp{}
+	k.cdc.MustUnmarshal(b, &priceStamp)
 
-	return decProto.Dec, nil
+	return priceStamp, nil
 }
 
 // GetExchangeRateBase gets the consensus exchange rate of an asset
@@ -111,36 +111,38 @@ func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, err
 		return sdk.ZeroDec(), types.ErrUnknownDenom.Wrap(denom)
 	}
 
-	exchangeRate, err := k.GetExchangeRate(ctx, symbol)
+	priceStamp, err := k.GetExchangeRate(ctx, symbol)
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
 
 	powerReduction := ten.Power(exponent)
-	return exchangeRate.Quo(powerReduction), nil
+	return priceStamp.ExchangeRate.Amount.Quo(powerReduction), nil
 }
 
 // SetExchangeRate sets the consensus exchange rate of USD denominated in the
 // denom asset to the store.
-func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, exchangeRate sdk.Dec) {
+func (k Keeper) SetExchangeRate(ctx sdk.Context, priceStamp types.PriceStamp) {
 	store := ctx.KVStore(k.storeKey)
-	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: exchangeRate})
-	denom = strings.ToUpper(denom)
-	store.Set(types.GetExchangeRateKey(denom), bz)
-	go metrics.RecordExchangeRate(denom, exchangeRate)
+	priceStamp.ExchangeRate.Denom = strings.ToUpper(priceStamp.ExchangeRate.Denom)
+	bz := k.cdc.MustMarshal(&priceStamp)
+
+	store.Set(types.GetExchangeRateKey(priceStamp.ExchangeRate.Denom), bz)
+	go metrics.RecordExchangeRate(priceStamp.ExchangeRate.Denom, priceStamp.ExchangeRate.Amount)
 }
 
 // SetExchangeRateWithEvent sets an consensus
 // exchange rate to the store with ABCI event
 func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, exchangeRate sdk.Dec) error {
-	k.SetExchangeRate(ctx, denom, exchangeRate)
+	blockNum := uint64(ctx.BlockHeight())
+	k.SetExchangeRate(ctx, *types.NewPriceStamp(exchangeRate, denom, blockNum))
 	return ctx.EventManager().EmitTypedEvent(&types.EventSetFxRate{
-		Denom: denom, Rate: exchangeRate,
+		Denom: denom, Rate: exchangeRate, BlockNum: blockNum,
 	})
 }
 
 // IterateExchangeRates iterates over USD rates in the store.
-func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, sdk.Dec) bool) {
+func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, types.PriceStamp) bool) {
 	store := ctx.KVStore(k.storeKey)
 
 	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixExchangeRate)
@@ -149,10 +151,10 @@ func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, sdk.D
 	for ; iter.Valid(); iter.Next() {
 		key := iter.Key()
 		denom := string(key[len(types.KeyPrefixExchangeRate) : len(key)-1])
-		dp := sdk.DecProto{}
+		priceStamp := types.PriceStamp{}
 
-		k.cdc.MustUnmarshal(iter.Value(), &dp)
-		if handler(denom, dp.Dec) {
+		k.cdc.MustUnmarshal(iter.Value(), &priceStamp)
+		if handler(denom, priceStamp) {
 			break
 		}
 	}
@@ -161,6 +163,18 @@ func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, sdk.D
 func (k Keeper) HasActiveExchangeRate(ctx sdk.Context, denom string) bool {
 	store := ctx.KVStore(k.storeKey)
 	return store.Has(types.GetExchangeRateKey(denom))
+}
+
+func (k Keeper) HasActiveExchangeRates(ctx sdk.Context, denoms []string) (bool, error) {
+	store := ctx.KVStore(k.storeKey)
+	for _, denom := range denoms {
+		found := store.Has(types.GetExchangeRateKey(denom))
+		if !found {
+			return false, types.ErrUnknownDenom.Wrap(denom)
+		}
+	}
+
+	return true, nil
 }
 
 func (k Keeper) ClearExchangeRates(ctx sdk.Context) {
@@ -359,7 +373,7 @@ func (k Keeper) ValidateFeeder(ctx sdk.Context, feederAddr sdk.AccAddress, valAd
 	return nil
 }
 
-func (k Keeper) IterateExchangeRatesWithDenoms(ctx sdk.Context, denoms []string, blocknum uint64) (types.PriceStamps, error) {
+func (k Keeper) IterateExchangeRatesWithDenoms(ctx sdk.Context, denoms []string) (types.PriceStamps, error) {
 	prices := types.PriceStamps{}
 	store := ctx.KVStore(k.storeKey)
 	for _, symbol := range denoms {
@@ -369,11 +383,9 @@ func (k Keeper) IterateExchangeRatesWithDenoms(ctx sdk.Context, denoms []string,
 			return nil, types.ErrUnknownDenom.Wrap(symbol)
 		}
 
-		decProto := sdk.DecProto{}
-		k.cdc.MustUnmarshal(b, &decProto)
-
-		price := types.NewPriceStamp(decProto.Dec, symbol, blocknum)
-		prices = append(prices, *price)
+		priceStamp := types.PriceStamp{}
+		k.cdc.MustUnmarshal(b, &priceStamp)
+		prices = append(prices, priceStamp)
 	}
 
 	return prices, nil

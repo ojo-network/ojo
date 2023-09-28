@@ -2,7 +2,6 @@ package keeper_test
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/cometbft/cometbft/crypto/secp256k1"
@@ -206,7 +205,7 @@ func (s *IntegrationTestSuite) TestSetExchangeRateWithEvent() {
 	s.Require().NoError(err)
 	rate, err := app.OracleKeeper.GetExchangeRate(ctx, displayDenom)
 	s.Require().NoError(err)
-	s.Require().Equal(rate, sdk.OneDec())
+	s.Require().Equal(rate.ExchangeRate.Amount, sdk.OneDec())
 }
 
 func (s *IntegrationTestSuite) TestGetExchangeRate_InvalidDenom() {
@@ -226,15 +225,15 @@ func (s *IntegrationTestSuite) TestGetExchangeRate_NotSet() {
 func (s *IntegrationTestSuite) TestGetExchangeRate_Valid() {
 	app, ctx := s.app, s.ctx
 
-	app.OracleKeeper.SetExchangeRate(ctx, displayDenom, sdk.OneDec())
+	app.OracleKeeper.SetExchangeRate(ctx, *types.NewPriceStamp(sdk.OneDec(), displayDenom, 0))
 	rate, err := app.OracleKeeper.GetExchangeRate(ctx, displayDenom)
 	s.Require().NoError(err)
-	s.Require().Equal(rate, sdk.OneDec())
+	s.Require().EqualValues(rate.ExchangeRate.Amount, sdk.OneDec())
 
-	app.OracleKeeper.SetExchangeRate(ctx, strings.ToLower(displayDenom), sdk.OneDec())
+	app.OracleKeeper.SetExchangeRate(ctx, *types.NewPriceStamp(sdk.OneDec(), displayDenom, 0))
 	rate, err = app.OracleKeeper.GetExchangeRate(ctx, displayDenom)
 	s.Require().NoError(err)
-	s.Require().Equal(rate, sdk.OneDec())
+	s.Require().EqualValues(rate.ExchangeRate.Amount, sdk.OneDec())
 }
 
 func (s *IntegrationTestSuite) TestGetExchangeRateBase() {
@@ -249,12 +248,12 @@ func (s *IntegrationTestSuite) TestGetExchangeRateBase() {
 
 	power := sdk.MustNewDecFromStr("10").Power(exponent)
 
-	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec())
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, *types.NewPriceStamp(sdk.OneDec(), displayDenom, 0))
 	rate, err := s.app.OracleKeeper.GetExchangeRateBase(s.ctx, bondDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(rate.Mul(power), sdk.OneDec())
 
-	s.app.OracleKeeper.SetExchangeRate(s.ctx, strings.ToLower(displayDenom), sdk.OneDec())
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, *types.NewPriceStamp(sdk.OneDec(), displayDenom, 0))
 	rate, err = s.app.OracleKeeper.GetExchangeRateBase(s.ctx, bondDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(rate.Mul(power), sdk.OneDec())
@@ -263,7 +262,7 @@ func (s *IntegrationTestSuite) TestGetExchangeRateBase() {
 func (s *IntegrationTestSuite) TestClearExchangeRate() {
 	app, ctx := s.app, s.ctx
 
-	app.OracleKeeper.SetExchangeRate(ctx, displayDenom, sdk.OneDec())
+	app.OracleKeeper.SetExchangeRate(ctx, *types.NewPriceStamp(sdk.OneDec(), displayDenom, 0))
 	app.OracleKeeper.ClearExchangeRates(ctx)
 	_, err := app.OracleKeeper.GetExchangeRate(ctx, displayDenom)
 	s.Require().Error(err)

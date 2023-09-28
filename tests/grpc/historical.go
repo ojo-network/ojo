@@ -6,9 +6,10 @@ import (
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/rs/zerolog"
+
 	"github.com/ojo-network/ojo/client"
 	"github.com/ojo-network/ojo/x/oracle/types"
-	"github.com/rs/zerolog"
 )
 
 // MedianCheck waits for availability of all exchange rates from the denom accept list,
@@ -29,11 +30,11 @@ func MedianCheck(val1Client *client.OjoClient) error {
 		return err
 	}
 
-	var exchangeRates sdk.DecCoins
+	var exchangeRates types.PriceStamps
 	var missingDenoms []string
 	for i := 0; i < 40; i++ {
 		exchangeRates, err = val1Client.QueryClient.QueryExchangeRates()
-		missingDenoms = findMissingDenoms(exchangeRates, params.MandatoryList)
+		missingDenoms = findMissingDenoms(exchangeRates.ExchangeRates(), params.MandatoryList)
 		if err == nil && len(missingDenoms) == 0 {
 			break
 		}

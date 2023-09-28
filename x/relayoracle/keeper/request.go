@@ -133,7 +133,7 @@ func (k Keeper) ProcessResult(ctx sdk.Context, requestID uint64, status types.Re
 		Result:          result,
 	})
 
-	expiry := k.PacketExpiry(ctx)
+	expiry := k.PacketTimeout(ctx)
 	if req.IBCChannel != nil {
 		sourceChannel := req.IBCChannel.ChannelId
 		sourcePort := req.IBCChannel.PortId

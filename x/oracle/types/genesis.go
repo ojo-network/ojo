@@ -4,13 +4,12 @@ import (
 	"encoding/json"
 
 	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // NewGenesisState creates a new GenesisState object
 func NewGenesisState(
 	params Params,
-	rates sdk.DecCoins,
+	rates []PriceStamp,
 	feederDelegations []FeederDelegation,
 	missCounters []MissCounter,
 	aggregateExchangeRatePrevotes []AggregateExchangeRatePrevote,
@@ -37,7 +36,7 @@ func NewGenesisState(
 func DefaultGenesisState() *GenesisState {
 	return &GenesisState{
 		Params:                        DefaultParams(),
-		ExchangeRates:                 sdk.DecCoins{},
+		ExchangeRates:                 []PriceStamp{},
 		FeederDelegations:             []FeederDelegation{},
 		MissCounters:                  []MissCounter{},
 		AggregateExchangeRatePrevotes: []AggregateExchangeRatePrevote{},

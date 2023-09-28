@@ -62,7 +62,7 @@ func TestGenesisValidation(t *testing.T) {
 func TestGetGenesisStateFromAppState(t *testing.T) {
 	emptyGenesis := GenesisState{
 		Params:                        Params{},
-		ExchangeRates:                 sdk.DecCoins{},
+		ExchangeRates:                 []PriceStamp{},
 		FeederDelegations:             []FeederDelegation{},
 		MissCounters:                  []MissCounter{},
 		AggregateExchangeRatePrevotes: []AggregateExchangeRatePrevote{},
