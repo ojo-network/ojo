@@ -161,6 +161,67 @@ func (ms msgServer) GovUpdateParams(
 	return &types.MsgGovUpdateParamsResponse{}, nil
 }
 
+// GovAddDenom adds a new asset to the AcceptList, and adds
+// it to the MandatoryList if specified.
+func (ms msgServer) GovAddDenom(
+	goCtx context.Context,
+	msg *types.MsgGovAddDenom,
+) (*types.MsgGovAddDenomResponse, error) {
+	if msg.Authority != ms.authority {
+		err := errors.Wrapf(
+			types.ErrNoGovAuthority,
+			"invalid authority; expected %s, got %s",
+			ms.authority,
+			msg.Authority,
+		)
+		return nil, err
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	params := ms.GetParams(ctx)
+
+	// if the AcceptList already contains this denom, and we're not
+	// adding it to the "mandatory" list, error out.
+	if params.AcceptList.Contains(msg.Denom.SymbolDenom) && !msg.Mandatory {
+		err := errors.Wrapf(
+			types.ErrInvalidParamValue,
+			"denom already exists in acceptList: %s",
+			msg.Denom.SymbolDenom,
+		)
+		return nil, err
+		// if the MandatoryList already contains this denom, and we're trying to
+		// add it to the "mandatory" list, error out.
+	} else if params.MandatoryList.Contains(msg.Denom.SymbolDenom) && msg.Mandatory {
+		err := errors.Wrapf(
+			types.ErrInvalidParamValue,
+			"denom already exists in mandatoryList: %s",
+			msg.Denom.SymbolDenom,
+		)
+		return nil, err
+	}
+
+	plan := types.ParamUpdatePlan{
+		Keys:    []string{},
+		Height:  msg.Height,
+		Changes: params,
+	}
+	// add to AcceptList
+	if !plan.Changes.AcceptList.Contains(msg.Denom.SymbolDenom) {
+		plan.Changes.AcceptList = append(plan.Changes.AcceptList, *msg.Denom)
+		plan.Keys = append(plan.Keys, string(types.KeyAcceptList))
+	}
+	if msg.Mandatory {
+		plan.Changes.MandatoryList = append(plan.Changes.MandatoryList, *msg.Denom)
+		plan.Keys = append(plan.Keys, string(types.KeyMandatoryList))
+	}
+
+	err := ms.ScheduleParamUpdatePlan(ctx, plan)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.MsgGovAddDenomResponse{}, nil
+}
+
 func (ms msgServer) GovCancelUpdateParams(
 	goCtx context.Context,
 	msg *types.MsgGovCancelUpdateParams,

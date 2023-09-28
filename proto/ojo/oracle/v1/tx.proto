@@ -30,6 +30,10 @@ service Msg {
   rpc GovUpdateParams(MsgGovUpdateParams)
       returns (MsgGovUpdateParamsResponse);
 
+  // GovUpdateParams updates the oracle parameters to include a new token.
+  rpc GovAddAsset(MsgGovAddDenom)
+      returns (MsgGovAddDenomResponse);
+
   // GovCancelUpdateParams cancels a plan to update the oracle parameters.
   rpc GovCancelUpdateParams(MsgGovCancelUpdateParams)
       returns (MsgGovCancelUpdateParamsResponse);
@@ -106,6 +110,36 @@ message MsgGovUpdateParams {
 
 // MsgGovUpdateParamsResponse defines the Msg/GovUpdateParams response type.
 message MsgGovUpdateParamsResponse {}
+
+
+// MsgGovAddDenom defines the Msg/GovAddDenom request type.
+message MsgGovAddDenom {
+  option (gogoproto.equal)            = true;
+  option (gogoproto.goproto_getters)  = false;
+  option (gogoproto.goproto_stringer) = false;
+  option (cosmos.msg.v1.signer)       = "authority";
+
+  // authority is the address of the governance account.
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // title of the proposal
+  string title = 2;
+
+  // description of the proposal
+  string description = 3;
+
+  // height at which the param update must be performed
+  int64 height   = 4;
+
+  // denom to be added to the registry
+  Denom denom = 5;
+
+  // whether or not the asset should be mandatory
+  bool mandatory = 6;
+}
+
+// MsgGovAddDenomResponse defines the Msg/GovAddDenomResponse response type.
+message MsgGovAddDenomResponse {}
 
 // MsgGovCancelUpdateParams defines the Msg/GovCancelUpdateParams request type.
 message MsgGovCancelUpdateParams {
