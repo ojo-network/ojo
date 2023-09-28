@@ -645,6 +645,12 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 						al.Contains(foo.SymbolDenom) && al.Contains(bar.SymbolDenom),
 					)
 
+					rwb := s.app.OracleKeeper.RewardBands(s.ctx)
+					_, err := rwb.GetBandFromDenom("foo")
+					s.Require().NoError(err)
+					_, err = rwb.GetBandFromDenom("bar")
+					s.Require().NoError(err)
+
 				case "valid mandatory denom addition":
 					al := s.app.OracleKeeper.AcceptList(s.ctx)
 					s.Require().True(
@@ -654,6 +660,12 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 					s.Require().True(
 						ml.Contains(foo.SymbolDenom) && ml.Contains(bar.SymbolDenom),
 					)
+
+					rwb := s.app.OracleKeeper.RewardBands(s.ctx)
+					_, err := rwb.GetBandFromDenom("foo")
+					s.Require().NoError(err)
+					_, err = rwb.GetBandFromDenom("bar")
+					s.Require().NoError(err)
 				}
 			}
 		})
