@@ -6,6 +6,7 @@ import (
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	ojoutils "github.com/ojo-network/ojo/util"
 
 	"github.com/ojo-network/ojo/x/oracle/types"
 )
@@ -208,13 +209,22 @@ func (ms msgServer) GovAddDenoms(
 		// add to AcceptList & MandatoryList if necessary
 		if !plan.Changes.AcceptList.Contains(denom.SymbolDenom) {
 			plan.Changes.AcceptList = append(plan.Changes.AcceptList, denom)
-			plan.Keys = append(plan.Keys, string(types.KeyAcceptList))
+			plan.Keys = ojoutils.AppendString(plan.Keys, string(types.KeyAcceptList))
 		}
 		if msg.Mandatory {
 			plan.Changes.MandatoryList = append(plan.Changes.MandatoryList, denom)
-			plan.Keys = append(plan.Keys, string(types.KeyMandatoryList))
+			plan.Keys = ojoutils.AppendString(plan.Keys, string(types.KeyMandatoryList))
+		}
+
+		// add a RewardBand
+		_, err := plan.Changes.RewardBands.GetBandFromDenom(denom.SymbolDenom)
+		if err != nil {
+			plan.Changes.RewardBands.AddDefault(denom.SymbolDenom)
 		}
 	}
+
+	// also update RewardBand key
+	plan.Keys = append(plan.Keys, string(types.KeyRewardBands))
 
 	err := ms.ScheduleParamUpdatePlan(ctx, plan)
 	if err != nil {
