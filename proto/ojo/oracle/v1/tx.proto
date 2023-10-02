@@ -112,7 +112,7 @@ message MsgGovUpdateParams {
 message MsgGovUpdateParamsResponse {}
 
 
-// MsgGovAddDenoms defines the Msg/GovAddDenom request type.
+// MsgGovAddDenoms defines the Msg/GovAddDenoms request type.
 message MsgGovAddDenoms {
   option (gogoproto.equal)            = true;
   option (gogoproto.goproto_getters)  = false;
