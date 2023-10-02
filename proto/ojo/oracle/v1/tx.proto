@@ -30,7 +30,7 @@ service Msg {
   rpc GovUpdateParams(MsgGovUpdateParams)
       returns (MsgGovUpdateParamsResponse);
 
-  // GovAddDenom updates the oracle parameters to include a new token.
+  // GovAddDenoms updates the oracle parameters to include a new tokens.
   rpc GovAddDenoms(MsgGovAddDenoms)
       returns (MsgGovAddDenomsResponse);
 
