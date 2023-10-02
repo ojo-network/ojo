@@ -209,11 +209,11 @@ func (ms msgServer) GovAddDenoms(
 		// add to AcceptList & MandatoryList if necessary
 		if !plan.Changes.AcceptList.Contains(denom.SymbolDenom) {
 			plan.Changes.AcceptList = append(plan.Changes.AcceptList, denom)
-			plan.Keys = ojoutils.AppendString(plan.Keys, string(types.KeyAcceptList))
+			plan.Keys = ojoutils.AppendUniqueString(plan.Keys, string(types.KeyAcceptList))
 		}
 		if msg.Mandatory {
 			plan.Changes.MandatoryList = append(plan.Changes.MandatoryList, denom)
-			plan.Keys = ojoutils.AppendString(plan.Keys, string(types.KeyMandatoryList))
+			plan.Keys = ojoutils.AppendUniqueString(plan.Keys, string(types.KeyMandatoryList))
 		}
 
 		// add a RewardBand
