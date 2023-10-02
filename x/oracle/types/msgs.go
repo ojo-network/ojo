@@ -247,7 +247,7 @@ func (msg MsgGovCancelUpdateParams) ValidateBasic() error {
 	return checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority)
 }
 
-// NewMsgCancelUpdateParams will creates a new MsgGovCancelUpdateParams instance
+// NewMsgGovAddDenoms will creates a new NewMsgGovAddDenoms instance
 func NewMsgGovAddDenoms(
 	authority, title, description string,
 	height int64, denoms DenomList, mandatory bool,
