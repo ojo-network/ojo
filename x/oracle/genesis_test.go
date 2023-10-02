@@ -1,17 +1,23 @@
 package oracle_test
 
 import (
-	"fmt"
+	"gotest.tools/v3/assert"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"gotest.tools/assert"
 
 	"github.com/ojo-network/ojo/x/oracle"
 	"github.com/ojo-network/ojo/x/oracle/types"
 )
 
-func (s *GenesisTestSuite) TestGenesis_InitGenesis() {
-	fmt.Println("init genesis test")
+const (
+	valoperAddr = "ojovaloper18wvrhmvm8av6s34q48yees3yu6xglwhmr4tzdn"
+	addr        = "ojo1ner6kc63xl903wrv2n8p9mtun79gegjld93lx0"
+	denom       = "ojo"
+)
+
+var exchangeRate = sdk.MustNewDecFromStr("8.8")
+
+func (s *IntegrationTestSuite) TestGenesis_InitGenesis() {
 	keeper, ctx := s.app.OracleKeeper, s.ctx
 
 	tcs := []struct {
@@ -56,7 +62,7 @@ func (s *GenesisTestSuite) TestGenesis_InitGenesis() {
 					},
 				},
 				HistoricPrices: []types.PriceStamp{
-					types.PriceStamp{
+					{
 						ExchangeRate: &sdk.DecCoin{
 							Denom:  denom,
 							Amount: exchangeRate,
@@ -65,7 +71,7 @@ func (s *GenesisTestSuite) TestGenesis_InitGenesis() {
 					},
 				},
 				Medians: []types.PriceStamp{
-					types.PriceStamp{
+					{
 						ExchangeRate: &sdk.DecCoin{
 							Denom:  denom,
 							Amount: exchangeRate,
@@ -74,7 +80,7 @@ func (s *GenesisTestSuite) TestGenesis_InitGenesis() {
 					},
 				},
 				MedianDeviations: []types.PriceStamp{
-					types.PriceStamp{
+					{
 						ExchangeRate: &sdk.DecCoin{
 							Denom:  denom,
 							Amount: exchangeRate,
@@ -137,8 +143,7 @@ func (s *GenesisTestSuite) TestGenesis_InitGenesis() {
 	}
 }
 
-func (s *GenesisTestSuite) TestGenesis_ExportGenesis() {
-	fmt.Println("export genesis test")
+func (s *IntegrationTestSuite) TestGenesis_ExportGenesis() {
 	keeper, ctx := s.app.OracleKeeper, s.ctx
 
 	params := types.DefaultParams()
@@ -149,9 +154,9 @@ func (s *GenesisTestSuite) TestGenesis_ExportGenesis() {
 			ValidatorAddress: valoperAddr,
 		},
 	}
-	exchangeRateTuples := []sdk.DecCoin{
+	exchangeRates := sdk.DecCoins{
 		{
-			Denom:  upperDenom,
+			Denom:  displayDenom,
 			Amount: exchangeRate,
 		},
 	}
@@ -204,7 +209,7 @@ func (s *GenesisTestSuite) TestGenesis_ExportGenesis() {
 	genesisState := types.GenesisState{
 		Params:                        params,
 		FeederDelegations:             feederDelegations,
-		ExchangeRates:                 exchangeRateTuples,
+		ExchangeRates:                 exchangeRates,
 		MissCounters:                  missCounters,
 		AggregateExchangeRatePrevotes: aggregateExchangeRatePrevotes,
 		AggregateExchangeRateVotes:    aggregateExchangeRateVotes,
@@ -218,12 +223,11 @@ func (s *GenesisTestSuite) TestGenesis_ExportGenesis() {
 	result := oracle.ExportGenesis(s.ctx, s.app.OracleKeeper)
 	assert.DeepEqual(s.T(), params, result.Params)
 	assert.DeepEqual(s.T(), feederDelegations, result.FeederDelegations)
-	assert.DeepEqual(s.T(), exchangeRateTuples, result.ExchangeRates)
+	assert.DeepEqual(s.T(), exchangeRates, result.ExchangeRates)
 	assert.DeepEqual(s.T(), missCounters, result.MissCounters)
 	assert.DeepEqual(s.T(), aggregateExchangeRatePrevotes, result.AggregateExchangeRatePrevotes)
 	assert.DeepEqual(s.T(), aggregateExchangeRateVotes, result.AggregateExchangeRateVotes)
 	assert.DeepEqual(s.T(), medians, result.Medians)
 	assert.DeepEqual(s.T(), historicPrices, result.HistoricPrices)
 	assert.DeepEqual(s.T(), medianDeviations, result.MedianDeviations)
-	assert.DeepEqual(s.T(), hacp, result.AvgCounterParams)
 }
