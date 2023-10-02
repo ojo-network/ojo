@@ -32,7 +32,7 @@ func (app App) RegisterUpgradeHandlers() {
 	app.registerUpgrade0_1_4(upgradeInfo)
 	app.registerUpgrade0_2_0(upgradeInfo)
 	app.registerUpgrade0_2_1(upgradeInfo)
-  app.registerUpgrade0_2_2(upgradeInfo)
+    app.registerUpgrade0_2_2(upgradeInfo)
 }
 
 // performs upgrade from v0.1.3 to v0.1.4
