@@ -136,7 +136,7 @@ message MsgGovAddDenoms {
     (gogoproto.nullable) = false
   ];
 
-  // whether or not the asset should be mandatory
+  // whether or not the assets should be mandatory
   bool mandatory = 6;
 }
 
