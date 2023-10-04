@@ -44,15 +44,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TM_VERSION: ${{ env.TM_VERSION }}
-      - name: Update Devnet
-        uses: ./.github/update-testnet
-        with:
-          COSMOS_BINARY_NAME: ojod
-          COSMOS_BINARY_VERSION: ${{ github.ref_name }}
-          PULUMI_PROJECT_DIR: infra/pulumi/testnet
-          PULUMI_STACK_NAME: ojo-network/devnet
-          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          UMEE_INFRA_SSH_KEY: ${{ secrets.UMEE_INFRA_SSH_KEY }}
-          GCP_WORKLOAD_IDENTITY_PROVIDER: projects/451365972553/locations/global/workloadIdentityPools/ojo-pool/providers/ojo-gh-provider
-          GCP_SERVICE_ACCOUNT: 'ojo-gh-actions-service@ojo-network.iam.gserviceaccount.com'
