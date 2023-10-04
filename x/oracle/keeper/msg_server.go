@@ -6,6 +6,7 @@ import (
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	ojoutils "github.com/ojo-network/ojo/util"
 
 	"github.com/ojo-network/ojo/x/oracle/types"
 )
@@ -159,6 +160,88 @@ func (ms msgServer) GovUpdateParams(
 	}
 
 	return &types.MsgGovUpdateParamsResponse{}, nil
+}
+
+// GovAddDenoms adds new assets to the AcceptList, and adds
+// it to the MandatoryList if specified.
+func (ms msgServer) GovAddDenoms(
+	goCtx context.Context,
+	msg *types.MsgGovAddDenoms,
+) (*types.MsgGovAddDenomsResponse, error) {
+	if msg.Authority != ms.authority {
+		err := errors.Wrapf(
+			types.ErrNoGovAuthority,
+			"invalid authority; expected %s, got %s",
+			ms.authority,
+			msg.Authority,
+		)
+		return nil, err
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	params := ms.GetParams(ctx)
+
+	plan := types.ParamUpdatePlan{
+		Keys:    []string{},
+		Height:  msg.Height,
+		Changes: params,
+	}
+	for _, denom := range msg.DenomList {
+		// if the AcceptList already contains this denom, and we're not
+		// adding it to the "mandatory" list, error out.
+		if plan.Changes.AcceptList.Contains(denom.SymbolDenom) && !msg.Mandatory {
+			err := errors.Wrapf(
+				types.ErrInvalidParamValue,
+				"denom already exists in acceptList: %s",
+				denom.SymbolDenom,
+			)
+			return nil, err
+			// if the MandatoryList already contains this denom, and we're trying to
+			// add it to the "mandatory" list, error out.
+		} else if plan.Changes.MandatoryList.Contains(denom.SymbolDenom) && msg.Mandatory {
+			err := errors.Wrapf(
+				types.ErrInvalidParamValue,
+				"denom already exists in mandatoryList: %s",
+				denom.SymbolDenom,
+			)
+			return nil, err
+		}
+
+		// add to AcceptList & MandatoryList if necessary
+		if !plan.Changes.AcceptList.Contains(denom.SymbolDenom) {
+			plan.Changes.AcceptList = append(plan.Changes.AcceptList, denom)
+			plan.Keys = ojoutils.AppendUniqueString(plan.Keys, string(types.KeyAcceptList))
+		}
+		if msg.Mandatory {
+			plan.Changes.MandatoryList = append(plan.Changes.MandatoryList, denom)
+			plan.Keys = ojoutils.AppendUniqueString(plan.Keys, string(types.KeyMandatoryList))
+		}
+
+		// add a RewardBand
+		_, err := plan.Changes.RewardBands.GetBandFromDenom(denom.SymbolDenom)
+		if err == types.ErrNoRewardBand {
+			if msg.RewardBand != nil {
+				plan.Changes.RewardBands.Add(denom.SymbolDenom, *msg.RewardBand)
+			}
+			plan.Changes.RewardBands.AddDefault(denom.SymbolDenom)
+		} else if err != nil {
+			return nil, err
+		}
+	}
+	// also update RewardBand key
+	plan.Keys = append(plan.Keys, string(types.KeyRewardBands))
+
+	// validate plan construction before scheduling
+	err := plan.ValidateBasic()
+	if err != nil {
+		return nil, err
+	}
+
+	err = ms.ScheduleParamUpdatePlan(ctx, plan)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.MsgGovAddDenomsResponse{}, nil
 }
 
 func (ms msgServer) GovCancelUpdateParams(
