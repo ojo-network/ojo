@@ -508,6 +508,7 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 
 func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 	govAccAddr := s.app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String()
+	bandArgument := sdk.NewDecWithPrec(2, 3)
 	foo := &oracletypes.Denom{
 		SymbolDenom: "FOO",
 		BaseDenom:   "FOO",
@@ -516,6 +517,11 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 	bar := &oracletypes.Denom{
 		SymbolDenom: "BAR",
 		BaseDenom:   "BAR",
+		Exponent:    6,
+	}
+	reward := &oracletypes.Denom{
+		SymbolDenom: "REWARD",
+		BaseDenom:   "REWARD",
 		Exponent:    6,
 	}
 
@@ -547,6 +553,20 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 				Height:      9,
 				DenomList:   append(types.DenomList{}, *foo, *bar),
 				Mandatory:   true,
+			},
+			false,
+			"",
+		},
+		{
+			"valid denom addition with reward band",
+			&types.MsgGovAddDenoms{
+				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
+				Height:      9,
+				DenomList:   append(types.DenomList{}, *reward),
+				Mandatory:   true,
+				RewardBand:  &bandArgument,
 			},
 			false,
 			"",
@@ -646,9 +666,11 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 					)
 
 					rwb := s.app.OracleKeeper.RewardBands(s.ctx)
-					_, err := rwb.GetBandFromDenom("foo")
+					band, err := rwb.GetBandFromDenom("foo")
+					s.Require().Equal(band, sdk.NewDecWithPrec(2, 2))
 					s.Require().NoError(err)
-					_, err = rwb.GetBandFromDenom("bar")
+					band, err = rwb.GetBandFromDenom("bar")
+					s.Require().Equal(band, sdk.NewDecWithPrec(2, 2))
 					s.Require().NoError(err)
 
 				case "valid mandatory denom addition":
@@ -662,9 +684,22 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 					)
 
 					rwb := s.app.OracleKeeper.RewardBands(s.ctx)
-					_, err := rwb.GetBandFromDenom("foo")
+					band, err := rwb.GetBandFromDenom("foo")
+					s.Require().Equal(band, sdk.NewDecWithPrec(2, 2))
 					s.Require().NoError(err)
-					_, err = rwb.GetBandFromDenom("bar")
+					band, err = rwb.GetBandFromDenom("bar")
+					s.Require().Equal(band, sdk.NewDecWithPrec(2, 2))
+					s.Require().NoError(err)
+
+				case "valid denom addition with reward band":
+					al := s.app.OracleKeeper.AcceptList(s.ctx)
+					s.Require().True(
+						al.Contains("REWARD"),
+					)
+
+					rwb := s.app.OracleKeeper.RewardBands(s.ctx)
+					band, err := rwb.GetBandFromDenom("REWARD")
+					s.Require().Equal(band, sdk.NewDecWithPrec(2, 3))
 					s.Require().NoError(err)
 				}
 			}

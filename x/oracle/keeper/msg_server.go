@@ -219,16 +219,24 @@ func (ms msgServer) GovAddDenoms(
 		// add a RewardBand
 		_, err := plan.Changes.RewardBands.GetBandFromDenom(denom.SymbolDenom)
 		if err == types.ErrNoRewardBand {
+			if msg.RewardBand != nil {
+				plan.Changes.RewardBands.Add(denom.SymbolDenom, *msg.RewardBand)
+			}
 			plan.Changes.RewardBands.AddDefault(denom.SymbolDenom)
 		} else if err != nil {
 			return nil, err
 		}
 	}
-
 	// also update RewardBand key
 	plan.Keys = append(plan.Keys, string(types.KeyRewardBands))
 
-	err := ms.ScheduleParamUpdatePlan(ctx, plan)
+	// validate plan construction before scheduling
+	err := plan.ValidateBasic()
+	if err != nil {
+		return nil, err
+	}
+
+	err = ms.ScheduleParamUpdatePlan(ctx, plan)
 	if err != nil {
 		return nil, err
 	}

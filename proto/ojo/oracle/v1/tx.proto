@@ -131,6 +131,7 @@ message MsgGovAddDenoms {
   // height at which the param update must be performed
   int64 height   = 4;
 
+  // denom_list is the list of denoms to add to the oracle registry
   repeated Denom denom_list = 5 [
     (gogoproto.castrepeated) = "DenomList",
     (gogoproto.nullable) = false
@@ -138,6 +139,14 @@ message MsgGovAddDenoms {
 
   // whether or not the assets should be mandatory
   bool mandatory = 6;
+
+    // reward_band determines what the reward_band will be for every
+  // asset in the proposal. If not provided, it will default.
+  string reward_band = 7 [
+    (gogoproto.moretags) = "yaml:\"vote_threshold\"",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable) = true
+  ];
 }
 
 // MsgGovAddDenomResponse defines the Msg/GovAddDenomResponse response type.

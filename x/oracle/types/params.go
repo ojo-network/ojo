@@ -1,6 +1,7 @@
 package types
 
 import (
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"gopkg.in/yaml.v3"
@@ -100,6 +101,18 @@ func (rbl *RewardBandList) AddDefault(
 	*rbl = append(*rbl, RewardBand{
 		SymbolDenom: denom,
 		RewardBand:  defaultRewardBand,
+	})
+}
+
+// Add adds a reward band of a given denom and
+// reward band decimal.
+func (rbl *RewardBandList) Add(
+	denom string,
+	band math.LegacyDec,
+) {
+	*rbl = append(*rbl, RewardBand{
+		SymbolDenom: denom,
+		RewardBand:  band,
 	})
 }
 
