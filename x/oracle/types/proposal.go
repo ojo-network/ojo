@@ -45,3 +45,20 @@ func (msg *MsgGovCancelUpdateParams) ProposalRoute() string { return RouterKey }
 func (msg *MsgGovCancelUpdateParams) ProposalType() string {
 	return proposalTypeMsgGovCancelUpdateParams
 }
+
+// Implements Proposal Interface
+var _ gov.Content = &MsgGovAddDenoms{}
+
+// GetTitle returns the title of a community pool spend proposal.
+func (msg *MsgGovAddDenoms) GetTitle() string { return msg.Title }
+
+// GetDescription returns the description of a community pool spend proposal.
+func (msg *MsgGovAddDenoms) GetDescription() string { return msg.Description }
+
+// GetDescription returns the routing key of a community pool spend proposal.
+func (msg *MsgGovAddDenoms) ProposalRoute() string { return RouterKey }
+
+// ProposalType returns the type of a community pool spend proposal.
+func (msg *MsgGovAddDenoms) ProposalType() string {
+	return proposalTypeMsgGovCancelUpdateParams
+}

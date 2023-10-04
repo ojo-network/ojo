@@ -2,7 +2,8 @@ package types
 
 import (
 	"fmt"
-
+  
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"gopkg.in/yaml.v3"
@@ -92,6 +93,8 @@ var (
 			Threshold: "2",
 		},
 	}
+
+	defaultRewardBand        = sdk.NewDecWithPrec(2, 2) // 0.02
 )
 
 var _ paramstypes.ParamSet = &Params{}
@@ -101,7 +104,6 @@ var _ paramstypes.ParamSet = &Params{}
 // This function is necessary because we cannot use a constant,
 // and the reward band list is manipulated in our unit tests.
 func DefaultRewardBands() RewardBandList {
-	defaultRewardBand := sdk.NewDecWithPrec(2, 2) // 0.02
 	return RewardBandList{
 		{
 			SymbolDenom: OjoSymbol,
@@ -112,6 +114,29 @@ func DefaultRewardBands() RewardBandList {
 			RewardBand:  defaultRewardBand,
 		},
 	}
+}
+
+// AddDefault adds a default reward band for the given
+// denom.
+func (rbl *RewardBandList) AddDefault(
+	denom string,
+) {
+	*rbl = append(*rbl, RewardBand{
+		SymbolDenom: denom,
+		RewardBand:  defaultRewardBand,
+	})
+}
+
+// Add adds a reward band of a given denom and
+// reward band decimal.
+func (rbl *RewardBandList) Add(
+	denom string,
+	band math.LegacyDec,
+) {
+	*rbl = append(*rbl, RewardBand{
+		SymbolDenom: denom,
+		RewardBand:  band,
+	})
 }
 
 // DefaultParams creates default oracle module parameters
