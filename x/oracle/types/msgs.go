@@ -246,3 +246,43 @@ func (msg MsgGovCancelUpdateParams) GetSigners() []sdk.AccAddress {
 func (msg MsgGovCancelUpdateParams) ValidateBasic() error {
 	return checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority)
 }
+
+// NewMsgGovAddDenoms will creates a new NewMsgGovAddDenoms instance
+func NewMsgGovAddDenoms(
+	authority, title, description string,
+	height int64, denoms DenomList, mandatory bool,
+) *MsgGovAddDenoms {
+	return &MsgGovAddDenoms{
+		Authority:   authority,
+		Title:       title,
+		Description: description,
+		Height:      height,
+		DenomList:   denoms,
+		Mandatory:   mandatory,
+	}
+}
+
+// Type implements Msg interface
+func (msg MsgGovAddDenoms) Type() string { return sdk.MsgTypeURL(&msg) }
+
+// String implements the Stringer interface.
+func (msg MsgGovAddDenoms) String() string {
+	out, _ := yaml.Marshal(msg)
+	return string(out)
+}
+
+// GetSignBytes implements Msg
+func (msg MsgGovAddDenoms) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(&msg)
+	return sdk.MustSortJSON(bz)
+}
+
+// GetSigners implements Msg
+func (msg MsgGovAddDenoms) GetSigners() []sdk.AccAddress {
+	return checkers.Signers(msg.Authority)
+}
+
+// ValidateBasic implements Msg
+func (msg MsgGovAddDenoms) ValidateBasic() error {
+	return checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority)
+}
