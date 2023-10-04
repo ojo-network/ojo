@@ -218,8 +218,11 @@ func (ms msgServer) GovAddDenoms(
 
 		// add a RewardBand
 		_, err := plan.Changes.RewardBands.GetBandFromDenom(denom.SymbolDenom)
-		if err != nil {
+		if err == types.ErrNoRewardBand {
 			plan.Changes.RewardBands.AddDefault(denom.SymbolDenom)
+		}
+		if err != nil {
+			return nil, err
 		}
 	}
 
