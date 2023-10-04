@@ -29,7 +29,7 @@ func TestIntegrationTestSuite(t *testing.T) {
 }
 
 func (s *IntegrationTestSuite) SetupTest() {
-	s.app, s.ctx, s.keys = integration.SetupAppWithContext(s.T(), 2)
+	s.app, s.ctx, s.keys = integration.SetupAppWithContext(s.T())
 }
 
 func (s *IntegrationTestSuite) TestEndBlockerAccountCreation() {

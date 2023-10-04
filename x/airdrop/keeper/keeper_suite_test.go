@@ -32,6 +32,6 @@ func TestIntegrationTestSuite(t *testing.T) {
 }
 
 func (s *IntegrationTestSuite) SetupSuite() {
-	s.app, s.ctx, s.keys = integration.SetupAppWithContext(s.T(), 2)
+	s.app, s.ctx, s.keys = integration.SetupAppWithContext(s.T())
 	s.msgServer = keeper.NewMsgServerImpl(s.app.AirdropKeeper)
 }

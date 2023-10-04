@@ -29,6 +29,8 @@ const (
 	isCheckTx    = false
 )
 
+var validatorPowers = []int64{599, 398, 2}
+
 type TestValidatorKey struct {
 	PubKey     cryptotypes.PubKey
 	ValAddress sdk.ValAddress
@@ -45,6 +47,7 @@ func CreateTestValidatorKeys(numValidators int) []TestValidatorKey {
 			PubKey:     pubKey,
 			ValAddress: sdk.ValAddress(pubKey.Address()),
 			AccAddress: sdk.AccAddress(pubKey.Address()),
+			Power:      validatorPowers[i],
 		}
 		validatorKeys = append(validatorKeys, valInfo)
 	}
@@ -54,7 +57,6 @@ func CreateTestValidatorKeys(numValidators int) []TestValidatorKey {
 
 func SetupAppWithContext(
 	t *testing.T,
-	numVals int,
 ) (
 	*ojoapp.App,
 	sdk.Context,
@@ -91,16 +93,15 @@ func SetupAppWithContext(
 	for _, val := range validatorKeys {
 		require.NoError(t, app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
 		require.NoError(t, app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, val.AccAddress, initCoins))
+		sh.CreateValidatorWithValPower(val.ValAddress, val.PubKey, val.Power, true)
 		// sh.CreateValidator(val.ValAddress, val.PubKey, amt, true)
 	}
 
-	sh.CreateValidatorWithValPower(validatorKeys[0].ValAddress, validatorKeys[0].PubKey, 599, true)
-	sh.CreateValidatorWithValPower(validatorKeys[1].ValAddress, validatorKeys[1].PubKey, 398, true)
-	sh.CreateValidatorWithValPower(validatorKeys[2].ValAddress, validatorKeys[2].PubKey, 2, true)
-
 	// mint and send coins to oracle module to fill up reward pool
 	require.NoError(t, app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
-	require.NoError(t, app.BankKeeper.SendCoinsFromModuleToModule(ctx, minttypes.ModuleName, oracletypes.ModuleName, initCoins))
+	require.NoError(t,
+		app.BankKeeper.SendCoinsFromModuleToModule(ctx, minttypes.ModuleName, oracletypes.ModuleName, initCoins),
+	)
 
 	staking.EndBlocker(ctx, app.StakingKeeper)
 
