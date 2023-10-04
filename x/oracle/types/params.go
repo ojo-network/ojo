@@ -1,8 +1,6 @@
 package types
 
 import (
-	"fmt"
-  
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -75,6 +73,7 @@ var (
 	}
 	DefaultSlashFraction     = sdk.NewDecWithPrec(1, 4) // 0.01%
 	DefaultMinValidPerWindow = sdk.NewDecWithPrec(5, 2) // 5%
+	defaultRewardBand        = sdk.NewDecWithPrec(2, 2) // 0.02
 
 	DefaultCurrencyPairProviders = CurrencyPairProvidersList{
 		CurrencyPairProviders{
@@ -93,8 +92,6 @@ var (
 			Threshold: "2",
 		},
 	}
-
-	defaultRewardBand        = sdk.NewDecWithPrec(2, 2) // 0.02
 )
 
 var _ paramstypes.ParamSet = &Params{}
@@ -514,18 +511,18 @@ func validateMaximumMedianStamps(i interface{}) error {
 func validateCurrencyPairProviders(i interface{}) error {
 	v, ok := i.(CurrencyPairProvidersList)
 	if !ok {
-		return fmt.Errorf("invalid parameter type: %T", i)
+		return ErrInvalidParamValue.Wrapf("invalid parameter type: %T", i)
 	}
 
 	for _, c := range v {
 		if len(c.BaseDenom) == 0 {
-			return fmt.Errorf("oracle parameter CurrencyPairProviders must have BaseDenom")
+			return ErrInvalidParamValue.Wrap("oracle parameter CurrencyPairProviders must have BaseDenom")
 		}
 		if len(c.QuoteDenom) == 0 {
-			return fmt.Errorf("oracle parameter CurrencyPairProviders must have QuoteDenom")
+			return ErrInvalidParamValue.Wrap("oracle parameter CurrencyPairProviders must have QuoteDenom")
 		}
 		if len(c.Providers) < 1 {
-			return fmt.Errorf("oracle parameter CurrencyPairProviders must have at least 1 provider listed")
+			return ErrInvalidParamValue.Wrap("oracle parameter CurrencyPairProviders must have at least 1 provider listed")
 		}
 	}
 
@@ -535,15 +532,15 @@ func validateCurrencyPairProviders(i interface{}) error {
 func validateCurrencyDeviationThresholds(i interface{}) error {
 	v, ok := i.(CurrencyDeviationThresholdList)
 	if !ok {
-		return fmt.Errorf("invalid parameter type: %T", i)
+		return ErrInvalidParamValue.Wrapf("invalid parameter type: %T", i)
 	}
 
 	for _, c := range v {
 		if len(c.BaseDenom) == 0 {
-			return fmt.Errorf("oracle parameter CurrencyDeviationThreshold must have BaseDenom")
+			return ErrInvalidParamValue.Wrap("oracle parameter CurrencyDeviationThreshold must have BaseDenom")
 		}
 		if len(c.Threshold) == 0 {
-			return fmt.Errorf("oracle parameter CurrencyDeviationThreshold must have Threshold")
+			return ErrInvalidParamValue.Wrap("oracle parameter CurrencyDeviationThreshold must have Threshold")
 		}
 	}
 

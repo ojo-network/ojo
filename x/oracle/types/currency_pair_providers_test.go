@@ -74,7 +74,7 @@ func TestCurrencyPairProvidersEqual(t *testing.T) {
 			"coinbase",
 		},
 		PairAddress: []PairAddressProvider{
-			PairAddressProvider{
+			{
 				Address:         "address",
 				AddressProvider: "eth-uniswap",
 			},
