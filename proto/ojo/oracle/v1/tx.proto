@@ -147,6 +147,22 @@ message MsgGovAddDenoms {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable) = true
   ];
+
+  // currency_pair_providers defines the currency provider pairs for
+  // each denom being added.
+  repeated CurrencyPairProviders currency_pair_providers = 8 [
+    (gogoproto.moretags) = "yaml:\"currency_pair_providers\"",
+    (gogoproto.castrepeated) = "CurrencyPairProvidersList",
+    (gogoproto.nullable) = false
+  ];
+
+  // currency_deviation_thresholds defines the deviation thresholds
+  // for each denom being added.
+  repeated CurrencyDeviationThreshold currency_deviation_thresholds = 9 [
+    (gogoproto.moretags) = "yaml:\"currency_deviation_thresholds\"",
+    (gogoproto.castrepeated) = "CurrencyDeviationThresholdList",
+    (gogoproto.nullable) = false
+  ];
 }
 
 // MsgGovAddDenomResponse defines the Msg/GovAddDenomResponse response type.

@@ -227,6 +227,19 @@ func (ms msgServer) GovAddDenoms(
 			return nil, err
 		}
 	}
+
+	// append new currency pair providers
+	for _, cpp := range msg.CurrencyPairProviders {
+		plan.Keys = ojoutils.AppendUniqueString(plan.Keys, string(types.KeyCurrencyPairProviders))
+		plan.Changes.CurrencyPairProviders = append(plan.Changes.CurrencyPairProviders, cpp)
+	}
+
+	// append new currency deviation thresholds
+	for _, cdt := range msg.CurrencyDeviationThresholds {
+		plan.Keys = ojoutils.AppendUniqueString(plan.Keys, string(types.KeyCurrencyDeviationThresholds))
+		plan.Changes.CurrencyDeviationThresholds = append(plan.Changes.CurrencyDeviationThresholds, cdt)
+	}
+
 	// also update RewardBand key
 	plan.Keys = append(plan.Keys, string(types.KeyRewardBands))
 

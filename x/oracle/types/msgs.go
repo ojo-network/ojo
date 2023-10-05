@@ -251,6 +251,8 @@ func (msg MsgGovCancelUpdateParams) ValidateBasic() error {
 func NewMsgGovAddDenoms(
 	authority, title, description string,
 	height int64, denoms DenomList, mandatory bool,
+	rewardBand sdk.Dec, currencyPairProviders CurrencyPairProvidersList,
+	currencyDeviationThresholds CurrencyDeviationThresholdList,
 ) *MsgGovAddDenoms {
 	return &MsgGovAddDenoms{
 		Authority:   authority,
@@ -259,6 +261,10 @@ func NewMsgGovAddDenoms(
 		Height:      height,
 		DenomList:   denoms,
 		Mandatory:   mandatory,
+		RewardBand:  &rewardBand,
+
+		CurrencyPairProviders:       currencyPairProviders,
+		CurrencyDeviationThresholds: currencyDeviationThresholds,
 	}
 }
 

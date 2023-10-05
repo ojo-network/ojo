@@ -7,11 +7,13 @@ import (
 var (
 	proposalTypeMsgGovUpdateParams       = MsgGovUpdateParams{}.String()
 	proposalTypeMsgGovCancelUpdateParams = MsgGovCancelUpdateParams{}.String()
+	proposalTypeMsgGovAddDenoms          = MsgGovAddDenoms{}.String()
 )
 
 func init() {
 	gov.RegisterProposalType(proposalTypeMsgGovUpdateParams)
 	gov.RegisterProposalType(proposalTypeMsgGovCancelUpdateParams)
+	gov.RegisterProposalType(proposalTypeMsgGovAddDenoms)
 }
 
 // Implements Proposal Interface
