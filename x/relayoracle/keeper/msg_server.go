@@ -44,6 +44,12 @@ func (ms msgServer) GovUpdateParams(
 		case string(types.KeyPacketTimeout):
 			ms.SetPacketTimeout(ctx, msg.Changes.PacketTimeout)
 
+		case string(types.KeyMaxExchange):
+			ms.SetMaxQueryForExchangeRate(ctx, msg.Changes.MaxAllowedDenomsExchangeQuery)
+
+		case string(types.KeyMaxHistorical):
+			ms.SetMaxQueryForHistorical(ctx, msg.Changes.MaxAllowedDenomsHistoricalQuery)
+
 		default:
 			return nil, fmt.Errorf("%s is not a relay oracle param key", key)
 		}

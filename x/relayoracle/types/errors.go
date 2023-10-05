@@ -13,5 +13,5 @@ var (
 	ErrIbcRequestDisabled   = sdkerrors.Register(ModuleName, 3, "ibc request.go disabled")
 	ErrRequestNotFound      = sdkerrors.Register(ModuleName, 4, "request not found")
 	ErrTooManyDenoms        = sdkerrors.Register(ModuleName, 5, "total denoms exceeds threshold")
-	ErrNoDenoms             = sdkerrors.Register(ModuleName, 5, "no denoms in reuqest")
+	ErrNoDenoms             = sdkerrors.Register(ModuleName, 6, "no denoms in request")
 )

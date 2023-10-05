@@ -60,6 +60,12 @@ func (msg MsgGovUpdateParams) ValidateBasic() error {
 		case string(KeyPacketTimeout):
 			return validateUint64(msg.Changes.PacketTimeout)
 
+		case string(KeyMaxHistorical):
+			return validateUint64(msg.Changes.MaxAllowedDenomsHistoricalQuery)
+
+		case string(KeyMaxExchange):
+			return validateUint64(msg.Changes.MaxAllowedDenomsExchangeQuery)
+
 		default:
 			return fmt.Errorf("%s is not a relay oracle param key", key)
 		}

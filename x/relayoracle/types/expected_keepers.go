@@ -11,6 +11,7 @@ type OracleKeeper interface {
 	IterateExchangeRatesForDenoms(ctx sdk.Context, denoms []string) (oracleTypes.PriceStamps, error)
 	IterateHistoricPricesForDenoms(ctx sdk.Context, prefix []byte, denoms []string, numStamps uint) oracleTypes.PriceStamps
 	HasActiveExchangeRates(ctx sdk.Context, denom []string) (bool, error)
+	HasActiveHistoricalRates(ctx sdk.Context, denom []string) (bool, error)
 	MaximumMedianStamps(ctx sdk.Context) (res uint64)
 }
 

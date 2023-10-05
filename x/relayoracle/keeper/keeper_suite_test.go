@@ -52,6 +52,7 @@ type IntegrationTestSuite struct {
 	ctx         sdk.Context
 	app         *ojoapp.App
 	queryClient types.QueryClient
+	msgServer   types.MsgServer
 }
 
 func TestIntegrationTestSuite(t *testing.T) {
@@ -94,4 +95,5 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.app = app
 	s.ctx = ctx
 	s.queryClient = types.NewQueryClient(queryHelper)
+	s.msgServer = keeper.NewMsgServerImpl(app.RelayOracle)
 }

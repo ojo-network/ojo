@@ -7,8 +7,9 @@ import (
 )
 
 // GetParams get all parameters as types.Params
-func (k Keeper) GetParams(ctx sdk.Context) types.Params {
-	return types.NewParams()
+func (k Keeper) GetParams(ctx sdk.Context) (params types.Params) {
+	k.paramstore.GetParamSet(ctx, &params)
+	return
 }
 
 // SetParams set the params
@@ -25,11 +26,11 @@ func (k Keeper) SetPacketTimeout(ctx sdk.Context, expiry uint64) {
 }
 
 func (k Keeper) SetMaxQueryForExchangeRate(ctx sdk.Context, maxRequests uint64) {
-	k.paramstore.Set(ctx, types.KeyPacketTimeout, maxRequests)
+	k.paramstore.Set(ctx, types.KeyMaxExchange, maxRequests)
 }
 
 func (k Keeper) SetMaxQueryForHistorical(ctx sdk.Context, expiry uint64) {
-	k.paramstore.Set(ctx, types.KeyPacketTimeout, expiry)
+	k.paramstore.Set(ctx, types.KeyMaxHistorical, expiry)
 }
 
 func (k Keeper) GetMaxQueryForExchangeRate(ctx sdk.Context) (limit uint64) {

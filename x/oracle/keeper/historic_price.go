@@ -389,3 +389,15 @@ func (k Keeper) IterateHistoricPricesForDenoms(
 
 	return prices
 }
+
+func (k Keeper) HasActiveHistoricalRates(ctx sdk.Context, denoms []string) (bool, error) {
+	store := ctx.KVStore(k.storeKey)
+	for _, denom := range denoms {
+		found := store.Has(types.GetExchangeRateKey(denom))
+		if !found {
+			return false, types.ErrUnknownDenom.Wrap(denom)
+		}
+	}
+
+	return true, nil
+}

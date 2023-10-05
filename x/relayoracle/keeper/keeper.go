@@ -120,6 +120,9 @@ func (k Keeper) OnRecvPacket(
 		return 0, err
 	}
 
+	//TODO: testing
+	ctx.Logger().Error("request recieved", "request", request.String())
+
 	if len(request.GetDenoms()) == 0 {
 		return 0, types.ErrNoDenoms
 	}
@@ -130,16 +133,20 @@ func (k Keeper) OnRecvPacket(
 			return 0, types.ErrTooManyDenoms
 		}
 
+		found, err := k.oracleKeeper.HasActiveExchangeRates(ctx, request.GetDenoms())
+		if !found {
+			return 0, err
+		}
+
 	default:
 		if len(request.GetDenoms()) > int(k.GetMaxQueryForHistorical(ctx)) {
 			return 0, types.ErrTooManyDenoms
 		}
-	}
 
-	// TODO: add different historical check for denoms
-	found, err := k.oracleKeeper.HasActiveExchangeRates(ctx, request.GetDenoms())
-	if !found {
-		return 0, err
+		found, err := k.oracleKeeper.HasActiveHistoricalRates(ctx, request.GetDenoms())
+		if !found {
+			return 0, err
+		}
 	}
 
 	ibcChannel := types.NewIbcChannel(packet.DestinationPort, packet.DestinationChannel)

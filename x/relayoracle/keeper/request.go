@@ -52,7 +52,7 @@ func (k Keeper) GetRequest(ctx sdk.Context, id uint64) (types.Request, error) {
 }
 
 func (k Keeper) SetResult(ctx sdk.Context, result types.Result) {
-	ctx.KVStore(k.storeKey).Set(types.RequestStoreKey(result.RequestID), k.cdc.MustMarshal(&result))
+	ctx.KVStore(k.storeKey).Set(types.ResultStoreKey(result.RequestID), k.cdc.MustMarshal(&result))
 }
 
 // DeleteRequest removes the given data request from the store.
@@ -152,11 +152,6 @@ func (k Keeper) ProcessResult(ctx sdk.Context, requestID uint64, status types.Re
 		packetData := types.NewOracleResponsePacketData(
 			req.ClientID, requestID, req.RequestTime, ctx.BlockTime().Unix(), status, result,
 		)
-
-		//TODO: remove log
-		ctx.Logger().Info("inside save request", "source channel", sourceChannel,
-			"source port", sourcePort, "packet data", packetData.String(),
-			"binary", packetData.ToBytes(), "json", types.ModuleCdc.MustMarshalJSON(packetData))
 
 		if _, err := k.channelKeeper.SendPacket(
 			ctx,
