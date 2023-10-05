@@ -161,14 +161,14 @@ func (im IBCModule) OnRecvPacket(
 	}
 
 	// process module packet data
-	id, err := im.keeper.OnRecvPacket(ctx, modulePacket, modulePacketData)
+	id, requestType, err := im.keeper.OnRecvPacket(ctx, modulePacket, modulePacketData)
 	if err != nil {
 		return channeltypes.NewErrorAcknowledgement(err)
 	}
 
 	// NOTE: acknowledgement will be written synchronously during IBC handler execution.
 	return channeltypes.NewResultAcknowledgement(
-		types.ModuleCdc.MustMarshal(types.NewRequestOracleAcknowledgement(id)))
+		types.ModuleCdc.MustMarshal(types.NewRequestOracleAcknowledgement(id, requestType)))
 }
 
 // OnAcknowledgementPacket implements the IBCModule interface

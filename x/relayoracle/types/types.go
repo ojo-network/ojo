@@ -2,6 +2,7 @@ package types
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	protobuftypes "github.com/gogo/protobuf/types"
 )
 
 func (packet *OracleRequestPacketData) ValidateBasic() error {
@@ -23,9 +24,10 @@ func NewRequest(calldata []byte, clientID string, channel *IBCChannel) Request {
 	}
 }
 
-func NewRequestOracleAcknowledgement(id uint64) *OracleRequestPacketAcknowledgement {
+func NewRequestOracleAcknowledgement(id uint64, requestType PriceRequestType) *OracleRequestPacketAcknowledgement {
 	return &OracleRequestPacketAcknowledgement{
 		RequestID: id,
+		Data:      ModuleCdc.MustMarshalLengthPrefixed(&protobuftypes.Int32Value{Value: int32(requestType)}),
 	}
 }
 

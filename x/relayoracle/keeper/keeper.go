@@ -108,49 +108,51 @@ func (k Keeper) OnRecvPacket(
 	ctx sdk.Context,
 	packet channeltypes.Packet,
 	data types.OracleRequestPacketData,
-) (uint64, error) {
+) (uint64, types.PriceRequestType, error) {
 	if err := data.ValidateBasic(); err != nil {
-		return 0, err
+		return 0, 0, err
 	}
 
 	// check if there is a active denom
 	var request types.RequestPrice
 	err := k.cdc.Unmarshal(data.GetCalldata(), &request)
 	if err != nil {
-		return 0, err
+		return 0, 0, err
 	}
 
 	//TODO: testing
 	ctx.Logger().Error("request recieved", "request", request.String())
 
 	if len(request.GetDenoms()) == 0 {
-		return 0, types.ErrNoDenoms
+		return 0, 0, types.ErrNoDenoms
 	}
 
 	switch request.Request {
 	case types.PRICE_REQUEST_RATE:
 		if len(request.GetDenoms()) > int(k.GetMaxQueryForExchangeRate(ctx)) {
-			return 0, types.ErrTooManyDenoms
+			return 0, 0, types.ErrTooManyDenoms
 		}
 
 		found, err := k.oracleKeeper.HasActiveExchangeRates(ctx, request.GetDenoms())
 		if !found {
-			return 0, err
+			return 0, 0, err
 		}
 
 	default:
 		if len(request.GetDenoms()) > int(k.GetMaxQueryForHistorical(ctx)) {
-			return 0, types.ErrTooManyDenoms
+			return 0, 0, types.ErrTooManyDenoms
 		}
 
 		found, err := k.oracleKeeper.HasActiveHistoricalRates(ctx, request.GetDenoms())
 		if !found {
-			return 0, err
+			return 0, 0, err
 		}
 	}
 
 	ibcChannel := types.NewIbcChannel(packet.DestinationPort, packet.DestinationChannel)
-	return k.PrepareRequest(ctx, ibcChannel, &data)
+	id, err := k.PrepareRequest(ctx, ibcChannel, &data)
+
+	return id, request.Request, err
 }
 
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {

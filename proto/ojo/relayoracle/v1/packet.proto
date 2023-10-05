@@ -54,4 +54,5 @@ message OracleData {
 message OracleRequestPacketAcknowledgement {
   option (gogoproto.equal) = true;
   uint64 request_id = 1 [(gogoproto.customname) = "RequestID"];
+  bytes data = 2;
 }
