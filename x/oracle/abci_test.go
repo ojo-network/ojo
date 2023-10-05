@@ -38,6 +38,11 @@ const (
 )
 
 func (s *IntegrationTestSuite) SetupTest() {
+	config := sdk.GetConfig()
+	config.SetBech32PrefixForAccount(appparams.AccountAddressPrefix, appparams.AccountPubKeyPrefix)
+	config.SetBech32PrefixForValidator(appparams.ValidatorAddressPrefix, appparams.ValidatorPubKeyPrefix)
+	config.SetBech32PrefixForConsensusNode(appparams.ConsNodeAddressPrefix, appparams.ConsNodePubKeyPrefix)
+
 	require := s.Require()
 	isCheckTx := false
 	app := ojoapp.Setup(s.T())
@@ -248,7 +253,6 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 
 func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 	app, ctx := s.app, s.ctx
-	originalBlockHeight := ctx.BlockHeight()
 	preVoteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx) / 2)
 	voteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx)/2 + 1)
 
@@ -387,8 +391,6 @@ func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 426), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1).Rewards[0])
 	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 408), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr2).Rewards[0])
 	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 426), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr3).Rewards[0])
-
-	ctx = ctx.WithBlockHeight(originalBlockHeight)
 }
 
 var exchangeRates = map[string][]sdk.Dec{
