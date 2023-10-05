@@ -112,7 +112,8 @@ func (app *App) registerUpgrade0_2_1(_ upgradetypes.Plan) {
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			ctx.Logger().Info("Upgrade handler execution", "name", planName)
-			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+      fromVM[ibctm.ModuleName] = ibctm.AppModule{}.ConsensusVersion()
+      return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)
 }
