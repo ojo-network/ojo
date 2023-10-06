@@ -519,10 +519,40 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 		BaseDenom:   "BAR",
 		Exponent:    6,
 	}
+	foobar := &oracletypes.Denom{
+		SymbolDenom: "FOOBAR",
+		BaseDenom:   "FOOBAR",
+		Exponent:    6,
+	}
 	reward := &oracletypes.Denom{
 		SymbolDenom: "REWARD",
 		BaseDenom:   "REWARD",
 		Exponent:    6,
+	}
+	currencyPairProviders := oracletypes.CurrencyPairProvidersList{
+		{
+			BaseDenom:  "FOO",
+			QuoteDenom: "BAR",
+			PairAddress: []oracletypes.PairAddressProvider{
+				{
+					Address:         "address",
+					AddressProvider: "provider",
+				},
+			},
+			Providers: []string{
+				"provider",
+			},
+		},
+	}
+	currencyDeviationThresholds := oracletypes.CurrencyDeviationThresholdList{
+		{
+			BaseDenom: "FOO",
+			Threshold: "2.0",
+		},
+		{
+			BaseDenom: "BAR",
+			Threshold: "2.0",
+		},
 	}
 
 	testCases := []struct {
@@ -545,7 +575,7 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 			"",
 		},
 		{
-			"valid mandatory denom addition",
+			"valid mandatory denom addition with currency pair providers and currency deviation thresholds",
 			&types.MsgGovAddDenoms{
 				Authority:   govAccAddr,
 				Title:       "test",
@@ -553,6 +583,9 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 				Height:      9,
 				DenomList:   append(types.DenomList{}, *foo, *bar),
 				Mandatory:   true,
+
+				CurrencyPairProviders:       currencyPairProviders,
+				CurrencyDeviationThresholds: currencyDeviationThresholds,
 			},
 			false,
 			"",
@@ -644,6 +677,46 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 			true,
 			"invalid oracle param value",
 		},
+		{
+			"invalid currency pair provider list",
+			&types.MsgGovAddDenoms{
+				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
+				Height:      9,
+				DenomList:   append(types.DenomList{}, *foobar),
+				Mandatory:   true,
+
+				CurrencyPairProviders: oracletypes.CurrencyPairProvidersList{
+					{
+						BaseDenom:  "FOOBAR",
+						QuoteDenom: "BAR",
+						Providers:  []string{},
+					},
+				},
+			},
+			true,
+			"oracle parameter CurrencyPairProviders must have at least 1 provider listed",
+		},
+		{
+			"invalid currency deviation threshold list",
+			&types.MsgGovAddDenoms{
+				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
+				Height:      9,
+				DenomList:   append(types.DenomList{}, *foobar),
+				Mandatory:   true,
+
+				CurrencyDeviationThresholds: oracletypes.CurrencyDeviationThresholdList{
+					{
+						BaseDenom: "FOOBAR",
+					},
+				},
+			},
+			true,
+			"oracle parameter CurrencyDeviationThreshold must have Threshold",
+		},
 	}
 
 	for _, tc := range testCases {
@@ -673,7 +746,7 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 					s.Require().Equal(band, sdk.NewDecWithPrec(2, 2))
 					s.Require().NoError(err)
 
-				case "valid mandatory denom addition":
+				case "valid mandatory denom addition with currency pair providers and currency deviation thresholds":
 					al := s.app.OracleKeeper.AcceptList(s.ctx)
 					s.Require().True(
 						al.Contains(foo.SymbolDenom) && al.Contains(bar.SymbolDenom),
@@ -690,6 +763,16 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 					band, err = rwb.GetBandFromDenom("bar")
 					s.Require().Equal(band, sdk.NewDecWithPrec(2, 2))
 					s.Require().NoError(err)
+
+					cpp := s.app.OracleKeeper.CurrencyPairProviders(s.ctx)
+					for i := range currencyPairProviders {
+						s.Require().Contains(cpp, currencyPairProviders[i])
+					}
+
+					cdt := s.app.OracleKeeper.CurrencyDeviationThresholds(s.ctx)
+					for i := range currencyDeviationThresholds {
+						s.Require().Contains(cdt, currencyDeviationThresholds[i])
+					}
 
 				case "valid denom addition with reward band":
 					al := s.app.OracleKeeper.AcceptList(s.ctx)
