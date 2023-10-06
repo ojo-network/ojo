@@ -63,6 +63,8 @@ func (s *IntegrationTestSuite) TestMsgServer_ClaimAirdrop() {
 		},
 	}
 
+	ctx := s.ctx.WithBlockHeight(9) // assumes block height of 9
+
 	for _, tc := range testCases {
 		s.Run(tc.name, func() {
 			SetParams(s, tc.expiryBlock, &tc.delegationRequirement)
@@ -72,8 +74,7 @@ func (s *IntegrationTestSuite) TestMsgServer_ClaimAirdrop() {
 				tc.originAccount.String(),
 				claimAddress.String(),
 			)
-
-			_, err := s.msgServer.ClaimAirdrop(s.ctx, msgClaimAirdrop)
+			_, err := s.msgServer.ClaimAirdrop(ctx, msgClaimAirdrop)
 			if tc.errMsg != "" {
 				s.Require().Error(err)
 				s.Require().Contains(err.Error(), tc.errMsg)
