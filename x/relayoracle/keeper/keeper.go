@@ -121,7 +121,7 @@ func (k Keeper) OnRecvPacket(
 	}
 
 	//TODO: testing
-	ctx.Logger().Error("request recieved", "request", request.String())
+	ctx.Logger().Error("request received", "request", request.String())
 
 	if len(request.GetDenoms()) == 0 {
 		return 0, 0, types.ErrNoDenoms
