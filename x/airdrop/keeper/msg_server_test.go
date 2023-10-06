@@ -74,6 +74,7 @@ func (s *IntegrationTestSuite) TestMsgServer_ClaimAirdrop() {
 				tc.originAccount.String(),
 				claimAddress.String(),
 			)
+
 			_, err := s.msgServer.ClaimAirdrop(ctx, msgClaimAirdrop)
 			if tc.errMsg != "" {
 				s.Require().Error(err)
