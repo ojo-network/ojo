@@ -3,7 +3,6 @@ package ojo.oracle.v1;
 
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
-import "ojo/oracle/v1/oracle.proto";
 
 option go_package = "github.com/ojo-network/ojo/x/oracle/types";
 
