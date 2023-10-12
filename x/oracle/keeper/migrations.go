@@ -316,6 +316,123 @@ func (m Migrator) MigrateCurrencyPairProviders(ctx sdk.Context) {
 			},
 		},
 		types.CurrencyPairProviders{
+			BaseDenom:  "MATIC",
+			QuoteDenom: "USDT",
+			Providers: []string{
+				"mexc",
+				"bitget",
+			},
+		},
+		types.CurrencyPairProviders{
+			BaseDenom:  "MATIC",
+			QuoteDenom: "USD",
+			Providers: []string{
+				"coinbase",
+				"kraken",
+			},
+		},
+		types.CurrencyPairProviders{
+			BaseDenom:  "CMST",
+			QuoteDenom: "OSMO",
+			Providers: []string{
+				"osmosis",
+			},
+		},
+		types.CurrencyPairProviders{
+			BaseDenom:  "LINK",
+			QuoteDenom: "USD",
+			Providers: []string{
+				"crypto",
+				"kraken",
+			},
+		},
+		types.CurrencyPairProviders{
+			BaseDenom:  "SUSHI",
+			QuoteDenom: "USDT",
+			Providers: []string{
+				"okx",
+				"bitget",
+			},
+		},
+		types.CurrencyPairProviders{
+			BaseDenom:  "SUSHI",
+			QuoteDenom: "USD",
+			Providers: []string{
+				"coinbase",
+			},
+		},
+		types.CurrencyPairProviders{
+			BaseDenom:  "CMDX",
+			QuoteDenom: "OSMO",
+			Providers: []string{
+				"osmosis",
+			},
+		},
+		types.CurrencyPairProviders{
+			BaseDenom:  "CRV",
+			QuoteDenom: "USDT",
+			Providers: []string{
+				"okx",
+				"bitget",
+				"mexc",
+			},
+		},
+		types.CurrencyPairProviders{
+			BaseDenom:  "CRV",
+			QuoteDenom: "USD",
+			Providers: []string{
+				"coinbase",
+			},
+		},
+		types.CurrencyPairProviders{
+			BaseDenom:  "MKR",
+			QuoteDenom: "USDT",
+			Providers: []string{
+				"okx",
+				"bitget",
+				"crypto",
+			},
+		},
+		types.CurrencyPairProviders{
+			BaseDenom:  "MKR",
+			QuoteDenom: "USD",
+			Providers: []string{
+				"coinbase",
+			},
+		},
+		types.CurrencyPairProviders{
+			BaseDenom:  "SEI",
+			QuoteDenom: "USDT",
+			Providers: []string{
+				"bitget",
+			},
+		},
+		types.CurrencyPairProviders{
+			BaseDenom:  "SEI",
+			QuoteDenom: "USD",
+			Providers: []string{
+				"coinbase",
+				"kraken",
+				"crypto",
+			},
+		},
+		types.CurrencyPairProviders{
+			BaseDenom:  "INJ",
+			QuoteDenom: "USDT",
+			Providers: []string{
+				"bitget",
+				"mexc",
+				"crypto",
+			},
+		},
+		types.CurrencyPairProviders{
+			BaseDenom:  "INJ",
+			QuoteDenom: "USD",
+			Providers: []string{
+				"coinbase",
+			},
+		},
+		types.CurrencyPairProviders{
 			BaseDenom:  "RETH",
 			QuoteDenom: "WETH",
 			PairAddress: []types.PairAddressProvider{
@@ -464,6 +581,42 @@ func (m Migrator) MigrateCurrencyDeviationThresholds(ctx sdk.Context) {
 		},
 		types.CurrencyDeviationThreshold{
 			BaseDenom: "CBETH",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "CMST",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "CMDX",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "MATIC",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "LINK",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "SUSHI",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "CRV",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "MKR",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "INJ",
+			Threshold: "2",
+		},
+		types.CurrencyDeviationThreshold{
+			BaseDenom: "SEI",
 			Threshold: "2",
 		},
 	}
