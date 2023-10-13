@@ -240,8 +240,10 @@ func (ms msgServer) GovAddDenoms(
 		plan.Changes.CurrencyDeviationThresholds = append(plan.Changes.CurrencyDeviationThresholds, cdt)
 	}
 
-	// also update RewardBand key
-	plan.Keys = append(plan.Keys, string(types.KeyRewardBands))
+	// also update RewardBand key if new denoms are getting added
+	if len(msg.DenomList) != 0 {
+		plan.Keys = append(plan.Keys, string(types.KeyRewardBands))
+	}
 
 	// validate plan construction before scheduling
 	err := plan.ValidateBasic()

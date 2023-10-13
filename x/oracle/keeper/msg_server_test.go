@@ -554,6 +554,27 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 			Threshold: "2.0",
 		},
 	}
+	currencyPairProviders2 := oracletypes.CurrencyPairProvidersList{
+		{
+			BaseDenom:  "FOOBAR",
+			QuoteDenom: "BAR",
+			PairAddress: []oracletypes.PairAddressProvider{
+				{
+					Address:         "address2",
+					AddressProvider: "provider2",
+				},
+			},
+			Providers: []string{
+				"provider2",
+			},
+		},
+	}
+	currencyDeviationThresholds2 := oracletypes.CurrencyDeviationThresholdList{
+		{
+			BaseDenom: "FOOBAR",
+			Threshold: "2.0",
+		},
+	}
 
 	testCases := []struct {
 		name      string
@@ -600,6 +621,22 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 				DenomList:   append(types.DenomList{}, *reward),
 				Mandatory:   true,
 				RewardBand:  &bandArgument,
+			},
+			false,
+			"",
+		},
+		{
+			"valid currency pair providers and currency deviation thresholds addition with no new denoms",
+			&types.MsgGovAddDenoms{
+				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
+				Height:      9,
+				DenomList:   types.DenomList{},
+				Mandatory:   true,
+
+				CurrencyPairProviders:       currencyPairProviders2,
+				CurrencyDeviationThresholds: currencyDeviationThresholds2,
 			},
 			false,
 			"",
@@ -784,6 +821,17 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 					band, err := rwb.GetBandFromDenom("REWARD")
 					s.Require().Equal(band, sdk.NewDecWithPrec(2, 3))
 					s.Require().NoError(err)
+
+				case "valid currency pair providers and currency deviation thresholds addition with no new denoms":
+					cpp := s.app.OracleKeeper.CurrencyPairProviders(s.ctx)
+					for i := range currencyPairProviders2 {
+						s.Require().Contains(cpp, currencyPairProviders2[i])
+					}
+
+					cdt := s.app.OracleKeeper.CurrencyDeviationThresholds(s.ctx)
+					for i := range currencyDeviationThresholds2 {
+						s.Require().Contains(cdt, currencyDeviationThresholds2[i])
+					}
 				}
 			}
 		})
