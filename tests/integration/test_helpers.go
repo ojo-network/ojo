@@ -70,7 +70,6 @@ func SetupAppWithContext(
 	app := ojoapp.Setup(t)
 	ctx := app.BaseApp.NewContext(isCheckTx, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
-		Height:  9,
 	})
 
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
@@ -79,10 +78,6 @@ func SetupAppWithContext(
 
 	sh := stakingtestutil.NewHelper(t, ctx, app.StakingKeeper)
 	sh.Denom = bondDenom
-
-	// amt := sdk.TokensFromConsensusPower(100, sdk.DefaultPowerReduction)
-
-	// make validators 60%, 29%, 1% of total power
 
 	initTokens := sdk.TokensFromConsensusPower(initialPower, sdk.DefaultPowerReduction)
 	initCoins := sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, initTokens))
@@ -94,7 +89,6 @@ func SetupAppWithContext(
 		require.NoError(t, app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
 		require.NoError(t, app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, val.AccAddress, initCoins))
 		sh.CreateValidatorWithValPower(val.ValAddress, val.PubKey, val.Power, true)
-		// sh.CreateValidator(val.ValAddress, val.PubKey, amt, true)
 	}
 
 	// mint and send coins to oracle module to fill up reward pool
