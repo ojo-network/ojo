@@ -1,21 +1,14 @@
 package oracle_test
 
 import (
-	"fmt"
 	"testing"
 
-	"github.com/cometbft/cometbft/crypto/secp256k1"
-	tmrand "github.com/cometbft/cometbft/libs/rand"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
-	"github.com/cosmos/cosmos-sdk/x/staking"
-	stakingtestutil "github.com/cosmos/cosmos-sdk/x/staking/testutil"
 	"github.com/stretchr/testify/suite"
 
 	ojoapp "github.com/ojo-network/ojo/app"
 	appparams "github.com/ojo-network/ojo/app/params"
+	"github.com/ojo-network/ojo/tests/integration"
 	"github.com/ojo-network/ojo/util/decmath"
 	"github.com/ojo-network/ojo/x/oracle"
 	"github.com/ojo-network/ojo/x/oracle/types"
@@ -29,82 +22,15 @@ const (
 type IntegrationTestSuite struct {
 	suite.Suite
 
-	ctx sdk.Context
-	app *ojoapp.App
+	ctx  sdk.Context
+	app  *ojoapp.App
+	keys []integration.TestValidatorKey
 }
-
-const (
-	initialPower = int64(1000)
-)
 
 func (s *IntegrationTestSuite) SetupTest() {
-	config := sdk.GetConfig()
-	config.SetBech32PrefixForAccount(appparams.AccountAddressPrefix, appparams.AccountPubKeyPrefix)
-	config.SetBech32PrefixForValidator(appparams.ValidatorAddressPrefix, appparams.ValidatorPubKeyPrefix)
-	config.SetBech32PrefixForConsensusNode(appparams.ConsNodeAddressPrefix, appparams.ConsNodePubKeyPrefix)
-
-	require := s.Require()
-	isCheckTx := false
-	app := ojoapp.Setup(s.T())
-	ctx := app.BaseApp.NewContext(isCheckTx, tmproto.Header{
-		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
-	})
-
-	oracle.InitGenesis(ctx, app.OracleKeeper, *types.DefaultGenesisState())
-
-	// validate setup... app.Setup creates one validator, with 1uumee self delegation
-	setupVals := app.StakingKeeper.GetBondedValidatorsByPower(ctx)
-	s.Require().Len(setupVals, 1)
-	s.Require().Equal(int64(1), setupVals[0].GetConsensusPower(app.StakingKeeper.PowerReduction(ctx)))
-
-	sh := stakingtestutil.NewHelper(s.T(), ctx, app.StakingKeeper)
-	sh.Denom = bondDenom
-
-	// mint and send coins to validators
-	require.NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins.MulInt(sdk.NewIntFromUint64(3))))
-	require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr1, initCoins))
-	require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr2, initCoins))
-	require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr3, initCoins))
-
-	// mint and send coins to oracle module to fill up reward pool
-	require.NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
-	require.NoError(app.BankKeeper.SendCoinsFromModuleToModule(ctx, minttypes.ModuleName, types.ModuleName, initCoins))
-
-	// self delegate 999 in total ... 1 val with 1uumee is already created in app.Setup
-	sh.CreateValidatorWithValPower(valAddr1, valPubKey1, 599, true)
-	sh.CreateValidatorWithValPower(valAddr2, valPubKey2, 398, true)
-	sh.CreateValidatorWithValPower(valAddr3, valPubKey3, 2, true)
-
-	staking.EndBlocker(ctx, app.StakingKeeper)
-
-	app.OracleKeeper.SetVoteThreshold(ctx, sdk.MustNewDecFromStr("0.4"))
-
-	s.app = app
-	s.ctx = ctx
+	s.app, s.ctx, s.keys = integration.SetupAppWithContext(s.T())
+	s.app.OracleKeeper.SetVoteThreshold(s.ctx, sdk.MustNewDecFromStr("0.4"))
 }
-
-// Test addresses
-var (
-	valPubKeys = simtestutil.CreateTestPubKeys(3)
-
-	valPubKey1 = valPubKeys[0]
-	pubKey1    = secp256k1.GenPrivKey().PubKey()
-	addr1      = sdk.AccAddress(pubKey1.Address())
-	valAddr1   = sdk.ValAddress(pubKey1.Address())
-
-	valPubKey2 = valPubKeys[1]
-	pubKey2    = secp256k1.GenPrivKey().PubKey()
-	addr2      = sdk.AccAddress(pubKey2.Address())
-	valAddr2   = sdk.ValAddress(pubKey2.Address())
-
-	valPubKey3 = valPubKeys[2]
-	pubKey3    = secp256k1.GenPrivKey().PubKey()
-	addr3      = sdk.AccAddress(pubKey3.Address())
-	valAddr3   = sdk.ValAddress(pubKey3.Address())
-
-	initTokens = sdk.TokensFromConsensusPower(initialPower, sdk.DefaultPowerReduction)
-	initCoins  = sdk.NewCoins(sdk.NewCoin(bondDenom, initTokens))
-)
 
 func createVotes(hash string, val sdk.ValAddress, rates sdk.DecCoins, blockHeight uint64) (types.AggregateExchangeRatePrevote, types.AggregateExchangeRateVote) {
 	preVote := types.AggregateExchangeRatePrevote{
@@ -121,6 +47,7 @@ func createVotes(hash string, val sdk.ValAddress, rates sdk.DecCoins, blockHeigh
 
 func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	app, ctx := s.app, s.ctx
+	valAddr1, valAddr2, valAddr3 := s.keys[0].ValAddress, s.keys[1].ValAddress, s.keys[2].ValAddress
 	ctx = ctx.WithBlockHeight(0)
 	preVoteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx) / 2)
 	voteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx)/2 + 1)
@@ -253,6 +180,7 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 
 func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 	app, ctx := s.app, s.ctx
+	valAddr1, valAddr2, valAddr3 := s.keys[0].ValAddress, s.keys[1].ValAddress, s.keys[2].ValAddress
 	preVoteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx) / 2)
 	voteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx)/2 + 1)
 
@@ -410,6 +338,7 @@ var exchangeRates = map[string][]sdk.Dec{
 
 func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 	app, ctx := s.app, s.ctx
+	valAddr1 := s.keys[0].ValAddress
 	blockHeight := ctx.BlockHeight()
 
 	var historicStampPeriod int64 = 3
