@@ -20,14 +20,34 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 	k.SetRequestCount(ctx, 0)
 
 	k.SetParams(ctx, genState.Params)
+
+	// set request ids
+	for _, request := range genState.Requests {
+		k.SetRequest(ctx, request.RequestID, request)
+	}
+
+	// set results
+	for _, result := range genState.Results {
+		k.SetResult(ctx, result)
+	}
+
+	// set pending list
+	var pending types.PendingRequestList
+	pending.RequestIds = genState.GetPendingRequestIds()
+	k.SetPendingList(ctx, pending)
+
 }
 
 // ExportGenesis returns the module's exported genesis
-// TODO: add pending request list and results to genesis
 func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
 	genesis := types.DefaultGenesis()
 	genesis.Params = k.GetParams(ctx)
 	genesis.PortId = k.GetPort(ctx)
+
+	// extract all results, requests and pending request ids
+	genesis.Results = k.AllResults(ctx)
+	genesis.Requests = k.AllRequests(ctx)
+	genesis.PendingRequestIds = k.GetPendingRequestList(ctx)
 
 	return genesis
 }

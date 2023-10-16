@@ -16,8 +16,9 @@ func NewIbcChannel(port, channel string) *IBCChannel {
 	}
 }
 
-func NewRequest(calldata []byte, clientID string, channel *IBCChannel) Request {
+func NewRequest(id uint64, calldata []byte, clientID string, channel *IBCChannel) Request {
 	return Request{
+		RequestID:       id,
 		RequestCallData: calldata,
 		ClientID:        clientID,
 		IBCChannel:      channel,

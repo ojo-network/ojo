@@ -12,11 +12,9 @@ import (
 	"github.com/ojo-network/ojo/x/relayoracle/types"
 )
 
-func (k Keeper) AddRequest(ctx sdk.Context, req types.Request) uint64 {
-	id := k.GetNextRequestID(ctx)
-	k.SetRequest(ctx, id, req)
-	k.AddRequestIDToPendingList(ctx, id)
-	return id
+func (k Keeper) AddRequest(ctx sdk.Context, req types.Request) {
+	k.SetRequest(ctx, req.RequestID, req)
+	k.AddRequestIDToPendingList(ctx, req.RequestID)
 }
 
 func (k Keeper) GetNextRequestID(ctx sdk.Context) uint64 {
@@ -65,8 +63,10 @@ func (k Keeper) PrepareRequest(
 	ibcChannel *types.IBCChannel,
 	data *types.OracleRequestPacketData,
 ) (uint64, error) {
-	req := types.NewRequest(data.GetCalldata(), data.GetClientID(), ibcChannel)
-	return k.AddRequest(ctx, req), nil
+	id := k.GetNextRequestID(ctx)
+	req := types.NewRequest(id, data.GetCalldata(), data.GetClientID(), ibcChannel)
+	k.AddRequest(ctx, req)
+	return id, nil
 }
 
 func (k Keeper) GetPendingRequestList(ctx sdk.Context) []uint64 {
@@ -92,6 +92,10 @@ func (k Keeper) AddRequestIDToPendingList(ctx sdk.Context, reqID uint64) {
 	k.cdc.MustUnmarshal(ctx.KVStore(k.storeKey).Get(types.PendingRequestListKey), &pending)
 	pending.RequestIds = append(pending.RequestIds, reqID)
 
+	k.SetPendingList(ctx, pending)
+}
+
+func (k Keeper) SetPendingList(ctx sdk.Context, pending types.PendingRequestList) {
 	ctx.KVStore(k.storeKey).Set(types.PendingRequestListKey, k.cdc.MustMarshal(&pending))
 }
 
@@ -256,4 +260,40 @@ func (k Keeper) ProcessRequestCalldata(
 	}
 
 	return resultEncoded, types.RESOLVE_STATUS_SUCCESS
+}
+
+// AllResults iterates and returns over all stored results
+func (k Keeper) AllResults(ctx sdk.Context) []types.Result {
+	var results []types.Result
+	store := ctx.KVStore(k.storeKey)
+
+	iter := sdk.KVStorePrefixIterator(store, types.ResultStoreKeyPrefix)
+	defer iter.Close()
+
+	for ; iter.Valid(); iter.Next() {
+		var result types.Result
+		k.cdc.MustUnmarshal(iter.Value(), &result)
+
+		results = append(results, result)
+	}
+
+	return results
+}
+
+// AllRequests iterates and returns over all stored requests
+func (k Keeper) AllRequests(ctx sdk.Context) []types.Request {
+	var requests []types.Request
+	store := ctx.KVStore(k.storeKey)
+
+	iter := sdk.KVStorePrefixIterator(store, types.RequestStoreKeyPrefix)
+	defer iter.Close()
+
+	for ; iter.Valid(); iter.Next() {
+		var request types.Request
+		k.cdc.MustUnmarshal(iter.Value(), &request)
+
+		requests = append(requests, request)
+	}
+
+	return requests
 }

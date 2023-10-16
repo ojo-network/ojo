@@ -4,6 +4,7 @@ package ojo.relayoracle.v1;
 
 import "gogoproto/gogo.proto";
 import "ojo/relayoracle/v1/params.proto";
+import "ojo/relayoracle/v1/oracle.proto";
 
 option go_package = "github.com/ojo-network/ojo/x/relayoracle/types";
 
@@ -11,4 +12,7 @@ option go_package = "github.com/ojo-network/ojo/x/relayoracle/types";
 message GenesisState {
   Params params  = 1 [(gogoproto.nullable) = false];
   string port_id = 2;
+  repeated Request requests = 3 [(gogoproto.nullable) = false];
+  repeated Result results = 4 [(gogoproto.nullable) = false];
+  repeated uint64 pending_request_ids = 5;
 }

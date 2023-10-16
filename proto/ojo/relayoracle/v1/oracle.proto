@@ -8,14 +8,17 @@ import "ojo/relayoracle/v1/packet.proto";
 option go_package = "github.com/ojo-network/ojo/x/relayoracle/types";
 
 message Request{
-    bytes request_calldata = 1 [(gogoproto.customname) = "RequestCallData"];
-    string client_id = 2 [(gogoproto.customname) = "ClientID"];
-    int64 request_height = 3;
-    int64 request_time = 4;
-    IBCChannel ibc_channel = 5 [(gogoproto.customname) = "IBCChannel"];
+    // TODO: should extract out request id
+    uint64 request_id = 1 [(gogoproto.customname) = "RequestID"];
+    bytes request_calldata = 2 [(gogoproto.customname) = "RequestCallData"];
+    string client_id = 3 [(gogoproto.customname) = "ClientID"];
+    int64 request_height = 4;
+    int64 request_time = 5;
+    IBCChannel ibc_channel = 6 [(gogoproto.customname) = "IBCChannel"];
 }
 
 message Result{
+    // TODO: should extract out request id?
     uint64 request_id = 1 [(gogoproto.customname) = "RequestID"];
     bytes request_calldata = 2 [(gogoproto.customname) = "RequestCallData"];
     string client_id = 3 [(gogoproto.customname) = "ClientID"];

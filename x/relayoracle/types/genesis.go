@@ -1,11 +1,10 @@
 package types
 
 import (
+	"fmt"
+
 	host "github.com/cosmos/ibc-go/v7/modules/core/24-host"
 )
-
-// DefaultIndex is the default global index
-const DefaultIndex uint64 = 1
 
 // DefaultGenesis returns the default genesis state
 func DefaultGenesis() *GenesisState {
@@ -22,5 +21,32 @@ func (gs GenesisState) Validate() error {
 		return err
 	}
 
-	return gs.Params.Validate()
+	err := gs.Params.Validate()
+	if err != nil {
+		return err
+	}
+
+	requestIds := make(map[uint64]struct{})
+	for _, request := range gs.Requests {
+		if _, found := requestIds[request.RequestID]; found {
+			return fmt.Errorf("duplicated request id: %d", request.RequestID)
+		}
+
+		requestIds[request.RequestID] = struct{}{}
+	}
+
+	// check if all pending requests and results have a valid request object
+	for _, pending := range gs.GetPendingRequestIds() {
+		if _, found := requestIds[pending]; !found {
+			return fmt.Errorf("pending request id not found: %d", pending)
+		}
+	}
+
+	for _, result := range gs.GetResults() {
+		if _, found := requestIds[result.RequestID]; !found {
+			return fmt.Errorf("result request id not found: %d", result.RequestID)
+		}
+	}
+
+	return nil
 }

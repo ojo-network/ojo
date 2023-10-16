@@ -177,7 +177,7 @@ echo
 echo "Command Line Access:"
 echo "  * $NODE_BIN --home $hdir status"
 
-$NODE_BIN $home0 start --api.enable true  --rpc.laddr "tcp://127.0.0.1:26657"  --grpc.address="0.0.0.0:9090" --grpc-web.enable=false --log_level trace > $log_path 2>&1 &
+$NODE_BIN $home0 start --grpc.address="0.0.0.0:9090" --p2p.laddr "tcp://0.0.0.0:26679" --rpc.laddr "tcp://127.0.0.1:26657" --grpc-web.enable=false --log_level trace > $log_path 2>&1 &
 
 # Adds 1 sec to create the log and makes it easier to debug it on CI
 sleep 1
