@@ -87,6 +87,16 @@ func (p ParamUpdatePlan) ValidateBasic() error {
 				return err
 			}
 
+		case string(KeyCurrencyPairProviders):
+			if err := validateCurrencyPairProviders(p.Changes.CurrencyPairProviders); err != nil {
+				return err
+			}
+
+		case string(KeyCurrencyDeviationThresholds):
+			if err := validateCurrencyDeviationThresholds(p.Changes.CurrencyDeviationThresholds); err != nil {
+				return err
+			}
+
 		default:
 			return fmt.Errorf("%s is not an existing oracle param key", key)
 		}

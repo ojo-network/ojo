@@ -175,3 +175,35 @@ func (k Keeper) MaximumMedianStamps(ctx sdk.Context) (res uint64) {
 func (k Keeper) SetMaximumMedianStamps(ctx sdk.Context, maximumMedianStamps uint64) {
 	k.paramSpace.Set(ctx, types.KeyMaximumMedianStamps, maximumMedianStamps)
 }
+
+// CurrencyPairProviders returns the current Currency Pair Providers the price feeder
+// will query when starting up.
+func (k Keeper) CurrencyPairProviders(ctx sdk.Context) (res types.CurrencyPairProvidersList) {
+	k.paramSpace.Get(ctx, types.KeyCurrencyPairProviders, &res)
+	return
+}
+
+// SetCurrencyPairProviders updates the current Currency Pair Providers the price feeder
+// will query when starting up.
+func (k Keeper) SetCurrencyPairProviders(
+	ctx sdk.Context,
+	currencyPairProviders types.CurrencyPairProvidersList,
+) {
+	k.paramSpace.Set(ctx, types.KeyCurrencyPairProviders, currencyPairProviders)
+}
+
+// CurrencyDeviationThresholds returns the current Currency Deviation Thesholds the
+// price feeder will query when starting up.
+func (k Keeper) CurrencyDeviationThresholds(ctx sdk.Context) (res types.CurrencyDeviationThresholdList) {
+	k.paramSpace.Get(ctx, types.KeyCurrencyDeviationThresholds, &res)
+	return
+}
+
+// SetCurrencyDeviationThresholds updates the current Currency Deviation Thesholds the
+// price feeder will query when starting up.
+func (k Keeper) SetCurrencyDeviationThresholds(
+	ctx sdk.Context,
+	currencyDeviationThresholds types.CurrencyDeviationThresholdList,
+) {
+	k.paramSpace.Set(ctx, types.KeyCurrencyDeviationThresholds, currencyDeviationThresholds)
+}

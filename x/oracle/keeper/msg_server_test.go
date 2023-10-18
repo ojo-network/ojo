@@ -69,8 +69,8 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRatePrevote() {
 func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 	ctx := s.ctx
 
-	ratesStr := "ojo:123.2"
-	ratesStrInvalidCoin := "ojo:123.2,badcoin:234.5"
+	ratesStr := "OJO:123.2"
+	ratesStrInvalidCoin := "OJO:123.2,badcoin:234.5"
 	salt, err := GenerateSalt(32)
 	s.Require().NoError(err)
 	hash := oracletypes.GetAggregateVoteHash(salt, ratesStr, valAddr)
@@ -519,10 +519,61 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 		BaseDenom:   "BAR",
 		Exponent:    6,
 	}
+	foobar := &oracletypes.Denom{
+		SymbolDenom: "FOOBAR",
+		BaseDenom:   "FOOBAR",
+		Exponent:    6,
+	}
 	reward := &oracletypes.Denom{
 		SymbolDenom: "REWARD",
 		BaseDenom:   "REWARD",
 		Exponent:    6,
+	}
+	currencyPairProviders := oracletypes.CurrencyPairProvidersList{
+		{
+			BaseDenom:  "FOO",
+			QuoteDenom: "BAR",
+			PairAddress: []oracletypes.PairAddressProvider{
+				{
+					Address:         "address",
+					AddressProvider: "provider",
+				},
+			},
+			Providers: []string{
+				"provider",
+			},
+		},
+	}
+	currencyDeviationThresholds := oracletypes.CurrencyDeviationThresholdList{
+		{
+			BaseDenom: "FOO",
+			Threshold: "2.0",
+		},
+		{
+			BaseDenom: "BAR",
+			Threshold: "2.0",
+		},
+	}
+	currencyPairProviders2 := oracletypes.CurrencyPairProvidersList{
+		{
+			BaseDenom:  "FOOBAR",
+			QuoteDenom: "BAR",
+			PairAddress: []oracletypes.PairAddressProvider{
+				{
+					Address:         "address2",
+					AddressProvider: "provider2",
+				},
+			},
+			Providers: []string{
+				"provider2",
+			},
+		},
+	}
+	currencyDeviationThresholds2 := oracletypes.CurrencyDeviationThresholdList{
+		{
+			BaseDenom: "FOOBAR",
+			Threshold: "2.0",
+		},
 	}
 
 	testCases := []struct {
@@ -545,7 +596,7 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 			"",
 		},
 		{
-			"valid mandatory denom addition",
+			"valid mandatory denom addition with currency pair providers and currency deviation thresholds",
 			&types.MsgGovAddDenoms{
 				Authority:   govAccAddr,
 				Title:       "test",
@@ -553,6 +604,9 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 				Height:      9,
 				DenomList:   append(types.DenomList{}, *foo, *bar),
 				Mandatory:   true,
+
+				CurrencyPairProviders:       currencyPairProviders,
+				CurrencyDeviationThresholds: currencyDeviationThresholds,
 			},
 			false,
 			"",
@@ -567,6 +621,22 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 				DenomList:   append(types.DenomList{}, *reward),
 				Mandatory:   true,
 				RewardBand:  &bandArgument,
+			},
+			false,
+			"",
+		},
+		{
+			"valid currency pair providers and currency deviation thresholds addition with no new denoms",
+			&types.MsgGovAddDenoms{
+				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
+				Height:      9,
+				DenomList:   types.DenomList{},
+				Mandatory:   true,
+
+				CurrencyPairProviders:       currencyPairProviders2,
+				CurrencyDeviationThresholds: currencyDeviationThresholds2,
 			},
 			false,
 			"",
@@ -644,6 +714,46 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 			true,
 			"invalid oracle param value",
 		},
+		{
+			"invalid currency pair provider list",
+			&types.MsgGovAddDenoms{
+				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
+				Height:      9,
+				DenomList:   append(types.DenomList{}, *foobar),
+				Mandatory:   true,
+
+				CurrencyPairProviders: oracletypes.CurrencyPairProvidersList{
+					{
+						BaseDenom:  "FOOBAR",
+						QuoteDenom: "BAR",
+						Providers:  []string{},
+					},
+				},
+			},
+			true,
+			"oracle parameter CurrencyPairProviders must have at least 1 provider listed",
+		},
+		{
+			"invalid currency deviation threshold list",
+			&types.MsgGovAddDenoms{
+				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
+				Height:      9,
+				DenomList:   append(types.DenomList{}, *foobar),
+				Mandatory:   true,
+
+				CurrencyDeviationThresholds: oracletypes.CurrencyDeviationThresholdList{
+					{
+						BaseDenom: "FOOBAR",
+					},
+				},
+			},
+			true,
+			"oracle parameter CurrencyDeviationThreshold must have Threshold",
+		},
 	}
 
 	for _, tc := range testCases {
@@ -673,7 +783,7 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 					s.Require().Equal(band, sdk.NewDecWithPrec(2, 2))
 					s.Require().NoError(err)
 
-				case "valid mandatory denom addition":
+				case "valid mandatory denom addition with currency pair providers and currency deviation thresholds":
 					al := s.app.OracleKeeper.AcceptList(s.ctx)
 					s.Require().True(
 						al.Contains(foo.SymbolDenom) && al.Contains(bar.SymbolDenom),
@@ -691,6 +801,16 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 					s.Require().Equal(band, sdk.NewDecWithPrec(2, 2))
 					s.Require().NoError(err)
 
+					cpp := s.app.OracleKeeper.CurrencyPairProviders(s.ctx)
+					for i := range currencyPairProviders {
+						s.Require().Contains(cpp, currencyPairProviders[i])
+					}
+
+					cdt := s.app.OracleKeeper.CurrencyDeviationThresholds(s.ctx)
+					for i := range currencyDeviationThresholds {
+						s.Require().Contains(cdt, currencyDeviationThresholds[i])
+					}
+
 				case "valid denom addition with reward band":
 					al := s.app.OracleKeeper.AcceptList(s.ctx)
 					s.Require().True(
@@ -701,6 +821,326 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 					band, err := rwb.GetBandFromDenom("REWARD")
 					s.Require().Equal(band, sdk.NewDecWithPrec(2, 3))
 					s.Require().NoError(err)
+
+				case "valid currency pair providers and currency deviation thresholds addition with no new denoms":
+					cpp := s.app.OracleKeeper.CurrencyPairProviders(s.ctx)
+					for i := range currencyPairProviders2 {
+						s.Require().Contains(cpp, currencyPairProviders2[i])
+					}
+
+					cdt := s.app.OracleKeeper.CurrencyDeviationThresholds(s.ctx)
+					for i := range currencyDeviationThresholds2 {
+						s.Require().Contains(cdt, currencyDeviationThresholds2[i])
+					}
+				}
+			}
+		})
+	}
+}
+
+func (s *IntegrationTestSuite) TestMsgServer_GovRemoveCurrencyPairProviders() {
+	govAccAddr := s.app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String()
+	currentCurrencyPairProviders := types.CurrencyPairProvidersList{
+		{
+			BaseDenom:  "FOO",
+			QuoteDenom: "BAR",
+			PairAddress: []oracletypes.PairAddressProvider{
+				{
+					Address:         "address",
+					AddressProvider: "provider",
+				},
+			},
+			Providers: []string{
+				"provider",
+			},
+		},
+		{
+			BaseDenom:  "FOOBAR",
+			QuoteDenom: "BAR",
+			PairAddress: []oracletypes.PairAddressProvider{
+				{
+					Address:         "address2",
+					AddressProvider: "provider2",
+				},
+			},
+			Providers: []string{
+				"provider2",
+			},
+		},
+		{
+			BaseDenom:  types.OjoSymbol,
+			QuoteDenom: types.USDDenom,
+			Providers: []string{
+				"binance",
+				"coinbase",
+			},
+		},
+		{
+			BaseDenom:  "UNI",
+			QuoteDenom: "ETH",
+			PairAddress: []oracletypes.PairAddressProvider{
+				{
+					Address:         "address4",
+					AddressProvider: "eth-uniswap",
+				},
+			},
+			Providers: []string{
+				"bitget",
+				"eth-uniswap",
+			},
+		},
+	}
+	s.app.OracleKeeper.SetCurrencyPairProviders(s.ctx, currentCurrencyPairProviders)
+
+	testCases := []struct {
+		name      string
+		req       *types.MsgGovRemoveCurrencyPairProviders
+		expectErr bool
+		errMsg    string
+	}{
+		{
+			"remove nonexisting currency pair",
+			&types.MsgGovRemoveCurrencyPairProviders{
+				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
+				Height:      9,
+
+				CurrencyPairProviders: types.CurrencyPairProvidersList{
+					{
+						BaseDenom:  "CURR1",
+						QuoteDenom: "CURR2",
+					},
+				},
+			},
+			false,
+			"",
+		},
+		{
+			"remove nonexisting currency pair with existing base denom and one with existing quote denom",
+			&types.MsgGovRemoveCurrencyPairProviders{
+				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
+				Height:      9,
+
+				CurrencyPairProviders: types.CurrencyPairProvidersList{
+					{
+						BaseDenom:  "OJO",
+						QuoteDenom: "CURR2",
+					},
+					{
+						BaseDenom:  "CURR1",
+						QuoteDenom: "USD",
+					},
+				},
+			},
+			false,
+			"",
+		},
+		{
+			"remove existing currency pair",
+			&types.MsgGovRemoveCurrencyPairProviders{
+				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
+				Height:      9,
+
+				CurrencyPairProviders: types.CurrencyPairProvidersList{
+					{
+						BaseDenom:  "FOO",
+						QuoteDenom: "BAR",
+					},
+				},
+			},
+			false,
+			"",
+		},
+		{
+			"remove multiple existing currency pairs",
+			&types.MsgGovRemoveCurrencyPairProviders{
+				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
+				Height:      9,
+
+				CurrencyPairProviders: types.CurrencyPairProvidersList{
+					{
+						BaseDenom:  "FOOBAR",
+						QuoteDenom: "BAR",
+					},
+					{
+						BaseDenom:  "UNI",
+						QuoteDenom: "ETH",
+					},
+				},
+			},
+			false,
+			"",
+		},
+	}
+
+	for _, tc := range testCases {
+		s.Run(tc.name, func() {
+			err := tc.req.ValidateBasic()
+			if err == nil {
+				_, err = s.msgServer.GovRemoveCurrencyPairProviders(s.ctx, tc.req)
+				oracle.EndBlocker(s.ctx, s.app.OracleKeeper)
+			}
+
+			if tc.expectErr {
+				s.Require().ErrorContains(err, tc.errMsg)
+			} else {
+				s.Require().NoError(err)
+
+				switch tc.name {
+				case "remove nonexisting currency pair":
+					cpp := s.app.OracleKeeper.CurrencyPairProviders(s.ctx)
+					s.Require().Equal(currentCurrencyPairProviders, cpp)
+
+				case "remove nonexisting currency pair with existing quote":
+					cpp := s.app.OracleKeeper.CurrencyPairProviders(s.ctx)
+					s.Require().Equal(currentCurrencyPairProviders, cpp)
+
+				case "remove existing currency pair":
+					cpp := s.app.OracleKeeper.CurrencyPairProviders(s.ctx)
+					s.Require().Equal(currentCurrencyPairProviders[1:], cpp)
+
+				case "remove multiple existing currency pairs":
+					cpp := s.app.OracleKeeper.CurrencyPairProviders(s.ctx)
+					s.Require().Equal(types.CurrencyPairProvidersList{
+						{
+							BaseDenom:  types.OjoSymbol,
+							QuoteDenom: types.USDDenom,
+							Providers: []string{
+								"binance",
+								"coinbase",
+							},
+						},
+					}, cpp)
+				}
+			}
+		})
+	}
+}
+
+func (s *IntegrationTestSuite) TestMsgServer_GovRemoveCurrencyDeviationThresholds() {
+	govAccAddr := s.app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String()
+	currentCurrencyDeviationThresholds := types.CurrencyDeviationThresholdList{
+		{
+			BaseDenom: "FOO",
+			Threshold: "2",
+		},
+		{
+			BaseDenom: "BAR",
+			Threshold: "2",
+		},
+		{
+			BaseDenom: types.OjoSymbol,
+			Threshold: "2",
+		},
+		{
+			BaseDenom: "FOOBAR",
+			Threshold: "2",
+		},
+	}
+
+	s.app.OracleKeeper.SetCurrencyDeviationThresholds(s.ctx, currentCurrencyDeviationThresholds)
+
+	testCases := []struct {
+		name      string
+		req       *types.MsgGovRemoveCurrencyDeviationThresholds
+		expectErr bool
+		errMsg    string
+	}{
+		{
+			"remove nonexisting currency",
+			&types.MsgGovRemoveCurrencyDeviationThresholds{
+				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
+				Height:      9,
+
+				Currencies: []string{"CURR1"},
+			},
+			false,
+			"",
+		},
+		{
+			"remove multiple nonexisting currencies",
+			&types.MsgGovRemoveCurrencyDeviationThresholds{
+				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
+				Height:      9,
+
+				Currencies: []string{"CURR1", "CURR2"},
+			},
+			false,
+			"",
+		},
+		{
+			"remove existing currency",
+			&types.MsgGovRemoveCurrencyDeviationThresholds{
+				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
+				Height:      9,
+
+				Currencies: []string{"FOO"},
+			},
+			false,
+			"",
+		},
+		{
+			"remove multiple existing currencies",
+			&types.MsgGovRemoveCurrencyDeviationThresholds{
+				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
+				Height:      9,
+
+				Currencies: []string{"BAR", "FOOBAR"},
+			},
+			false,
+			"",
+		},
+	}
+
+	for _, tc := range testCases {
+		s.Run(tc.name, func() {
+			err := tc.req.ValidateBasic()
+			if err == nil {
+				_, err = s.msgServer.GovRemoveCurrencyDeviationThresholds(s.ctx, tc.req)
+				oracle.EndBlocker(s.ctx, s.app.OracleKeeper)
+			}
+
+			if tc.expectErr {
+				s.Require().ErrorContains(err, tc.errMsg)
+			} else {
+				s.Require().NoError(err)
+
+				switch tc.name {
+				case "remove nonexisting currency pair":
+					cdt := s.app.OracleKeeper.CurrencyDeviationThresholds(s.ctx)
+					s.Require().Equal(currentCurrencyDeviationThresholds, cdt)
+
+				case "remove nonexisting currency pair with existing quote":
+					cdt := s.app.OracleKeeper.CurrencyDeviationThresholds(s.ctx)
+					s.Require().Equal(currentCurrencyDeviationThresholds, cdt)
+
+				case "remove existing currency pair":
+					cdt := s.app.OracleKeeper.CurrencyDeviationThresholds(s.ctx)
+					s.Require().Equal(currentCurrencyDeviationThresholds[1:], cdt)
+
+				case "remove multiple existing currency pairs":
+					cdt := s.app.OracleKeeper.CurrencyDeviationThresholds(s.ctx)
+					s.Require().Equal(types.CurrencyDeviationThresholdList{
+						{
+							BaseDenom: types.OjoSymbol,
+							Threshold: "2",
+						},
+					}, cdt)
 				}
 			}
 		})

@@ -93,13 +93,20 @@ func (k Keeper) ValidateParamChanges(ctx sdk.Context, keys []string, changes typ
 
 		case string(types.KeyMaximumMedianStamps):
 			params.MaximumMedianStamps = changes.MaximumMedianStamps
+
+		case string(types.KeyCurrencyPairProviders):
+			params.CurrencyPairProviders = changes.CurrencyPairProviders
+
+		case string(types.KeyCurrencyDeviationThresholds):
+			params.CurrencyDeviationThresholds = changes.CurrencyDeviationThresholds
 		}
 	}
 
 	return params.Validate()
 }
 
-// ExecuteParamUpdatePlan will execute a given param update plan.
+// ExecuteParamUpdatePlan will execute a given param update plan and emit a param
+// update event.
 func (k Keeper) ExecuteParamUpdatePlan(ctx sdk.Context, plan types.ParamUpdatePlan) {
 	for _, key := range plan.Keys {
 		switch key {
@@ -141,6 +148,18 @@ func (k Keeper) ExecuteParamUpdatePlan(ctx sdk.Context, plan types.ParamUpdatePl
 
 		case string(types.KeyMaximumMedianStamps):
 			k.SetMaximumMedianStamps(ctx, plan.Changes.MaximumMedianStamps)
+
+		case string(types.KeyCurrencyPairProviders):
+			k.SetCurrencyPairProviders(ctx, plan.Changes.CurrencyPairProviders)
+
+		case string(types.KeyCurrencyDeviationThresholds):
+			k.SetCurrencyDeviationThresholds(ctx, plan.Changes.CurrencyDeviationThresholds)
 		}
 	}
+
+	event := sdk.NewEvent(
+		types.EventParamUpdate,
+		sdk.NewAttribute(types.AttributeKeyNotifyPriceFeeder, "1"),
+	)
+	ctx.EventManager().EmitEvent(event)
 }

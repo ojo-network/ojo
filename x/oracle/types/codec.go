@@ -35,6 +35,12 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgDelegateFeedConsent{}, "ojo/oracle/MsgDelegateFeedConsent", nil)
 	cdc.RegisterConcrete(&MsgGovUpdateParams{}, "ojo/oracle/MsgGovUpdateParams", nil)
 	cdc.RegisterConcrete(&MsgGovAddDenoms{}, "ojo/oracle/MsgGovAddDenoms", nil)
+	cdc.RegisterConcrete(&MsgGovRemoveCurrencyPairProviders{}, "ojo/oracle/MsgGovRemoveCurrencyPairProviders", nil)
+	cdc.RegisterConcrete(
+		&MsgGovRemoveCurrencyDeviationThresholds{},
+		"ojo/oracle/MsgGovRemoveCurrencyDeviationThresholds",
+		nil,
+	)
 }
 
 // RegisterInterfaces registers the x/oracle interfaces types with the interface registry
@@ -45,12 +51,16 @@ func RegisterInterfaces(registry codectypes.InterfaceRegistry) {
 		&MsgAggregateExchangeRateVote{},
 		&MsgGovUpdateParams{},
 		&MsgGovAddDenoms{},
+		&MsgGovRemoveCurrencyPairProviders{},
+		&MsgGovRemoveCurrencyDeviationThresholds{},
 	)
 
 	registry.RegisterImplementations(
 		(*govtypes.Content)(nil),
 		&MsgGovUpdateParams{},
 		&MsgGovAddDenoms{},
+		&MsgGovRemoveCurrencyPairProviders{},
+		&MsgGovRemoveCurrencyDeviationThresholds{},
 	)
 
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)

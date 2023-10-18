@@ -60,6 +60,20 @@ message Params {
   // Maximum Median Stamps represents the maximum amount of medians the
   // oracle module will store before pruning via FIFO.
   uint64 maximum_median_stamps = 13;
+  // Currency Pair Providers defines the currency provider pairs the
+  // price feeder uses upon start up for pricing data.
+  repeated CurrencyPairProviders currency_pair_providers = 14 [
+    (gogoproto.moretags) = "yaml:\"currency_pair_providers\"",
+    (gogoproto.castrepeated) = "CurrencyPairProvidersList",
+    (gogoproto.nullable) = false
+  ];
+  // Currency Deviation Thresholds defines the deviation thresholds
+  // for each base currency the price feeder uses upon start up.
+  repeated CurrencyDeviationThreshold currency_deviation_thresholds = 15 [
+    (gogoproto.moretags) = "yaml:\"currency_deviation_thresholds\"",
+    (gogoproto.castrepeated) = "CurrencyDeviationThresholdList",
+    (gogoproto.nullable) = false
+  ];
 }
 
 // Denom - the object to hold configurations of each denom
@@ -128,6 +142,37 @@ message PriceStamp {
 // in a given Slash Window. This set gets updated every Slash Window.
 message ValidatorRewardSet {
   repeated string validator_set = 1 [ (gogoproto.moretags) = "yaml:\"validator_set\"" ];
+}
+
+// CurrencyPairProviders defines a list of currency providers for the
+// currency pair defined by base and quote.
+message CurrencyPairProviders {
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+  option (gogoproto.goproto_stringer) = false;
+
+  string base_denom  = 1 [ (gogoproto.moretags) = "yaml:\"base_denom\"" ];
+  string quote_denom = 2 [ (gogoproto.moretags) = "yaml:\"quote_denom\"" ];
+  repeated PairAddressProvider pair_address = 3 [ (gogoproto.moretags) = "yaml:\"pair_address\"", (gogoproto.nullable) = false ];
+  repeated string providers = 4 [ (gogoproto.moretags) = "yaml:\"providers\"" ];
+}
+
+// PairAddressProvider defines the uniswap pair address and provider
+// for uniswap currency pair.
+message PairAddressProvider {
+  string address          = 1 [ (gogoproto.moretags) = "yaml:\"address\"" ];
+  string address_provider = 2 [ (gogoproto.moretags) = "yaml:\"address_provider\"" ];
+}
+
+// CurrencyDeviationThreshold defines a deviation theshold for a
+// base denom.
+message CurrencyDeviationThreshold {
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+  option (gogoproto.goproto_stringer) = false;
+
+  string base_denom = 1 [ (gogoproto.moretags) = "yaml:\"base_denom\"" ];
+  string threshold  = 2 [ (gogoproto.moretags) = "yaml:\"threshold\"" ];
 }
 
 // ParamUpdatePlan specifies updates to the Oracle module parameters
