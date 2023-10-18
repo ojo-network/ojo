@@ -329,7 +329,9 @@ func (ms msgServer) GovRemoveCurrencyDeviationThresholds(
 	}
 
 	for _, curr := range msg.Currencies {
-		plan.Changes.CurrencyDeviationThresholds = plan.Changes.CurrencyDeviationThresholds.RemovePair(strings.ToUpper(curr))
+		plan.Changes.CurrencyDeviationThresholds = plan.Changes.CurrencyDeviationThresholds.RemovePair(
+			strings.ToUpper(curr),
+		)
 	}
 
 	// validate plan construction before scheduling
