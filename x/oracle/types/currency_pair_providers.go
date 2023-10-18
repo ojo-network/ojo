@@ -35,3 +35,14 @@ func (cppl CurrencyPairProvidersList) String() (out string) {
 
 	return strings.TrimSpace(out)
 }
+
+func (cppl CurrencyPairProvidersList) RemovePair(pair CurrencyPairProviders) CurrencyPairProvidersList {
+	for i := 0; i < len(cppl); i++ {
+		if cppl[i].BaseDenom == pair.BaseDenom && cppl[i].QuoteDenom == pair.QuoteDenom {
+			cppl = append(cppl[:i], cppl[i+1:]...)
+			i-- // decrement i so the next iteration will check the next element
+		}
+	}
+
+	return cppl
+}

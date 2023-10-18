@@ -448,6 +448,182 @@ func (m *MsgGovAddDenomsResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgGovAddDenomsResponse proto.InternalMessageInfo
 
+// MsgGovRemoveCurrencyPairProviders defines the Msg/GovRemoveCurrencyPairProviders request type.
+type MsgGovRemoveCurrencyPairProviders struct {
+	// authority is the address of the governance account.
+	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	// title of the proposal
+	Title string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	// description of the proposal
+	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	// height at which the param update must be performed
+	Height int64 `protobuf:"varint,4,opt,name=height,proto3" json:"height,omitempty"`
+	// currency_pair_providers to remove from the current CurrencyPairProvidersList
+	CurrencyPairProviders CurrencyPairProvidersList `protobuf:"bytes,5,rep,name=currency_pair_providers,json=currencyPairProviders,proto3,castrepeated=CurrencyPairProvidersList" json:"currency_pair_providers" yaml:"currency_pair_providers"`
+}
+
+func (m *MsgGovRemoveCurrencyPairProviders) Reset()      { *m = MsgGovRemoveCurrencyPairProviders{} }
+func (*MsgGovRemoveCurrencyPairProviders) ProtoMessage() {}
+func (*MsgGovRemoveCurrencyPairProviders) Descriptor() ([]byte, []int) {
+	return fileDescriptor_58d45810177a43e8, []int{10}
+}
+func (m *MsgGovRemoveCurrencyPairProviders) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgGovRemoveCurrencyPairProviders) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgGovRemoveCurrencyPairProviders.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgGovRemoveCurrencyPairProviders) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgGovRemoveCurrencyPairProviders.Merge(m, src)
+}
+func (m *MsgGovRemoveCurrencyPairProviders) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgGovRemoveCurrencyPairProviders) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgGovRemoveCurrencyPairProviders.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgGovRemoveCurrencyPairProviders proto.InternalMessageInfo
+
+// MsgGovRemoveCurrencyPairProvidersResponse defines the Msg/GovRemoveCurrencyPairProvidersResponse response type.
+type MsgGovRemoveCurrencyPairProvidersResponse struct {
+}
+
+func (m *MsgGovRemoveCurrencyPairProvidersResponse) Reset() {
+	*m = MsgGovRemoveCurrencyPairProvidersResponse{}
+}
+func (m *MsgGovRemoveCurrencyPairProvidersResponse) String() string {
+	return proto.CompactTextString(m)
+}
+func (*MsgGovRemoveCurrencyPairProvidersResponse) ProtoMessage() {}
+func (*MsgGovRemoveCurrencyPairProvidersResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_58d45810177a43e8, []int{11}
+}
+func (m *MsgGovRemoveCurrencyPairProvidersResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgGovRemoveCurrencyPairProvidersResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgGovRemoveCurrencyPairProvidersResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgGovRemoveCurrencyPairProvidersResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgGovRemoveCurrencyPairProvidersResponse.Merge(m, src)
+}
+func (m *MsgGovRemoveCurrencyPairProvidersResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgGovRemoveCurrencyPairProvidersResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgGovRemoveCurrencyPairProvidersResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgGovRemoveCurrencyPairProvidersResponse proto.InternalMessageInfo
+
+// MsgGovRemoveCurrencyDeviationThresholds defines the Msg/GovRemoveCurrencyDeviationThresholds request type.
+type MsgGovRemoveCurrencyDeviationThresholds struct {
+	// authority is the address of the governance account.
+	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	// title of the proposal
+	Title string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	// description of the proposal
+	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	// height at which the param update must be performed
+	Height int64 `protobuf:"varint,4,opt,name=height,proto3" json:"height,omitempty"`
+	// currencies to remove from the current CurrencyDeviationThresholdsList
+	Currencies []string `protobuf:"bytes,5,rep,name=currencies,proto3" json:"currencies,omitempty"`
+}
+
+func (m *MsgGovRemoveCurrencyDeviationThresholds) Reset() {
+	*m = MsgGovRemoveCurrencyDeviationThresholds{}
+}
+func (*MsgGovRemoveCurrencyDeviationThresholds) ProtoMessage() {}
+func (*MsgGovRemoveCurrencyDeviationThresholds) Descriptor() ([]byte, []int) {
+	return fileDescriptor_58d45810177a43e8, []int{12}
+}
+func (m *MsgGovRemoveCurrencyDeviationThresholds) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgGovRemoveCurrencyDeviationThresholds) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgGovRemoveCurrencyDeviationThresholds.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgGovRemoveCurrencyDeviationThresholds) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgGovRemoveCurrencyDeviationThresholds.Merge(m, src)
+}
+func (m *MsgGovRemoveCurrencyDeviationThresholds) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgGovRemoveCurrencyDeviationThresholds) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgGovRemoveCurrencyDeviationThresholds.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgGovRemoveCurrencyDeviationThresholds proto.InternalMessageInfo
+
+// MsgGovRemoveCurrencyDeviationThresholdsResponse defines the Msg/GovRemoveCurrencyDeviationThresholdsResponse response type.
+type MsgGovRemoveCurrencyDeviationThresholdsResponse struct {
+}
+
+func (m *MsgGovRemoveCurrencyDeviationThresholdsResponse) Reset() {
+	*m = MsgGovRemoveCurrencyDeviationThresholdsResponse{}
+}
+func (m *MsgGovRemoveCurrencyDeviationThresholdsResponse) String() string {
+	return proto.CompactTextString(m)
+}
+func (*MsgGovRemoveCurrencyDeviationThresholdsResponse) ProtoMessage() {}
+func (*MsgGovRemoveCurrencyDeviationThresholdsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_58d45810177a43e8, []int{13}
+}
+func (m *MsgGovRemoveCurrencyDeviationThresholdsResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgGovRemoveCurrencyDeviationThresholdsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgGovRemoveCurrencyDeviationThresholdsResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgGovRemoveCurrencyDeviationThresholdsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgGovRemoveCurrencyDeviationThresholdsResponse.Merge(m, src)
+}
+func (m *MsgGovRemoveCurrencyDeviationThresholdsResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgGovRemoveCurrencyDeviationThresholdsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgGovRemoveCurrencyDeviationThresholdsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgGovRemoveCurrencyDeviationThresholdsResponse proto.InternalMessageInfo
+
 // MsgGovCancelUpdateParams defines the Msg/GovCancelUpdateParams request type.
 type MsgGovCancelUpdateParams struct {
 	// authority is the address of the governance account.
@@ -461,7 +637,7 @@ type MsgGovCancelUpdateParams struct {
 func (m *MsgGovCancelUpdateParams) Reset()      { *m = MsgGovCancelUpdateParams{} }
 func (*MsgGovCancelUpdateParams) ProtoMessage() {}
 func (*MsgGovCancelUpdateParams) Descriptor() ([]byte, []int) {
-	return fileDescriptor_58d45810177a43e8, []int{10}
+	return fileDescriptor_58d45810177a43e8, []int{14}
 }
 func (m *MsgGovCancelUpdateParams) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -498,7 +674,7 @@ func (m *MsgGovCancelUpdateParamsResponse) Reset()         { *m = MsgGovCancelUp
 func (m *MsgGovCancelUpdateParamsResponse) String() string { return proto.CompactTextString(m) }
 func (*MsgGovCancelUpdateParamsResponse) ProtoMessage()    {}
 func (*MsgGovCancelUpdateParamsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_58d45810177a43e8, []int{11}
+	return fileDescriptor_58d45810177a43e8, []int{15}
 }
 func (m *MsgGovCancelUpdateParamsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -538,6 +714,10 @@ func init() {
 	proto.RegisterType((*MsgGovUpdateParamsResponse)(nil), "ojo.oracle.v1.MsgGovUpdateParamsResponse")
 	proto.RegisterType((*MsgGovAddDenoms)(nil), "ojo.oracle.v1.MsgGovAddDenoms")
 	proto.RegisterType((*MsgGovAddDenomsResponse)(nil), "ojo.oracle.v1.MsgGovAddDenomsResponse")
+	proto.RegisterType((*MsgGovRemoveCurrencyPairProviders)(nil), "ojo.oracle.v1.MsgGovRemoveCurrencyPairProviders")
+	proto.RegisterType((*MsgGovRemoveCurrencyPairProvidersResponse)(nil), "ojo.oracle.v1.MsgGovRemoveCurrencyPairProvidersResponse")
+	proto.RegisterType((*MsgGovRemoveCurrencyDeviationThresholds)(nil), "ojo.oracle.v1.MsgGovRemoveCurrencyDeviationThresholds")
+	proto.RegisterType((*MsgGovRemoveCurrencyDeviationThresholdsResponse)(nil), "ojo.oracle.v1.MsgGovRemoveCurrencyDeviationThresholdsResponse")
 	proto.RegisterType((*MsgGovCancelUpdateParams)(nil), "ojo.oracle.v1.MsgGovCancelUpdateParams")
 	proto.RegisterType((*MsgGovCancelUpdateParamsResponse)(nil), "ojo.oracle.v1.MsgGovCancelUpdateParamsResponse")
 }
@@ -545,70 +725,77 @@ func init() {
 func init() { proto.RegisterFile("ojo/oracle/v1/tx.proto", fileDescriptor_58d45810177a43e8) }
 
 var fileDescriptor_58d45810177a43e8 = []byte{
-	// 998 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x56, 0xbb, 0x73, 0xe3, 0x44,
-	0x18, 0xb7, 0xc8, 0x83, 0xf8, 0x0b, 0x21, 0x9c, 0x2e, 0x0f, 0x59, 0x04, 0xc9, 0x88, 0x90, 0x8b,
-	0x61, 0x62, 0xcf, 0xe5, 0x66, 0x6e, 0x98, 0x54, 0xc4, 0x09, 0x97, 0x86, 0x30, 0x19, 0x01, 0x57,
-	0xd0, 0x78, 0x36, 0xda, 0x45, 0x52, 0x22, 0x6b, 0xcd, 0xee, 0xc6, 0x17, 0x17, 0x34, 0x0c, 0xc3,
-	0x50, 0x52, 0x52, 0x1e, 0xcd, 0x15, 0xd7, 0x40, 0x41, 0x4b, 0x9f, 0xf2, 0x86, 0x8a, 0xb9, 0xc2,
-	0x07, 0x49, 0x01, 0x34, 0x14, 0xfe, 0x0b, 0x18, 0xad, 0x1e, 0x76, 0xfc, 0x4a, 0x52, 0x5d, 0x65,
-	0xed, 0xf7, 0xfb, 0xed, 0xf7, 0xfd, 0x7e, 0xdf, 0xbe, 0x0c, 0x4b, 0xf4, 0x88, 0x56, 0x28, 0x43,
-	0x4e, 0x40, 0x2a, 0xcd, 0xbb, 0x15, 0x71, 0x5a, 0x6e, 0x30, 0x2a, 0xa8, 0x3a, 0x47, 0x8f, 0x68,
-	0x39, 0x8e, 0x97, 0x9b, 0x77, 0xf5, 0x65, 0x87, 0xf2, 0x3a, 0xe5, 0x95, 0x3a, 0x77, 0x23, 0x5a,
-	0x9d, 0xbb, 0x31, 0x4f, 0x2f, 0xc4, 0x40, 0x4d, 0x8e, 0x2a, 0xf1, 0x20, 0x81, 0x16, 0x5c, 0xea,
-	0xd2, 0x38, 0x1e, 0x7d, 0x25, 0x51, 0xfd, 0x72, 0xc1, 0xa4, 0x84, 0xc4, 0xac, 0x9f, 0x15, 0x30,
-	0xf7, 0xb9, 0xbb, 0xed, 0xba, 0x8c, 0xb8, 0x48, 0x90, 0x8f, 0x4e, 0x1d, 0x0f, 0x85, 0x2e, 0xb1,
-	0x91, 0x20, 0x07, 0x8c, 0x34, 0xa9, 0x20, 0xea, 0x3b, 0x30, 0xe9, 0x21, 0xee, 0x69, 0x4a, 0x51,
-	0x59, 0xcf, 0x57, 0xe7, 0x3b, 0x6d, 0x73, 0xb6, 0x85, 0xea, 0xc1, 0x96, 0x15, 0x45, 0x2d, 0x5b,
-	0x82, 0x6a, 0x09, 0xa6, 0xbf, 0x24, 0x04, 0x13, 0xa6, 0xbd, 0x22, 0x69, 0xb7, 0x3a, 0x6d, 0x73,
-	0x2e, 0xa6, 0xc5, 0x71, 0xcb, 0x4e, 0x08, 0xea, 0x26, 0xe4, 0x9b, 0x28, 0xf0, 0x31, 0x12, 0x94,
-	0x69, 0x13, 0x92, 0xbd, 0xd0, 0x69, 0x9b, 0x6f, 0xc4, 0xec, 0x0c, 0xb2, 0xec, 0x2e, 0x6d, 0x6b,
-	0xe6, 0xfb, 0xc7, 0x66, 0xee, 0x9f, 0xc7, 0x66, 0xce, 0x2a, 0xc1, 0x9d, 0x2b, 0x04, 0xdb, 0x84,
-	0x37, 0x68, 0xc8, 0x89, 0xf5, 0x9f, 0x02, 0x2b, 0xa3, 0xb8, 0x0f, 0x13, 0x67, 0x1c, 0x05, 0x62,
-	0xd0, 0x59, 0x14, 0xb5, 0x6c, 0x09, 0xaa, 0x1f, 0xc2, 0xeb, 0x24, 0x99, 0x58, 0x63, 0x48, 0x10,
-	0x9e, 0x38, 0x2c, 0x74, 0xda, 0xe6, 0x62, 0x4c, 0xbf, 0x8c, 0x5b, 0xf6, 0x1c, 0xe9, 0xa9, 0xc4,
-	0x7b, 0x7a, 0x33, 0x71, 0xa3, 0xde, 0x4c, 0xde, 0xb4, 0x37, 0x6b, 0xb0, 0x3a, 0xce, 0x6f, 0xd6,
-	0x98, 0x6f, 0x15, 0x58, 0xda, 0xe7, 0xee, 0x2e, 0x09, 0x24, 0xef, 0x01, 0x21, 0x78, 0x27, 0x02,
-	0x42, 0xa1, 0x56, 0x60, 0x86, 0x36, 0x08, 0x93, 0xf5, 0xe3, 0xb6, 0xdc, 0xee, 0xb4, 0xcd, 0xf9,
-	0xb8, 0x7e, 0x8a, 0x58, 0x76, 0x46, 0x8a, 0x26, 0xe0, 0x24, 0x4f, 0xd2, 0x98, 0x9e, 0x09, 0x29,
-	0x62, 0xd9, 0x19, 0xa9, 0x47, 0x6e, 0x11, 0x8c, 0xe1, 0x2a, 0x32, 0xa1, 0xcf, 0x15, 0x50, 0xf7,
-	0xb9, 0xbb, 0x47, 0x9b, 0x9f, 0x37, 0x70, 0xb4, 0xc2, 0x88, 0xa1, 0x3a, 0x57, 0xef, 0x43, 0x1e,
-	0x9d, 0x08, 0x8f, 0x32, 0x5f, 0xb4, 0x12, 0x95, 0xda, 0xef, 0xbf, 0x6e, 0x2c, 0x24, 0x87, 0x61,
-	0x1b, 0x63, 0x46, 0x38, 0xff, 0x54, 0x30, 0x3f, 0x74, 0xed, 0x2e, 0x55, 0x5d, 0x80, 0x29, 0xe1,
-	0x8b, 0x20, 0x11, 0x6a, 0xc7, 0x03, 0xb5, 0x08, 0xb3, 0x98, 0x70, 0x87, 0xf9, 0x0d, 0xe1, 0xd3,
-	0x30, 0x5e, 0x23, 0xbb, 0x37, 0xa4, 0x7e, 0x00, 0x93, 0x8d, 0x00, 0x85, 0x72, 0x41, 0x66, 0x37,
-	0x8d, 0xf2, 0xa5, 0x93, 0x5a, 0x96, 0xa2, 0x12, 0x7d, 0x01, 0x0a, 0xab, 0x93, 0x67, 0x6d, 0x33,
-	0x67, 0xcb, 0x19, 0x5b, 0x7a, 0x64, 0xf6, 0xc7, 0xd8, 0xb0, 0xf2, 0xcd, 0xdf, 0xbf, 0xbc, 0xd7,
-	0x55, 0x63, 0xad, 0x80, 0x3e, 0xe8, 0x2d, 0xb3, 0xfe, 0xef, 0x14, 0xcc, 0xc7, 0xf0, 0x36, 0xc6,
-	0xbb, 0x24, 0xa4, 0x2f, 0xc1, 0xf7, 0x12, 0x4c, 0x7b, 0xc4, 0x77, 0x3d, 0x21, 0x9d, 0x4f, 0xd8,
-	0xc9, 0x48, 0x7d, 0x00, 0x80, 0x23, 0x45, 0xb5, 0xc0, 0xe7, 0x42, 0x9b, 0x2a, 0x4e, 0xac, 0xcf,
-	0x6e, 0x2e, 0xf4, 0x75, 0x45, 0x4a, 0xae, 0xde, 0x8a, 0x7a, 0xf1, 0xf4, 0x85, 0x99, 0x97, 0xc3,
-	0x8f, 0x7d, 0x2e, 0xec, 0x3c, 0x4e, 0x3f, 0xd5, 0x15, 0xc8, 0xd7, 0x51, 0x28, 0x77, 0x71, 0x4b,
-	0x9b, 0x2e, 0x2a, 0xeb, 0x33, 0x76, 0x37, 0xa0, 0x7a, 0x30, 0xcb, 0xc8, 0x23, 0xc4, 0x70, 0xed,
-	0x10, 0x85, 0x58, 0x7b, 0x55, 0xfa, 0xdd, 0x3b, 0x6b, 0x9b, 0xca, 0xf3, 0xb6, 0xb9, 0xe6, 0xfa,
-	0xc2, 0x3b, 0x39, 0x2c, 0x3b, 0xb4, 0x9e, 0xdc, 0x81, 0xc9, 0xcf, 0x06, 0xc7, 0xc7, 0x15, 0xd1,
-	0x6a, 0x10, 0x5e, 0xde, 0x25, 0x4e, 0xf7, 0x8c, 0x46, 0x37, 0x43, 0x4d, 0x78, 0x8c, 0x70, 0x8f,
-	0x06, 0xd8, 0xb2, 0x21, 0xce, 0x5d, 0x45, 0x21, 0x56, 0x7f, 0x52, 0x60, 0xd9, 0x39, 0x61, 0x8c,
-	0x84, 0x4e, 0xab, 0xd6, 0x40, 0x3e, 0x8b, 0x2e, 0xd7, 0xa6, 0x8f, 0x09, 0xe3, 0xda, 0x8c, 0x74,
-	0xb7, 0xda, 0xe7, 0x6e, 0x27, 0x61, 0x1f, 0x20, 0x9f, 0x1d, 0xa4, 0xdc, 0xea, 0x4e, 0xe4, 0xb6,
-	0xd3, 0x36, 0x8d, 0xb8, 0xe4, 0x88, 0x94, 0xd6, 0xd3, 0x17, 0x66, 0x61, 0x68, 0x02, 0xd9, 0x9f,
-	0x45, 0x67, 0x18, 0xa4, 0xfe, 0xa6, 0xc0, 0x5b, 0x59, 0x42, 0x4c, 0x9a, 0x3e, 0x8a, 0x96, 0xa8,
-	0xeb, 0x88, 0x6b, 0x79, 0xa9, 0xb4, 0x34, 0x42, 0xe9, 0x6e, 0x3a, 0xe5, 0xb3, 0x74, 0x46, 0xf5,
-	0x93, 0x44, 0xee, 0x6a, 0x9f, 0xdc, 0x61, 0xd9, 0x23, 0xd1, 0xc6, 0xe8, 0x5c, 0x52, 0xf9, 0x9b,
-	0xce, 0x48, 0x9c, 0x8f, 0x3d, 0x09, 0x05, 0x58, 0xee, 0xdb, 0xea, 0xd9, 0x31, 0x78, 0xa2, 0x80,
-	0x16, 0x63, 0x3b, 0x28, 0x74, 0x48, 0xf0, 0x32, 0xef, 0x81, 0xb1, 0x1e, 0x2c, 0x28, 0x8e, 0xd2,
-	0x99, 0x9a, 0xd9, 0x7c, 0x32, 0x05, 0x13, 0xfb, 0xdc, 0x55, 0xbf, 0x53, 0x60, 0x65, 0xec, 0x93,
-	0x5b, 0xee, 0x5b, 0xc4, 0x2b, 0x5e, 0x3c, 0xfd, 0xfe, 0xcd, 0xf8, 0xa9, 0x20, 0xf5, 0x6b, 0x28,
-	0x8c, 0x7e, 0x1d, 0xdf, 0xbf, 0x66, 0xd2, 0x88, 0xac, 0xdf, 0xbb, 0x01, 0x39, 0x2b, 0x7f, 0x0c,
-	0xb7, 0x87, 0xbd, 0x41, 0xef, 0x0e, 0xe6, 0x1a, 0x42, 0xd3, 0x37, 0xae, 0x45, 0xcb, 0x8a, 0xd5,
-	0x60, 0xbe, 0xff, 0x1d, 0x79, 0x7b, 0x30, 0x43, 0x1f, 0x45, 0x2f, 0x5d, 0x49, 0xc9, 0x0a, 0x3c,
-	0x84, 0xd7, 0x2e, 0xdd, 0xd6, 0xc6, 0xd0, 0xa9, 0x19, 0xae, 0xaf, 0x8d, 0xc7, 0xb3, 0xbc, 0x5f,
-	0xc1, 0xe2, 0xf0, 0xed, 0x7f, 0x67, 0x68, 0x82, 0x41, 0xa2, 0x5e, 0xb9, 0x26, 0x31, 0x2d, 0x59,
-	0xdd, 0x3b, 0xfb, 0xcb, 0xc8, 0x9d, 0x9d, 0x1b, 0xca, 0xb3, 0x73, 0x43, 0xf9, 0xf3, 0xdc, 0x50,
-	0x7e, 0xb8, 0x30, 0x72, 0xcf, 0x2e, 0x8c, 0xdc, 0x1f, 0x17, 0x46, 0xee, 0x8b, 0x52, 0xcf, 0xdd,
-	0x4b, 0x8f, 0xe8, 0x46, 0x48, 0xc4, 0x23, 0xca, 0x8e, 0xa3, 0xef, 0xca, 0x69, 0xfa, 0x4f, 0x53,
-	0x5e, 0xc1, 0x87, 0xd3, 0xf2, 0x6f, 0xe6, 0xbd, 0xff, 0x03, 0x00, 0x00, 0xff, 0xff, 0x5a, 0xe7,
-	0xea, 0x8d, 0xf5, 0x0a, 0x00, 0x00,
+	// 1110 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x57, 0xbf, 0x73, 0x1b, 0x45,
+	0x14, 0xd6, 0xc5, 0x3f, 0x62, 0x3d, 0x13, 0x4c, 0x2e, 0xfe, 0x21, 0x1f, 0xe6, 0x4e, 0x39, 0x8c,
+	0x63, 0x91, 0xb1, 0x84, 0x9d, 0x99, 0x4c, 0xc6, 0x05, 0x83, 0x65, 0x13, 0x37, 0x98, 0xf1, 0x1c,
+	0x90, 0x82, 0x46, 0xb3, 0xbe, 0x5b, 0x4e, 0x67, 0x9f, 0x6e, 0xc5, 0xee, 0x5a, 0xb1, 0x0b, 0x1a,
+	0x86, 0x61, 0x28, 0x28, 0x28, 0xa9, 0x98, 0xd0, 0x50, 0xa4, 0x81, 0x82, 0x96, 0xde, 0x65, 0x86,
+	0x82, 0x61, 0x52, 0x28, 0x60, 0x17, 0xc0, 0x30, 0x50, 0xe8, 0x2f, 0x60, 0x6e, 0xf7, 0x74, 0x92,
+	0xa5, 0x93, 0x2c, 0xd1, 0xc4, 0x95, 0x6f, 0xdf, 0xfb, 0xde, 0x7b, 0xdf, 0xf7, 0xde, 0xee, 0x7a,
+	0x05, 0xb3, 0x64, 0x9f, 0x14, 0x08, 0x45, 0xb6, 0x8f, 0x0b, 0xb5, 0xd5, 0x02, 0x3f, 0xca, 0x57,
+	0x29, 0xe1, 0x44, 0xbd, 0x46, 0xf6, 0x49, 0x5e, 0xda, 0xf3, 0xb5, 0x55, 0x6d, 0xce, 0x26, 0xac,
+	0x42, 0x58, 0xa1, 0xc2, 0xdc, 0x10, 0x56, 0x61, 0xae, 0xc4, 0x69, 0xf3, 0xd2, 0x51, 0x12, 0xab,
+	0x82, 0x5c, 0x44, 0xae, 0x69, 0x97, 0xb8, 0x44, 0xda, 0xc3, 0xaf, 0xc8, 0xaa, 0x9d, 0x2f, 0x18,
+	0x95, 0x10, 0x3e, 0xf3, 0x7b, 0x05, 0x8c, 0x1d, 0xe6, 0x6e, 0xb8, 0x2e, 0xc5, 0x2e, 0xe2, 0xf8,
+	0xed, 0x23, 0xbb, 0x8c, 0x02, 0x17, 0x5b, 0x88, 0xe3, 0x5d, 0x8a, 0x6b, 0x84, 0x63, 0xf5, 0x55,
+	0x18, 0x2d, 0x23, 0x56, 0xce, 0x28, 0x59, 0x65, 0x39, 0x5d, 0x9c, 0x6a, 0xd4, 0x8d, 0xc9, 0x63,
+	0x54, 0xf1, 0xd7, 0xcd, 0xd0, 0x6a, 0x5a, 0xc2, 0xa9, 0xe6, 0x60, 0xfc, 0x23, 0x8c, 0x1d, 0x4c,
+	0x33, 0x57, 0x04, 0xec, 0x7a, 0xa3, 0x6e, 0x5c, 0x93, 0x30, 0x69, 0x37, 0xad, 0x08, 0xa0, 0xae,
+	0x41, 0xba, 0x86, 0x7c, 0xcf, 0x41, 0x9c, 0xd0, 0xcc, 0x88, 0x40, 0x4f, 0x37, 0xea, 0xc6, 0x4b,
+	0x12, 0x1d, 0xbb, 0x4c, 0xab, 0x05, 0x5b, 0x9f, 0xf8, 0xe2, 0x91, 0x91, 0xfa, 0xf3, 0x91, 0x91,
+	0x32, 0x73, 0x70, 0xeb, 0x02, 0xc2, 0x16, 0x66, 0x55, 0x12, 0x30, 0x6c, 0xfe, 0xab, 0xc0, 0x42,
+	0x2f, 0xec, 0x83, 0x48, 0x19, 0x43, 0x3e, 0xef, 0x56, 0x16, 0x5a, 0x4d, 0x4b, 0x38, 0xd5, 0xb7,
+	0xe0, 0x45, 0x1c, 0x05, 0x96, 0x28, 0xe2, 0x98, 0x45, 0x0a, 0xe7, 0x1b, 0x75, 0x63, 0x46, 0xc2,
+	0xcf, 0xfb, 0x4d, 0xeb, 0x1a, 0x6e, 0xab, 0xc4, 0xda, 0x7a, 0x33, 0x32, 0x54, 0x6f, 0x46, 0x87,
+	0xed, 0xcd, 0x12, 0x2c, 0xf6, 0xd3, 0x1b, 0x37, 0xe6, 0x33, 0x05, 0x66, 0x77, 0x98, 0xbb, 0x85,
+	0x7d, 0x81, 0xbb, 0x8f, 0xb1, 0xb3, 0x19, 0x3a, 0x02, 0xae, 0x16, 0x60, 0x82, 0x54, 0x31, 0x15,
+	0xf5, 0x65, 0x5b, 0x6e, 0x34, 0xea, 0xc6, 0x94, 0xac, 0xdf, 0xf4, 0x98, 0x56, 0x0c, 0x0a, 0x03,
+	0x9c, 0x28, 0x4f, 0xd4, 0x98, 0xb6, 0x80, 0xa6, 0xc7, 0xb4, 0x62, 0x50, 0x1b, 0xdd, 0x2c, 0xe8,
+	0xc9, 0x2c, 0x62, 0xa2, 0x4f, 0x15, 0x50, 0x77, 0x98, 0xbb, 0x4d, 0x6a, 0x1f, 0x54, 0x9d, 0x70,
+	0xc2, 0x88, 0xa2, 0x0a, 0x53, 0xef, 0x42, 0x1a, 0x1d, 0xf2, 0x32, 0xa1, 0x1e, 0x3f, 0x8e, 0x58,
+	0x66, 0x7e, 0xfe, 0x71, 0x65, 0x3a, 0x3a, 0x0c, 0x1b, 0x8e, 0x43, 0x31, 0x63, 0xef, 0x71, 0xea,
+	0x05, 0xae, 0xd5, 0x82, 0xaa, 0xd3, 0x30, 0xc6, 0x3d, 0xee, 0x47, 0x44, 0x2d, 0xb9, 0x50, 0xb3,
+	0x30, 0xe9, 0x60, 0x66, 0x53, 0xaf, 0xca, 0x3d, 0x12, 0xc8, 0x19, 0x59, 0xed, 0x26, 0xf5, 0x1e,
+	0x8c, 0x56, 0x7d, 0x14, 0x88, 0x81, 0x4c, 0xae, 0xe9, 0xf9, 0x73, 0x27, 0x35, 0x2f, 0x48, 0x45,
+	0xfc, 0x7c, 0x14, 0x14, 0x47, 0x4f, 0xea, 0x46, 0xca, 0x12, 0x11, 0xeb, 0x5a, 0x28, 0xf6, 0x6b,
+	0x29, 0x58, 0xf9, 0xf4, 0x8f, 0x1f, 0x5e, 0x6f, 0xb1, 0x31, 0x17, 0x40, 0xeb, 0xd6, 0x16, 0x4b,
+	0xff, 0x6b, 0x0c, 0xa6, 0xa4, 0x7b, 0xc3, 0x71, 0xb6, 0x70, 0x40, 0x9e, 0x83, 0xee, 0x59, 0x18,
+	0x2f, 0x63, 0xcf, 0x2d, 0x73, 0xa1, 0x7c, 0xc4, 0x8a, 0x56, 0xea, 0x7d, 0x00, 0x27, 0x64, 0x54,
+	0xf2, 0x3d, 0xc6, 0x33, 0x63, 0xd9, 0x91, 0xe5, 0xc9, 0xb5, 0xe9, 0x8e, 0xae, 0x08, 0xca, 0xc5,
+	0xeb, 0x61, 0x2f, 0x1e, 0x3f, 0x33, 0xd2, 0x62, 0xf9, 0x8e, 0xc7, 0xb8, 0x95, 0x76, 0x9a, 0x9f,
+	0xea, 0x02, 0xa4, 0x2b, 0x28, 0x10, 0xbb, 0xf8, 0x38, 0x33, 0x9e, 0x55, 0x96, 0x27, 0xac, 0x96,
+	0x41, 0x2d, 0xc3, 0x24, 0xc5, 0x0f, 0x11, 0x75, 0x4a, 0x7b, 0x28, 0x70, 0x32, 0x57, 0x85, 0xde,
+	0xed, 0x93, 0xba, 0xa1, 0x3c, 0xad, 0x1b, 0x4b, 0xae, 0xc7, 0xcb, 0x87, 0x7b, 0x79, 0x9b, 0x54,
+	0xa2, 0x3b, 0x30, 0xfa, 0xb3, 0xc2, 0x9c, 0x83, 0x02, 0x3f, 0xae, 0x62, 0x96, 0xdf, 0xc2, 0x76,
+	0xeb, 0x8c, 0x86, 0x37, 0x43, 0x89, 0x97, 0x29, 0x66, 0x65, 0xe2, 0x3b, 0xa6, 0x05, 0x32, 0x77,
+	0x11, 0x05, 0x8e, 0xfa, 0xad, 0x02, 0x73, 0xf6, 0x21, 0xa5, 0x38, 0xb0, 0x8f, 0x4b, 0x55, 0xe4,
+	0xd1, 0xf0, 0x72, 0xad, 0x79, 0x0e, 0xa6, 0x2c, 0x33, 0x21, 0xd4, 0x2d, 0x76, 0xa8, 0xdb, 0x8c,
+	0xd0, 0xbb, 0xc8, 0xa3, 0xbb, 0x4d, 0x6c, 0x71, 0x33, 0x54, 0xdb, 0xa8, 0x1b, 0xba, 0x2c, 0xd9,
+	0x23, 0xa5, 0xf9, 0xf8, 0x99, 0x31, 0x9f, 0x98, 0x40, 0xf4, 0x67, 0xc6, 0x4e, 0x72, 0xa9, 0x3f,
+	0x29, 0xf0, 0x4a, 0x9c, 0xd0, 0xc1, 0x35, 0x0f, 0x85, 0x23, 0x6a, 0x29, 0x62, 0x99, 0xb4, 0x60,
+	0x9a, 0xeb, 0xc1, 0x74, 0xab, 0x19, 0xf2, 0x7e, 0x33, 0xa2, 0xf8, 0x6e, 0x44, 0x77, 0xb1, 0x83,
+	0x6e, 0x52, 0xf6, 0x90, 0xb4, 0xde, 0x3b, 0x97, 0x60, 0xfe, 0xb2, 0xdd, 0xd3, 0xcf, 0xfa, 0x9e,
+	0x84, 0x79, 0x98, 0xeb, 0xd8, 0xea, 0xf1, 0x31, 0xf8, 0xfb, 0x0a, 0xdc, 0x94, 0x3e, 0x0b, 0x57,
+	0x48, 0x0d, 0x27, 0xf6, 0xed, 0xd2, 0x1c, 0x8c, 0x7e, 0x1b, 0x69, 0xec, 0x72, 0x6c, 0xa4, 0xbe,
+	0x83, 0xb8, 0x0d, 0xb9, 0x0b, 0x9b, 0x1d, 0x8f, 0xe6, 0x1f, 0x45, 0xfc, 0x2b, 0xee, 0x42, 0x27,
+	0x4c, 0xff, 0xd2, 0x0c, 0x48, 0x07, 0x88, 0xba, 0xe2, 0x61, 0x39, 0x92, 0xb4, 0xd5, 0x66, 0xe9,
+	0xdb, 0x9c, 0x55, 0x28, 0x0c, 0x28, 0x37, 0x6e, 0xd1, 0x77, 0x0a, 0x64, 0x64, 0xcc, 0x26, 0x0a,
+	0x6c, 0xec, 0x3f, 0xcf, 0xff, 0x62, 0x7d, 0xb5, 0x99, 0x90, 0xed, 0xc5, 0xb3, 0x29, 0x66, 0xed,
+	0x97, 0xab, 0x30, 0xb2, 0xc3, 0x5c, 0xf5, 0x73, 0x05, 0x16, 0xfa, 0x3e, 0x18, 0xf3, 0x1d, 0x7b,
+	0xfc, 0x82, 0xf7, 0x9a, 0x76, 0x77, 0x38, 0x7c, 0x93, 0x90, 0xfa, 0x09, 0xcc, 0xf7, 0x7e, 0xdb,
+	0xdd, 0x1e, 0x30, 0x69, 0x08, 0xd6, 0xee, 0x0c, 0x01, 0x8e, 0xcb, 0x1f, 0xc0, 0x8d, 0xa4, 0x17,
+	0xd4, 0x6b, 0xdd, 0xb9, 0x12, 0x60, 0xda, 0xca, 0x40, 0xb0, 0xb8, 0x58, 0x09, 0xa6, 0x3a, 0x5f,
+	0x41, 0x37, 0xbb, 0x33, 0x74, 0x40, 0xb4, 0xdc, 0x85, 0x90, 0xb8, 0xc0, 0x03, 0x78, 0xe1, 0xdc,
+	0x5b, 0x43, 0x4f, 0x0c, 0x8d, 0xfd, 0xda, 0x52, 0x7f, 0x7f, 0x9c, 0xf7, 0x4b, 0x05, 0xf4, 0x0b,
+	0x6e, 0xef, 0x37, 0x12, 0x53, 0xf5, 0x89, 0xd0, 0xee, 0x0d, 0x1b, 0x11, 0xd3, 0xf9, 0x46, 0x81,
+	0xc5, 0xc1, 0x6e, 0xac, 0x01, 0x4a, 0x24, 0xc4, 0x69, 0x6f, 0xfe, 0xbf, 0xb8, 0x98, 0xe0, 0xc7,
+	0x30, 0x93, 0x7c, 0x5d, 0xdc, 0x4a, 0x4c, 0xdc, 0x0d, 0xd4, 0x0a, 0x03, 0x02, 0x9b, 0x25, 0x8b,
+	0xdb, 0x27, 0xbf, 0xeb, 0xa9, 0x93, 0x53, 0x5d, 0x79, 0x72, 0xaa, 0x2b, 0xbf, 0x9d, 0xea, 0xca,
+	0x57, 0x67, 0x7a, 0xea, 0xc9, 0x99, 0x9e, 0xfa, 0xf5, 0x4c, 0x4f, 0x7d, 0x98, 0x6b, 0x7b, 0x69,
+	0x91, 0x7d, 0xb2, 0x12, 0x60, 0xfe, 0x90, 0xd0, 0x83, 0xf0, 0xbb, 0x70, 0xd4, 0xfc, 0x5d, 0x29,
+	0x1e, 0x5c, 0x7b, 0xe3, 0xe2, 0x47, 0xe5, 0x9d, 0xff, 0x02, 0x00, 0x00, 0xff, 0xff, 0xf8, 0x65,
+	0xaf, 0x5b, 0xe3, 0x0e, 0x00, 0x00,
 }
 
 func (this *MsgGovUpdateParams) Equal(that interface{}) bool {
@@ -711,6 +898,88 @@ func (this *MsgGovAddDenoms) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *MsgGovRemoveCurrencyPairProviders) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*MsgGovRemoveCurrencyPairProviders)
+	if !ok {
+		that2, ok := that.(MsgGovRemoveCurrencyPairProviders)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Authority != that1.Authority {
+		return false
+	}
+	if this.Title != that1.Title {
+		return false
+	}
+	if this.Description != that1.Description {
+		return false
+	}
+	if this.Height != that1.Height {
+		return false
+	}
+	if len(this.CurrencyPairProviders) != len(that1.CurrencyPairProviders) {
+		return false
+	}
+	for i := range this.CurrencyPairProviders {
+		if !this.CurrencyPairProviders[i].Equal(&that1.CurrencyPairProviders[i]) {
+			return false
+		}
+	}
+	return true
+}
+func (this *MsgGovRemoveCurrencyDeviationThresholds) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*MsgGovRemoveCurrencyDeviationThresholds)
+	if !ok {
+		that2, ok := that.(MsgGovRemoveCurrencyDeviationThresholds)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Authority != that1.Authority {
+		return false
+	}
+	if this.Title != that1.Title {
+		return false
+	}
+	if this.Description != that1.Description {
+		return false
+	}
+	if this.Height != that1.Height {
+		return false
+	}
+	if len(this.Currencies) != len(that1.Currencies) {
+		return false
+	}
+	for i := range this.Currencies {
+		if this.Currencies[i] != that1.Currencies[i] {
+			return false
+		}
+	}
+	return true
+}
 func (this *MsgGovCancelUpdateParams) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -766,6 +1035,12 @@ type MsgClient interface {
 	GovUpdateParams(ctx context.Context, in *MsgGovUpdateParams, opts ...grpc.CallOption) (*MsgGovUpdateParamsResponse, error)
 	// GovAddDenoms updates the oracle parameters to include a new tokens.
 	GovAddDenoms(ctx context.Context, in *MsgGovAddDenoms, opts ...grpc.CallOption) (*MsgGovAddDenomsResponse, error)
+	// GovRemoveCurrencyPairProviders updates the oracle parameters to remove a list of
+	// currency pair providers.
+	GovRemoveCurrencyPairProviders(ctx context.Context, in *MsgGovRemoveCurrencyPairProviders, opts ...grpc.CallOption) (*MsgGovRemoveCurrencyPairProvidersResponse, error)
+	// GovRemoveCurrencyDeviationThresholds updates the oracle parameters to remove a list
+	// of currency deviation thresholds.
+	GovRemoveCurrencyDeviationThresholds(ctx context.Context, in *MsgGovRemoveCurrencyDeviationThresholds, opts ...grpc.CallOption) (*MsgGovRemoveCurrencyDeviationThresholdsResponse, error)
 	// GovCancelUpdateParams cancels a plan to update the oracle parameters.
 	GovCancelUpdateParams(ctx context.Context, in *MsgGovCancelUpdateParams, opts ...grpc.CallOption) (*MsgGovCancelUpdateParamsResponse, error)
 }
@@ -823,6 +1098,24 @@ func (c *msgClient) GovAddDenoms(ctx context.Context, in *MsgGovAddDenoms, opts 
 	return out, nil
 }
 
+func (c *msgClient) GovRemoveCurrencyPairProviders(ctx context.Context, in *MsgGovRemoveCurrencyPairProviders, opts ...grpc.CallOption) (*MsgGovRemoveCurrencyPairProvidersResponse, error) {
+	out := new(MsgGovRemoveCurrencyPairProvidersResponse)
+	err := c.cc.Invoke(ctx, "/ojo.oracle.v1.Msg/GovRemoveCurrencyPairProviders", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) GovRemoveCurrencyDeviationThresholds(ctx context.Context, in *MsgGovRemoveCurrencyDeviationThresholds, opts ...grpc.CallOption) (*MsgGovRemoveCurrencyDeviationThresholdsResponse, error) {
+	out := new(MsgGovRemoveCurrencyDeviationThresholdsResponse)
+	err := c.cc.Invoke(ctx, "/ojo.oracle.v1.Msg/GovRemoveCurrencyDeviationThresholds", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *msgClient) GovCancelUpdateParams(ctx context.Context, in *MsgGovCancelUpdateParams, opts ...grpc.CallOption) (*MsgGovCancelUpdateParamsResponse, error) {
 	out := new(MsgGovCancelUpdateParamsResponse)
 	err := c.cc.Invoke(ctx, "/ojo.oracle.v1.Msg/GovCancelUpdateParams", in, out, opts...)
@@ -846,6 +1139,12 @@ type MsgServer interface {
 	GovUpdateParams(context.Context, *MsgGovUpdateParams) (*MsgGovUpdateParamsResponse, error)
 	// GovAddDenoms updates the oracle parameters to include a new tokens.
 	GovAddDenoms(context.Context, *MsgGovAddDenoms) (*MsgGovAddDenomsResponse, error)
+	// GovRemoveCurrencyPairProviders updates the oracle parameters to remove a list of
+	// currency pair providers.
+	GovRemoveCurrencyPairProviders(context.Context, *MsgGovRemoveCurrencyPairProviders) (*MsgGovRemoveCurrencyPairProvidersResponse, error)
+	// GovRemoveCurrencyDeviationThresholds updates the oracle parameters to remove a list
+	// of currency deviation thresholds.
+	GovRemoveCurrencyDeviationThresholds(context.Context, *MsgGovRemoveCurrencyDeviationThresholds) (*MsgGovRemoveCurrencyDeviationThresholdsResponse, error)
 	// GovCancelUpdateParams cancels a plan to update the oracle parameters.
 	GovCancelUpdateParams(context.Context, *MsgGovCancelUpdateParams) (*MsgGovCancelUpdateParamsResponse, error)
 }
@@ -868,6 +1167,12 @@ func (*UnimplementedMsgServer) GovUpdateParams(ctx context.Context, req *MsgGovU
 }
 func (*UnimplementedMsgServer) GovAddDenoms(ctx context.Context, req *MsgGovAddDenoms) (*MsgGovAddDenomsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GovAddDenoms not implemented")
+}
+func (*UnimplementedMsgServer) GovRemoveCurrencyPairProviders(ctx context.Context, req *MsgGovRemoveCurrencyPairProviders) (*MsgGovRemoveCurrencyPairProvidersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GovRemoveCurrencyPairProviders not implemented")
+}
+func (*UnimplementedMsgServer) GovRemoveCurrencyDeviationThresholds(ctx context.Context, req *MsgGovRemoveCurrencyDeviationThresholds) (*MsgGovRemoveCurrencyDeviationThresholdsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GovRemoveCurrencyDeviationThresholds not implemented")
 }
 func (*UnimplementedMsgServer) GovCancelUpdateParams(ctx context.Context, req *MsgGovCancelUpdateParams) (*MsgGovCancelUpdateParamsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GovCancelUpdateParams not implemented")
@@ -967,6 +1272,42 @@ func _Msg_GovAddDenoms_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_GovRemoveCurrencyPairProviders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgGovRemoveCurrencyPairProviders)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).GovRemoveCurrencyPairProviders(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ojo.oracle.v1.Msg/GovRemoveCurrencyPairProviders",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).GovRemoveCurrencyPairProviders(ctx, req.(*MsgGovRemoveCurrencyPairProviders))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_GovRemoveCurrencyDeviationThresholds_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgGovRemoveCurrencyDeviationThresholds)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).GovRemoveCurrencyDeviationThresholds(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ojo.oracle.v1.Msg/GovRemoveCurrencyDeviationThresholds",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).GovRemoveCurrencyDeviationThresholds(ctx, req.(*MsgGovRemoveCurrencyDeviationThresholds))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Msg_GovCancelUpdateParams_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(MsgGovCancelUpdateParams)
 	if err := dec(in); err != nil {
@@ -1008,6 +1349,14 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GovAddDenoms",
 			Handler:    _Msg_GovAddDenoms_Handler,
+		},
+		{
+			MethodName: "GovRemoveCurrencyPairProviders",
+			Handler:    _Msg_GovRemoveCurrencyPairProviders_Handler,
+		},
+		{
+			MethodName: "GovRemoveCurrencyDeviationThresholds",
+			Handler:    _Msg_GovRemoveCurrencyDeviationThresholds_Handler,
 		},
 		{
 			MethodName: "GovCancelUpdateParams",
@@ -1432,6 +1781,173 @@ func (m *MsgGovAddDenomsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error)
 	return len(dAtA) - i, nil
 }
 
+func (m *MsgGovRemoveCurrencyPairProviders) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgGovRemoveCurrencyPairProviders) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgGovRemoveCurrencyPairProviders) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.CurrencyPairProviders) > 0 {
+		for iNdEx := len(m.CurrencyPairProviders) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.CurrencyPairProviders[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTx(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x2a
+		}
+	}
+	if m.Height != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.Height))
+		i--
+		dAtA[i] = 0x20
+	}
+	if len(m.Description) > 0 {
+		i -= len(m.Description)
+		copy(dAtA[i:], m.Description)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Description)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Title) > 0 {
+		i -= len(m.Title)
+		copy(dAtA[i:], m.Title)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Title)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Authority) > 0 {
+		i -= len(m.Authority)
+		copy(dAtA[i:], m.Authority)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgGovRemoveCurrencyPairProvidersResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgGovRemoveCurrencyPairProvidersResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgGovRemoveCurrencyPairProvidersResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgGovRemoveCurrencyDeviationThresholds) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgGovRemoveCurrencyDeviationThresholds) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgGovRemoveCurrencyDeviationThresholds) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Currencies) > 0 {
+		for iNdEx := len(m.Currencies) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.Currencies[iNdEx])
+			copy(dAtA[i:], m.Currencies[iNdEx])
+			i = encodeVarintTx(dAtA, i, uint64(len(m.Currencies[iNdEx])))
+			i--
+			dAtA[i] = 0x2a
+		}
+	}
+	if m.Height != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.Height))
+		i--
+		dAtA[i] = 0x20
+	}
+	if len(m.Description) > 0 {
+		i -= len(m.Description)
+		copy(dAtA[i:], m.Description)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Description)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Title) > 0 {
+		i -= len(m.Title)
+		copy(dAtA[i:], m.Title)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Title)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Authority) > 0 {
+		i -= len(m.Authority)
+		copy(dAtA[i:], m.Authority)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgGovRemoveCurrencyDeviationThresholdsResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgGovRemoveCurrencyDeviationThresholdsResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgGovRemoveCurrencyDeviationThresholdsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
 func (m *MsgGovCancelUpdateParams) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -1682,6 +2198,84 @@ func (m *MsgGovAddDenoms) Size() (n int) {
 }
 
 func (m *MsgGovAddDenomsResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *MsgGovRemoveCurrencyPairProviders) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Authority)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Title)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Description)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	if m.Height != 0 {
+		n += 1 + sovTx(uint64(m.Height))
+	}
+	if len(m.CurrencyPairProviders) > 0 {
+		for _, e := range m.CurrencyPairProviders {
+			l = e.Size()
+			n += 1 + l + sovTx(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *MsgGovRemoveCurrencyPairProvidersResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *MsgGovRemoveCurrencyDeviationThresholds) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Authority)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Title)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Description)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	if m.Height != 0 {
+		n += 1 + sovTx(uint64(m.Height))
+	}
+	if len(m.Currencies) > 0 {
+		for _, s := range m.Currencies {
+			l = len(s)
+			n += 1 + l + sovTx(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *MsgGovRemoveCurrencyDeviationThresholdsResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -2893,6 +3487,502 @@ func (m *MsgGovAddDenomsResponse) Unmarshal(dAtA []byte) error {
 		}
 		if fieldNum <= 0 {
 			return fmt.Errorf("proto: MsgGovAddDenomsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgGovRemoveCurrencyPairProviders) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgGovRemoveCurrencyPairProviders: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgGovRemoveCurrencyPairProviders: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Authority = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Title", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Title = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Description", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Description = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Height", wireType)
+			}
+			m.Height = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Height |= int64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CurrencyPairProviders", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.CurrencyPairProviders = append(m.CurrencyPairProviders, CurrencyPairProviders{})
+			if err := m.CurrencyPairProviders[len(m.CurrencyPairProviders)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgGovRemoveCurrencyPairProvidersResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgGovRemoveCurrencyPairProvidersResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgGovRemoveCurrencyPairProvidersResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgGovRemoveCurrencyDeviationThresholds) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgGovRemoveCurrencyDeviationThresholds: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgGovRemoveCurrencyDeviationThresholds: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Authority = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Title", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Title = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Description", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Description = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Height", wireType)
+			}
+			m.Height = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Height |= int64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Currencies", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Currencies = append(m.Currencies, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgGovRemoveCurrencyDeviationThresholdsResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgGovRemoveCurrencyDeviationThresholdsResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgGovRemoveCurrencyDeviationThresholdsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:

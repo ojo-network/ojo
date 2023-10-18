@@ -13,11 +13,7 @@ func (cdt CurrencyDeviationThreshold) String() string {
 }
 
 func (cdt CurrencyDeviationThreshold) Equal(cdt2 *CurrencyDeviationThreshold) bool {
-	if !strings.EqualFold(cdt.BaseDenom, cdt2.BaseDenom) || !strings.EqualFold(cdt.Threshold, cdt2.Threshold) {
-		return false
-	}
-
-	return true
+	return strings.EqualFold(cdt.BaseDenom, cdt2.BaseDenom) && strings.EqualFold(cdt.Threshold, cdt2.Threshold)
 }
 
 // CurrencyDeviationThresholdList is array of CurrencyDeviationThresholds
@@ -29,4 +25,15 @@ func (cdtl CurrencyDeviationThresholdList) String() (out string) {
 	}
 
 	return strings.TrimSpace(out)
+}
+
+func (cdtl CurrencyDeviationThresholdList) RemovePair(curr string) CurrencyDeviationThresholdList {
+	for i := 0; i < len(cdtl); i++ {
+		if cdtl[i].BaseDenom == curr {
+			cdtl = append(cdtl[:i], cdtl[i+1:]...)
+			i-- // decrement i so the next iteration will check the next element
+		}
+	}
+
+	return cdtl
 }

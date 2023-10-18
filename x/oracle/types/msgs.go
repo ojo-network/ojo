@@ -292,3 +292,82 @@ func (msg MsgGovAddDenoms) GetSigners() []sdk.AccAddress {
 func (msg MsgGovAddDenoms) ValidateBasic() error {
 	return checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority)
 }
+
+// NewMsgGovRemoveCurrencyPairProviders will creates a new NewMsgGovRemoveCurrencyPairProviders instance
+func NewMsgGovRemoveCurrencyPairProviders(
+	authority, title, description string,
+	height int64, currencyPairProviders CurrencyPairProvidersList,
+) *MsgGovRemoveCurrencyPairProviders {
+	return &MsgGovRemoveCurrencyPairProviders{
+		Authority:   authority,
+		Title:       title,
+		Description: description,
+		Height:      height,
+
+		CurrencyPairProviders: currencyPairProviders,
+	}
+}
+
+// Type implements Msg interface
+func (msg MsgGovRemoveCurrencyPairProviders) Type() string { return sdk.MsgTypeURL(&msg) }
+
+// String implements the Stringer interface.
+func (msg MsgGovRemoveCurrencyPairProviders) String() string {
+	out, _ := yaml.Marshal(msg)
+	return string(out)
+}
+
+// GetSignBytes implements Msg
+func (msg MsgGovRemoveCurrencyPairProviders) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(&msg)
+	return sdk.MustSortJSON(bz)
+}
+
+// GetSigners implements Msg
+func (msg MsgGovRemoveCurrencyPairProviders) GetSigners() []sdk.AccAddress {
+	return checkers.Signers(msg.Authority)
+}
+
+// ValidateBasic implements Msg
+func (msg MsgGovRemoveCurrencyPairProviders) ValidateBasic() error {
+	return checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority)
+}
+
+// NewMsgGovRemoveCurrencyDeviationThresholds will creates a new NewMsgGovRemoveCurrencyDeviationThresholds instance
+func NewMsgGovRemoveCurrencyDeviationThresholds(
+	authority, title, description string,
+	height int64, currencies []string,
+) *MsgGovRemoveCurrencyDeviationThresholds {
+	return &MsgGovRemoveCurrencyDeviationThresholds{
+		Authority:   authority,
+		Title:       title,
+		Description: description,
+		Height:      height,
+		Currencies:  currencies,
+	}
+}
+
+// Type implements Msg interface
+func (msg MsgGovRemoveCurrencyDeviationThresholds) Type() string { return sdk.MsgTypeURL(&msg) }
+
+// String implements the Stringer interface.
+func (msg MsgGovRemoveCurrencyDeviationThresholds) String() string {
+	out, _ := yaml.Marshal(msg)
+	return string(out)
+}
+
+// GetSignBytes implements Msg
+func (msg MsgGovRemoveCurrencyDeviationThresholds) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(&msg)
+	return sdk.MustSortJSON(bz)
+}
+
+// GetSigners implements Msg
+func (msg MsgGovRemoveCurrencyDeviationThresholds) GetSigners() []sdk.AccAddress {
+	return checkers.Signers(msg.Authority)
+}
+
+// ValidateBasic implements Msg
+func (msg MsgGovRemoveCurrencyDeviationThresholds) ValidateBasic() error {
+	return checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority)
+}

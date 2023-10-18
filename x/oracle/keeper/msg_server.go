@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"strings"
 
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -257,6 +258,92 @@ func (ms msgServer) GovAddDenoms(
 	}
 
 	return &types.MsgGovAddDenomsResponse{}, nil
+}
+
+// GovRemoveCurrencyPairProviders removes the specified currency pair
+// providers in MsgGovRemoveCurrencyPairProviders if they exist in
+// the current CurrencyPairProviders list.
+func (ms msgServer) GovRemoveCurrencyPairProviders(
+	goCtx context.Context,
+	msg *types.MsgGovRemoveCurrencyPairProviders,
+) (*types.MsgGovRemoveCurrencyPairProvidersResponse, error) {
+	if msg.Authority != ms.authority {
+		err := errors.Wrapf(
+			types.ErrNoGovAuthority,
+			"invalid authority; expected %s, got %s",
+			ms.authority,
+			msg.Authority,
+		)
+		return nil, err
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	params := ms.GetParams(ctx)
+
+	plan := types.ParamUpdatePlan{
+		Keys:    []string{string(types.KeyCurrencyPairProviders)},
+		Height:  msg.Height,
+		Changes: params,
+	}
+
+	for _, cpp := range msg.CurrencyPairProviders {
+		plan.Changes.CurrencyPairProviders = plan.Changes.CurrencyPairProviders.RemovePair(cpp)
+	}
+
+	// validate plan construction before scheduling
+	err := plan.ValidateBasic()
+	if err != nil {
+		return nil, err
+	}
+
+	err = ms.ScheduleParamUpdatePlan(ctx, plan)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.MsgGovRemoveCurrencyPairProvidersResponse{}, nil
+}
+
+// GovRemoveCurrencyDeviationThresholds removes the specified currency
+// deviation thresholds in MsgGovRemoveCurrencyDeviationThresholdsResponse
+// if they exist in the current CurrencyDeviationThresholds list.
+func (ms msgServer) GovRemoveCurrencyDeviationThresholds(
+	goCtx context.Context,
+	msg *types.MsgGovRemoveCurrencyDeviationThresholds,
+) (*types.MsgGovRemoveCurrencyDeviationThresholdsResponse, error) {
+	if msg.Authority != ms.authority {
+		err := errors.Wrapf(
+			types.ErrNoGovAuthority,
+			"invalid authority; expected %s, got %s",
+			ms.authority,
+			msg.Authority,
+		)
+		return nil, err
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	params := ms.GetParams(ctx)
+
+	plan := types.ParamUpdatePlan{
+		Keys:    []string{string(types.KeyCurrencyDeviationThresholds)},
+		Height:  msg.Height,
+		Changes: params,
+	}
+
+	for _, curr := range msg.Currencies {
+		plan.Changes.CurrencyDeviationThresholds = plan.Changes.CurrencyDeviationThresholds.RemovePair(strings.ToUpper(curr))
+	}
+
+	// validate plan construction before scheduling
+	err := plan.ValidateBasic()
+	if err != nil {
+		return nil, err
+	}
+
+	err = ms.ScheduleParamUpdatePlan(ctx, plan)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.MsgGovRemoveCurrencyDeviationThresholdsResponse{}, nil
 }
 
 func (ms msgServer) GovCancelUpdateParams(
