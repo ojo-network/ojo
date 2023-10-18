@@ -36,7 +36,11 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgGovUpdateParams{}, "ojo/oracle/MsgGovUpdateParams", nil)
 	cdc.RegisterConcrete(&MsgGovAddDenoms{}, "ojo/oracle/MsgGovAddDenoms", nil)
 	cdc.RegisterConcrete(&MsgGovRemoveCurrencyPairProviders{}, "ojo/oracle/MsgGovRemoveCurrencyPairProviders", nil)
-	cdc.RegisterConcrete(&MsgGovRemoveCurrencyDeviationThresholds{}, "ojo/oracle/MsgGovRemoveCurrencyDeviationThresholds", nil)
+	cdc.RegisterConcrete(
+		&MsgGovRemoveCurrencyDeviationThresholds{},
+		"ojo/oracle/MsgGovRemoveCurrencyDeviationThresholds",
+		nil,
+	)
 }
 
 // RegisterInterfaces registers the x/oracle interfaces types with the interface registry
