@@ -40,11 +40,7 @@ func (k Keeper) ClearParamUpdatePlan(ctx sdk.Context, planHeight uint64) error {
 func (k Keeper) haveParamUpdatePlan(ctx sdk.Context, planHeight uint64) bool {
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(types.KeyParamUpdatePlan(planHeight))
-	if bz == nil {
-		return false
-	}
-
-	return true
+	return bz != nil
 }
 
 // GetParamUpdatePlans returns all the param update plans in the store.
