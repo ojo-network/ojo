@@ -19,7 +19,9 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 	plans := k.GetParamUpdatePlans(ctx)
 	for _, plan := range plans {
 		if plan.ShouldExecute(ctx) {
-			k.ExecuteParamUpdatePlan(ctx, plan)
+			if err := k.ExecuteParamUpdatePlan(ctx, plan); err != nil {
+				return err
+			}
 		}
 	}
 

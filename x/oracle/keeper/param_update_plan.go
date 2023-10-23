@@ -131,7 +131,7 @@ func (k Keeper) ValidateParamChanges(ctx sdk.Context, keys []string, changes typ
 
 // ExecuteParamUpdatePlan will execute a given param update plan and emit a param
 // update event.
-func (k Keeper) ExecuteParamUpdatePlan(ctx sdk.Context, plan types.ParamUpdatePlan) {
+func (k Keeper) ExecuteParamUpdatePlan(ctx sdk.Context, plan types.ParamUpdatePlan) error {
 	for _, key := range plan.Keys {
 		switch key {
 		case string(types.KeyVotePeriod):
@@ -181,12 +181,12 @@ func (k Keeper) ExecuteParamUpdatePlan(ctx sdk.Context, plan types.ParamUpdatePl
 		}
 	}
 
-	// clear plan from store after executing it
-	k.ClearParamUpdatePlan(ctx, uint64(plan.Height))
-
 	event := sdk.NewEvent(
 		types.EventParamUpdate,
 		sdk.NewAttribute(types.AttributeKeyNotifyPriceFeeder, "1"),
 	)
 	ctx.EventManager().EmitEvent(event)
+
+	// clear plan from store after executing it
+	return k.ClearParamUpdatePlan(ctx, uint64(plan.Height))
 }
