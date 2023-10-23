@@ -44,9 +44,9 @@ service Msg {
   rpc GovRemoveCurrencyDeviationThresholds(MsgGovRemoveCurrencyDeviationThresholds)
       returns (MsgGovRemoveCurrencyDeviationThresholdsResponse);
 
-  // GovCancelUpdateParams cancels a plan to update the oracle parameters.
-  rpc GovCancelUpdateParams(MsgGovCancelUpdateParams)
-      returns (MsgGovCancelUpdateParamsResponse);
+  // GovCancelUpdateParamPlan cancels a plan to update the oracle parameters.
+  rpc GovCancelUpdateParamPlan(MsgGovCancelUpdateParamPlan)
+      returns (MsgGovCancelUpdateParamPlanResponse);
 }
 
 // MsgAggregateExchangeRatePrevote represents a message to submit an aggregate
@@ -234,8 +234,8 @@ message MsgGovRemoveCurrencyDeviationThresholds {
 // MsgGovRemoveCurrencyDeviationThresholdsResponse defines the Msg/GovRemoveCurrencyDeviationThresholdsResponse response type.
 message MsgGovRemoveCurrencyDeviationThresholdsResponse {}
 
-// MsgGovCancelUpdateParams defines the Msg/GovCancelUpdateParams request type.
-message MsgGovCancelUpdateParams {
+// MsgGovCancelUpdateParamPlan defines the Msg/GovCancelUpdateParamPlan request type.
+message MsgGovCancelUpdateParamPlan {
   option (gogoproto.equal)            = true;
   option (gogoproto.goproto_getters)  = false;
   option (gogoproto.goproto_stringer) = false;
@@ -247,9 +247,12 @@ message MsgGovCancelUpdateParams {
   // title of the proposal
   string title = 2;
 
-   // description of the proposal
+  // description of the proposal
   string description = 3;
+
+  // height of param update plan to cancel
+  int64 height = 4;
 }
 
-// MsgGovCancelUpdateParamsResponse defines the Msg/GovCancelUpdateParamsResponse response type.
-message MsgGovCancelUpdateParamsResponse {}
+// MsgGovCancelUpdateParamPlanResponse defines the Msg/GovCancelUpdateParamPlanResponse response type.
+message MsgGovCancelUpdateParamPlanResponse {}

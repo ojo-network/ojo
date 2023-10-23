@@ -1150,13 +1150,14 @@ func (s *IntegrationTestSuite) TestMsgServer_GovRemoveCurrencyDeviationThreshold
 func (s *IntegrationTestSuite) TestMsgServer_CancelUpdateGovParams() {
 	govAccAddr := s.app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String()
 
-	// No plan exists
-	_, err := s.msgServer.GovCancelUpdateParams(s.ctx,
-		&types.MsgGovCancelUpdateParams{
+	// No plan exists at height
+	_, err := s.msgServer.GovCancelUpdateParamPlan(s.ctx,
+		&types.MsgGovCancelUpdateParamPlan{
 			Authority: govAccAddr,
+			Height:    100,
 		},
 	)
-	s.Require().ErrorContains(err, "No param update plan found: invalid request")
+	s.Require().ErrorContains(err, "No param update plan found at block height 100: invalid request")
 
 	// Schedule plan
 	_, err = s.msgServer.GovUpdateParams(s.ctx,
@@ -1176,13 +1177,14 @@ func (s *IntegrationTestSuite) TestMsgServer_CancelUpdateGovParams() {
 	s.Require().NoError(err)
 
 	// Plan exists now
-	_, err = s.msgServer.GovCancelUpdateParams(s.ctx,
-		&types.MsgGovCancelUpdateParams{
+	_, err = s.msgServer.GovCancelUpdateParamPlan(s.ctx,
+		&types.MsgGovCancelUpdateParamPlan{
 			Authority: govAccAddr,
+			Height:    100,
 		},
 	)
 	s.Require().NoError(err)
 
-	_, found := s.app.OracleKeeper.GetParamUpdatePlan(s.ctx)
-	s.Require().Equal(false, found)
+	plan := s.app.OracleKeeper.GetParamUpdatePlans(s.ctx)
+	s.Require().Len(plan, 0)
 }

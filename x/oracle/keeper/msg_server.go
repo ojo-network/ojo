@@ -348,10 +348,10 @@ func (ms msgServer) GovRemoveCurrencyDeviationThresholds(
 	return &types.MsgGovRemoveCurrencyDeviationThresholdsResponse{}, nil
 }
 
-func (ms msgServer) GovCancelUpdateParams(
+func (ms msgServer) GovCancelUpdateParamPlan(
 	goCtx context.Context,
-	msg *types.MsgGovCancelUpdateParams,
-) (*types.MsgGovCancelUpdateParamsResponse, error) {
+	msg *types.MsgGovCancelUpdateParamPlan,
+) (*types.MsgGovCancelUpdateParamPlanResponse, error) {
 	if msg.Authority != ms.authority {
 		err := errors.Wrapf(
 			types.ErrNoGovAuthority,
@@ -363,10 +363,10 @@ func (ms msgServer) GovCancelUpdateParams(
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	err := ms.ClearParamUpdatePlan(ctx)
+	err := ms.ClearParamUpdatePlan(ctx, uint64(msg.Height))
 	if err != nil {
 		return nil, err
 	}
 
-	return &types.MsgGovCancelUpdateParamsResponse{}, nil
+	return &types.MsgGovCancelUpdateParamPlanResponse{}, nil
 }
