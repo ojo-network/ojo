@@ -432,7 +432,7 @@ func (s *IntegrationTestSuite) TestUpdateOracleParams() {
 	app, ctx := s.app, s.ctx
 	blockHeight := ctx.BlockHeight()
 
-	// Schedule param update plan for current block height
+	// Schedule param update plans for at different block heights
 	err := app.OracleKeeper.ScheduleParamUpdatePlan(
 		ctx,
 		types.ParamUpdatePlan{
@@ -444,37 +444,53 @@ func (s *IntegrationTestSuite) TestUpdateOracleParams() {
 		},
 	)
 	s.Require().NoError(err)
-	_, found := s.app.OracleKeeper.GetParamUpdatePlan(s.ctx)
-	s.Require().Equal(true, found)
-
-	// Check Vote Threshold was updated
-	oracle.EndBlocker(ctx, app.OracleKeeper)
-	s.Require().Equal(sdk.NewDecWithPrec(40, 2), app.OracleKeeper.VoteThreshold(ctx))
-
-	// Schedule param update plan for current block height and then cancel it
 	err = app.OracleKeeper.ScheduleParamUpdatePlan(
 		ctx,
 		types.ParamUpdatePlan{
 			Keys:   []string{"VoteThreshold"},
-			Height: blockHeight,
+			Height: blockHeight + 1,
 			Changes: types.Params{
 				VoteThreshold: sdk.NewDecWithPrec(50, 2),
 			},
 		},
 	)
 	s.Require().NoError(err)
-	_, found = s.app.OracleKeeper.GetParamUpdatePlan(s.ctx)
-	s.Require().Equal(true, found)
+	plans := s.app.OracleKeeper.GetParamUpdatePlans(s.ctx)
+	s.Require().Len(plans, 2)
+
+	// Check Vote Threshold was updated by first plan
+	oracle.EndBlocker(ctx, app.OracleKeeper)
+	s.Require().Equal(sdk.NewDecWithPrec(40, 2), app.OracleKeeper.VoteThreshold(ctx))
+
+	// Check Vote Threshold was updated by second plan in next block
+	ctx = ctx.WithBlockHeight(blockHeight + 1)
+	oracle.EndBlocker(ctx, app.OracleKeeper)
+	s.Require().Equal(sdk.NewDecWithPrec(50, 2), app.OracleKeeper.VoteThreshold(ctx))
+
+	// Schedule param update plan for current block height and then cancel it
+	err = app.OracleKeeper.ScheduleParamUpdatePlan(
+		ctx,
+		types.ParamUpdatePlan{
+			Keys:   []string{"VoteThreshold"},
+			Height: blockHeight + 1,
+			Changes: types.Params{
+				VoteThreshold: sdk.NewDecWithPrec(60, 2),
+			},
+		},
+	)
+	s.Require().NoError(err)
+	plans = s.app.OracleKeeper.GetParamUpdatePlans(s.ctx)
+	s.Require().Len(plans, 1)
 
 	// Cancel update
-	err = app.OracleKeeper.ClearParamUpdatePlan(ctx)
+	err = app.OracleKeeper.ClearParamUpdatePlan(ctx, uint64(blockHeight+1))
 	s.Require().NoError(err)
-	_, found = s.app.OracleKeeper.GetParamUpdatePlan(s.ctx)
-	s.Require().Equal(false, found)
+	plans = s.app.OracleKeeper.GetParamUpdatePlans(s.ctx)
+	s.Require().Len(plans, 0)
 
 	// Check Vote Threshold wasn't updated
 	oracle.EndBlocker(ctx, app.OracleKeeper)
-	s.Require().Equal(sdk.NewDecWithPrec(40, 2), app.OracleKeeper.VoteThreshold(ctx))
+	s.Require().Equal(sdk.NewDecWithPrec(50, 2), app.OracleKeeper.VoteThreshold(ctx))
 }
 
 func TestOracleTestSuite(t *testing.T) {

@@ -14,7 +14,7 @@ var (
 	_ sdk.Msg = &MsgAggregateExchangeRatePrevote{}
 	_ sdk.Msg = &MsgAggregateExchangeRateVote{}
 	_ sdk.Msg = &MsgGovUpdateParams{}
-	_ sdk.Msg = &MsgGovCancelUpdateParams{}
+	_ sdk.Msg = &MsgGovCancelUpdateParamPlan{}
 )
 
 func NewMsgAggregateExchangeRatePrevote(
@@ -213,9 +213,9 @@ func (msg MsgGovUpdateParams) ValidateBasic() error {
 	return msg.Plan.ValidateBasic()
 }
 
-// NewMsgCancelUpdateParams will creates a new MsgGovCancelUpdateParams instance
-func NewMsgCancelUpdateParams(authority, title, description string) *MsgGovCancelUpdateParams {
-	return &MsgGovCancelUpdateParams{
+// NewMsgGovCancelUpdateParamPlan will creates a new MsgGovCancelUpdateParamPlan instance
+func NewMsgGovCancelUpdateParamPlan(authority, title, description string) *MsgGovCancelUpdateParamPlan {
+	return &MsgGovCancelUpdateParamPlan{
 		Authority:   authority,
 		Title:       title,
 		Description: description,
@@ -223,27 +223,27 @@ func NewMsgCancelUpdateParams(authority, title, description string) *MsgGovCance
 }
 
 // Type implements Msg interface
-func (msg MsgGovCancelUpdateParams) Type() string { return sdk.MsgTypeURL(&msg) }
+func (msg MsgGovCancelUpdateParamPlan) Type() string { return sdk.MsgTypeURL(&msg) }
 
 // String implements the Stringer interface.
-func (msg MsgGovCancelUpdateParams) String() string {
+func (msg MsgGovCancelUpdateParamPlan) String() string {
 	out, _ := yaml.Marshal(msg)
 	return string(out)
 }
 
 // GetSignBytes implements Msg
-func (msg MsgGovCancelUpdateParams) GetSignBytes() []byte {
+func (msg MsgGovCancelUpdateParamPlan) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(&msg)
 	return sdk.MustSortJSON(bz)
 }
 
 // GetSigners implements Msg
-func (msg MsgGovCancelUpdateParams) GetSigners() []sdk.AccAddress {
+func (msg MsgGovCancelUpdateParamPlan) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
 }
 
 // ValidateBasic implements Msg
-func (msg MsgGovCancelUpdateParams) ValidateBasic() error {
+func (msg MsgGovCancelUpdateParamPlan) ValidateBasic() error {
 	return checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority)
 }
 

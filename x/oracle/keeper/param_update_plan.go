@@ -18,35 +18,59 @@ func (k Keeper) ScheduleParamUpdatePlan(ctx sdk.Context, plan types.ParamUpdateP
 	store := ctx.KVStore(k.storeKey)
 
 	bz := k.cdc.MustMarshal(&plan)
-	store.Set(types.KeyParamUpdatePlan(), bz)
+	store.Set(types.KeyParamUpdatePlan(uint64(plan.Height)), bz)
 
 	return nil
 }
 
 // ClearParamUpdatePlan will clear an upcoming param update plan if one exists and return
 // an error if one isn't found.
-func (k Keeper) ClearParamUpdatePlan(ctx sdk.Context) error {
-	store := ctx.KVStore(k.storeKey)
-	bz := store.Get(types.KeyParamUpdatePlan())
-	if bz == nil {
-		return types.ErrInvalidRequest.Wrap("No param update plan found")
+func (k Keeper) ClearParamUpdatePlan(ctx sdk.Context, planHeight uint64) error {
+	if !k.haveParamUpdatePlan(ctx, planHeight) {
+		return types.ErrInvalidRequest.Wrapf("No param update plan found at block height %d", planHeight)
 	}
 
-	store.Delete(types.KeyParamUpdatePlan())
+	store := ctx.KVStore(k.storeKey)
+	store.Delete(types.KeyParamUpdatePlan(planHeight))
 	return nil
 }
 
-// GetParamUpdatePlan will return whether an upcoming param update plan exists and the plan
-// if it does.
-func (k Keeper) GetParamUpdatePlan(ctx sdk.Context) (plan types.ParamUpdatePlan, havePlan bool) {
+// haveParamUpdatePlan will return whether a param update plan exists and the specified
+// plan height.
+func (k Keeper) haveParamUpdatePlan(ctx sdk.Context, planHeight uint64) bool {
 	store := ctx.KVStore(k.storeKey)
-	bz := store.Get(types.KeyParamUpdatePlan())
-	if bz == nil {
-		return plan, false
-	}
+	bz := store.Get(types.KeyParamUpdatePlan(planHeight))
+	return bz != nil
+}
 
-	k.cdc.MustUnmarshal(bz, &plan)
-	return plan, true
+// GetParamUpdatePlans returns all the param update plans in the store.
+func (k Keeper) GetParamUpdatePlans(ctx sdk.Context) (plans []types.ParamUpdatePlan) {
+	k.IterateParamUpdatePlans(ctx, func(plan types.ParamUpdatePlan) bool {
+		plans = append(plans, plan)
+		return false
+	})
+
+	return plans
+}
+
+// IterateParamUpdatePlans iterates rate over param update plans in the store
+func (k Keeper) IterateParamUpdatePlans(
+	ctx sdk.Context,
+	handler func(types.ParamUpdatePlan) bool,
+) {
+	store := ctx.KVStore(k.storeKey)
+
+	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixParamUpdatePlan)
+	defer iter.Close()
+
+	for ; iter.Valid(); iter.Next() {
+		var paramUpdatePlan types.ParamUpdatePlan
+		k.cdc.MustUnmarshal(iter.Value(), &paramUpdatePlan)
+
+		if handler(paramUpdatePlan) {
+			break
+		}
+	}
 }
 
 // ValidateParamChanges validates parameter changes against the existing oracle parameters.
@@ -107,7 +131,7 @@ func (k Keeper) ValidateParamChanges(ctx sdk.Context, keys []string, changes typ
 
 // ExecuteParamUpdatePlan will execute a given param update plan and emit a param
 // update event.
-func (k Keeper) ExecuteParamUpdatePlan(ctx sdk.Context, plan types.ParamUpdatePlan) {
+func (k Keeper) ExecuteParamUpdatePlan(ctx sdk.Context, plan types.ParamUpdatePlan) error {
 	for _, key := range plan.Keys {
 		switch key {
 		case string(types.KeyVotePeriod):
@@ -162,4 +186,7 @@ func (k Keeper) ExecuteParamUpdatePlan(ctx sdk.Context, plan types.ParamUpdatePl
 		sdk.NewAttribute(types.AttributeKeyNotifyPriceFeeder, "1"),
 	)
 	ctx.EventManager().EmitEvent(event)
+
+	// clear plan from store after executing it
+	return k.ClearParamUpdatePlan(ctx, uint64(plan.Height))
 }

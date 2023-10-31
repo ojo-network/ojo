@@ -6,7 +6,7 @@ import (
 
 var (
 	proposalTypeMsgGovUpdateParams                      = MsgGovUpdateParams{}.String()
-	proposalTypeMsgGovCancelUpdateParams                = MsgGovCancelUpdateParams{}.String()
+	proposalTypeMsgGovCancelUpdateParams                = MsgGovCancelUpdateParamPlan{}.String()
 	proposalTypeMsgGovAddDenoms                         = MsgGovAddDenoms{}.String()
 	proposalTypeMsgGovRemoveCurrencyPairProviders       = MsgGovRemoveCurrencyPairProviders{}.String()
 	proposalTypeMsgGovRemoveCurrencyDeviationThresholds = MsgGovRemoveCurrencyDeviationThresholds{}.String()
@@ -36,19 +36,19 @@ func (msg *MsgGovUpdateParams) ProposalRoute() string { return RouterKey }
 func (msg *MsgGovUpdateParams) ProposalType() string { return proposalTypeMsgGovUpdateParams }
 
 // Implements Proposal Interface
-var _ gov.Content = &MsgGovCancelUpdateParams{}
+var _ gov.Content = &MsgGovCancelUpdateParamPlan{}
 
 // GetTitle returns the title of a community pool spend proposal.
-func (msg *MsgGovCancelUpdateParams) GetTitle() string { return msg.Title }
+func (msg *MsgGovCancelUpdateParamPlan) GetTitle() string { return msg.Title }
 
 // GetDescription returns the description of a community pool spend proposal.
-func (msg *MsgGovCancelUpdateParams) GetDescription() string { return msg.Description }
+func (msg *MsgGovCancelUpdateParamPlan) GetDescription() string { return msg.Description }
 
 // GetDescription returns the routing key of a community pool spend proposal.
-func (msg *MsgGovCancelUpdateParams) ProposalRoute() string { return RouterKey }
+func (msg *MsgGovCancelUpdateParamPlan) ProposalRoute() string { return RouterKey }
 
 // ProposalType returns the type of a community pool spend proposal.
-func (msg *MsgGovCancelUpdateParams) ProposalType() string {
+func (msg *MsgGovCancelUpdateParamPlan) ProposalType() string {
 	return proposalTypeMsgGovCancelUpdateParams
 }
 
