@@ -132,28 +132,28 @@ func (SlashingModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	return cdc.MustMarshalJSON(genState)
 }
 
-// SlashingModule defines a custom wrapper around the x/slashing module's
-// AppModuleBasic implementation to provide custom default genesis state.
+// IBCTransferModule defines a custom wrapper around the IBC Transfer AppModuleBasic
+// so that we can use a custom Keeper.
 type IBCTransferModule struct {
 	transfer.AppModuleBasic
 	keeper IBCTransferKeeper
 }
 
-// NewAppModule creates a new 20-transfer module
+// NewIBCTransferModule creates a new 20-transfer module
 func NewIBCTransferModule(k IBCTransferKeeper) IBCTransferModule {
 	return IBCTransferModule{
 		keeper: k,
 	}
 }
 
-// SlashingModule defines a custom wrapper around the x/slashing module's
-// AppModuleBasic implementation to provide custom default genesis state.
+// IBCAppModule is a custom wrapper around IBCModule, which
+// implements the ICS26 interface for transfer given the transfer keeper.
 type IBCAppModule struct {
 	transfer.IBCModule
 	keeper IBCTransferKeeper
 }
 
-// NewIBCModule creates a new IBCModule given the keeper
+// NewIBCAppModule creates a new IBCModule given the keeper
 func NewIBCAppModule(k IBCTransferKeeper) IBCAppModule {
 	return IBCAppModule{
 		keeper: k,
