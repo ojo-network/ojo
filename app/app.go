@@ -466,8 +466,8 @@ func New(
 		app.BankKeeper,
 		scopedTransferKeeper,
 	)
-	transferModule := transfer.NewAppModule(app.TransferKeeper.Keeper)
-	transferIBCModule := transfer.NewIBCModule(app.TransferKeeper.Keeper)
+	transferModule := NewIBCTransferModule(app.TransferKeeper)
+	transferIBCModule := NewIBCAppModule(app.TransferKeeper)
 
 	// Create evidence Keeper for to register the IBC light client misbehavior evidence route
 	evidenceKeeper := evidencekeeper.NewKeeper(

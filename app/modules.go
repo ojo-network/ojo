@@ -18,6 +18,7 @@ import (
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/cosmos/ibc-go/v7/modules/apps/transfer"
 
 	appparams "github.com/ojo-network/ojo/app/params"
 )
@@ -129,4 +130,32 @@ func (SlashingModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	genState.Params.DowntimeJailDuration = 24 * time.Hour
 
 	return cdc.MustMarshalJSON(genState)
+}
+
+// SlashingModule defines a custom wrapper around the x/slashing module's
+// AppModuleBasic implementation to provide custom default genesis state.
+type IBCTransferModule struct {
+	transfer.AppModuleBasic
+	keeper IBCTransferKeeper
+}
+
+// NewAppModule creates a new 20-transfer module
+func NewIBCTransferModule(k IBCTransferKeeper) IBCTransferModule {
+	return IBCTransferModule{
+		keeper: k,
+	}
+}
+
+// SlashingModule defines a custom wrapper around the x/slashing module's
+// AppModuleBasic implementation to provide custom default genesis state.
+type IBCAppModule struct {
+	transfer.IBCModule
+	keeper IBCTransferKeeper
+}
+
+// NewIBCModule creates a new IBCModule given the keeper
+func NewIBCAppModule(k IBCTransferKeeper) IBCAppModule {
+	return IBCAppModule{
+		keeper: k,
+	}
 }
