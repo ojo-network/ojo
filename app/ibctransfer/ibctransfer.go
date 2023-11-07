@@ -1,4 +1,4 @@
-package app
+package ibctransfer
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 	"github.com/cosmos/ibc-go/v7/modules/core/exported"
 )
 
-type IBCTransferKeeper struct {
+type Keeper struct {
 	ibctransferkeeper.Keeper
 
 	storeKey   storetypes.StoreKey
@@ -27,17 +27,17 @@ type IBCTransferKeeper struct {
 	scopedKeeper  exported.ScopedKeeper
 }
 
-func (k IBCTransferKeeper) Transfer(goCtx context.Context, msg *types.MsgTransfer) (*types.MsgTransferResponse, error) {
-	// TODO: Custom IBC Transfer logic
+func (k Keeper) Transfer(goCtx context.Context, msg *types.MsgTransfer) (*types.MsgTransferResponse, error) {
+	// TODO: Custom IBC validation logic
 	return k.Keeper.Transfer(goCtx, msg)
 }
 
-// NewIBCTransferKeeper creates a new IBC transfer Keeper instance
-func NewIBCTransferKeeper(
+// NewKeeper creates a new IBC transfer Keeper instance
+func NewKeeper(
 	cdc codec.BinaryCodec, key storetypes.StoreKey, paramSpace paramtypes.Subspace,
 	ics4Wrapper porttypes.ICS4Wrapper, channelKeeper types.ChannelKeeper, portKeeper types.PortKeeper,
 	authKeeper types.AccountKeeper, bankKeeper types.BankKeeper, scopedKeeper exported.ScopedKeeper,
-) IBCTransferKeeper {
+) Keeper {
 	// ensure ibc transfer module account is set
 	if addr := authKeeper.GetModuleAddress(types.ModuleName); addr == nil {
 		panic("the IBC transfer module account has not been set")
@@ -48,7 +48,7 @@ func NewIBCTransferKeeper(
 		paramSpace = paramSpace.WithKeyTable(types.ParamKeyTable())
 	}
 
-	return IBCTransferKeeper{
+	return Keeper{
 		cdc:           cdc,
 		storeKey:      key,
 		paramSpace:    paramSpace,

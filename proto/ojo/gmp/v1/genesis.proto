@@ -1,0 +1,12 @@
+syntax = "proto3";
+package ojo.gmp.v1;
+
+import "gogoproto/gogo.proto";
+import "ojo/gmp/v1/gmp.proto";
+
+option go_package = "github.com/ojo-network/ojo/x/gmp/types";
+
+// GenesisState represents the genesis state of the gmp module.
+message GenesisState {
+  Params params = 1 [ (gogoproto.nullable) = false ];
+}

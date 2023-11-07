@@ -20,6 +20,7 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/cosmos/ibc-go/v7/modules/apps/transfer"
 
+	"github.com/ojo-network/ojo/app/ibctransfer"
 	appparams "github.com/ojo-network/ojo/app/params"
 )
 
@@ -136,11 +137,11 @@ func (SlashingModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 // so that we can use a custom Keeper.
 type IBCTransferModule struct {
 	transfer.AppModuleBasic
-	keeper IBCTransferKeeper
+	keeper ibctransfer.Keeper
 }
 
 // NewIBCTransferModule creates a new 20-transfer module
-func NewIBCTransferModule(k IBCTransferKeeper) IBCTransferModule {
+func NewIBCTransferModule(k ibctransfer.Keeper) IBCTransferModule {
 	return IBCTransferModule{
 		keeper: k,
 	}
@@ -150,11 +151,11 @@ func NewIBCTransferModule(k IBCTransferKeeper) IBCTransferModule {
 // implements the ICS26 interface for transfer given the transfer keeper.
 type IBCAppModule struct {
 	transfer.IBCModule
-	keeper IBCTransferKeeper
+	keeper ibctransfer.Keeper
 }
 
 // NewIBCAppModule creates a new IBCModule given the keeper
-func NewIBCAppModule(k IBCTransferKeeper) IBCAppModule {
+func NewIBCAppModule(k ibctransfer.Keeper) IBCAppModule {
 	return IBCAppModule{
 		keeper: k,
 	}

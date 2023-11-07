@@ -97,10 +97,16 @@ import (
 	ibctm "github.com/cosmos/ibc-go/v7/modules/light-clients/07-tendermint"
 	"github.com/spf13/cast"
 
+	ibctransfer "github.com/ojo-network/ojo/app/ibctransfer"
+
 	"github.com/ojo-network/ojo/util/genmap"
 	"github.com/ojo-network/ojo/x/oracle"
 	oraclekeeper "github.com/ojo-network/ojo/x/oracle/keeper"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
+
+	"github.com/ojo-network/ojo/x/gmp"
+	gmpkeeper "github.com/ojo-network/ojo/x/gmp/keeper"
+	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 
 	"github.com/ojo-network/ojo/x/airdrop"
 	airdropkeeper "github.com/ojo-network/ojo/x/airdrop/keeper"
@@ -156,6 +162,7 @@ var (
 		transfer.AppModuleBasic{},
 		vesting.AppModuleBasic{},
 		oracle.AppModuleBasic{},
+		gmp.AppModuleBasic{},
 		airdrop.AppModuleBasic{},
 		consensus.AppModuleBasic{},
 		ibctm.AppModuleBasic{},
@@ -171,6 +178,7 @@ var (
 		govtypes.ModuleName:            {authtypes.Burner},
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		oracletypes.ModuleName:         {authtypes.Minter},
+		gmptypes.ModuleName:            {authtypes.Minter},
 		airdroptypes.ModuleName:        {authtypes.Minter},
 	}
 )
@@ -222,10 +230,11 @@ type App struct {
 	ParamsKeeper          paramskeeper.Keeper
 	IBCKeeper             *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
 	EvidenceKeeper        evidencekeeper.Keeper
-	TransferKeeper        IBCTransferKeeper
+	TransferKeeper        ibctransfer.Keeper
 	FeeGrantKeeper        feegrantkeeper.Keeper
 	GroupKeeper           groupkeeper.Keeper
 	OracleKeeper          oraclekeeper.Keeper
+	GmpKeeper             gmpkeeper.Keeper
 	AirdropKeeper         airdropkeeper.Keeper
 	ConsensusParamsKeeper consensusparamkeeper.Keeper
 
@@ -275,7 +284,8 @@ func New(
 		crisistypes.StoreKey, minttypes.StoreKey, distrtypes.StoreKey, slashingtypes.StoreKey,
 		govtypes.StoreKey, paramstypes.StoreKey, ibcexported.StoreKey, upgradetypes.StoreKey,
 		feegrant.StoreKey, evidencetypes.StoreKey, ibctransfertypes.StoreKey, capabilitytypes.StoreKey,
-		consensusparamtypes.StoreKey, group.StoreKey, oracletypes.StoreKey, airdroptypes.StoreKey,
+		consensusparamtypes.StoreKey, group.StoreKey, oracletypes.StoreKey, gmptypes.StoreKey,
+		airdroptypes.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -422,6 +432,14 @@ func New(
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 
+	app.GmpKeeper = gmpkeeper.NewKeeper(
+		appCodec,
+		keys[gmptypes.ModuleName],
+		app.OracleKeeper,
+		app.TransferKeeper,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
+
 	app.AirdropKeeper = airdropkeeper.NewKeeper(
 		appCodec,
 		keys[airdroptypes.ModuleName],
@@ -455,7 +473,7 @@ func New(
 	)
 
 	// Create Transfer Keepers
-	app.TransferKeeper = NewIBCTransferKeeper(
+	app.TransferKeeper = ibctransfer.NewKeeper(
 		appCodec,
 		keys[ibctransfertypes.StoreKey],
 		app.GetSubspace(ibctransfertypes.ModuleName),
@@ -545,6 +563,7 @@ func New(
 		params.NewAppModule(app.ParamsKeeper),
 		transferModule,
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
+		gmp.NewAppModule(appCodec, app.GmpKeeper, app.OracleKeeper),
 		airdrop.NewAppModule(appCodec, app.AirdropKeeper, app.AccountKeeper, app.BankKeeper),
 		consensus.NewAppModule(appCodec, app.ConsensusParamsKeeper),
 	)
@@ -575,6 +594,7 @@ func New(
 		paramstypes.ModuleName,
 		vestingtypes.ModuleName,
 		oracletypes.ModuleName,
+		gmptypes.ModuleName,
 		airdroptypes.ModuleName,
 		consensusparamtypes.ModuleName,
 	)
@@ -600,6 +620,7 @@ func New(
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
 		oracletypes.ModuleName,
+		gmptypes.ModuleName,
 		airdroptypes.ModuleName,
 		consensusparamtypes.ModuleName,
 	)
@@ -615,7 +636,7 @@ func New(
 		minttypes.ModuleName, crisistypes.ModuleName, genutiltypes.ModuleName, ibctransfertypes.ModuleName,
 		ibcexported.ModuleName, evidencetypes.ModuleName, authz.ModuleName, feegrant.ModuleName,
 		group.ModuleName, paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
-		oracletypes.ModuleName, airdroptypes.ModuleName, consensusparamtypes.ModuleName,
+		oracletypes.ModuleName, gmptypes.ModuleName, airdroptypes.ModuleName, consensusparamtypes.ModuleName,
 	}
 	app.mm.SetOrderInitGenesis(genesisModuleOrder...)
 	app.mm.SetOrderExportGenesis(genesisModuleOrder...)

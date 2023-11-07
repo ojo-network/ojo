@@ -1,0 +1,54 @@
+syntax = "proto3";
+package ojo.gmp.v1;
+
+import "gogoproto/gogo.proto";
+import "cosmos_proto/cosmos.proto";
+
+option go_package = "github.com/ojo-network/ojo/x/gmp/types";
+
+option (gogoproto.goproto_getters_all) = false;
+
+// Params defines the parameters for the gmp module.
+message Params {
+  // The axelar address that we'll send IBC transactions to.
+  string gmp_address = 1;
+
+  // The channel over which we communicate with axelar.
+  string gmp_channel = 2;
+
+  // The amount of time we'll wait for a response from axelar before timing out.
+  int64 gmp_timeout = 3;
+}
+
+// ExchangeRates defines the ExchangeRates to relay
+message ExchangeRate {
+  // symbol_denom is the symbol of the exchange rate (e.x. "BTC")
+  string symbol_denom = 1;
+
+  // exponent is the exponent of the asset
+  uint32 exponent = 2;
+
+  // rate is the conversion rate of the asset
+  string rate = 3 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable) = false
+  ];
+}
+
+// GmpMessage defines the GMP message that we encode in the
+// IBC memo field and send to Axelar.
+//
+// Ref: https://github.com/axelarnetwork/evm-cosmos-gmp-sample
+message GmpMessage {
+  // destination_chain is the destination chain of the message
+	string destination_chain = 1;
+
+  // destination_address is the destination address of the message
+	string destination_address = 2;
+
+  // payload is the encoded payload of the message (exchange rates)
+  bytes payload = 3;
+
+  // type is an enum that specifies the type of message
+	int64 type = 4;
+}

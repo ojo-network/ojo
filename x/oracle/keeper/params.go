@@ -1,6 +1,9 @@
 package keeper
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/ojo-network/ojo/x/oracle/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -206,4 +209,14 @@ func (k Keeper) SetCurrencyDeviationThresholds(
 	currencyDeviationThresholds types.CurrencyDeviationThresholdList,
 ) {
 	k.paramSpace.Set(ctx, types.KeyCurrencyDeviationThresholds, currencyDeviationThresholds)
+}
+
+func (k Keeper) GetExponent(ctx sdk.Context, denom string) (uint32, error) {
+	params := k.GetParams(ctx)
+	for _, v := range params.AcceptList {
+		if strings.EqualFold(v.SymbolDenom, denom) {
+			return v.Exponent, nil
+		}
+	}
+	return 0, fmt.Errorf("unable to find exponent for %s", denom)
 }
