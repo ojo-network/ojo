@@ -78,7 +78,7 @@ func (ms msgServer) Relay(
 	if err != nil {
 		return nil, err
 	}
-	_, err = abi.Arguments{{Type: exchangeRateType}}.Pack(rates)
+	payload, err := abi.Arguments{{Type: exchangeRateType}}.Pack(rates)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func (ms msgServer) Relay(
 	message := types.GmpMessage{
 		DestinationChain:   msg.DestinationChain,
 		DestinationAddress: msg.DestinationAddress,
-		Payload:            "f",
+		Payload:            payload,
 		Type:               types.TypeGeneralMessage,
 	}
 	bz, err := message.Marshal()
