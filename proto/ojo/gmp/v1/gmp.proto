@@ -20,21 +20,6 @@ message Params {
   int64 gmp_timeout = 3;
 }
 
-// ExchangeRates defines the ExchangeRates to relay
-message ExchangeRate {
-  // symbol_denom is the symbol of the exchange rate (e.x. "BTC")
-  string symbol_denom = 1;
-
-  // exponent is the exponent of the asset
-  uint32 exponent = 2;
-
-  // rate is the conversion rate of the asset
-  string rate = 3 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
-  ];
-}
-
 // GmpMessage defines the GMP message that we encode in the
 // IBC memo field and send to Axelar.
 //

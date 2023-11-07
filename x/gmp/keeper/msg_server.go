@@ -63,15 +63,10 @@ func (ms msgServer) Relay(
 		if err != nil {
 			return &types.MsgRelayResponse{}, err
 		}
-		exponent, err := ms.keeper.oracleKeeper.GetExponent(ctx, denom)
-		if err != nil {
-			return &types.MsgRelayResponse{}, err
-		}
 
 		rates = append(rates, types.ExchangeRate{
 			SymbolDenom: denom,
-			Exponent:    exponent,
-			Rate:        rate,
+			Rate:        types.DecToInt(rate),
 		})
 	}
 	exchangeRateType, err := abi.NewType("exchangeRate[]", "exchangeRate[]", nil)
