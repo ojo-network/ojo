@@ -2,11 +2,11 @@ package keeper
 
 import (
 	"context"
+	"math/big"
 	"time"
 
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ethereum/go-ethereum/accounts/abi"
 
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
@@ -57,23 +57,27 @@ func (ms msgServer) Relay(
 	params := ms.keeper.GetParams(ctx)
 
 	// encode oracle data
-	rates := []types.ExchangeRate{}
+	rates := []types.PriceFeedData{}
 	for _, denom := range msg.Denoms {
 		rate, err := ms.keeper.oracleKeeper.GetExchangeRate(ctx, denom)
 		if err != nil {
 			return &types.MsgRelayResponse{}, err
 		}
 
-		rates = append(rates, types.ExchangeRate{
-			SymbolDenom: denom,
-			Rate:        types.DecToInt(rate),
-		})
+		pfData := types.NewPriceFeedData(
+			denom,
+			types.DecToInt(rate),
+			// TODO: replace with actual resolve time
+			big.NewInt(1),
+			// TODO: replace with actual id
+			big.NewInt(1),
+		)
+
+		rates = append(rates, pfData)
 	}
-	exchangeRateType, err := abi.NewType("exchangeRate[]", "exchangeRate[]", nil)
-	if err != nil {
-		return nil, err
-	}
-	payload, err := abi.Arguments{{Type: exchangeRateType}}.Pack(rates)
+
+	// TODO: Fill with actual disableResolve option.
+	payload, err := types.EncodeABI("postPrices", rates, false)
 	if err != nil {
 		return nil, err
 	}

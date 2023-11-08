@@ -8,14 +8,19 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestToMap(t *testing.T) {
-	rates := []ExchangeRate{
+func TestEncodeExchangeRates(t *testing.T) {
+	assetNameArray := [32]byte{}
+	copy(assetNameArray[:], []byte("btc"))
+	rates := [1]PriceFeedData{
 		{
-			SymbolDenom: "btc",
-			Rate:        big.NewInt(50000),
+			AssetName:   assetNameArray,
+			Value:       big.NewInt(50000),
+			ResolveTime: big.NewInt(50000),
+			Id:          big.NewInt(50000),
 		},
 	}
-	r, err := EncodeExchangeRate(rates)
+	disableResolve := false
+	r, err := EncodeABI("postPrices", rates, disableResolve)
 	require.NoError(t, err)
 	fmt.Println(r)
 }
