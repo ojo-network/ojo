@@ -67,9 +67,9 @@ func (ms msgServer) Relay(
 		priceFeed, err := types.NewPriceFeedData(
 			denom,
 			types.DecToInt(rate),
-			// TODO: replace with actual resolve time
+			// TODO: replace with actual resolve time & id
+			// Ref: https://github.com/ojo-network/ojo/issues/309
 			big.NewInt(1),
-			// TODO: replace with actual id
 			big.NewInt(1),
 		)
 		if err != nil {
@@ -80,7 +80,8 @@ func (ms msgServer) Relay(
 		rates = append(rates, priceFeed)
 	}
 
-	// TODO: Fill with actual disableResolve option.
+	// TODO: fill with actual disableResolve option
+	// Ref: https://github.com/ojo-network/ojo/issues/309
 	payload, err := types.EncodeABI("postPrices", rates, false)
 	if err != nil {
 		return nil, err

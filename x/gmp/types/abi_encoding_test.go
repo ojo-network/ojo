@@ -9,7 +9,8 @@ import (
 )
 
 // TODO: Make these tests more thorough
-func TestEncodeExchangeRates(t *testing.T) {
+// Ref: https://github.com/ojo-network/ojo/issues/310
+func TestEncodeABI(t *testing.T) {
 	assetNameArray := [32]byte{}
 	copy(assetNameArray[:], []byte("btc"))
 	rates := [1]PriceFeedData{

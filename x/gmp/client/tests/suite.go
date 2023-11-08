@@ -39,7 +39,8 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 	s.network.Cleanup()
 }
 
-// TODO: Fix tx raw log not having "no gmp account found" message in it
+// TODO: Fix tx raw log not having "no gmp account found" message in it.
+// Ref: https://github.com/ojo-network/ojo/issues/308
 func (s *IntegrationTestSuite) TestRelayGmp() {
 	s.T().Skip()
 
