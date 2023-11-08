@@ -66,7 +66,7 @@ func (ms msgServer) Relay(
 
 		priceFeed, err := types.NewPriceFeedData(
 			denom,
-			types.DecToInt(rate),
+			rate,
 			// TODO: replace with actual resolve time & id
 			// Ref: https://github.com/ojo-network/ojo/issues/309
 			big.NewInt(1),

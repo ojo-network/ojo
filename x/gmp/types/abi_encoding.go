@@ -2,14 +2,10 @@ package types
 
 import (
 	"fmt"
-	"math/big"
 	"strings"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 )
-
-var rateFactor = sdk.NewDec(10).Power(9)
 
 type FnName string
 
@@ -42,9 +38,4 @@ func EncodeABI(fn string, params ...interface{}) ([]byte, error) {
 	default:
 		return []byte{}, fmt.Errorf("invalid function name")
 	}
-}
-
-// DecToInt multiplies amount by rate factor to make it compatible with contracts.
-func DecToInt(amount sdk.Dec) *big.Int {
-	return amount.Mul(rateFactor).TruncateInt().BigInt()
 }

@@ -3,7 +3,22 @@ package types
 import (
 	"fmt"
 	"math/big"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
+
+const (
+	// TypeUnrecognized means coin type is unrecognized
+	TypeUnrecognized = iota
+	// TypeGeneralMessage is a pure message
+	TypeGeneralMessage
+	// TypeGeneralMessageWithToken is a general message with token
+	TypeGeneralMessageWithToken
+	// TypeSendToken is a direct token transfer
+	TypeSendToken
+)
+
+var rateFactor = sdk.NewDec(10).Power(9)
 
 // PriceFeedData is a struct to represent the data that is relayed to other chains.
 // It contains the asset name, value, resolve time, and id.
@@ -21,24 +36,30 @@ type PriceFeedData struct {
 // NewPriceFeedData creates a new PriceFeedData struct.
 // It must convert the assetName string to a byte array.
 // This array may not exceed 32 bytes.
+// TODO: Add a test for this function.
 func NewPriceFeedData(
 	assetName string,
-	value *big.Int,
+	value sdk.Dec,
 	resolveTime *big.Int,
 	id *big.Int,
 ) (PriceFeedData, error) {
 	assetSlice := []byte(assetName)
 	if len(assetSlice) > 32 {
 		return PriceFeedData{}, fmt.Errorf(
-			"failed to parse pruning options from flags: %s", assetName,
+			"asset name is too long to convert to array: %s", assetName,
 		)
 	}
 	var assetArray [32]byte
 	copy(assetArray[:], assetSlice)
 	return PriceFeedData{
 		AssetName:   assetArray,
-		Value:       value,
+		Value:       decToInt(value),
 		ResolveTime: resolveTime,
 		Id:          id,
 	}, nil
+}
+
+// DecToInt multiplies amount by rate factor to make it compatible with contracts.
+func decToInt(amount sdk.Dec) *big.Int {
+	return amount.Mul(rateFactor).TruncateInt().BigInt()
 }
