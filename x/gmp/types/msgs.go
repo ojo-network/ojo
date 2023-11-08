@@ -44,7 +44,13 @@ func (msg MsgSetParams) ValidateBasic() error {
 	return nil
 }
 
-func NewMsgRelay(relayer string, destinationChain string, destinationAddress string, token sdk.Coin, denoms []string) *MsgRelay {
+func NewMsgRelay(
+	relayer string,
+	destinationChain string,
+	destinationAddress string,
+	token sdk.Coin,
+	denoms []string,
+) *MsgRelay {
 	return &MsgRelay{
 		Relayer:            relayer,
 		DestinationChain:   destinationChain,

@@ -27,7 +27,7 @@ const (
 func EncodeABI(fn string, params ...interface{}) ([]byte, error) {
 	switch FnName(fn) {
 	case prices, medians, deviations:
-		parsedABI, err := abi.JSON(strings.NewReader(abiJson))
+		parsedABI, err := abi.JSON(strings.NewReader(abiJSON))
 		if err != nil {
 			return nil, err
 		}

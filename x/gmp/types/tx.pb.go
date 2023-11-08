@@ -35,7 +35,7 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 type MsgSetParams struct {
 	// authority is the address that controls the module (defaults to x/gov unless overwritten).
 	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
-	// params defines the airdrop parameters to update.
+	// params defines the gmp parameters to update.
 	Params *Params `protobuf:"bytes,2,opt,name=params,proto3" json:"params,omitempty"`
 }
 
@@ -109,6 +109,7 @@ func (m *MsgSetParamsResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgSetParamsResponse proto.InternalMessageInfo
 
+// MsgRelay defines the Relay message type.
 type MsgRelay struct {
 	// authority is the address that signs the message.
 	Relayer string `protobuf:"bytes,1,opt,name=relayer,proto3" json:"relayer,omitempty"`
@@ -155,6 +156,7 @@ func (m *MsgRelay) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgRelay proto.InternalMessageInfo
 
+// MsgRelay defines the Relay response type.
 type MsgRelayResponse struct {
 }
 
@@ -248,7 +250,7 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type MsgClient interface {
-	// SetParams sets the parameters for the airdrop module.
+	// SetParams sets the parameters for the gmp module.
 	SetParams(ctx context.Context, in *MsgSetParams, opts ...grpc.CallOption) (*MsgSetParamsResponse, error)
 	// Relay relays Ojo data via GMP.
 	Relay(ctx context.Context, in *MsgRelay, opts ...grpc.CallOption) (*MsgRelayResponse, error)
@@ -282,7 +284,7 @@ func (c *msgClient) Relay(ctx context.Context, in *MsgRelay, opts ...grpc.CallOp
 
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
-	// SetParams sets the parameters for the airdrop module.
+	// SetParams sets the parameters for the gmp module.
 	SetParams(context.Context, *MsgSetParams) (*MsgSetParamsResponse, error)
 	// Relay relays Ojo data via GMP.
 	Relay(context.Context, *MsgRelay) (*MsgRelayResponse, error)

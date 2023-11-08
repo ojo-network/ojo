@@ -8,7 +8,7 @@ func (s *IntegrationTestSuite) TestMsgServer_SetParams() {
 	gmpChannel := "channel-1"
 	gmpAddress := "axelar1dv4u5k73pzqrxlzujxg3qp8kvc3pje7jtdvu72npnt5zhq05ejcsn5qme5"
 	timeout := int64(1)
-	SetParams(s, gmpChannel, gmpAddress, timeout)
+	SetParams(s, gmpAddress, gmpChannel, timeout)
 
 	params := types.DefaultParams()
 

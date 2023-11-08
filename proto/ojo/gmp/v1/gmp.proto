@@ -2,7 +2,6 @@ syntax = "proto3";
 package ojo.gmp.v1;
 
 import "gogoproto/gogo.proto";
-import "cosmos_proto/cosmos.proto";
 
 option go_package = "github.com/ojo-network/ojo/x/gmp/types";
 
