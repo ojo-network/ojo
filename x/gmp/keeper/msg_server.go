@@ -64,7 +64,7 @@ func (ms msgServer) Relay(
 			return &types.MsgRelayResponse{}, err
 		}
 
-		pfData := types.NewPriceFeedData(
+		priceFeed, err := types.NewPriceFeedData(
 			denom,
 			types.DecToInt(rate),
 			// TODO: replace with actual resolve time
@@ -72,8 +72,12 @@ func (ms msgServer) Relay(
 			// TODO: replace with actual id
 			big.NewInt(1),
 		)
+		if err != nil {
+			ms.keeper.Logger(ctx).With(err).Error("asset name is too long to relay!")
+			continue
+		}
 
-		rates = append(rates, pfData)
+		rates = append(rates, priceFeed)
 	}
 
 	// TODO: Fill with actual disableResolve option.

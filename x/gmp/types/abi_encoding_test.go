@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// TODO: Make these tests more thorough
 func TestEncodeExchangeRates(t *testing.T) {
 	assetNameArray := [32]byte{}
 	copy(assetNameArray[:], []byte("btc"))

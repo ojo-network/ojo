@@ -1,6 +1,12 @@
 package keeper
 
 import (
+	"fmt"
+
+	"github.com/cometbft/cometbft/libs/log"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	"github.com/ojo-network/ojo/app/ibctransfer"
@@ -32,4 +38,9 @@ func NewKeeper(
 		oracleKeeper: oracleKeeper,
 		ibcKeeper:    ibcKeeper,
 	}
+}
+
+// Logger returns a module-specific logger.
+func (k Keeper) Logger(ctx sdk.Context) log.Logger {
+	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }

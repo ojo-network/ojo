@@ -1,6 +1,7 @@
 package types
 
 import (
+	"fmt"
 	"math/big"
 )
 
@@ -20,14 +21,20 @@ func NewPriceFeedData(
 	value *big.Int,
 	resolveTime *big.Int,
 	id *big.Int,
-) PriceFeedData {
-	// convert assetName to an array of bytes
-	var assetNameBytes [32]byte
-	copy(assetNameBytes[:], []byte(assetName))
+) (PriceFeedData, error) {
+	assetSlice := []byte(assetName)
+	if len(assetSlice) > 32 {
+		return PriceFeedData{}, fmt.Errorf(
+			"failed to parse pruning options from flags: %s", assetName,
+		)
+	}
+	// convert assetSlice to assetArray
+	var assetArray [32]byte
+	copy(assetArray[:], []byte(assetSlice))
 	return PriceFeedData{
-		AssetName:   assetNameBytes,
+		AssetName:   assetArray,
 		Value:       value,
 		ResolveTime: resolveTime,
 		Id:          id,
-	}
+	}, nil
 }
