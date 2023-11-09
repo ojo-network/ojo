@@ -4,6 +4,9 @@ import (
 	"github.com/ojo-network/ojo/x/gmp/types"
 )
 
+// TODO: Add tests for RelayPrice
+// Ref: https://github.com/ojo-network/ojo/issues/313
+
 func (s *IntegrationTestSuite) TestMsgServer_SetParams() {
 	gmpChannel := "channel-1"
 	gmpAddress := "axelar1dv4u5k73pzqrxlzujxg3qp8kvc3pje7jtdvu72npnt5zhq05ejcsn5qme5"

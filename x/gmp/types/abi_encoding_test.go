@@ -1,7 +1,6 @@
 package types
 
 import (
-	"fmt"
 	"math/big"
 	"testing"
 
@@ -22,7 +21,6 @@ func TestEncodeABI(t *testing.T) {
 		},
 	}
 	disableResolve := false
-	r, err := EncodeABI("postPrices", rates, disableResolve)
+	_, err := EncodeABI("postPrices", rates, disableResolve)
 	require.NoError(t, err)
-	fmt.Println(r)
 }

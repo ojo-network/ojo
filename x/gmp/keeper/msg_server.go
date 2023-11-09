@@ -49,10 +49,10 @@ func (ms msgServer) SetParams(goCtx context.Context, msg *types.MsgSetParams) (*
 
 // Relay implements MsgServer.Relay method.
 // It defines a method to relay over GMP to recipient chains.
-func (ms msgServer) Relay(
+func (ms msgServer) RelayPrice(
 	goCtx context.Context,
-	msg *types.MsgRelay,
-) (*types.MsgRelayResponse, error) {
+	msg *types.MsgRelayPrice,
+) (*types.MsgRelayPriceResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	params := ms.keeper.GetParams(ctx)
 
@@ -61,7 +61,7 @@ func (ms msgServer) Relay(
 	for _, denom := range msg.Denoms {
 		rate, err := ms.keeper.oracleKeeper.GetExchangeRate(ctx, denom)
 		if err != nil {
-			return &types.MsgRelayResponse{}, err
+			return &types.MsgRelayPriceResponse{}, err
 		}
 
 		priceFeed, err := types.NewPriceFeedData(
@@ -73,7 +73,7 @@ func (ms msgServer) Relay(
 			big.NewInt(1),
 		)
 		if err != nil {
-			ms.keeper.Logger(ctx).With(err).Error("asset name is too long to relay!")
+			ms.keeper.Logger(ctx).With(err).Error("unable to relay price to gmp")
 			continue
 		}
 
@@ -113,8 +113,8 @@ func (ms msgServer) Relay(
 
 	_, err = ms.keeper.ibcKeeper.Transfer(ctx, transferMsg)
 	if err != nil {
-		return &types.MsgRelayResponse{}, err
+		return &types.MsgRelayPriceResponse{}, err
 	}
 
-	return &types.MsgRelayResponse{}, nil
+	return &types.MsgRelayPriceResponse{}, nil
 }

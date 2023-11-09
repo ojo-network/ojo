@@ -50,8 +50,8 @@ func NewMsgRelay(
 	destinationAddress string,
 	token sdk.Coin,
 	denoms []string,
-) *MsgRelay {
-	return &MsgRelay{
+) *MsgRelayPrice {
+	return &MsgRelayPrice{
 		Relayer:            relayer,
 		DestinationChain:   destinationChain,
 		DestinationAddress: destinationAddress,
@@ -61,20 +61,20 @@ func NewMsgRelay(
 }
 
 // Type implements LegacyMsg interface
-func (msg MsgRelay) Type() string { return sdk.MsgTypeURL(&msg) }
+func (msg MsgRelayPrice) Type() string { return sdk.MsgTypeURL(&msg) }
 
 // GetSignBytes implements sdk.Msg
-func (msg MsgRelay) GetSignBytes() []byte {
+func (msg MsgRelayPrice) GetSignBytes() []byte {
 	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
 }
 
 // GetSigners implements sdk.Msg
-func (msg MsgRelay) GetSigners() []sdk.AccAddress {
+func (msg MsgRelayPrice) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Relayer)
 }
 
 // ValidateBasic Implements sdk.Msg
-func (msg MsgRelay) ValidateBasic() error {
+func (msg MsgRelayPrice) ValidateBasic() error {
 	// TODO validate relay msg
 	return nil
 }

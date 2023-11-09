@@ -29,14 +29,14 @@ func init() {
 // RegisterLegacyAminoCodec registers the necessary x/gmp interfaces and concrete types
 // on the provided LegacyAmino codec. These types are used for Amino JSON serialization.
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
-	cdc.RegisterConcrete(&MsgRelay{}, "ojo/gmp/MsgRelay", nil)
+	cdc.RegisterConcrete(&MsgRelayPrice{}, "ojo/gmp/MsgRelayPrice", nil)
 	cdc.RegisterConcrete(&MsgSetParams{}, "ojo/gmp/MsgSetParams", nil)
 }
 
 // RegisterInterfaces registers the x/gmp interfaces types with the interface registry
 func RegisterInterfaces(registry codectypes.InterfaceRegistry) {
 	registry.RegisterImplementations((*sdk.Msg)(nil),
-		&MsgRelay{},
+		&MsgRelayPrice{},
 		&MsgSetParams{},
 	)
 

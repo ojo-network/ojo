@@ -15,7 +15,7 @@ service Msg {
   rpc SetParams(MsgSetParams) returns (MsgSetParamsResponse);
 
   // Relay relays Ojo data via GMP.
-  rpc Relay(MsgRelay) returns (MsgRelayResponse);
+  rpc RelayPrice(MsgRelayPrice) returns (MsgRelayPriceResponse);
 }
 
 // MsgSetParams defines the SetParams message type.
@@ -35,7 +35,7 @@ message MsgSetParams {
 message MsgSetParamsResponse {}
 
 // MsgRelay defines the Relay message type.
-message MsgRelay {
+message MsgRelayPrice {
   option (gogoproto.equal) = false;
   option (gogoproto.goproto_getters) = false;
   option (cosmos.msg.v1.signer) = "relayer";
@@ -60,4 +60,4 @@ message MsgRelay {
 }
 
 // MsgRelay defines the Relay response type.
-message MsgRelayResponse {}
+message MsgRelayPriceResponse {}
