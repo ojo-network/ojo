@@ -97,6 +97,7 @@ import (
 	ibctm "github.com/cosmos/ibc-go/v7/modules/light-clients/07-tendermint"
 	"github.com/spf13/cast"
 
+	gmp_middleware "github.com/ojo-network/ojo/app/gmp_middleware"
 	ibctransfer "github.com/ojo-network/ojo/app/ibctransfer"
 
 	"github.com/ojo-network/ojo/util/genmap"
@@ -485,7 +486,8 @@ func New(
 		scopedTransferKeeper,
 	)
 	transferModule := NewIBCTransferModule(app.TransferKeeper)
-	transferIBCModule := NewIBCAppModule(app.TransferKeeper)
+	var ibcStack ibcporttypes.IBCModule
+	ibcStack = NewIBCAppModule(app.TransferKeeper)
 
 	// Create evidence Keeper for to register the IBC light client misbehavior evidence route
 	evidenceKeeper := evidencekeeper.NewKeeper(
@@ -523,9 +525,14 @@ func New(
 		),
 	)
 
-	// Create static IBC router, add transfer route, then set and seal it
+	// Create static IBC router, add transfer route, then set and seal it.
+	// We also need to add the axelar GMP middleware here.
 	ibcRouter := ibcporttypes.NewRouter()
-	ibcRouter.AddRoute(ibctransfertypes.ModuleName, transferIBCModule)
+	ibcStack = gmp_middleware.NewIBCMiddleware(
+		ibcStack,
+		gmp_middleware.NewGmpHandler(app.GmpKeeper),
+	)
+	ibcRouter.AddRoute(ibctransfertypes.ModuleName, ibcStack)
 	app.IBCKeeper.SetRouter(ibcRouter)
 
 	/****  Module Options ****/

@@ -2,15 +2,11 @@ package keeper
 
 import (
 	"context"
-	"math/big"
-	"time"
 
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
-	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	clienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
 	"github.com/ojo-network/ojo/x/gmp/types"
 )
 
@@ -53,68 +49,5 @@ func (ms msgServer) RelayPrice(
 	goCtx context.Context,
 	msg *types.MsgRelayPrice,
 ) (*types.MsgRelayPriceResponse, error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
-	params := ms.keeper.GetParams(ctx)
-
-	// encode oracle data
-	rates := []types.PriceFeedData{}
-	for _, denom := range msg.Denoms {
-		rate, err := ms.keeper.oracleKeeper.GetExchangeRate(ctx, denom)
-		if err != nil {
-			return &types.MsgRelayPriceResponse{}, err
-		}
-
-		priceFeed, err := types.NewPriceFeedData(
-			denom,
-			rate,
-			// TODO: replace with actual resolve time & id
-			// Ref: https://github.com/ojo-network/ojo/issues/309
-			big.NewInt(1),
-			big.NewInt(1),
-		)
-		if err != nil {
-			ms.keeper.Logger(ctx).With(err).Error("unable to relay price to gmp")
-			continue
-		}
-
-		rates = append(rates, priceFeed)
-	}
-
-	// TODO: fill with actual disableResolve option
-	// Ref: https://github.com/ojo-network/ojo/issues/309
-	payload, err := types.EncodeABI("postPrices", rates, false)
-	if err != nil {
-		return nil, err
-	}
-
-	// package GMP
-	message := types.GmpMessage{
-		DestinationChain:   msg.DestinationChain,
-		DestinationAddress: msg.DestinationAddress,
-		Payload:            payload,
-		Type:               types.TypeGeneralMessage,
-	}
-	bz, err := message.Marshal()
-	if err != nil {
-		return nil, err
-	}
-
-	// submit IBC transfer
-	transferMsg := ibctransfertypes.NewMsgTransfer(
-		ibctransfertypes.PortID,
-		params.GmpChannel,
-		msg.Token,
-		msg.Relayer,
-		params.GmpAddress,
-		clienttypes.ZeroHeight(),
-		uint64(ctx.BlockTime().Add(time.Duration(params.GmpTimeout)*time.Hour).UnixNano()),
-		string(bz),
-	)
-
-	_, err = ms.keeper.ibcKeeper.Transfer(ctx, transferMsg)
-	if err != nil {
-		return &types.MsgRelayPriceResponse{}, err
-	}
-
-	return &types.MsgRelayPriceResponse{}, nil
+	return ms.keeper.RelayPrice(goCtx, msg)
 }
