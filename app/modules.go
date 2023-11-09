@@ -18,7 +18,9 @@ import (
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/cosmos/ibc-go/v7/modules/apps/transfer"
 
+	"github.com/ojo-network/ojo/app/ibctransfer"
 	appparams "github.com/ojo-network/ojo/app/params"
 )
 
@@ -129,4 +131,32 @@ func (SlashingModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	genState.Params.DowntimeJailDuration = 24 * time.Hour
 
 	return cdc.MustMarshalJSON(genState)
+}
+
+// IBCTransferModule defines a custom wrapper around the IBC Transfer AppModuleBasic
+// so that we can use a custom Keeper.
+type IBCTransferModule struct {
+	transfer.AppModuleBasic
+	keeper ibctransfer.Keeper
+}
+
+// NewIBCTransferModule creates a new 20-transfer module
+func NewIBCTransferModule(k ibctransfer.Keeper) IBCTransferModule {
+	return IBCTransferModule{
+		keeper: k,
+	}
+}
+
+// IBCAppModule is a custom wrapper around IBCModule, which
+// implements the ICS26 interface for transfer given the transfer keeper.
+type IBCAppModule struct {
+	transfer.IBCModule
+	keeper ibctransfer.Keeper
+}
+
+// NewIBCAppModule creates a new IBCModule given the keeper
+func NewIBCAppModule(k ibctransfer.Keeper) IBCAppModule {
+	return IBCAppModule{
+		keeper: k,
+	}
 }

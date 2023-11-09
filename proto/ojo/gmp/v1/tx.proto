@@ -1,0 +1,63 @@
+syntax = "proto3";
+package ojo.gmp.v1;
+
+import "gogoproto/gogo.proto";
+import "ojo/gmp/v1/gmp.proto";
+import "cosmos_proto/cosmos.proto";
+import "cosmos/msg/v1/msg.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "github.com/ojo-network/ojo/x/gmp/types";
+
+// Msg defines the gmp Msg service.
+service Msg {
+  // SetParams sets the parameters for the gmp module.
+  rpc SetParams(MsgSetParams) returns (MsgSetParamsResponse);
+
+  // Relay relays Ojo data via GMP.
+  rpc RelayPrice(MsgRelayPrice) returns (MsgRelayPriceResponse);
+}
+
+// MsgSetParams defines the SetParams message type.
+message MsgSetParams {
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+  option (cosmos.msg.v1.signer) = "authority";
+
+  // authority is the address that controls the module (defaults to x/gov unless overwritten).
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // params defines the gmp parameters to update.
+  Params params = 2;
+}
+
+// MsgSetParamsResponse defines the SetParams response type.
+message MsgSetParamsResponse {}
+
+// MsgRelay defines the Relay message type.
+message MsgRelayPrice {
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+  option (cosmos.msg.v1.signer) = "relayer";
+
+  // authority is the address that signs the message.
+  string relayer = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // destination_chain defines the chain which this will be relayed to.
+  string destination_chain = 2;
+
+  // destination_address defines the destination contract address to call.
+  string destination_address = 3;
+
+  // denoms defines the denoms that the user wants to relay via GMP.
+  repeated string denoms = 4;
+
+  // token determines the IBC token that the user wants to relay via GMP.
+  cosmos.base.v1beta1.Coin token = 5 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+
+// MsgRelay defines the Relay response type.
+message MsgRelayPriceResponse {}
