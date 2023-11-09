@@ -34,7 +34,7 @@ message MsgSetParams {
 // MsgSetParamsResponse defines the SetParams response type.
 message MsgSetParamsResponse {}
 
-// MsgRelay defines the Relay message type.
+// MsgRelayPrice defines the Relay message type.
 message MsgRelayPrice {
   option (gogoproto.equal) = false;
   option (gogoproto.goproto_getters) = false;
@@ -57,7 +57,16 @@ message MsgRelayPrice {
     (gogoproto.nullable) = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
   ];
+
+  // resolve_price determines the time that the user wants to resolve the price to.
+  int64 resolve_time = 6;
+
+  // id determines the id of the price that the user wants to pass.
+  int64 id = 7;
+
+  // disable_resolve determines whether the user wants to resolve the price or not.
+  bool disable_resolve = 8;
 }
 
-// MsgRelay defines the Relay response type.
+// MsgRelayPriceResponse defines the Relay response type.
 message MsgRelayPriceResponse {}

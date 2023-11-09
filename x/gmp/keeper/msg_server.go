@@ -67,10 +67,8 @@ func (ms msgServer) RelayPrice(
 		priceFeed, err := types.NewPriceFeedData(
 			denom,
 			rate,
-			// TODO: replace with actual resolve time & id
-			// Ref: https://github.com/ojo-network/ojo/issues/309
-			big.NewInt(1),
-			big.NewInt(1),
+			big.NewInt(msg.ResolveTime),
+			big.NewInt(msg.Id),
 		)
 		if err != nil {
 			ms.keeper.Logger(ctx).With(err).Error("unable to relay price to gmp")
@@ -80,9 +78,7 @@ func (ms msgServer) RelayPrice(
 		rates = append(rates, priceFeed)
 	}
 
-	// TODO: fill with actual disableResolve option
-	// Ref: https://github.com/ojo-network/ojo/issues/309
-	payload, err := types.EncodeABI("postPrices", rates, false)
+	payload, err := types.EncodeABI("postPrices", rates, msg.DisableResolve)
 	if err != nil {
 		return nil, err
 	}
