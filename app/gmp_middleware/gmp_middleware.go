@@ -4,14 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	"github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	transfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
 	porttypes "github.com/cosmos/ibc-go/v7/modules/core/05-port/types"
 	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/exported"
+	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 )
 
 type IBCMiddleware struct {
@@ -38,7 +39,16 @@ func (im IBCMiddleware) OnChanOpenInit(
 	version string,
 ) (string, error) {
 	// call underlying callback
-	return im.app.OnChanOpenInit(ctx, order, connectionHops, portID, channelID, chanCap, counterparty, version)
+	return im.app.OnChanOpenInit(
+		ctx,
+		order,
+		connectionHops,
+		portID,
+		channelID,
+		chanCap,
+		counterparty,
+		version,
+	)
 }
 
 // OnChanOpenTry implements the IBCMiddleware interface
@@ -52,7 +62,16 @@ func (im IBCMiddleware) OnChanOpenTry(
 	counterparty channeltypes.Counterparty,
 	counterpartyVersion string,
 ) (string, error) {
-	return im.app.OnChanOpenTry(ctx, order, connectionHops, portID, channelID, channelCap, counterparty, counterpartyVersion)
+	return im.app.OnChanOpenTry(
+		ctx,
+		order,
+		connectionHops,
+		portID,
+		channelID,
+		channelCap,
+		counterparty,
+		counterpartyVersion,
+	)
 }
 
 // OnChanOpenAck implements the IBCMiddleware interface
@@ -63,7 +82,13 @@ func (im IBCMiddleware) OnChanOpenAck(
 	counterpartyChannelID string,
 	counterpartyVersion string,
 ) error {
-	return im.app.OnChanOpenAck(ctx, portID, channelID, counterpartyChannelID, counterpartyVersion)
+	return im.app.OnChanOpenAck(
+		ctx,
+		portID,
+		channelID,
+		counterpartyChannelID,
+		counterpartyVersion,
+	)
 }
 
 // OnChanOpenConfirm implements the IBCMiddleware interface
@@ -106,13 +131,9 @@ func (im IBCMiddleware) OnRecvPacket(
 
 	var data transfertypes.FungibleTokenPacketData
 	if err := types.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
-		return channeltypes.NewErrorAcknowledgement(fmt.Errorf("cannot unmarshal ICS-20 transfer packet data"))
-	}
-
-	// authenticate the message with packet sender + channel-id
-	// TODO: authenticate the message with channel-id
-	if data.Sender != AxelarGMPAcc {
-		return ack
+		return channeltypes.NewErrorAcknowledgement(
+			fmt.Errorf("cannot unmarshal ICS-20 transfer packet data"),
+		)
 	}
 
 	var msg Message
@@ -123,19 +144,40 @@ func (im IBCMiddleware) OnRecvPacket(
 	}
 
 	switch msg.Type {
-	case TypeGeneralMessage:
-		// implement the handler
-		err = im.handler.HandleGeneralMessage(ctx, msg.SourceChain, msg.SourceAddress, data.Receiver, msg.Payload)
-	case TypeGeneralMessageWithToken:
+	case gmptypes.TypeGeneralMessage:
+		err = im.handler.HandleGeneralMessage(
+			ctx,
+			msg.SourceChain,
+			msg.SourceAddress,
+			data.Receiver,
+			msg.Payload,
+			data.Sender,
+			packet.DestinationChannel,
+		)
+	case gmptypes.TypeGeneralMessageWithToken:
 		// parse the transfer amount
 		amt, ok := sdk.NewIntFromString(data.Amount)
 		if !ok {
-			return channeltypes.NewErrorAcknowledgement(sdkerrors.Wrapf(transfertypes.ErrInvalidAmount, "unable to parse transfer amount (%s) into sdk.Int", data.Amount))
+			return channeltypes.NewErrorAcknowledgement(
+				errors.Wrapf(
+					transfertypes.ErrInvalidAmount,
+					"unable to parse transfer amount (%s) into sdk.Int",
+					data.Amount,
+				),
+			)
 		}
-
 		denom := parseDenom(packet, data.Denom)
-		// implement the handler
-		err = im.handler.HandleGeneralMessageWithToken(ctx, msg.SourceChain, msg.SourceAddress, data.Receiver, msg.Payload, sdk.NewCoin(denom, amt))
+
+		err = im.handler.HandleGeneralMessageWithToken(
+			ctx,
+			msg.SourceChain,
+			msg.SourceAddress,
+			data.Receiver,
+			msg.Payload,
+			data.Sender,
+			packet.DestinationChannel,
+			sdk.NewCoin(denom, amt),
+		)
 	default:
 		err = fmt.Errorf("unrecognized message type: %d", msg.Type)
 	}

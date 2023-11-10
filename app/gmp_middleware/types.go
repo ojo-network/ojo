@@ -8,11 +8,9 @@ import (
 )
 
 type GeneralMessageHandler interface {
-	HandleGeneralMessage(ctx sdk.Context, srcChain, srcAddress string, destAddress string, payload []byte) error
-	HandleGeneralMessageWithToken(ctx sdk.Context, srcChain, srcAddress string, destAddress string, payload []byte, coin sdk.Coin) error
+	HandleGeneralMessage(ctx sdk.Context, srcChain, srcAddress string, destAddress string, payload []byte, sender string, channel string) error
+	HandleGeneralMessageWithToken(ctx sdk.Context, srcChain, srcAddress string, destAddress string, payload []byte, sender string, channel string, coin sdk.Coin) error
 }
-
-const AxelarGMPAcc = "axelar1dv7u5k73pzqrxlzujxg3qp8kvc3pje7jtdvu72npnt5zhq05ejcsn5qme5"
 
 // Message is attached in ICS20 packet memo field
 type Message struct {
@@ -21,16 +19,6 @@ type Message struct {
 	Payload       []byte `json:"payload"`
 	Type          int64  `json:"type"`
 }
-
-type MessageType int
-
-const (
-	// TypeUnrecognized means coin type is unrecognized
-	TypeUnrecognized = iota
-	TypeGeneralMessage
-	// TypeGeneralMessageWithToken is a general message with token
-	TypeGeneralMessageWithToken
-)
 
 // parseDenom convert denom to receiver chain representation
 func parseDenom(packet channeltypes.Packet, denom string) string {

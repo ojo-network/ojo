@@ -2,14 +2,20 @@ package gmp_middleware
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/ojo-network/ojo/x/gmp/types"
 	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 )
 
 type GmpKeeper interface {
-	RelayPrice(goCtx context.Context, msg *gmptypes.MsgRelayPrice) (*gmptypes.MsgRelayPriceResponse, error)
+	RelayPrice(
+		goCtx context.Context,
+		msg *gmptypes.MsgRelayPrice,
+	) (*gmptypes.MsgRelayPriceResponse, error)
+	GetParams(ctx sdk.Context) (params types.Params)
 }
 
 type GmpHandler struct {
@@ -24,7 +30,15 @@ func NewGmpHandler(k GmpKeeper) *GmpHandler {
 
 // HandleGeneralMessage takes the receiving message from axelar,
 // and sends it along to the GMP module.
-func (h GmpHandler) HandleGeneralMessage(ctx sdk.Context, srcChain, srcAddress string, destAddress string, payload []byte) error {
+func (h GmpHandler) HandleGeneralMessage(
+	ctx sdk.Context,
+	srcChain,
+	srcAddress string,
+	destAddress string,
+	payload []byte,
+	sender string,
+	channel string,
+) error {
 	ctx.Logger().Info("HandleGeneralMessage called",
 		"srcChain", srcChain,
 		"srcAddress", srcAddress,
@@ -32,6 +46,14 @@ func (h GmpHandler) HandleGeneralMessage(ctx sdk.Context, srcChain, srcAddress s
 		"payload", payload,
 		"module", "x/gmp-middleware",
 	)
+
+	params := h.gmp.GetParams(ctx)
+	if !strings.EqualFold(params.GmpAddress, sender) {
+		return fmt.Errorf("invalid sender address: %s", sender)
+	}
+	if !strings.EqualFold(params.GmpChannel, channel) {
+		return fmt.Errorf("invalid channel: %s", channel)
+	}
 
 	denomString := string(payload)
 	denoms := strings.Split(denomString, ",")
@@ -47,8 +69,18 @@ func (h GmpHandler) HandleGeneralMessage(ctx sdk.Context, srcChain, srcAddress s
 	return err
 }
 
-// HandleGeneralMessageWithToken currently performs a no-op.
-func (h GmpHandler) HandleGeneralMessageWithToken(ctx sdk.Context, srcChain, srcAddress string, destAddress string, payload []byte, coin sdk.Coin) error {
+// HandleGeneralMessage takes the receiving message from axelar,
+// and sends it along to the GMP module.
+func (h GmpHandler) HandleGeneralMessageWithToken(
+	ctx sdk.Context,
+	srcChain,
+	srcAddress string,
+	destAddress string,
+	payload []byte,
+	sender string,
+	channel string,
+	coin sdk.Coin,
+) error {
 	ctx.Logger().Info("HandleGeneralMessageWithToken called",
 		"srcChain", srcChain,
 		"srcAddress", srcAddress,
@@ -57,5 +89,25 @@ func (h GmpHandler) HandleGeneralMessageWithToken(ctx sdk.Context, srcChain, src
 		"coin", coin,
 	)
 
-	return nil
+	params := h.gmp.GetParams(ctx)
+	if !strings.EqualFold(params.GmpAddress, sender) {
+		return fmt.Errorf("invalid sender address: %s", sender)
+	}
+	if !strings.EqualFold(params.GmpChannel, channel) {
+		return fmt.Errorf("invalid channel: %s", channel)
+	}
+
+	denomString := string(payload)
+	denoms := strings.Split(denomString, ",")
+
+	_, err := h.gmp.RelayPrice(ctx, &gmptypes.MsgRelayPrice{
+		Relayer:            srcAddress,
+		DestinationChain:   srcChain,
+		DestinationAddress: destAddress,
+		Denoms:             denoms,
+		Token:              coin,
+	},
+	)
+
+	return err
 }
