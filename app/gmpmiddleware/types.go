@@ -1,9 +1,13 @@
 package gmpmiddleware
 
 import (
+	"fmt"
+	"strings"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
+	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 )
 
 type GeneralMessageHandler interface {
@@ -60,4 +64,26 @@ func parseDenom(packet channeltypes.Packet, denom string) string {
 	denom = types.ParseDenomTrace(prefixedDenom).IBCDenom()
 
 	return denom
+}
+
+func parsePayload(payload []byte) ([]string, error) {
+	denomString := string(payload)
+	if len(denomString) < 1 {
+		return []string{}, fmt.Errorf("unable to parse payload")
+	}
+	denoms := strings.Split(denomString, ",")
+	if len(denoms) < 1 {
+		return []string{}, fmt.Errorf("unable to parse payload")
+	}
+	return denoms, nil
+}
+
+func verifyParams(params gmptypes.Params, sender string, channel string) error {
+	if !strings.EqualFold(params.GmpAddress, sender) {
+		return fmt.Errorf("invalid sender address: %s", sender)
+	}
+	if !strings.EqualFold(params.GmpChannel, channel) {
+		return fmt.Errorf("invalid channel: %s", channel)
+	}
+	return nil
 }

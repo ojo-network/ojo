@@ -2,8 +2,6 @@ package gmpmiddleware
 
 import (
 	"context"
-	"fmt"
-	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ojo-network/ojo/x/gmp/types"
@@ -46,25 +44,23 @@ func (h GmpHandler) HandleGeneralMessage(
 		"module", "x/gmp-middleware",
 	)
 
-	params := h.gmp.GetParams(ctx)
-	if !strings.EqualFold(params.GmpAddress, sender) {
-		return fmt.Errorf("invalid sender address: %s", sender)
+	err := verifyParams(h.gmp.GetParams(ctx), sender, channel)
+	if err != nil {
+		return err
 	}
-	if !strings.EqualFold(params.GmpChannel, channel) {
-		return fmt.Errorf("invalid channel: %s", channel)
+	denoms, err := parsePayload(payload)
+	if err != nil {
+		return err
 	}
 
-	denomString := string(payload)
-	denoms := strings.Split(denomString, ",")
-
-	_, err := h.gmp.RelayPrice(ctx, &types.MsgRelayPrice{
-		Relayer:            srcAddress,
-		DestinationChain:   srcChain,
-		DestinationAddress: destAddress,
-		Denoms:             denoms,
-	},
+	_, err = h.gmp.RelayPrice(ctx,
+		&types.MsgRelayPrice{
+			Relayer:            srcAddress,
+			DestinationChain:   srcChain,
+			DestinationAddress: destAddress,
+			Denoms:             denoms,
+		},
 	)
-
 	return err
 }
 
@@ -88,25 +84,23 @@ func (h GmpHandler) HandleGeneralMessageWithToken(
 		"coin", coin,
 	)
 
-	params := h.gmp.GetParams(ctx)
-	if !strings.EqualFold(params.GmpAddress, sender) {
-		return fmt.Errorf("invalid sender address: %s", sender)
+	err := verifyParams(h.gmp.GetParams(ctx), sender, channel)
+	if err != nil {
+		return err
 	}
-	if !strings.EqualFold(params.GmpChannel, channel) {
-		return fmt.Errorf("invalid channel: %s", channel)
+	denoms, err := parsePayload(payload)
+	if err != nil {
+		return err
 	}
 
-	denomString := string(payload)
-	denoms := strings.Split(denomString, ",")
-
-	_, err := h.gmp.RelayPrice(ctx, &types.MsgRelayPrice{
-		Relayer:            srcAddress,
-		DestinationChain:   srcChain,
-		DestinationAddress: destAddress,
-		Denoms:             denoms,
-		Token:              coin,
-	},
+	_, err = h.gmp.RelayPrice(ctx,
+		&types.MsgRelayPrice{
+			Relayer:            srcAddress,
+			DestinationChain:   srcChain,
+			DestinationAddress: destAddress,
+			Denoms:             denoms,
+			Token:              coin,
+		},
 	)
-
 	return err
 }
