@@ -7,8 +7,25 @@ import (
 )
 
 type GeneralMessageHandler interface {
-	HandleGeneralMessage(ctx sdk.Context, srcChain, srcAddress string, destAddress string, payload []byte, sender string, channel string) error
-	HandleGeneralMessageWithToken(ctx sdk.Context, srcChain, srcAddress string, destAddress string, payload []byte, sender string, channel string, coin sdk.Coin) error
+	HandleGeneralMessage(
+		ctx sdk.Context,
+		srcChain,
+		srcAddress string,
+		destAddress string,
+		payload []byte,
+		sender string,
+		channel string,
+	) error
+	HandleGeneralMessageWithToken(
+		ctx sdk.Context,
+		srcChain,
+		srcAddress string,
+		destAddress string,
+		payload []byte,
+		sender string,
+		channel string,
+		coin sdk.Coin,
+	) error
 }
 
 // Message is attached in ICS20 packet memo field
