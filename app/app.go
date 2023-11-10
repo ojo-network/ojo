@@ -97,7 +97,7 @@ import (
 	ibctm "github.com/cosmos/ibc-go/v7/modules/light-clients/07-tendermint"
 	"github.com/spf13/cast"
 
-	gmp_middleware "github.com/ojo-network/ojo/app/gmp_middleware"
+	gmpmiddleware "github.com/ojo-network/ojo/app/gmpmiddleware"
 	ibctransfer "github.com/ojo-network/ojo/app/ibctransfer"
 
 	"github.com/ojo-network/ojo/util/genmap"
@@ -528,9 +528,9 @@ func New(
 	// Create static IBC router, add transfer route, then set and seal it.
 	// We also need to add the axelar GMP middleware here.
 	ibcRouter := ibcporttypes.NewRouter()
-	ibcStack = gmp_middleware.NewIBCMiddleware(
+	ibcStack = gmpmiddleware.NewIBCMiddleware(
 		ibcStack,
-		gmp_middleware.NewGmpHandler(app.GmpKeeper),
+		gmpmiddleware.NewGmpHandler(app.GmpKeeper),
 	)
 	ibcRouter.AddRoute(ibctransfertypes.ModuleName, ibcStack)
 	app.IBCKeeper.SetRouter(ibcRouter)

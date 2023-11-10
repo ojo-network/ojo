@@ -1,4 +1,4 @@
-package gmp_middleware
+package gmpmiddleware
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
