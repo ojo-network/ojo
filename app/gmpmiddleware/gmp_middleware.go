@@ -1,4 +1,4 @@
-package gmp_middleware
+package gmpmiddleware
 
 import (
 	"encoding/json"
@@ -8,7 +8,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	"github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	transfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
 	porttypes "github.com/cosmos/ibc-go/v7/modules/core/05-port/types"
 	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/exported"
@@ -129,7 +128,7 @@ func (im IBCMiddleware) OnRecvPacket(
 		return ack
 	}
 
-	var data transfertypes.FungibleTokenPacketData
+	var data types.FungibleTokenPacketData
 	if err := types.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
 		return channeltypes.NewErrorAcknowledgement(
 			fmt.Errorf("cannot unmarshal ICS-20 transfer packet data"),
@@ -160,7 +159,7 @@ func (im IBCMiddleware) OnRecvPacket(
 		if !ok {
 			return channeltypes.NewErrorAcknowledgement(
 				errors.Wrapf(
-					transfertypes.ErrInvalidAmount,
+					types.ErrInvalidAmount,
 					"unable to parse transfer amount (%s) into sdk.Int",
 					data.Amount,
 				),

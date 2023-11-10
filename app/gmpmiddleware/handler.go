@@ -1,4 +1,4 @@
-package gmp_middleware
+package gmpmiddleware
 
 import (
 	"context"
@@ -7,14 +7,13 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ojo-network/ojo/x/gmp/types"
-	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 )
 
 type GmpKeeper interface {
 	RelayPrice(
 		goCtx context.Context,
-		msg *gmptypes.MsgRelayPrice,
-	) (*gmptypes.MsgRelayPriceResponse, error)
+		msg *types.MsgRelayPrice,
+	) (*types.MsgRelayPriceResponse, error)
 	GetParams(ctx sdk.Context) (params types.Params)
 }
 
@@ -58,7 +57,7 @@ func (h GmpHandler) HandleGeneralMessage(
 	denomString := string(payload)
 	denoms := strings.Split(denomString, ",")
 
-	_, err := h.gmp.RelayPrice(ctx, &gmptypes.MsgRelayPrice{
+	_, err := h.gmp.RelayPrice(ctx, &types.MsgRelayPrice{
 		Relayer:            srcAddress,
 		DestinationChain:   srcChain,
 		DestinationAddress: destAddress,
@@ -100,7 +99,7 @@ func (h GmpHandler) HandleGeneralMessageWithToken(
 	denomString := string(payload)
 	denoms := strings.Split(denomString, ",")
 
-	_, err := h.gmp.RelayPrice(ctx, &gmptypes.MsgRelayPrice{
+	_, err := h.gmp.RelayPrice(ctx, &types.MsgRelayPrice{
 		Relayer:            srcAddress,
 		DestinationChain:   srcChain,
 		DestinationAddress: destAddress,
