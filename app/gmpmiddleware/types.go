@@ -7,6 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 )
 
@@ -40,6 +41,21 @@ type Message struct {
 	Type          int64  `json:"type"`
 }
 
+// AxelarPayload is the payload sent from Axelar to IBC middleware.
+// It needs to be decoded using the ABI encoded data.
+type GmpPayload struct {
+	AssetNames      []string
+	ContractAddress string
+	CommandSelector [4]byte
+	CommandParams   []byte
+	Timestamp       uint64
+}
+
+// axelarPayloadSpec is the ABI spec for the AxelarPayload struct.
+//
+//nolint:lll
+const gmpPayloadSpec = `[{"constant":false,"inputs":[{"name":"assetNames","type":"bytes32[]"},{"name":"contractAddress","type":"address"},{"name":"commandSelector","type":"bytes4"},{"name":"commandParams","type":"bytes"},{"name":"timestamp","type":"uint256"}],"name":"EncodedData","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}]`
+
 // parseDenom convert denom to receiver chain representation
 func parseDenom(packet channeltypes.Packet, denom string) string {
 	if types.ReceiverChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), denom) {
@@ -66,16 +82,20 @@ func parseDenom(packet channeltypes.Packet, denom string) string {
 	return denom
 }
 
-func parsePayload(payload []byte) ([]string, error) {
-	denomString := string(payload)
-	if len(denomString) < 1 {
-		return []string{}, fmt.Errorf("unable to parse payload")
+// parsePayload takes an encoded payload and decodes it into an EncodedData object.
+func parsePayload(payload []byte) (GmpPayload, error) {
+	parsedABI, err := abi.JSON(strings.NewReader(gmpPayloadSpec))
+	if err != nil {
+		return GmpPayload{}, err
 	}
-	denoms := strings.Split(denomString, ",")
-	if len(denoms) < 1 {
-		return []string{}, fmt.Errorf("unable to parse payload")
+
+	var decodedData GmpPayload
+	err = parsedABI.UnpackIntoInterface(&decodedData, "EncodedData", payload)
+	if err != nil {
+		return GmpPayload{}, err
 	}
-	return denoms, nil
+
+	return decodedData, nil
 }
 
 func verifyParams(params gmptypes.Params, sender string, channel string) error {
