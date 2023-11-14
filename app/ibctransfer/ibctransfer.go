@@ -2,6 +2,7 @@ package ibctransfer
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -28,7 +29,7 @@ type Keeper struct {
 	bankKeeper    types.BankKeeper
 	scopedKeeper  exported.ScopedKeeper
 
-	gmpKeeper GmpKeeper
+	GmpKeeper *GmpKeeper
 }
 
 // Transfer defines a wrapper function for the ICS20 Transfer method.
@@ -38,7 +39,8 @@ type Keeper struct {
 // If it does, it will build a MsgTransfer with the payload.
 func (k Keeper) Transfer(goCtx context.Context, msg *types.MsgTransfer) (*types.MsgTransferResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	gmpParams := k.gmpKeeper.GetParams(ctx)
+	gmpKeeper := *k.GmpKeeper
+	gmpParams := gmpKeeper.GetParams(ctx)
 
 	if msg.Receiver == gmpParams.GmpAddress {
 		relayMsg := &gmptypes.MsgRelayPrice{}
@@ -46,17 +48,20 @@ func (k Keeper) Transfer(goCtx context.Context, msg *types.MsgTransfer) (*types.
 		bz := make([]byte, len(msg.Memo))
 		copy(bz, msg.Memo)
 		err := relayMsg.Unmarshal(bz)
-		if err == nil {
+		if err != nil {
 			// If the payload is not a relayMsg type, then a user is trying to perform GMP
 			// without the proper payload. This transaction be considered to be by a bad actor.
 			k.Logger(ctx).With(err).Error("unexpected object while trying to relay data to GMP")
 			return nil, err
 		}
 
-		gmpTransferMsg, err := k.gmpKeeper.BuildGmpRequest(goCtx, relayMsg)
+		gmpTransferMsg, err := gmpKeeper.BuildGmpRequest(goCtx, relayMsg)
 		if err != nil {
 			return nil, err
 		}
+		fmt.Println("trying to get transfer params:")
+		k.Keeper.SetParams(ctx, types.DefaultParams())
+		fmt.Println("transfer getparams:", k.Keeper.GetParams(ctx))
 		return k.Keeper.Transfer(goCtx, gmpTransferMsg)
 	}
 	return k.Keeper.Transfer(goCtx, msg)
@@ -89,6 +94,10 @@ func NewKeeper(
 		authKeeper:    authKeeper,
 		bankKeeper:    bankKeeper,
 		scopedKeeper:  scopedKeeper,
-		gmpKeeper:     gmpKeeper,
+		GmpKeeper:     &gmpKeeper,
 	}
+}
+
+func (k Keeper) SetGmpKeeper(gmpKeeper GmpKeeper) {
+	k.GmpKeeper = &gmpKeeper
 }

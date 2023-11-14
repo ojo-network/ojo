@@ -34,4 +34,11 @@ func TestIntegrationTestSuite(t *testing.T) {
 func (s *IntegrationTestSuite) SetupSuite() {
 	s.app, s.ctx, s.keys = integration.SetupAppWithContext(s.T())
 	s.msgServer = keeper.NewMsgServerImpl(s.app.GmpKeeper)
+	s.SetOraclePrices()
+}
+
+func (s *IntegrationTestSuite) SetOraclePrices() {
+	app, ctx := s.app, s.ctx
+	app.OracleKeeper.SetExchangeRate(ctx, "ATOM", sdk.NewDecWithPrec(1, 1))
+	app.OracleKeeper.SetExchangeRate(ctx, "BTC", sdk.NewDecWithPrec(1, 3))
 }

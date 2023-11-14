@@ -437,8 +437,8 @@ func New(
 		appCodec,
 		keys[gmptypes.ModuleName],
 		app.OracleKeeper,
-		app.TransferKeeper,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		app.TransferKeeper,
 	)
 
 	app.AirdropKeeper = airdropkeeper.NewKeeper(
@@ -486,6 +486,8 @@ func New(
 		scopedTransferKeeper,
 		app.GmpKeeper,
 	)
+	// Reassign the GMP transfer keeper
+	app.GmpKeeper.IBCKeeper = &app.TransferKeeper
 	transferModule := NewIBCTransferModule(app.TransferKeeper)
 	var ibcStack ibcporttypes.IBCModule
 	ibcStack = NewIBCAppModule(app.TransferKeeper)

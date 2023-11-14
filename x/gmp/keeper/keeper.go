@@ -23,7 +23,7 @@ type Keeper struct {
 	cdc          codec.BinaryCodec
 	storeKey     storetypes.StoreKey
 	oracleKeeper types.OracleKeeper
-	ibcKeeper    ibctransfer.Keeper
+	IBCKeeper    *ibctransfer.Keeper
 	// the address capable of executing a MsgSetParams message. Typically, this
 	// should be the x/gov module account.
 	authority string
@@ -34,15 +34,15 @@ func NewKeeper(
 	cdc codec.BinaryCodec,
 	storeKey storetypes.StoreKey,
 	oracleKeeper types.OracleKeeper,
-	ibcKeeper ibctransfer.Keeper,
 	authority string,
+	ibcKeeper ibctransfer.Keeper,
 ) Keeper {
 	return Keeper{
 		cdc:          cdc,
 		storeKey:     storeKey,
 		authority:    authority,
 		oracleKeeper: oracleKeeper,
-		ibcKeeper:    ibcKeeper,
+		IBCKeeper:    &ibcKeeper,
 	}
 }
 
@@ -76,7 +76,7 @@ func (k Keeper) RelayPrice(
 		uint64(ctx.BlockTime().Add(time.Duration(params.GmpTimeout)*time.Hour).UnixNano()),
 		string(bz),
 	)
-	_, err = k.ibcKeeper.Transfer(ctx, transferMsg)
+	_, err = k.IBCKeeper.Transfer(ctx, transferMsg)
 	if err != nil {
 		return &types.MsgRelayPriceResponse{}, err
 	}

@@ -1,11 +1,18 @@
 package keeper_test
 
 import (
+	"github.com/cometbft/cometbft/crypto/secp256k1"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
+	appparams "github.com/ojo-network/ojo/app/params"
 	"github.com/ojo-network/ojo/x/gmp/types"
 )
 
-// TODO: Add tests for RelayPrice
-// Ref: https://github.com/ojo-network/ojo/issues/313
+var (
+	pubKey    = secp256k1.GenPrivKey().PubKey()
+	addr      = sdk.AccAddress(pubKey.Address())
+	initCoins = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdk.NewInt(1000000000000000000)))
+)
 
 func (s *IntegrationTestSuite) TestMsgServer_SetParams() {
 	gmpChannel := "channel-1"
@@ -37,5 +44,32 @@ func SetParams(
 	)
 
 	_, err := s.msgServer.SetParams(s.ctx, msg)
+	s.Require().NoError(err)
+}
+
+func (s *IntegrationTestSuite) TestMsgServer_RelayPrices() {
+	// Set default params
+	app, ctx := s.app, s.ctx
+	app.GmpKeeper.SetParams(ctx, types.DefaultParams())
+	s.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
+	s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, initCoins))
+
+	// Attempt a relay transaction
+	msg := types.NewMsgRelay(
+		addr.String(),
+		"Ethereum",
+		"0x0000",
+		"0x0000",
+		sdk.Coin{
+			Denom:  "uojo",
+			Amount: sdk.NewInt(1),
+		},
+		[]string{"BTC", "ATOM"},
+		[]byte{1, 2, 3, 4},
+		[]byte{1, 2, 3, 4},
+		1000,
+	)
+
+	_, err := app.GmpKeeper.RelayPrice(ctx, msg)
 	s.Require().NoError(err)
 }
