@@ -484,6 +484,7 @@ func New(
 		app.AccountKeeper,
 		app.BankKeeper,
 		scopedTransferKeeper,
+		app.GmpKeeper,
 	)
 	transferModule := NewIBCTransferModule(app.TransferKeeper)
 	var ibcStack ibcporttypes.IBCModule
