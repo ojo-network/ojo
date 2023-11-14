@@ -105,7 +105,7 @@ func (k Keeper) RelayPrice(
 	encoder := types.NewGMPEncoder(
 		prices,
 		msg.Denoms,
-		common.HexToAddress(msg.DestinationAddress),
+		common.HexToAddress(msg.ContractAddress),
 		commandSelector,
 		msg.CommandParams,
 	)
@@ -117,7 +117,7 @@ func (k Keeper) RelayPrice(
 	// package GMP
 	message := types.GmpMessage{
 		DestinationChain:   msg.DestinationChain,
-		DestinationAddress: msg.DestinationAddress,
+		DestinationAddress: msg.ContractAddress,
 		Payload:            payload,
 		Type:               types.TypeGeneralMessage,
 	}

@@ -49,7 +49,7 @@ func (msg MsgSetParams) ValidateBasic() error {
 func NewMsgRelay(
 	relayer string,
 	destinationChain string,
-	destinationAddress string,
+	contractAddress string,
 	token sdk.Coin,
 	denoms []string,
 	commandSelector []byte,
@@ -57,14 +57,14 @@ func NewMsgRelay(
 	timestamp int64,
 ) *MsgRelayPrice {
 	return &MsgRelayPrice{
-		Relayer:            relayer,
-		DestinationChain:   destinationChain,
-		DestinationAddress: destinationAddress,
-		Token:              token,
-		Denoms:             denoms,
-		CommandSelector:    commandSelector,
-		CommandParams:      commandParams,
-		Timestamp:          timestamp,
+		Relayer:          relayer,
+		DestinationChain: destinationChain,
+		ContractAddress:  contractAddress,
+		Token:            token,
+		Denoms:           denoms,
+		CommandSelector:  commandSelector,
+		CommandParams:    commandParams,
+		Timestamp:        timestamp,
 	}
 }
 
@@ -95,8 +95,8 @@ func (msg MsgRelayPrice) ValidateBasic() error {
 	if msg.Timestamp == 0 {
 		return fmt.Errorf("timestamp cannot be empty")
 	}
-	if msg.DestinationAddress == "" {
-		return fmt.Errorf("destinationAddress cannot be empty")
+	if msg.ContractAddress == "" {
+		return fmt.Errorf("contractAddress cannot be empty")
 	}
 	if msg.DestinationChain == "" {
 		return fmt.Errorf("destinationChain cannot be empty")

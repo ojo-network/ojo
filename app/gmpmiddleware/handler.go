@@ -55,13 +55,13 @@ func (h GmpHandler) HandleGeneralMessage(
 
 	_, err = h.gmp.RelayPrice(ctx,
 		&types.MsgRelayPrice{
-			Relayer:            srcAddress,
-			DestinationChain:   srcChain,
-			DestinationAddress: msg.ContractAddress.Hex(),
-			Denoms:             msg.GetDenoms(),
-			CommandSelector:    msg.CommandSelector[:],
-			CommandParams:      msg.CommandParams,
-			Timestamp:          msg.Timestamp.Int64(),
+			Relayer:          srcAddress,
+			DestinationChain: srcChain,
+			ContractAddress:  msg.ContractAddress.Hex(),
+			Denoms:           msg.GetDenoms(),
+			CommandSelector:  msg.CommandSelector[:],
+			CommandParams:    msg.CommandParams,
+			Timestamp:        msg.Timestamp.Int64(),
 		},
 	)
 	return err
@@ -97,14 +97,14 @@ func (h GmpHandler) HandleGeneralMessageWithToken(
 	}
 	_, err = h.gmp.RelayPrice(ctx,
 		&types.MsgRelayPrice{
-			Relayer:            srcAddress,
-			DestinationChain:   srcChain,
-			DestinationAddress: msg.ContractAddress.Hex(),
-			Denoms:             msg.GetDenoms(),
-			CommandSelector:    msg.CommandSelector[:],
-			CommandParams:      msg.CommandParams,
-			Timestamp:          msg.Timestamp.Int64(),
-			Token:              coin,
+			Relayer:          srcAddress,
+			DestinationChain: srcChain,
+			ContractAddress:  msg.ContractAddress.Hex(),
+			Denoms:           msg.GetDenoms(),
+			CommandSelector:  msg.CommandSelector[:],
+			CommandParams:    msg.CommandParams,
+			Timestamp:        msg.Timestamp.Int64(),
+			Token:            coin,
 		},
 	)
 	return err

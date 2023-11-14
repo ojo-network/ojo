@@ -46,8 +46,8 @@ message MsgRelayPrice {
   // destination_chain defines the chain which this will be relayed to.
   string destination_chain = 2;
 
-  // destination_address defines the destination contract address to call.
-  string destination_address = 3;
+  // contract_address defines the destination contract address to call.
+  string contract_address = 3;
 
   // denoms defines the denoms that the user wants to relay via GMP.
   repeated string denoms = 4;
