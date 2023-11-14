@@ -64,7 +64,7 @@ message MsgRelayPrice {
   // command_params defines the command parameters to call.
   bytes command_params = 8;
 
-  // timestamp defines the timestamp of the message.
+  // timestamp defines the timestamp of the message in terms of the source evm chain block time.
   int64 timestamp = 9;
 }
 
