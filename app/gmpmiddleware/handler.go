@@ -31,7 +31,7 @@ func (h GmpHandler) HandleGeneralMessage(
 	ctx sdk.Context,
 	srcChain,
 	srcAddress string,
-	destAddress string,
+	receiver string,
 	payload []byte,
 	sender string,
 	channel string,
@@ -39,7 +39,7 @@ func (h GmpHandler) HandleGeneralMessage(
 	ctx.Logger().Info("HandleGeneralMessage called",
 		"srcChain", srcChain,
 		"srcAddress", srcAddress,
-		"destAddress", destAddress,
+		"receiver", receiver,
 		"payload", payload,
 		"module", "x/gmp-middleware",
 	)
@@ -48,19 +48,26 @@ func (h GmpHandler) HandleGeneralMessage(
 	if err != nil {
 		return err
 	}
-	denoms, err := parsePayload(payload)
+	msg, err := types.NewGmpDecoder(payload)
+	if err != nil {
+		return err
+	}
+	tx := &types.MsgRelayPrice{
+		Relayer:               srcAddress,
+		DestinationChain:      srcChain,
+		ClientContractAddress: msg.ContractAddress.Hex(),
+		OjoContractAddress:    srcAddress,
+		Denoms:                msg.GetDenoms(),
+		CommandSelector:       msg.CommandSelector[:],
+		CommandParams:         msg.CommandParams,
+		Timestamp:             msg.Timestamp.Int64(),
+	}
+	err = tx.ValidateBasic()
 	if err != nil {
 		return err
 	}
 
-	_, err = h.gmp.RelayPrice(ctx,
-		&types.MsgRelayPrice{
-			Relayer:            srcAddress,
-			DestinationChain:   srcChain,
-			DestinationAddress: destAddress,
-			Denoms:             denoms,
-		},
-	)
+	_, err = h.gmp.RelayPrice(ctx, tx)
 	return err
 }
 
@@ -70,7 +77,7 @@ func (h GmpHandler) HandleGeneralMessageWithToken(
 	ctx sdk.Context,
 	srcChain,
 	srcAddress string,
-	destAddress string,
+	receiver string,
 	payload []byte,
 	sender string,
 	channel string,
@@ -78,8 +85,8 @@ func (h GmpHandler) HandleGeneralMessageWithToken(
 ) error {
 	ctx.Logger().Info("HandleGeneralMessageWithToken called",
 		"srcChain", srcChain,
-		"srcAddress", srcAddress,
-		"destAddress", destAddress,
+		"srcAddress", srcAddress, // this is the Ojo contract address
+		"receiver", receiver,
 		"payload", payload,
 		"coin", coin,
 	)
@@ -88,19 +95,25 @@ func (h GmpHandler) HandleGeneralMessageWithToken(
 	if err != nil {
 		return err
 	}
-	denoms, err := parsePayload(payload)
+	msg, err := types.NewGmpDecoder(payload)
 	if err != nil {
 		return err
 	}
-
-	_, err = h.gmp.RelayPrice(ctx,
-		&types.MsgRelayPrice{
-			Relayer:            srcAddress,
-			DestinationChain:   srcChain,
-			DestinationAddress: destAddress,
-			Denoms:             denoms,
-			Token:              coin,
-		},
-	)
+	tx := &types.MsgRelayPrice{
+		Relayer:               srcAddress,
+		DestinationChain:      srcChain,
+		ClientContractAddress: msg.ContractAddress.Hex(),
+		OjoContractAddress:    srcAddress,
+		Denoms:                msg.GetDenoms(),
+		CommandSelector:       msg.CommandSelector[:],
+		CommandParams:         msg.CommandParams,
+		Timestamp:             msg.Timestamp.Int64(),
+		Token:                 coin,
+	}
+	err = tx.ValidateBasic()
+	if err != nil {
+		return err
+	}
+	_, err = h.gmp.RelayPrice(ctx, tx)
 	return err
 }

@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -31,9 +32,10 @@ func GetTxCmd() *cobra.Command {
 
 func GetCmdRelay() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "relay [destination-chain] [destination-address] [amount] [comma-separated list of tokens]",
+		Use: `relay [destination-chain] [ojo-contract-address] [client-contract-address] ` +
+			`[command-selector] [command-params] [timestamp] [denoms] [amount]`,
 		Args:  cobra.ExactArgs(4),
-		Short: "Relay via axelar GMP to an address",
+		Short: "Relay oracle data via Axelar GMP",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
 				return err
@@ -47,25 +49,69 @@ func GetCmdRelay() *cobra.Command {
 				return fmt.Errorf("destination-chain cannot be empty")
 			}
 			if args[1] == "" {
-				return fmt.Errorf("destination-address cannot be empty")
+				return fmt.Errorf("ojo-contract-address cannot be empty")
+			}
+			if args[2] == "" {
+				return fmt.Errorf("client-contract-address cannot be empty")
 			}
 			if args[3] == "" {
+				return fmt.Errorf("command-selector cannot be empty")
+			}
+			if args[4] == "" {
+				return fmt.Errorf("command-params cannot be empty")
+			}
+			if args[5] == "" {
+				return fmt.Errorf("timestamp cannot be empty")
+			}
+			if args[6] == "" {
 				return fmt.Errorf("denoms cannot be empty")
 			}
 
-			// Normalize the coin denom
-			coin, err := sdk.ParseCoinNormalized(args[2])
+			coin := sdk.Coin{}
+			// normalize the coin denom
+			if args[7] != "" {
+				coin, err := sdk.ParseCoinNormalized(args[7])
+				if err != nil {
+					return err
+				}
+				if !strings.HasPrefix(coin.Denom, "ibc/") {
+					denomTrace := ibctransfertypes.ParseDenomTrace(coin.Denom)
+					coin.Denom = denomTrace.IBCDenom()
+				}
+			}
+
+			// convert denoms to string array
+			denoms := strings.Split(args[6], ",")
+
+			// convert timestamp string to int64
+			timestamp, err := strconv.ParseInt(args[5], 10, 64)
 			if err != nil {
 				return err
 			}
-			if !strings.HasPrefix(coin.Denom, "ibc/") {
-				denomTrace := ibctransfertypes.ParseDenomTrace(coin.Denom)
-				coin.Denom = denomTrace.IBCDenom()
+
+			// convert command-selector to []byte
+			var commandSelector []byte
+			copy(commandSelector, args[3])
+
+			// convert command-params to []byte
+			var commandParams []byte
+			copy(commandParams, args[4])
+
+			msg := types.NewMsgRelay(
+				clientCtx.GetFromAddress().String(),
+				args[0],         // destination-chain e.g. "Ethereum"
+				args[1],         // ojo-contract-address e.g. "0x001"
+				args[2],         // customer-contract-address e.g. "0x002"
+				coin,            // amount
+				denoms,          // denoms
+				commandSelector, // command-selector
+				commandParams,   // command-params
+				timestamp,       // timestamp
+			)
+			err = msg.ValidateBasic()
+			if err != nil {
+				return err
 			}
-
-			denoms := strings.Split(args[3], ",")
-
-			msg := types.NewMsgRelay(clientCtx.GetFromAddress().String(), args[0], args[1], coin, denoms)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},

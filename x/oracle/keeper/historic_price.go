@@ -26,6 +26,21 @@ func (k Keeper) HistoricMedians(
 	return medians
 }
 
+func (k Keeper) HistoricDeviations(
+	ctx sdk.Context,
+	denom string,
+	numStamps uint64,
+) types.PriceStamps {
+	deviations := types.PriceStamps{}
+
+	k.IterateHistoricDeviations(ctx, denom, uint(numStamps), func(median types.PriceStamp) bool {
+		deviations = append(deviations, median)
+		return false
+	})
+
+	return deviations
+}
+
 // CalcAndSetHistoricMedian uses all the historic prices of a given denom to
 // calculate its median price at the current block and set it to the store.
 // It will also call setMedianDeviation with the calculated median.
@@ -256,7 +271,7 @@ func (k Keeper) IterateHistoricPrices(
 	}
 }
 
-// IterateHistoricMediansSinceBlock iterates over medians of a given
+// IterateHistoricMedians iterates over medians of a given
 // denom in the store in reverse.
 // Iterator stops when exhausting the source, or when the handler returns `true`.
 func (k Keeper) IterateHistoricMedians(
@@ -269,6 +284,33 @@ func (k Keeper) IterateHistoricMedians(
 
 	// make sure we have one zero byte to correctly separate denoms
 	prefix := util.ConcatBytes(1, types.KeyPrefixMedian, []byte(denom))
+	iter := sdk.KVStoreReversePrefixIteratorPaginated(store, prefix, 1, numStamps)
+	defer iter.Close()
+
+	for ; iter.Valid(); iter.Next() {
+		denom, block := types.ParseDenomAndBlockFromKey(iter.Key(), types.KeyPrefixMedian)
+		decProto := sdk.DecProto{}
+		k.cdc.MustUnmarshal(iter.Value(), &decProto)
+		price := types.NewPriceStamp(decProto.Dec, denom, block)
+		if handler(*price) {
+			break
+		}
+	}
+}
+
+// IterateHistoricDeviations iterates over medians of a given
+// denom in the store in reverse.
+// Iterator stops when exhausting the source, or when the handler returns `true`.
+func (k Keeper) IterateHistoricDeviations(
+	ctx sdk.Context,
+	denom string,
+	numStamps uint,
+	handler func(types.PriceStamp) bool,
+) {
+	store := ctx.KVStore(k.storeKey)
+
+	// make sure we have one zero byte to correctly separate denoms
+	prefix := util.ConcatBytes(1, types.KeyPrefixMedianDeviation, []byte(denom))
 	iter := sdk.KVStoreReversePrefixIteratorPaginated(store, prefix, 1, numStamps)
 	defer iter.Close()
 

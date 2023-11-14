@@ -15,7 +15,7 @@ type GeneralMessageHandler interface {
 		ctx sdk.Context,
 		srcChain,
 		srcAddress string,
-		destAddress string,
+		receiver string,
 		payload []byte,
 		sender string,
 		channel string,
@@ -24,7 +24,7 @@ type GeneralMessageHandler interface {
 		ctx sdk.Context,
 		srcChain,
 		srcAddress string,
-		destAddress string,
+		receiver string,
 		payload []byte,
 		sender string,
 		channel string,
@@ -38,6 +38,16 @@ type Message struct {
 	SourceAddress string `json:"source_address"`
 	Payload       []byte `json:"payload"`
 	Type          int64  `json:"type"`
+}
+
+func verifyParams(params gmptypes.Params, sender string, channel string) error {
+	if !strings.EqualFold(params.GmpAddress, sender) {
+		return fmt.Errorf("invalid sender address: %s", sender)
+	}
+	if !strings.EqualFold(params.GmpChannel, channel) {
+		return fmt.Errorf("invalid channel: %s", channel)
+	}
+	return nil
 }
 
 // parseDenom convert denom to receiver chain representation
@@ -64,26 +74,4 @@ func parseDenom(packet channeltypes.Packet, denom string) string {
 	denom = types.ParseDenomTrace(prefixedDenom).IBCDenom()
 
 	return denom
-}
-
-func parsePayload(payload []byte) ([]string, error) {
-	denomString := string(payload)
-	if len(denomString) < 1 {
-		return []string{}, fmt.Errorf("unable to parse payload")
-	}
-	denoms := strings.Split(denomString, ",")
-	if len(denoms) < 1 {
-		return []string{}, fmt.Errorf("unable to parse payload")
-	}
-	return denoms, nil
-}
-
-func verifyParams(params gmptypes.Params, sender string, channel string) error {
-	if !strings.EqualFold(params.GmpAddress, sender) {
-		return fmt.Errorf("invalid sender address: %s", sender)
-	}
-	if !strings.EqualFold(params.GmpChannel, channel) {
-		return fmt.Errorf("invalid channel: %s", channel)
-	}
-	return nil
 }

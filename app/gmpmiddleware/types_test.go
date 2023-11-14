@@ -20,22 +20,6 @@ func TestVerifyParams(t *testing.T) {
 	require.Error(t, err)
 }
 
-func TestParsePayload(t *testing.T) {
-	payload := []byte(`denom1,denom2`)
-	denoms, err := parsePayload(payload)
-	require.NoError(t, err)
-	require.Equal(t, []string{"denom1", "denom2"}, denoms)
-
-	payload = []byte(`denom1`)
-	denoms, err = parsePayload(payload)
-	require.NoError(t, err)
-	require.Equal(t, []string{"denom1"}, denoms)
-
-	payload = []byte(``)
-	_, err = parsePayload(payload)
-	require.Error(t, err)
-}
-
 func TestParseDenom(t *testing.T) {
 	packet := channeltypes.Packet{
 		SourcePort:    "ibc",
