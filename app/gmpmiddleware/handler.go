@@ -48,7 +48,7 @@ func (h GmpHandler) HandleGeneralMessage(
 	if err != nil {
 		return err
 	}
-	msg, err := NewGmpData(payload)
+	msg, err := types.NewGmpDecoder(payload)
 	if err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func (h GmpHandler) HandleGeneralMessage(
 			Relayer:            srcAddress,
 			DestinationChain:   srcChain,
 			DestinationAddress: destAddress,
-			Denoms:             msg.assets(),
+			Denoms:             msg.GetDenoms(),
 		},
 	)
 	return err
@@ -88,7 +88,7 @@ func (h GmpHandler) HandleGeneralMessageWithToken(
 	if err != nil {
 		return err
 	}
-	msg, err := NewGmpData(payload)
+	msg, err := types.NewGmpDecoder(payload)
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func (h GmpHandler) HandleGeneralMessageWithToken(
 			Relayer:            srcAddress,
 			DestinationChain:   srcChain,
 			DestinationAddress: destAddress,
-			Denoms:             msg.assets(),
+			Denoms:             msg.GetDenoms(),
 			Token:              coin,
 		},
 	)

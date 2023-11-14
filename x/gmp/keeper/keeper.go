@@ -84,16 +84,16 @@ func (k Keeper) RelayPrice(
 
 	// TODO: fill with actual disableResolve option
 	// Ref: https://github.com/ojo-network/ojo/issues/309
-	payload, err := types.EncodeABI("postPrices", rates, false)
+	/*payload, err := types.EncodeABI("postPrices", rates, false)
 	if err != nil {
 		return nil, err
-	}
+	}*/
 
 	// package GMP
 	message := types.GmpMessage{
 		DestinationChain:   msg.DestinationChain,
 		DestinationAddress: msg.DestinationAddress,
-		Payload:            payload,
+		Payload:            []byte{},
 		Type:               types.TypeGeneralMessage,
 	}
 	bz, err := message.Marshal()
