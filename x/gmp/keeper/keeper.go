@@ -105,7 +105,7 @@ func (k Keeper) RelayPrice(
 	encoder := types.NewGMPEncoder(
 		prices,
 		msg.Denoms,
-		common.HexToAddress(msg.ContractAddress),
+		common.HexToAddress(msg.DestinationAddress),
 		commandSelector,
 		msg.CommandParams,
 	)

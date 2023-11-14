@@ -58,9 +58,6 @@ message MsgRelayPrice {
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
   ];
 
-  // contract_address defines the contract address to call.
-  string contract_address = 6;
-
   // command_selector defines the command to call.
   bytes command_selector = 7;
 

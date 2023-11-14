@@ -59,6 +59,9 @@ func (h GmpHandler) HandleGeneralMessage(
 			DestinationChain:   srcChain,
 			DestinationAddress: destAddress,
 			Denoms:             msg.GetDenoms(),
+			CommandSelector:    msg.CommandSelector[:],
+			CommandParams:      msg.CommandParams,
+			Timestamp:          msg.Timestamp.Int64(),
 		},
 	)
 	return err
@@ -98,6 +101,9 @@ func (h GmpHandler) HandleGeneralMessageWithToken(
 			DestinationChain:   srcChain,
 			DestinationAddress: destAddress,
 			Denoms:             msg.GetDenoms(),
+			CommandSelector:    msg.CommandSelector[:],
+			CommandParams:      msg.CommandParams,
+			Timestamp:          msg.Timestamp.Int64(),
 			Token:              coin,
 		},
 	)
