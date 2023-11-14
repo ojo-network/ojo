@@ -146,11 +146,11 @@ func (im IBCMiddleware) OnRecvPacket(
 	case gmptypes.TypeGeneralMessage:
 		err = im.handler.HandleGeneralMessage(
 			ctx,
-			msg.SourceChain,
-			msg.SourceAddress,
-			data.Receiver,
+			msg.SourceChain,   // e.g. "Ethereum"
+			msg.SourceAddress, // e.g. "0x1234..."
+			data.Receiver,     // e.g. "ojo1..."
 			msg.Payload,
-			data.Sender,
+			data.Sender, // e.g. "ojo1..."
 			packet.DestinationChannel,
 		)
 	case gmptypes.TypeGeneralMessageWithToken:
