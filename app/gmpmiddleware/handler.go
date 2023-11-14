@@ -57,7 +57,7 @@ func (h GmpHandler) HandleGeneralMessage(
 		&types.MsgRelayPrice{
 			Relayer:            srcAddress,
 			DestinationChain:   srcChain,
-			DestinationAddress: destAddress,
+			DestinationAddress: msg.ContractAddress.Hex(),
 			Denoms:             msg.GetDenoms(),
 			CommandSelector:    msg.CommandSelector[:],
 			CommandParams:      msg.CommandParams,
@@ -99,7 +99,7 @@ func (h GmpHandler) HandleGeneralMessageWithToken(
 		&types.MsgRelayPrice{
 			Relayer:            srcAddress,
 			DestinationChain:   srcChain,
-			DestinationAddress: destAddress,
+			DestinationAddress: msg.ContractAddress.Hex(),
 			Denoms:             msg.GetDenoms(),
 			CommandSelector:    msg.CommandSelector[:],
 			CommandParams:      msg.CommandParams,
