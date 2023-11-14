@@ -52,18 +52,21 @@ func (h GmpHandler) HandleGeneralMessage(
 	if err != nil {
 		return err
 	}
+	tx := &types.MsgRelayPrice{
+		Relayer:          srcAddress,
+		DestinationChain: srcChain,
+		ContractAddress:  msg.ContractAddress.Hex(),
+		Denoms:           msg.GetDenoms(),
+		CommandSelector:  msg.CommandSelector[:],
+		CommandParams:    msg.CommandParams,
+		Timestamp:        msg.Timestamp.Int64(),
+	}
+	err = tx.ValidateBasic()
+	if err != nil {
+		return err
+	}
 
-	_, err = h.gmp.RelayPrice(ctx,
-		&types.MsgRelayPrice{
-			Relayer:          srcAddress,
-			DestinationChain: srcChain,
-			ContractAddress:  msg.ContractAddress.Hex(),
-			Denoms:           msg.GetDenoms(),
-			CommandSelector:  msg.CommandSelector[:],
-			CommandParams:    msg.CommandParams,
-			Timestamp:        msg.Timestamp.Int64(),
-		},
-	)
+	_, err = h.gmp.RelayPrice(ctx, tx)
 	return err
 }
 
@@ -81,7 +84,7 @@ func (h GmpHandler) HandleGeneralMessageWithToken(
 ) error {
 	ctx.Logger().Info("HandleGeneralMessageWithToken called",
 		"srcChain", srcChain,
-		"srcAddress", srcAddress,
+		"srcAddress", srcAddress, // this is the Ojo contract address
 		"receiver", receiver,
 		"payload", payload,
 		"coin", coin,
@@ -95,17 +98,21 @@ func (h GmpHandler) HandleGeneralMessageWithToken(
 	if err != nil {
 		return err
 	}
-	_, err = h.gmp.RelayPrice(ctx,
-		&types.MsgRelayPrice{
-			Relayer:          srcAddress,
-			DestinationChain: srcChain,
-			ContractAddress:  msg.ContractAddress.Hex(),
-			Denoms:           msg.GetDenoms(),
-			CommandSelector:  msg.CommandSelector[:],
-			CommandParams:    msg.CommandParams,
-			Timestamp:        msg.Timestamp.Int64(),
-			Token:            coin,
-		},
-	)
+	tx := &types.MsgRelayPrice{
+		Relayer:               srcAddress,
+		DestinationChain:      srcChain,
+		ClientContractAddress: msg.ContractAddress.Hex(),
+		OjoContractAddress:    srcAddress,
+		Denoms:                msg.GetDenoms(),
+		CommandSelector:       msg.CommandSelector[:],
+		CommandParams:         msg.CommandParams,
+		Timestamp:             msg.Timestamp.Int64(),
+		Token:                 coin,
+	}
+	err = tx.ValidateBasic()
+	if err != nil {
+		return err
+	}
+	_, err = h.gmp.RelayPrice(ctx, tx)
 	return err
 }

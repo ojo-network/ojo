@@ -13,7 +13,8 @@ func TestMsgRelayPriceValidateBasic(t *testing.T) {
 	price := NewMsgRelay(
 		"relayer",
 		"axelar-1",
-		"axelar1dv4u5k73pzqrxlzujxg3qp8kvc3pje7jtdvu72npnt5zhq05ejcsn5qme5",
+		"0x010",
+		"0x020",
 		coins,
 		[]string{"uojo"},
 		[]byte("1234"),

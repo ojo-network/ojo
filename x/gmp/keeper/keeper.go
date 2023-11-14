@@ -94,7 +94,6 @@ func (k Keeper) RelayPrice(
 			k.Logger(ctx).With(err).Error("unable to relay price to gmp")
 			continue
 		}
-
 		prices = append(prices, priceFeed)
 	}
 
@@ -105,7 +104,7 @@ func (k Keeper) RelayPrice(
 	encoder := types.NewGMPEncoder(
 		prices,
 		msg.Denoms,
-		common.HexToAddress(msg.ContractAddress),
+		common.HexToAddress(msg.ClientContractAddress),
 		commandSelector,
 		msg.CommandParams,
 	)
@@ -117,7 +116,7 @@ func (k Keeper) RelayPrice(
 	// package GMP
 	message := types.GmpMessage{
 		DestinationChain:   msg.DestinationChain,
-		DestinationAddress: msg.ContractAddress,
+		DestinationAddress: msg.OjoContractAddress,
 		Payload:            payload,
 		Type:               types.TypeGeneralMessage,
 	}
@@ -137,7 +136,6 @@ func (k Keeper) RelayPrice(
 		uint64(ctx.BlockTime().Add(time.Duration(params.GmpTimeout)*time.Hour).UnixNano()),
 		string(bz),
 	)
-
 	_, err = k.ibcKeeper.Transfer(ctx, transferMsg)
 	if err != nil {
 		return &types.MsgRelayPriceResponse{}, err
