@@ -24,7 +24,7 @@ func TestEncode(t *testing.T) {
 				},
 			},
 		},
-		AssetNames:      [32]byte{},
+		AssetNames:      [][32]byte{},
 		ContractAddress: common.Address{},
 		CommandSelector: [4]byte{},
 		CommandParams:   []byte{},
@@ -35,7 +35,7 @@ func TestEncode(t *testing.T) {
 	vals, err := encoderSpec.Unpack(bz)
 	require.NoError(t, err)
 
-	require.Equal(t, message.AssetNames, vals[1].([32]byte))
+	require.Equal(t, message.AssetNames, vals[1].([][32]byte))
 	require.Equal(t, message.ContractAddress, vals[2].(common.Address))
 	require.Equal(t, message.CommandSelector, vals[3].([4]byte))
 	require.Equal(t, message.CommandParams, vals[4].([]byte))

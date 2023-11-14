@@ -17,7 +17,6 @@ type GmpDecoder struct {
 	CommandSelector [4]byte
 	CommandParams   []byte
 	Timestamp       *big.Int
-	AbiEncodedData  []byte
 }
 
 // abiSpec is the ABI specification for the GMP data.

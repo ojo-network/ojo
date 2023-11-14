@@ -4,7 +4,6 @@ import "github.com/ethereum/go-ethereum/accounts/abi"
 
 // These are the types we use to encode and decode data to and from the GMP.
 var (
-	assetNameType, _       = abi.NewType("bytes32", "bytes32", nil)
 	assetNamesType, _      = abi.NewType("bytes32[]", "bytes32[]", nil)
 	contractAddressType, _ = abi.NewType("address", "address", nil)
 	commandSelectorType, _ = abi.NewType("bytes4", "bytes4", nil)
