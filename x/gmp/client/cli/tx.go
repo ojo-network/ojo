@@ -66,22 +66,22 @@ func GetCmdRelay() *cobra.Command {
 			if args[6] == "" {
 				return fmt.Errorf("denoms cannot be empty")
 			}
-			if args[7] == "" {
-				return fmt.Errorf("amount cannot be empty")
-			}
 
+			coin := sdk.Coin{}
 			// normalize the coin denom
-			coin, err := sdk.ParseCoinNormalized(args[6])
-			if err != nil {
-				return err
-			}
-			if !strings.HasPrefix(coin.Denom, "ibc/") {
-				denomTrace := ibctransfertypes.ParseDenomTrace(coin.Denom)
-				coin.Denom = denomTrace.IBCDenom()
+			if args[7] != "" {
+				coin, err := sdk.ParseCoinNormalized(args[7])
+				if err != nil {
+					return err
+				}
+				if !strings.HasPrefix(coin.Denom, "ibc/") {
+					denomTrace := ibctransfertypes.ParseDenomTrace(coin.Denom)
+					coin.Denom = denomTrace.IBCDenom()
+				}
 			}
 
 			// convert denoms to string array
-			denoms := strings.Split(args[3], ",")
+			denoms := strings.Split(args[6], ",")
 
 			// convert timestamp string to int64
 			timestamp, err := strconv.ParseInt(args[5], 10, 64)
@@ -99,9 +99,9 @@ func GetCmdRelay() *cobra.Command {
 
 			msg := types.NewMsgRelay(
 				clientCtx.GetFromAddress().String(),
-				args[0],         // destination-chain
-				args[1],         // ojo-contract-address
-				args[2],         // customer-contract-address
+				args[0],         // destination-chain e.g. "Ethereum"
+				args[1],         // ojo-contract-address e.g. "0x001"
+				args[2],         // customer-contract-address e.g. "0x002"
 				coin,            // amount
 				denoms,          // denoms
 				commandSelector, // command-selector

@@ -53,13 +53,14 @@ func (h GmpHandler) HandleGeneralMessage(
 		return err
 	}
 	tx := &types.MsgRelayPrice{
-		Relayer:          srcAddress,
-		DestinationChain: srcChain,
-		ContractAddress:  msg.ContractAddress.Hex(),
-		Denoms:           msg.GetDenoms(),
-		CommandSelector:  msg.CommandSelector[:],
-		CommandParams:    msg.CommandParams,
-		Timestamp:        msg.Timestamp.Int64(),
+		Relayer:               srcAddress,
+		DestinationChain:      srcChain,
+		ClientContractAddress: msg.ContractAddress.Hex(),
+		OjoContractAddress:    srcAddress,
+		Denoms:                msg.GetDenoms(),
+		CommandSelector:       msg.CommandSelector[:],
+		CommandParams:         msg.CommandParams,
+		Timestamp:             msg.Timestamp.Int64(),
 	}
 	err = tx.ValidateBasic()
 	if err != nil {
