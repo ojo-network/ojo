@@ -87,7 +87,7 @@ import (
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
-	classicibctransfer "github.com/cosmos/ibc-go/v7/modules/apps/transfer/keeper"
+	ibctransferkeeper "github.com/cosmos/ibc-go/v7/modules/apps/transfer/keeper"
 	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	ibc "github.com/cosmos/ibc-go/v7/modules/core"
 	ibcclientclient "github.com/cosmos/ibc-go/v7/modules/core/02-client/client"
@@ -475,7 +475,8 @@ func New(
 		scopedIBCKeeper,
 	)
 
-	classicIBCKeeper := classicibctransfer.NewKeeper(
+	// Create Transfer Keepers
+	ibcTransferKeeper := ibctransferkeeper.NewKeeper(
 		appCodec,
 		keys[ibctransfertypes.StoreKey],
 		app.GetSubspace(ibctransfertypes.ModuleName),
@@ -486,7 +487,6 @@ func New(
 		app.BankKeeper,
 		scopedTransferKeeper,
 	)
-	// Create Transfer Keepers
 	app.TransferKeeper = ibctransfer.NewKeeper(
 		appCodec,
 		keys[ibctransfertypes.StoreKey],
@@ -499,7 +499,8 @@ func New(
 		scopedTransferKeeper,
 		app.GmpKeeper,
 	)
-	app.TransferKeeper.Keeper = classicIBCKeeper
+	app.TransferKeeper.Keeper = ibcTransferKeeper
+
 	// Reassign the GMP transfer keeper
 	app.GmpKeeper.IBCKeeper = &app.TransferKeeper
 	var ibcStack ibcporttypes.IBCModule
