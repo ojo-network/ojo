@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"encoding/base64"
 	"fmt"
 	"strconv"
 	"strings"
@@ -34,12 +35,9 @@ func GetCmdRelay() *cobra.Command {
 	cmd := &cobra.Command{
 		Use: `relay [destination-chain] [ojo-contract-address] [client-contract-address] ` +
 			`[command-selector] [command-params] [timestamp] [denoms] [amount]`,
-		Args:  cobra.ExactArgs(4),
+		Args:  cobra.ExactArgs(8),
 		Short: "Relay oracle data via Axelar GMP",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
-				return err
-			}
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
@@ -89,13 +87,14 @@ func GetCmdRelay() *cobra.Command {
 				return err
 			}
 
-			// convert command-selector to []byte
-			var commandSelector []byte
-			copy(commandSelector, args[3])
-
-			// convert command-params to []byte
-			var commandParams []byte
-			copy(commandParams, args[4])
+			commandSelector, err := base64.StdEncoding.DecodeString(args[3])
+			if err != nil {
+				return err
+			}
+			commandParams, err := base64.StdEncoding.DecodeString(args[4])
+			if err != nil {
+				return err
+			}
 
 			msg := types.NewMsgRelay(
 				clientCtx.GetFromAddress().String(),

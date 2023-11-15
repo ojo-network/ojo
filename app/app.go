@@ -87,7 +87,7 @@ import (
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
-	"github.com/cosmos/ibc-go/v7/modules/apps/transfer"
+	ibctransferkeeper "github.com/cosmos/ibc-go/v7/modules/apps/transfer/keeper"
 	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	ibc "github.com/cosmos/ibc-go/v7/modules/core"
 	ibcclientclient "github.com/cosmos/ibc-go/v7/modules/core/02-client/client"
@@ -160,7 +160,7 @@ var (
 		ibc.AppModuleBasic{},
 		upgrade.AppModuleBasic{},
 		evidence.AppModuleBasic{},
-		transfer.AppModuleBasic{},
+		ibctransfer.AppModuleBasic{},
 		vesting.AppModuleBasic{},
 		oracle.AppModuleBasic{},
 		gmp.AppModuleBasic{},
@@ -437,8 +437,8 @@ func New(
 		appCodec,
 		keys[gmptypes.ModuleName],
 		app.OracleKeeper,
-		app.TransferKeeper,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		app.TransferKeeper,
 	)
 
 	app.AirdropKeeper = airdropkeeper.NewKeeper(
@@ -474,7 +474,7 @@ func New(
 	)
 
 	// Create Transfer Keepers
-	app.TransferKeeper = ibctransfer.NewKeeper(
+	ibcTransferKeeper := ibctransferkeeper.NewKeeper(
 		appCodec,
 		keys[ibctransfertypes.StoreKey],
 		app.GetSubspace(ibctransfertypes.ModuleName),
@@ -485,9 +485,24 @@ func New(
 		app.BankKeeper,
 		scopedTransferKeeper,
 	)
-	transferModule := NewIBCTransferModule(app.TransferKeeper)
+	app.TransferKeeper = ibctransfer.NewKeeper(
+		appCodec,
+		keys[ibctransfertypes.StoreKey],
+		app.GetSubspace(ibctransfertypes.ModuleName),
+		app.IBCKeeper.ChannelKeeper,
+		app.IBCKeeper.ChannelKeeper,
+		&app.IBCKeeper.PortKeeper,
+		app.AccountKeeper,
+		app.BankKeeper,
+		scopedTransferKeeper,
+		app.GmpKeeper,
+	)
+	app.TransferKeeper.Keeper = ibcTransferKeeper
+
+	// Reassign the GMP transfer keeper
+	app.GmpKeeper.IBCKeeper = &app.TransferKeeper
 	var ibcStack ibcporttypes.IBCModule
-	ibcStack = NewIBCAppModule(app.TransferKeeper)
+	ibcStack = ibctransfer.NewIBCModule(app.TransferKeeper)
 
 	// Create evidence Keeper for to register the IBC light client misbehavior evidence route
 	evidenceKeeper := evidencekeeper.NewKeeper(
@@ -568,7 +583,7 @@ func New(
 		evidence.NewAppModule(app.EvidenceKeeper),
 		ibc.NewAppModule(app.IBCKeeper),
 		params.NewAppModule(app.ParamsKeeper),
-		transferModule,
+		ibctransfer.NewAppModule(app.TransferKeeper),
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
 		gmp.NewAppModule(appCodec, app.GmpKeeper, app.OracleKeeper),
 		airdrop.NewAppModule(appCodec, app.AirdropKeeper, app.AccountKeeper, app.BankKeeper),

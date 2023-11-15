@@ -23,7 +23,7 @@ type Keeper struct {
 	cdc          codec.BinaryCodec
 	storeKey     storetypes.StoreKey
 	oracleKeeper types.OracleKeeper
-	ibcKeeper    ibctransfer.Keeper
+	IBCKeeper    *ibctransfer.Keeper
 	// the address capable of executing a MsgSetParams message. Typically, this
 	// should be the x/gov module account.
 	authority string
@@ -34,15 +34,15 @@ func NewKeeper(
 	cdc codec.BinaryCodec,
 	storeKey storetypes.StoreKey,
 	oracleKeeper types.OracleKeeper,
-	ibcKeeper ibctransfer.Keeper,
 	authority string,
+	ibcKeeper ibctransfer.Keeper,
 ) Keeper {
 	return Keeper{
 		cdc:          cdc,
 		storeKey:     storeKey,
 		authority:    authority,
 		oracleKeeper: oracleKeeper,
-		ibcKeeper:    ibcKeeper,
+		IBCKeeper:    &ibcKeeper,
 	}
 }
 
@@ -51,11 +51,43 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
-// RelayPrice
+// RelayPrice submits an IBC transfer with a MsgRelayPrice payload.
+// This is so the IBC Transfer module can then use BuildGmpRequest
+// and perform the GMP request.
 func (k Keeper) RelayPrice(
 	goCtx context.Context,
 	msg *types.MsgRelayPrice,
 ) (*types.MsgRelayPriceResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	params := k.GetParams(ctx)
+
+	bz, err := msg.Marshal()
+	if err != nil {
+		return nil, err
+	}
+
+	transferMsg := ibctransfertypes.NewMsgTransfer(
+		ibctransfertypes.PortID,
+		params.GmpChannel,
+		msg.Token,
+		msg.Relayer,
+		params.GmpAddress,
+		clienttypes.ZeroHeight(),
+		uint64(ctx.BlockTime().Add(time.Duration(params.GmpTimeout)*time.Hour).UnixNano()),
+		string(bz),
+	)
+	_, err = k.IBCKeeper.Transfer(ctx, transferMsg)
+	if err != nil {
+		return &types.MsgRelayPriceResponse{}, err
+	}
+
+	return &types.MsgRelayPriceResponse{}, nil
+}
+
+func (k Keeper) BuildGmpRequest(
+	goCtx context.Context,
+	msg *types.MsgRelayPrice,
+) (*ibctransfertypes.MsgTransfer, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	params := k.GetParams(ctx)
 
@@ -64,7 +96,8 @@ func (k Keeper) RelayPrice(
 		// get exchange rate
 		rate, err := k.oracleKeeper.GetExchangeRate(ctx, denom)
 		if err != nil {
-			return &types.MsgRelayPriceResponse{}, err
+			k.Logger(ctx).With(err).Error("attempting to relay unavailable denom")
+			continue
 		}
 
 		// get any available median and standard deviation data
@@ -81,10 +114,10 @@ func (k Keeper) RelayPrice(
 		// convert them to a medianData slice
 		medianData, err := types.NewMediansSlice(medians, deviations)
 		if err != nil {
-			return &types.MsgRelayPriceResponse{}, err
+			return &ibctransfertypes.MsgTransfer{}, err
 		}
 
-		priceFeed, err := types.NewPriceData(
+		price, err := types.NewPriceData(
 			denom,
 			rate,
 			big.NewInt(msg.Timestamp),
@@ -94,7 +127,7 @@ func (k Keeper) RelayPrice(
 			k.Logger(ctx).With(err).Error("unable to relay price to gmp")
 			continue
 		}
-		prices = append(prices, priceFeed)
+		prices = append(prices, price)
 	}
 
 	// convert commandSelector to [4]byte
@@ -136,10 +169,5 @@ func (k Keeper) RelayPrice(
 		uint64(ctx.BlockTime().Add(time.Duration(params.GmpTimeout)*time.Hour).UnixNano()),
 		string(bz),
 	)
-	_, err = k.ibcKeeper.Transfer(ctx, transferMsg)
-	if err != nil {
-		return &types.MsgRelayPriceResponse{}, err
-	}
-
-	return &types.MsgRelayPriceResponse{}, nil
+	return transferMsg, nil
 }
