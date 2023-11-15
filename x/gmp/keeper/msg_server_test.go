@@ -70,18 +70,18 @@ func (s *IntegrationTestSuite) TestMsgServer_RelayPrices() {
 		[]byte{1, 2, 3, 4},
 		1000,
 	)
+	app.GmpKeeper.RelayPrice(ctx, msg)
 
+	// Attempt a normal IBC transfer
 	transferMsg := ibctransfertypes.NewMsgTransfer(
 		ibctransfertypes.PortID,
 		"channel-1",
 		msg.Token,
-		msg.Relayer,
-		"addy",
+		addr.String(),
+		addr.String(),
 		clienttypes.ZeroHeight(),
 		uint64(1000),
 		"memo",
 	)
-	app.OracleKeeper.SetExchangeRate(ctx, "ATOM", sdk.NewDecWithPrec(1, 1))
 	app.TransferKeeper.Transfer(ctx, transferMsg)
-	app.GmpKeeper.RelayPrice(ctx, msg)
 }

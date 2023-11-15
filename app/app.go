@@ -114,8 +114,6 @@ import (
 	airdroptypes "github.com/ojo-network/ojo/x/airdrop/types"
 
 	customante "github.com/ojo-network/ojo/ante"
-
-	ibctransfermod "github.com/cosmos/ibc-go/v7/modules/apps/transfer"
 )
 
 const (
@@ -162,7 +160,7 @@ var (
 		ibc.AppModuleBasic{},
 		upgrade.AppModuleBasic{},
 		evidence.AppModuleBasic{},
-		ibctransfermod.AppModuleBasic{},
+		ibctransfer.AppModuleBasic{},
 		vesting.AppModuleBasic{},
 		oracle.AppModuleBasic{},
 		gmp.AppModuleBasic{},
