@@ -17,6 +17,7 @@ import (
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
+	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 
 	oraclekeeper "github.com/ojo-network/ojo/x/oracle/keeper"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
@@ -133,7 +134,7 @@ func (app *App) registerUpgrade0_2_2(_ upgradetypes.Plan) {
 	)
 }
 
-func (app *App) registerUpgrade0_3_0(_ upgradetypes.Plan) {
+func (app *App) registerUpgrade0_3_0(upgradeInfo upgradetypes.Plan) {
 	const planName = "v0.3.0"
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
@@ -141,6 +142,12 @@ func (app *App) registerUpgrade0_3_0(_ upgradetypes.Plan) {
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)
+
+	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
+		Added: []string{
+			gmptypes.ModuleName,
+		},
+	})
 }
 
 // helper function to check if the store loader should be upgraded
