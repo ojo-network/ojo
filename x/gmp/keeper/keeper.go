@@ -96,7 +96,8 @@ func (k Keeper) BuildGmpRequest(
 		// get exchange rate
 		rate, err := k.oracleKeeper.GetExchangeRate(ctx, denom)
 		if err != nil {
-			return &ibctransfertypes.MsgTransfer{}, err
+			k.Logger(ctx).With(err).Error("attempting to relay unavailable denom")
+			continue
 		}
 
 		// get any available median and standard deviation data

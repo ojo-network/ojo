@@ -4,6 +4,8 @@ import (
 	"github.com/cometbft/cometbft/crypto/secp256k1"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+	clienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
 	appparams "github.com/ojo-network/ojo/app/params"
 	"github.com/ojo-network/ojo/x/gmp/types"
 )
@@ -50,7 +52,6 @@ func SetParams(
 func (s *IntegrationTestSuite) TestMsgServer_RelayPrices() {
 	// Set default params
 	app, ctx := s.app, s.ctx
-	app.GmpKeeper.SetParams(ctx, types.DefaultParams())
 	s.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
 	s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, initCoins))
 
@@ -70,6 +71,17 @@ func (s *IntegrationTestSuite) TestMsgServer_RelayPrices() {
 		1000,
 	)
 
-	_, err := app.GmpKeeper.RelayPrice(ctx, msg)
-	s.Require().NoError(err)
+	transferMsg := ibctransfertypes.NewMsgTransfer(
+		ibctransfertypes.PortID,
+		"channel-1",
+		msg.Token,
+		msg.Relayer,
+		"addy",
+		clienttypes.ZeroHeight(),
+		uint64(1000),
+		"memo",
+	)
+	app.OracleKeeper.SetExchangeRate(ctx, "ATOM", sdk.NewDecWithPrec(1, 1))
+	app.TransferKeeper.Transfer(ctx, transferMsg)
+	app.GmpKeeper.RelayPrice(ctx, msg)
 }

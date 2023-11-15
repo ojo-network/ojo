@@ -87,7 +87,7 @@ import (
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
-	"github.com/cosmos/ibc-go/v7/modules/apps/transfer"
+	classicibctransfer "github.com/cosmos/ibc-go/v7/modules/apps/transfer/keeper"
 	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	ibc "github.com/cosmos/ibc-go/v7/modules/core"
 	ibcclientclient "github.com/cosmos/ibc-go/v7/modules/core/02-client/client"
@@ -114,6 +114,8 @@ import (
 	airdroptypes "github.com/ojo-network/ojo/x/airdrop/types"
 
 	customante "github.com/ojo-network/ojo/ante"
+
+	ibctransfermod "github.com/cosmos/ibc-go/v7/modules/apps/transfer"
 )
 
 const (
@@ -160,7 +162,7 @@ var (
 		ibc.AppModuleBasic{},
 		upgrade.AppModuleBasic{},
 		evidence.AppModuleBasic{},
-		transfer.AppModuleBasic{},
+		ibctransfermod.AppModuleBasic{},
 		vesting.AppModuleBasic{},
 		oracle.AppModuleBasic{},
 		gmp.AppModuleBasic{},
@@ -473,6 +475,17 @@ func New(
 		scopedIBCKeeper,
 	)
 
+	classicIBCKeeper := classicibctransfer.NewKeeper(
+		appCodec,
+		keys[ibctransfertypes.StoreKey],
+		app.GetSubspace(ibctransfertypes.ModuleName),
+		app.IBCKeeper.ChannelKeeper,
+		app.IBCKeeper.ChannelKeeper,
+		&app.IBCKeeper.PortKeeper,
+		app.AccountKeeper,
+		app.BankKeeper,
+		scopedTransferKeeper,
+	)
 	// Create Transfer Keepers
 	app.TransferKeeper = ibctransfer.NewKeeper(
 		appCodec,
@@ -486,11 +499,11 @@ func New(
 		scopedTransferKeeper,
 		app.GmpKeeper,
 	)
+	app.TransferKeeper.Keeper = classicIBCKeeper
 	// Reassign the GMP transfer keeper
 	app.GmpKeeper.IBCKeeper = &app.TransferKeeper
-	transferModule := NewIBCTransferModule(app.TransferKeeper)
 	var ibcStack ibcporttypes.IBCModule
-	ibcStack = NewIBCAppModule(app.TransferKeeper)
+	ibcStack = ibctransfer.NewIBCModule(app.TransferKeeper)
 
 	// Create evidence Keeper for to register the IBC light client misbehavior evidence route
 	evidenceKeeper := evidencekeeper.NewKeeper(
@@ -571,7 +584,7 @@ func New(
 		evidence.NewAppModule(app.EvidenceKeeper),
 		ibc.NewAppModule(app.IBCKeeper),
 		params.NewAppModule(app.ParamsKeeper),
-		transferModule,
+		ibctransfer.NewAppModule(app.TransferKeeper),
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
 		gmp.NewAppModule(appCodec, app.GmpKeeper, app.OracleKeeper),
 		airdrop.NewAppModule(appCodec, app.AirdropKeeper, app.AccountKeeper, app.BankKeeper),
