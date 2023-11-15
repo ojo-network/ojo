@@ -33,6 +33,7 @@ func (app App) RegisterUpgradeHandlers() {
 	app.registerUpgrade0_2_0(upgradeInfo)
 	app.registerUpgrade0_2_1(upgradeInfo)
 	app.registerUpgrade0_2_2(upgradeInfo)
+	app.registerUpgrade0_3_0(upgradeInfo)
 }
 
 // performs upgrade from v0.1.3 to v0.1.4
@@ -48,7 +49,7 @@ func (app *App) registerUpgrade0_1_4(_ upgradetypes.Plan) {
 	)
 }
 
-//nolint: all
+// nolint: all
 func (app *App) registerUpgrade0_2_0(upgradeInfo upgradetypes.Plan) {
 	const planName = "v0.2.0"
 
@@ -127,6 +128,16 @@ func (app *App) registerUpgrade0_2_2(_ upgradetypes.Plan) {
 			upgrader := oraclekeeper.NewMigrator(&app.OracleKeeper)
 			upgrader.MigrateCurrencyPairProviders(ctx)
 			upgrader.MigrateCurrencyDeviationThresholds(ctx)
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		},
+	)
+}
+
+func (app *App) registerUpgrade0_3_0(_ upgradetypes.Plan) {
+	const planName = "v0.3.0"
+	app.UpgradeKeeper.SetUpgradeHandler(planName,
+		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			ctx.Logger().Info("Upgrade handler execution", "name", planName)
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)
