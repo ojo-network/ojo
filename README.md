@@ -5,6 +5,7 @@
 
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/badges/latest/active.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/ojo-network/ojo?style=flat-square)](https://goreportcard.com/report/github.com/ojo-network/ojo)
+[![Version](https://img.shields.io/github/v/tag/ojo-network/ojo.svg?style=flat-square)](https://github.com/ojo-network/ojo/releases/latest)
 [![License: Apache-2.0](https://img.shields.io/github/license/ojo-network/ojo.svg?style=flat-square)](https://github.com/ojo-network/ojo/blob/main/LICENSE)
 [![GitHub Super-Linter](https://img.shields.io/github/actions/workflow/status/ojo-network/ojo/lint.yml?branch=main)](https://github.com/marketplace/actions/super-linter)
 
