@@ -44,6 +44,7 @@ $ make install
 Ojo currently has three active public networks:
 
 | Network Name                                      | Type              | Docs                                               |
+| :-----------------------------------------------: | :---------------: | :------------------------------------------------: |
 | [Agamotto](https://agamotto.ojo.network/agamotto) | Mainnet           | [Docs](https://docs.ojo.network/networks/agamotto) |
 | [Ditto](https://agamotto.ojo.network/ditto)       | Testnet           | N/A                                                |
 | [Sauron](https://sauron.ojo.network/)             | Validator Testnet | [Docs](https://docs.ojo.network/networks/sauron)   |
