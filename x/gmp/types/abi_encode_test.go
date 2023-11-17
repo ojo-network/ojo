@@ -15,12 +15,10 @@ func TestEncode(t *testing.T) {
 				AssetName:   [32]byte{},
 				Price:       big.NewInt(1),
 				ResolveTime: big.NewInt(1),
-				MedianData: []MedianData{
-					{
-						BlockNums:  []*big.Int{big.NewInt(1)},
-						Medians:    []*big.Int{big.NewInt(1)},
-						Deviations: []*big.Int{big.NewInt(1)},
-					},
+				MedianData: MedianData{
+					BlockNums:  []*big.Int{big.NewInt(1)},
+					Medians:    []*big.Int{big.NewInt(1)},
+					Deviations: []*big.Int{big.NewInt(1)},
 				},
 			},
 		},
