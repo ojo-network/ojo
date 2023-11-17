@@ -151,7 +151,7 @@ func (app *App) registerUpgrade0_3_0(upgradeInfo upgradetypes.Plan) {
 	})
 }
 
-func (app *App) registerUpgrade0_3_0_rc2(upgradeInfo upgradetypes.Plan) {
+func (app *App) registerUpgrade0_3_0_rc2(_ upgradetypes.Plan) {
 	const planName = "v0.3.0-rc2"
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
