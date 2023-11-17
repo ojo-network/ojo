@@ -135,8 +135,8 @@ func NewMedianData(medians oracletypes.PriceStamps, deviations oracletypes.Price
 	}
 
 	medianData := MedianData{
-		BlockNums: make([]*big.Int, 0, len(medians)),
-		Medians: make([]*big.Int, 0, len(medians)),
+		BlockNums:  make([]*big.Int, 0, len(medians)),
+		Medians:    make([]*big.Int, 0, len(medians)),
 		Deviations: make([]*big.Int, 0, len(medians)),
 	}
 
