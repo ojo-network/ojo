@@ -42,7 +42,7 @@ type PriceData struct {
 	AssetName   [32]byte
 	Price       *big.Int
 	ResolveTime *big.Int
-	MedianData  []MedianData
+	MedianData  MedianData
 }
 
 // encoderSpec is the ABI specification for the GMP data.
@@ -103,7 +103,7 @@ func NewPriceData(
 	assetName string,
 	price sdk.Dec,
 	resolveTime *big.Int,
-	medianData []MedianData,
+	medianData MedianData,
 ) (PriceData, error) {
 	assetSlice := []byte(assetName)
 	if len(assetSlice) > 32 {
@@ -128,27 +128,23 @@ func decToInt(amount sdk.Dec) *big.Int {
 
 var rateFactor = sdk.NewDec(10).Power(9)
 
-// NewMediansSlice creates a slice of MedianData from slices of medians and deviations.
-func NewMediansSlice(medians oracletypes.PriceStamps, deviations oracletypes.PriceStamps) ([]MedianData, error) {
+// NewMedianData creates a MedianData object of medians and deviations and their block numbers.
+func NewMedianData(medians oracletypes.PriceStamps, deviations oracletypes.PriceStamps) (MedianData, error) {
 	if len(medians) != len(deviations) {
-		return nil, fmt.Errorf("length of medians and deviations must be equal")
+		return MedianData{}, fmt.Errorf("length of medians and deviations must be equal")
 	}
-	// First, sort them so we'll be able to find matching blockNums.
-	sortedMedians := *medians.Sort()
-	sortedDeviations := *deviations.Sort()
 
-	// Then, create the MedianData slice.
-	medianData := make([]MedianData, 0, len(medians))
-	for i, median := range sortedMedians {
-		// If the median and deviation are not from the same block, skip.
-		if median.BlockNum != sortedDeviations[i].BlockNum {
-			continue
-		}
-		medianData = append(medianData, MedianData{
-			BlockNums:  []*big.Int{big.NewInt(int64(median.BlockNum))},
-			Medians:    []*big.Int{decToInt(median.ExchangeRate.Amount)},
-			Deviations: []*big.Int{decToInt(sortedDeviations[i].ExchangeRate.Amount)},
-		})
+	medianData := MedianData{
+		BlockNums: make([]*big.Int, 0, len(medians)),
+		Medians: make([]*big.Int, 0, len(medians)),
+		Deviations: make([]*big.Int, 0, len(medians)),
 	}
+
+	for i, median := range medians {
+		medianData.BlockNums = append(medianData.BlockNums, big.NewInt(int64(median.BlockNum)))
+		medianData.Medians = append(medianData.Medians, decToInt(median.ExchangeRate.Amount))
+		medianData.Deviations = append(medianData.Deviations, decToInt(deviations[i].ExchangeRate.Amount))
+	}
+
 	return medianData, nil
 }

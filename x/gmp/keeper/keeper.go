@@ -112,7 +112,7 @@ func (k Keeper) BuildGmpRequest(
 			k.oracleKeeper.MaximumMedianStamps(ctx),
 		)
 		// convert them to a medianData slice
-		medianData, err := types.NewMediansSlice(medians, deviations)
+		medianData, err := types.NewMedianData(medians, deviations)
 		if err != nil {
 			return &ibctransfertypes.MsgTransfer{}, err
 		}

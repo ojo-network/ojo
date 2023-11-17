@@ -11,7 +11,7 @@ var (
 	timestampType, _       = abi.NewType("uint256", "uint256", nil)
 
 	// priceDataType is the ABI specification for the PriceData tuple in Solidity.
-	// It is a tuple of (bytes32, uint256, uint256, tuple[]).
+	// It is a tuple of (bytes32, uint256, uint256, tuple).
 	// It includes MedianData, another tuple of (uint256[], uint256[], uint256[]).
 	priceDataType, _ = abi.NewType("tuple[]", "",
 		[]abi.ArgumentMarshaling{
@@ -19,7 +19,7 @@ var (
 			{Name: "Price", Type: "uint256"},
 			{Name: "ResolveTime", Type: "uint256"},
 			{
-				Name: "MedianData", Type: "tuple[]", Components: []abi.ArgumentMarshaling{
+				Name: "MedianData", Type: "tuple", Components: []abi.ArgumentMarshaling{
 					{Name: "BlockNums", Type: "uint256[]"},
 					{Name: "Medians", Type: "uint256[]"},
 					{Name: "Deviations", Type: "uint256[]"},
