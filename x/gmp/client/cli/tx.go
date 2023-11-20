@@ -65,8 +65,9 @@ func GetCmdRelay() *cobra.Command {
 				return fmt.Errorf("denoms cannot be empty")
 			}
 
-			coin := sdk.Coin{}
+			tokens := sdk.Coin{}
 			// normalize the coin denom
+			fmt.Println(args[7])
 			if args[7] != "" {
 				coin, err := sdk.ParseCoinNormalized(args[7])
 				if err != nil {
@@ -76,6 +77,7 @@ func GetCmdRelay() *cobra.Command {
 					denomTrace := ibctransfertypes.ParseDenomTrace(coin.Denom)
 					coin.Denom = denomTrace.IBCDenom()
 				}
+				tokens = coin
 			}
 
 			// convert denoms to string array
@@ -101,7 +103,7 @@ func GetCmdRelay() *cobra.Command {
 				args[0],         // destination-chain e.g. "Ethereum"
 				args[1],         // ojo-contract-address e.g. "0x001"
 				args[2],         // customer-contract-address e.g. "0x002"
-				coin,            // amount
+				tokens,          // amount
 				denoms,          // denoms
 				commandSelector, // command-selector
 				commandParams,   // command-params
