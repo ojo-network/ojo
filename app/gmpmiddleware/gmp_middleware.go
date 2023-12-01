@@ -178,7 +178,7 @@ func (im IBCMiddleware) OnRecvPacket(
 			sdk.NewCoin(denom, amt),
 		)
 	default:
-		err = fmt.Errorf("unrecognized message type: %d", msg.Type)
+		return ack
 	}
 
 	if err != nil {
