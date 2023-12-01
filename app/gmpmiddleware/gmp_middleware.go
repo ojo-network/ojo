@@ -130,16 +130,16 @@ func (im IBCMiddleware) OnRecvPacket(
 
 	var data types.FungibleTokenPacketData
 	if err := types.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
-		return channeltypes.NewErrorAcknowledgement(
-			fmt.Errorf("cannot unmarshal ICS-20 transfer packet data"),
-		)
+		ctx.Logger().Error("cannot unmarshal ICS-20 transfer packet data")
+		return ack
 	}
 
 	var msg Message
 	var err error
 
 	if err = json.Unmarshal([]byte(data.GetMemo()), &msg); err != nil {
-		return channeltypes.NewErrorAcknowledgement(fmt.Errorf("cannot unmarshal memo"))
+		ctx.Logger().With(err).Error("cannot unmarshal memo")
+		return ack
 	}
 
 	switch msg.Type {
@@ -178,6 +178,9 @@ func (im IBCMiddleware) OnRecvPacket(
 			sdk.NewCoin(denom, amt),
 		)
 	default:
+		ctx.Logger().With(
+			fmt.Errorf("unrecognized message type: %d", msg.Type)).
+			Error("unrecognized gmp message")
 		return ack
 	}
 
