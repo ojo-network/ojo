@@ -23,7 +23,4 @@ func TestMsgRelayPriceValidateBasic(t *testing.T) {
 	)
 	err = price.ValidateBasic()
 	require.NoError(t, err)
-	price.CommandSelector = []byte("12345")
-	err = price.ValidateBasic()
-	require.Error(t, err)
 }

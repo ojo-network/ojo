@@ -85,12 +85,6 @@ func (msg MsgRelayPrice) GetSigners() []sdk.AccAddress {
 
 // ValidateBasic Implements sdk.Msg
 func (msg MsgRelayPrice) ValidateBasic() error {
-	if len(msg.CommandParams) == 0 {
-		return fmt.Errorf("commandParams cannot be empty")
-	}
-	if len(msg.CommandSelector) != 4 {
-		return fmt.Errorf("commandSelector length must be 4")
-	}
 	if len(msg.Denoms) == 0 {
 		return fmt.Errorf("denoms cannot be empty")
 	}
