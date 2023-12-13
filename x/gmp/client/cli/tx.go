@@ -59,7 +59,7 @@ func GetCmdRelay() *cobra.Command {
 			tokens := sdk.Coin{}
 			// normalize the coin denom
 			if args[4] != "" {
-				coin, err := sdk.ParseCoinNormalized(args[7])
+				coin, err := sdk.ParseCoinNormalized(args[4])
 				if err != nil {
 					return err
 				}

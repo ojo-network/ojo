@@ -17,6 +17,9 @@ message Params {
 
   // The amount of time we'll wait for a response from axelar before timing out.
   int64 gmp_timeout = 3;
+
+  // The axelar address of the fee recipient.
+  string fee_recipient = 4;
 }
 
 // GmpMessage defines the GMP message that we encode in the
@@ -35,4 +38,16 @@ message GmpMessage {
 
   // type is an enum that specifies the type of message
 	int64 type = 4;
+
+  // fee is the fee payed to a relayer on the Axelar network
+  GmpFee fee = 5;
+}
+
+// GMPFee defines the fee field message inside of GMPMessage.
+message GmpFee {
+  // Fee amount
+  string amount = 1;
+
+  // Recipient of fee; should be fee_recipient.
+  string recipient = 2;
 }

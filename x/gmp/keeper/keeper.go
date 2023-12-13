@@ -152,10 +152,10 @@ func (k Keeper) BuildGmpRequest(
 		DestinationAddress: msg.OjoContractAddress,
 		Payload:            payload,
 		Type:               types.TypeGeneralMessage,
-	}
-	bz, err := message.Marshal()
-	if err != nil {
-		return nil, err
+		Fee: 				&types.GmpFee{
+			Amount:    "1000000",
+			Recipient: params.FeeRecipient,
+		},
 	}
 
 	// submit IBC transfer
@@ -167,7 +167,7 @@ func (k Keeper) BuildGmpRequest(
 		params.GmpAddress,
 		clienttypes.ZeroHeight(),
 		uint64(ctx.BlockTime().Add(time.Duration(params.GmpTimeout)*time.Hour).UnixNano()),
-		string(bz),
+		message.String(),
 	)
 	return transferMsg, nil
 }
