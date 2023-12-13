@@ -20,7 +20,8 @@ func (s *IntegrationTestSuite) TestMsgServer_SetParams() {
 	gmpChannel := "channel-1"
 	gmpAddress := "axelar1dv4u5k73pzqrxlzujxg3qp8kvc3pje7jtdvu72npnt5zhq05ejcsn5qme5"
 	timeout := int64(1)
-	SetParams(s, gmpAddress, gmpChannel, timeout)
+	feeRecipient := "axelar1zl3rxpp70lmte2xr6c4lgske2fyuj3hupcsvcd"
+	SetParams(s, gmpAddress, gmpChannel, timeout, feeRecipient)
 
 	params := types.DefaultParams()
 
@@ -33,15 +34,18 @@ func SetParams(
 	gmpAddress string,
 	gmpChannel string,
 	gmpTimeout int64,
+	feeRecipient string,
 ) {
 	params := types.DefaultParams()
 	params.GmpAddress = gmpAddress
+	params.FeeRecipient = feeRecipient
 	authority := s.app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String()
 
 	msg := types.NewMsgSetParams(
 		params.GmpAddress,
 		params.GmpChannel,
 		params.GmpTimeout,
+		params.FeeRecipient,
 		authority,
 	)
 
