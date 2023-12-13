@@ -6,9 +6,9 @@ func (s *IntegrationTestSuite) TestSetAndGetParams() {
 	app, ctx := s.app, s.ctx
 
 	params := types.Params{
-		GmpChannel: "channel-101",
-		GmpAddress: "gmpaddress",
-		GmpTimeout: int64(101),
+		GmpChannel:   "channel-101",
+		GmpAddress:   "gmpaddress",
+		GmpTimeout:   int64(101),
 		FeeRecipient: "feerecipient",
 	}
 

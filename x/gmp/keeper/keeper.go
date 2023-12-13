@@ -152,7 +152,7 @@ func (k Keeper) BuildGmpRequest(
 		DestinationAddress: msg.OjoContractAddress,
 		Payload:            payload,
 		Type:               types.TypeGeneralMessage,
-		Fee: 				&types.GmpFee{
+		Fee: &types.GmpFee{
 			Amount:    "1000000",
 			Recipient: params.FeeRecipient,
 		},

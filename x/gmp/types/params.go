@@ -13,9 +13,9 @@ var (
 
 func DefaultParams() Params {
 	return Params{
-		GmpAddress: DefaultGMPAddress,
-		GmpChannel: DefaultChannel,
-		GmpTimeout: DefaultTimeout,
+		GmpAddress:   DefaultGMPAddress,
+		GmpChannel:   DefaultChannel,
+		GmpTimeout:   DefaultTimeout,
 		FeeRecipient: DefaultFeeRecipient,
 	}
 }

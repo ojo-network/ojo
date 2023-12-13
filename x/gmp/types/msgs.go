@@ -14,12 +14,14 @@ func NewMsgSetParams(
 	gmpAddress string,
 	gmpChannel string,
 	gmpTimeout int64,
+	feeRecipient string,
 	govAddress string,
 ) *MsgSetParams {
 	params := &Params{
-		GmpAddress: gmpAddress,
-		GmpChannel: gmpChannel,
-		GmpTimeout: gmpTimeout,
+		GmpAddress:   gmpAddress,
+		GmpChannel:   gmpChannel,
+		GmpTimeout:   gmpTimeout,
+		FeeRecipient: feeRecipient,
 	}
 	return &MsgSetParams{
 		Params:    params,
