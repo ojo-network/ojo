@@ -153,7 +153,7 @@ func (k Keeper) BuildGmpRequest(
 		Payload:            payload,
 		Type:               types.TypeGeneralMessage,
 		Fee: &types.GmpFee{
-			Amount:    "1000000",
+			Amount:    msg.Token.Amount.String(),
 			Recipient: params.FeeRecipient,
 		},
 	}
