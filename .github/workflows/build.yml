@@ -39,7 +39,7 @@ jobs:
           go mod download
           cd cmd/ojod
           go build .
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: env.GIT_DIFF
         with:
           name: ojod-${{ matrix.targetos }}-${{ matrix.arch }}
