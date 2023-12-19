@@ -21,33 +21,3 @@ message Params {
   // The axelar address of the fee recipient.
   string fee_recipient = 4;
 }
-
-// GmpMessage defines the GMP message that we encode in the
-// IBC memo field and send to Axelar.
-//
-// Ref: https://github.com/axelarnetwork/evm-cosmos-gmp-sample
-message GmpMessage {
-  // destination_chain is the destination chain of the message
-	string destination_chain = 1;
-
-  // destination_address is the destination address of the message
-	string destination_address = 2;
-
-  // payload is the encoded payload of the message (exchange rates)
-  bytes payload = 3;
-
-  // type is an enum that specifies the type of message
-	int64 type = 4;
-
-  // fee is the fee payed to a relayer on the Axelar network
-  GmpFee fee = 5;
-}
-
-// GMPFee defines the fee field message inside of GMPMessage.
-message GmpFee {
-  // Fee amount
-  string amount = 1;
-
-  // Recipient of fee; should be fee_recipient.
-  string recipient = 2;
-}
