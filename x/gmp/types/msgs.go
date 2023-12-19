@@ -93,9 +93,6 @@ func (msg MsgRelayPrice) ValidateBasic() error {
 	if msg.Timestamp == 0 {
 		return fmt.Errorf("timestamp cannot be empty")
 	}
-	if msg.ClientContractAddress == "" {
-		return fmt.Errorf("clientContractAddress cannot be empty")
-	}
 	if msg.OjoContractAddress == "" {
 		return fmt.Errorf("cjoContractAddress cannot be empty")
 	}
