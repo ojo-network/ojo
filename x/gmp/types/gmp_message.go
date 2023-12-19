@@ -13,7 +13,7 @@ type GmpMessage struct {
 	Payload []int `json:"payload"`
 	// Type is an enum that specifies the type of message
 	Type int64 `json:"type"`
-	// Fee is the fee payed to a relayer on the Axelar network
+	// Fee is the fee paid to a relayer on the Axelar network
 	Fee *GmpFee `json:"fee"`
 }
 
