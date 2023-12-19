@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math/big"
 	"time"
@@ -145,17 +146,26 @@ func (k Keeper) BuildGmpRequest(
 	if err != nil {
 		return nil, err
 	}
+	intPayload := make([]int, len(payload))
+	for i, b := range payload {
+		intPayload[i] = int(b)
+	}
 
 	// package GMP
 	message := types.GmpMessage{
 		DestinationChain:   msg.DestinationChain,
 		DestinationAddress: msg.OjoContractAddress,
-		Payload:            payload,
+		Payload:            intPayload,
 		Type:               types.TypeGeneralMessage,
 		Fee: &types.GmpFee{
 			Amount:    msg.Token.Amount.String(),
 			Recipient: params.FeeRecipient,
 		},
+	}
+	bz, err := json.Marshal(&message)
+	if err != nil {
+		k.Logger(ctx).With(err).Error("error marshaling GMP message")
+		return nil, nil
 	}
 
 	// submit IBC transfer
@@ -167,7 +177,7 @@ func (k Keeper) BuildGmpRequest(
 		params.GmpAddress,
 		clienttypes.ZeroHeight(),
 		uint64(ctx.BlockTime().Add(time.Duration(params.GmpTimeout)*time.Hour).UnixNano()),
-		message.String(),
+		string(bz),
 	)
 	return transferMsg, nil
 }
