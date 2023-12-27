@@ -20,6 +20,8 @@ type GmpHandler struct {
 	gmp GmpKeeper
 }
 
+var relayer = authtypes.NewModuleAddress(types.ModuleName).String()
+
 func NewGmpHandler(k GmpKeeper) *GmpHandler {
 	return &GmpHandler{
 		gmp: k,
@@ -55,7 +57,7 @@ func (h GmpHandler) HandleGeneralMessage(
 	}
 	ctx.Logger().Info("HandleGeneralMessage GMP Decoder", "msg", msg)
 	tx := &types.MsgRelayPrice{
-		Relayer:               authtypes.NewModuleAddress(types.ModuleName).String(),
+		Relayer:               relayer,
 		DestinationChain:      srcChain,
 		ClientContractAddress: msg.ContractAddress.Hex(),
 		OjoContractAddress:    srcAddress,
@@ -103,7 +105,7 @@ func (h GmpHandler) HandleGeneralMessageWithToken(
 	}
 	ctx.Logger().Info("HandleGeneralMessageWithToken GMP Decoder", "msg", msg)
 	tx := &types.MsgRelayPrice{
-		Relayer:               authtypes.NewModuleAddress(types.ModuleName).String(),
+		Relayer:               relayer,
 		DestinationChain:      srcChain,
 		ClientContractAddress: msg.ContractAddress.Hex(),
 		OjoContractAddress:    srcAddress,
