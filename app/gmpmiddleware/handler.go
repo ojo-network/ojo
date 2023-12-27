@@ -3,10 +3,10 @@ package gmpmiddleware
 import (
 	"context"
 
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/ojo-network/ojo/x/gmp/types"
+	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 )
 
 type GmpKeeper interface {
