@@ -6,7 +6,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/ojo-network/ojo/x/gmp/types"
-	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 )
 
 type GmpKeeper interface {
@@ -56,7 +55,7 @@ func (h GmpHandler) HandleGeneralMessage(
 	}
 	ctx.Logger().Info("HandleGeneralMessage GMP Decoder", "msg", msg)
 	tx := &types.MsgRelayPrice{
-		Relayer:               authtypes.NewModuleAddress(gmptypes.ModuleName).String(),
+		Relayer:               authtypes.NewModuleAddress(types.ModuleName).String(),
 		DestinationChain:      srcChain,
 		ClientContractAddress: msg.ContractAddress.Hex(),
 		OjoContractAddress:    srcAddress,
@@ -104,7 +103,7 @@ func (h GmpHandler) HandleGeneralMessageWithToken(
 	}
 	ctx.Logger().Info("HandleGeneralMessageWithToken GMP Decoder", "msg", msg)
 	tx := &types.MsgRelayPrice{
-		Relayer:               authtypes.NewModuleAddress(gmptypes.ModuleName).String(),
+		Relayer:               authtypes.NewModuleAddress(types.ModuleName).String(),
 		DestinationChain:      srcChain,
 		ClientContractAddress: msg.ContractAddress.Hex(),
 		OjoContractAddress:    srcAddress,
