@@ -3,6 +3,8 @@ package gmpmiddleware
 import (
 	"context"
 
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ojo-network/ojo/x/gmp/types"
 )
@@ -52,8 +54,9 @@ func (h GmpHandler) HandleGeneralMessage(
 	if err != nil {
 		return err
 	}
+	ctx.Logger().Info("HandleGeneralMessage GMP Decoder", "msg", msg)
 	tx := &types.MsgRelayPrice{
-		Relayer:               srcAddress,
+		Relayer:               authtypes.NewModuleAddress(gmptypes.ModuleName).String(),
 		DestinationChain:      srcChain,
 		ClientContractAddress: msg.ContractAddress.Hex(),
 		OjoContractAddress:    srcAddress,
@@ -66,7 +69,7 @@ func (h GmpHandler) HandleGeneralMessage(
 	if err != nil {
 		return err
 	}
-
+	ctx.Logger().Info("HandleGeneralMessage GMP Decoder", "tx", tx)
 	_, err = h.gmp.RelayPrice(ctx, tx)
 	return err
 }
@@ -99,8 +102,9 @@ func (h GmpHandler) HandleGeneralMessageWithToken(
 	if err != nil {
 		return err
 	}
+	ctx.Logger().Info("HandleGeneralMessageWithToken GMP Decoder", "msg", msg)
 	tx := &types.MsgRelayPrice{
-		Relayer:               srcAddress,
+		Relayer:               authtypes.NewModuleAddress(gmptypes.ModuleName).String(),
 		DestinationChain:      srcChain,
 		ClientContractAddress: msg.ContractAddress.Hex(),
 		OjoContractAddress:    srcAddress,
@@ -114,6 +118,7 @@ func (h GmpHandler) HandleGeneralMessageWithToken(
 	if err != nil {
 		return err
 	}
+	ctx.Logger().Info("HandleGeneralMessage GMP Decoder", "tx", tx)
 	_, err = h.gmp.RelayPrice(ctx, tx)
 	return err
 }
