@@ -4,9 +4,7 @@ import (
 	"context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/ojo-network/ojo/x/gmp/types"
-	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
 
 type GmpKeeper interface {
@@ -18,14 +16,16 @@ type GmpKeeper interface {
 }
 
 type GmpHandler struct {
-	gmp GmpKeeper
+	gmp     GmpKeeper
+	relayer string
 }
 
-var relayer = authtypes.NewModuleAddress(oracletypes.ModuleName).String()
+// var relayer = authtypes.NewModuleAddress(oracletypes.ModuleName).String()
 
-func NewGmpHandler(k GmpKeeper) *GmpHandler {
+func NewGmpHandler(k GmpKeeper, relayer string) *GmpHandler {
 	return &GmpHandler{
-		gmp: k,
+		gmp:     k,
+		relayer: relayer,
 	}
 }
 
@@ -58,7 +58,7 @@ func (h GmpHandler) HandleGeneralMessage(
 	}
 	ctx.Logger().Info("HandleGeneralMessage GMP Decoder", "msg", msg)
 	tx := &types.MsgRelayPrice{
-		Relayer:               relayer,
+		Relayer:               h.relayer,
 		DestinationChain:      srcChain,
 		ClientContractAddress: msg.ContractAddress.Hex(),
 		OjoContractAddress:    srcAddress,
@@ -106,7 +106,7 @@ func (h GmpHandler) HandleGeneralMessageWithToken(
 	}
 	ctx.Logger().Info("HandleGeneralMessageWithToken GMP Decoder", "msg", msg)
 	tx := &types.MsgRelayPrice{
-		Relayer:               relayer,
+		Relayer:               h.relayer,
 		DestinationChain:      srcChain,
 		ClientContractAddress: msg.ContractAddress.Hex(),
 		OjoContractAddress:    srcAddress,
