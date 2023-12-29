@@ -5,8 +5,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 	"github.com/ojo-network/ojo/x/gmp/types"
+	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
 
 type GmpKeeper interface {
