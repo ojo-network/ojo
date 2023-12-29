@@ -545,7 +545,7 @@ func New(
 	ibcRouter := ibcporttypes.NewRouter()
 	ibcStack = gmpmiddleware.NewIBCMiddleware(
 		ibcStack,
-		gmpmiddleware.NewGmpHandler(app.GmpKeeper),
+		gmpmiddleware.NewGmpHandler(app.GmpKeeper, authtypes.NewModuleAddress(gmptypes.ModuleName).String()),
 	)
 	ibcRouter.AddRoute(ibctransfertypes.ModuleName, ibcStack)
 	app.IBCKeeper.SetRouter(ibcRouter)
