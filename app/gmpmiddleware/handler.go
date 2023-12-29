@@ -20,8 +20,6 @@ type GmpHandler struct {
 	relayer string
 }
 
-// var relayer = authtypes.NewModuleAddress(oracletypes.ModuleName).String()
-
 func NewGmpHandler(k GmpKeeper, relayer string) *GmpHandler {
 	return &GmpHandler{
 		gmp:     k,
