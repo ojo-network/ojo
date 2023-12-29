@@ -5,6 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 	"github.com/ojo-network/ojo/x/gmp/types"
 )
 
@@ -20,7 +21,7 @@ type GmpHandler struct {
 	gmp GmpKeeper
 }
 
-var relayer = authtypes.NewModuleAddress(types.ModuleName).String()
+var relayer = authtypes.NewModuleAddress(oracletypes.ModuleName).String()
 
 func NewGmpHandler(k GmpKeeper) *GmpHandler {
 	return &GmpHandler{
