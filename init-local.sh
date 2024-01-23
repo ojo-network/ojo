@@ -93,10 +93,10 @@ echo "DA_BLOCK_HEIGHT=$DA_BLOCK_HEIGHT" >> restart-local.sh
 echo "NAMESPACE=$NAMESPACE" >> restart-local.sh
 echo "AUTH_TOKEN=$AUTH_TOKEN" >> restart-local.sh
 
-echo "ojod start --rollkit.aggregator true --rollkit.da_layer celestia --rollkit.da_config='{\"base_url\":\"http://localhost:26658\",\"timeout\":60000000000,\"fee\":600000,\"gas_limit\":6000000,\"auth_token\":\"'\$AUTH_TOKEN'\"}' --rollkit.namespace_id \$NAMESPACE --rollkit.da_start_height \$DA_BLOCK_HEIGHT --rpc.laddr tcp://127.0.0.1:36657 --minimum-gas-prices="0.025uojo" --p2p.laddr \"0.0.0.0:36656\"" >> restart-local.sh
+echo "ojod start --rollkit.aggregator true --rollkit.da_layer celestia --rollkit.da_config='{\"base_url\":\"http://localhost:26657\",\"timeout\":60000000000,\"fee\":600000,\"gas_limit\":6000000,\"auth_token\":\"'\$AUTH_TOKEN'\"}' --rollkit.namespace_id \$NAMESPACE --rollkit.da_start_height \$DA_BLOCK_HEIGHT --rpc.laddr tcp://127.0.0.1:36657 --minimum-gas-prices="0.025uojo" --p2p.laddr \"0.0.0.0:36656\"" >> restart-local.sh
 
 # start the chain
-ojod start --rollkit.aggregator true --rollkit.da_layer celestia --rollkit.da_config='{"base_url":"http://localhost:26658","timeout":60000000000,"fee":600000,"gas_limit":6000000,"auth_token":"'$AUTH_TOKEN'"}' --rollkit.namespace_id $NAMESPACE --rollkit.da_start_height $DA_BLOCK_HEIGHT --rpc.laddr tcp://127.0.0.1:36657 --p2p.laddr "0.0.0.0:36656" --minimum-gas-prices="0.025uojo"
+ojod start --rollkit.aggregator true --rollkit.da_layer celestia --rollkit.da_config='{"base_url":"http://localhost:26657","timeout":60000000000,"fee":600000,"gas_limit":6000000,"auth_token":"'$AUTH_TOKEN'"}' --rollkit.namespace_id $NAMESPACE --rollkit.da_start_height $DA_BLOCK_HEIGHT --rpc.laddr tcp://127.0.0.1:36657 --p2p.laddr "0.0.0.0:36656" --minimum-gas-prices="0.025uojo"
 
 # uncomment the next command if you are using lazy aggregation
 # ojod start --rollkit.aggregator true --rollkit.da_layer celestia --rollkit.da_config='{"base_url":"http://localhost:26658","timeout":60000000000,"fee":600000,"gas_limit":6000000,"auth_token":"'$AUTH_TOKEN'"}' --rollkit.namespace_id $NAMESPACE --rollkit.da_start_height $DA_BLOCK_HEIGHT --rollkit.lazy_aggregator
