@@ -39,15 +39,11 @@ func TestUnmarshalIntoAxelarMessage(t *testing.T) {
 	)
 	payload, err := encoder.GMPEncode()
 	require.NoError(t, err)
-	intPayload := make([]int, len(payload))
-	for i, b := range payload {
-		intPayload[i] = int(b)
-	}
 
 	message := GmpMessage{
 		DestinationChain:   "base",
 		DestinationAddress: "0xa97Abf29D45DEDD18612f181383fC127da1cAa8d",
-		Payload:            intPayload,
+		Payload:            payload,
 		Type:               1,
 		Fee: &GmpFee{
 			Amount:    "100000000000",

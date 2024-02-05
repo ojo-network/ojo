@@ -146,16 +146,12 @@ func (k Keeper) BuildGmpRequest(
 	if err != nil {
 		return nil, err
 	}
-	intPayload := make([]int, len(payload))
-	for i, b := range payload {
-		intPayload[i] = int(b)
-	}
 
 	// package GMP
 	message := types.GmpMessage{
 		DestinationChain:   msg.DestinationChain,
 		DestinationAddress: msg.OjoContractAddress,
-		Payload:            intPayload,
+		Payload:            payload,
 		Type:               types.TypeGeneralMessage,
 		Fee: &types.GmpFee{
 			Amount:    msg.Token.Amount.String(),

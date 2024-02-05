@@ -10,7 +10,7 @@ type GmpMessage struct {
 	// DestinationAddress is the destination address of the message
 	DestinationAddress string `json:"destination_address"`
 	// Payload is the encoded payload of the message (exchange rates)
-	Payload []int `json:"payload"`
+	Payload []byte `json:"payload"`
 	// Type is an enum that specifies the type of message
 	Type int64 `json:"type"`
 	// Fee is the fee paid to a relayer on the Axelar network
