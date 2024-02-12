@@ -24,14 +24,14 @@ message Params {
   // cosmos.base.v1beta1.Dec delegation_requirement = 1;
   string delegation_requirement = 3 [
     (cosmos_proto.scalar) = "cosmos.Dec",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec"
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec"
   ];
-  
+
   // The multiplier for the amount of tokens users will receive once they claim their airdrop.
   // E.g., if we want users to receive an equal second half, this will be 2.
   string airdrop_factor = 4 [
     (cosmos_proto.scalar) = "cosmos.Dec",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec"
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec"
   ];
 }
 
@@ -49,7 +49,7 @@ message AirdropAccount {
   enum State {
     // Unspecified state
     STATE_UNSPECIFIED = 0;
-  
+
     // The KV store entry has been created but initial tokens have not been allocated
     STATE_CREATED = 1;
 

@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -60,7 +61,7 @@ func (q querier) ExchangeRates(
 
 		exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(req.Denom, exchangeRate))
 	} else {
-		q.IterateExchangeRates(ctx, func(denom string, rate sdk.Dec) (stop bool) {
+		q.IterateExchangeRates(ctx, func(denom string, rate math.LegacyDec) (stop bool) {
 			exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(denom, rate))
 			return false
 		})
@@ -81,7 +82,7 @@ func (q querier) ActiveExchangeRates(
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	denoms := []string{}
-	q.IterateExchangeRates(ctx, func(denom string, _ sdk.Dec) (stop bool) {
+	q.IterateExchangeRates(ctx, func(denom string, _ math.LegacyDec) (stop bool) {
 		denoms = append(denoms, denom)
 		return false
 	})

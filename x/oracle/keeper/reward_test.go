@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ojo-network/ojo/x/oracle/types"
@@ -51,17 +52,19 @@ func (s *IntegrationTestSuite) TestRewardBallotWinners() {
 	val2ExpectedRewardFactor := fmt.Sprintf("%f", 1-(math.Log(float64(missCounters[1].MissCounter-missCounters[0].MissCounter+1))/
 		math.Log(float64(maximumMissCounts-(missCounters[0].MissCounter)+1))))
 
-	votePeriodsPerWindow := sdk.NewDec((int64)(app.OracleKeeper.RewardDistributionWindow(ctx))).
+	votePeriodsPerWindow := sdkmath.LegacyNewDec((int64)(app.OracleKeeper.RewardDistributionWindow(ctx))).
 		QuoInt64((int64)(app.OracleKeeper.VotePeriod(ctx))).
 		TruncateInt64()
 	app.OracleKeeper.RewardBallotWinners(ctx, (int64)(app.OracleKeeper.VotePeriod(ctx)), (int64)(app.OracleKeeper.RewardDistributionWindow(ctx)), voteTargets, claims)
-	outstandingRewardsDecVal1 := app.DistrKeeper.GetValidatorOutstandingRewardsCoins(ctx, valAddr)
+	outstandingRewardsDecVal1, err := app.DistrKeeper.GetValidatorOutstandingRewardsCoins(ctx, valAddr)
+	s.Require().NoError(err)
 	outstandingRewardsVal1, _ := outstandingRewardsDecVal1.TruncateDecimal()
-	outstandingRewardsDecVal2 := app.DistrKeeper.GetValidatorOutstandingRewardsCoins(ctx, valAddr2)
+	outstandingRewardsDecVal2, err := app.DistrKeeper.GetValidatorOutstandingRewardsCoins(ctx, valAddr2)
+	s.Require().NoError(err)
 	outstandingRewardsVal2, _ := outstandingRewardsDecVal2.TruncateDecimal()
-	s.Require().Equal(sdk.NewDecFromInt(givingAmt.AmountOf(types.OjoDenom)).Mul(sdk.MustNewDecFromStr(val1ExpectedRewardFactor).QuoInt64(int64(len(claims)))).QuoInt64(votePeriodsPerWindow).TruncateInt(),
+	s.Require().Equal(sdkmath.LegacyNewDecFromInt(givingAmt.AmountOf(types.OjoDenom)).Mul(sdkmath.LegacyMustNewDecFromStr(val1ExpectedRewardFactor).QuoInt64(int64(len(claims)))).QuoInt64(votePeriodsPerWindow).TruncateInt(),
 		outstandingRewardsVal1.AmountOf(types.OjoDenom))
-	s.Require().Equal(sdk.NewDecFromInt(givingAmt.AmountOf(types.OjoDenom)).Mul(sdk.MustNewDecFromStr(val2ExpectedRewardFactor).QuoInt64(int64(len(claims)))).QuoInt64(votePeriodsPerWindow).TruncateInt(),
+	s.Require().Equal(sdkmath.LegacyNewDecFromInt(givingAmt.AmountOf(types.OjoDenom)).Mul(sdkmath.LegacyMustNewDecFromStr(val2ExpectedRewardFactor).QuoInt64(int64(len(claims)))).QuoInt64(votePeriodsPerWindow).TruncateInt(),
 		outstandingRewardsVal2.AmountOf(types.OjoDenom))
 }
 
@@ -85,17 +88,19 @@ func (s *IntegrationTestSuite) TestRewardBallotWinnersZeroMissCounters() {
 		voteTargets = append(voteTargets, v.SymbolDenom)
 	}
 
-	votePeriodsPerWindow := sdk.NewDec((int64)(app.OracleKeeper.RewardDistributionWindow(ctx))).
+	votePeriodsPerWindow := sdkmath.LegacyNewDec((int64)(app.OracleKeeper.RewardDistributionWindow(ctx))).
 		QuoInt64((int64)(app.OracleKeeper.VotePeriod(ctx))).
 		TruncateInt64()
 	app.OracleKeeper.RewardBallotWinners(ctx, (int64)(app.OracleKeeper.VotePeriod(ctx)), (int64)(app.OracleKeeper.RewardDistributionWindow(ctx)), voteTargets, claims)
-	outstandingRewardsDecVal1 := app.DistrKeeper.GetValidatorOutstandingRewardsCoins(ctx, valAddr)
+	outstandingRewardsDecVal1, err := app.DistrKeeper.GetValidatorOutstandingRewardsCoins(ctx, valAddr)
+	s.Require().NoError(err)
 	outstandingRewardsVal1, _ := outstandingRewardsDecVal1.TruncateDecimal()
-	outstandingRewardsDecVal2 := app.DistrKeeper.GetValidatorOutstandingRewardsCoins(ctx, valAddr2)
+	outstandingRewardsDecVal2, err := app.DistrKeeper.GetValidatorOutstandingRewardsCoins(ctx, valAddr2)
+	s.Require().NoError(err)
 	outstandingRewardsVal2, _ := outstandingRewardsDecVal2.TruncateDecimal()
-	s.Require().Equal(sdk.NewDecFromInt(givingAmt.AmountOf(types.OjoDenom)).QuoInt64(votePeriodsPerWindow).QuoInt64(2).TruncateInt(),
+	s.Require().Equal(sdkmath.LegacyNewDecFromInt(givingAmt.AmountOf(types.OjoDenom)).QuoInt64(votePeriodsPerWindow).QuoInt64(2).TruncateInt(),
 		outstandingRewardsVal1.AmountOf(types.OjoDenom))
-	s.Require().Equal(sdk.NewDecFromInt(givingAmt.AmountOf(types.OjoDenom)).QuoInt64(votePeriodsPerWindow).QuoInt64(2).TruncateInt(),
+	s.Require().Equal(sdkmath.LegacyNewDecFromInt(givingAmt.AmountOf(types.OjoDenom)).QuoInt64(votePeriodsPerWindow).QuoInt64(2).TruncateInt(),
 		outstandingRewardsVal2.AmountOf(types.OjoDenom))
 }
 
@@ -109,12 +114,14 @@ func (s *IntegrationTestSuite) TestRewardBallotWinnersZeroVoteTargets() {
 	}
 
 	app.OracleKeeper.RewardBallotWinners(ctx, (int64)(app.OracleKeeper.VotePeriod(ctx)), (int64)(app.OracleKeeper.RewardDistributionWindow(ctx)), []string{}, claims)
-	outstandingRewardsDecVal1 := app.DistrKeeper.GetValidatorOutstandingRewardsCoins(ctx, valAddr)
+	outstandingRewardsDecVal1, err := app.DistrKeeper.GetValidatorOutstandingRewardsCoins(ctx, valAddr)
+	s.Require().NoError(err)
 	outstandingRewardsVal1, _ := outstandingRewardsDecVal1.TruncateDecimal()
-	outstandingRewardsDecVal2 := app.DistrKeeper.GetValidatorOutstandingRewardsCoins(ctx, valAddr2)
+	outstandingRewardsDecVal2, err := app.DistrKeeper.GetValidatorOutstandingRewardsCoins(ctx, valAddr2)
+	s.Require().NoError(err)
 	outstandingRewardsVal2, _ := outstandingRewardsDecVal2.TruncateDecimal()
-	s.Require().Equal(sdk.ZeroDec().TruncateInt(), outstandingRewardsVal1.AmountOf(types.OjoDenom))
-	s.Require().Equal(sdk.ZeroDec().TruncateInt(), outstandingRewardsVal2.AmountOf(types.OjoDenom))
+	s.Require().Equal(sdkmath.LegacyZeroDec().TruncateInt(), outstandingRewardsVal1.AmountOf(types.OjoDenom))
+	s.Require().Equal(sdkmath.LegacyZeroDec().TruncateInt(), outstandingRewardsVal2.AmountOf(types.OjoDenom))
 }
 
 func (s *IntegrationTestSuite) TestRewardBallotWinnersZeroClaims() {
@@ -127,10 +134,12 @@ func (s *IntegrationTestSuite) TestRewardBallotWinnersZeroClaims() {
 	}
 
 	app.OracleKeeper.RewardBallotWinners(ctx, (int64)(app.OracleKeeper.VotePeriod(ctx)), (int64)(app.OracleKeeper.RewardDistributionWindow(ctx)), voteTargets, []types.Claim{})
-	outstandingRewardsDecVal1 := app.DistrKeeper.GetValidatorOutstandingRewardsCoins(ctx, valAddr)
+	outstandingRewardsDecVal1, err := app.DistrKeeper.GetValidatorOutstandingRewardsCoins(ctx, valAddr)
+	s.Require().NoError(err)
 	outstandingRewardsVal1, _ := outstandingRewardsDecVal1.TruncateDecimal()
-	outstandingRewardsDecVal2 := app.DistrKeeper.GetValidatorOutstandingRewardsCoins(ctx, valAddr2)
+	outstandingRewardsDecVal2, err := app.DistrKeeper.GetValidatorOutstandingRewardsCoins(ctx, valAddr2)
+	s.Require().NoError(err)
 	outstandingRewardsVal2, _ := outstandingRewardsDecVal2.TruncateDecimal()
-	s.Require().Equal(sdk.ZeroDec().TruncateInt(), outstandingRewardsVal1.AmountOf(types.OjoDenom))
-	s.Require().Equal(sdk.ZeroDec().TruncateInt(), outstandingRewardsVal2.AmountOf(types.OjoDenom))
+	s.Require().Equal(sdkmath.LegacyZeroDec().TruncateInt(), outstandingRewardsVal1.AmountOf(types.OjoDenom))
+	s.Require().Equal(sdkmath.LegacyZeroDec().TruncateInt(), outstandingRewardsVal2.AmountOf(types.OjoDenom))
 }

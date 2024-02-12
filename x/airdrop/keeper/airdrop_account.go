@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"cosmossdk.io/math"
+	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	authvesting "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
@@ -54,7 +56,7 @@ func (k Keeper) GetAllAirdropAccounts(
 	ctx sdk.Context,
 ) (accounts []*types.AirdropAccount) {
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, types.AirdropAccountKeyPrefix)
+	iterator := storetypes.KVStorePrefixIterator(store, types.AirdropAccountKeyPrefix)
 	defer iterator.Close()
 
 	for ; iterator.Valid(); iterator.Next() {
@@ -72,7 +74,7 @@ func (k Keeper) PaginatedAirdropAccounts(
 	limit int,
 ) (accounts []*types.AirdropAccount) {
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, types.AirdropIteratorKey(state))
+	iterator := storetypes.KVStorePrefixIterator(store, types.AirdropIteratorKey(state))
 	defer iterator.Close()
 
 	for i := 0; iterator.Valid() && i < limit; iterator.Next() {
@@ -129,8 +131,11 @@ func (k Keeper) VerifyDelegationRequirement(
 	if err != nil {
 		return err
 	}
-	delegations := k.stakingKeeper.GetDelegatorDelegations(ctx, address, 999)
-	totalShares := sdk.ZeroDec()
+	delegations, err := k.stakingKeeper.GetDelegatorDelegations(ctx, address, 999)
+	if err != nil {
+		return err
+	}
+	totalShares := math.LegacyZeroDec()
 	for _, delegation := range delegations {
 		totalShares = totalShares.Add(delegation.Shares)
 	}
@@ -165,14 +170,7 @@ func (k Keeper) MintClaimTokensToDistribution(ctx sdk.Context, aa *types.Airdrop
 	if err != nil {
 		return err
 	}
-	err = k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, distributiontypes.ModuleName, aa.ClaimCoins())
-	if err != nil {
-		return err
-	}
-	feePool := k.distributionKeeper.GetFeePool(ctx)
-	feePool.CommunityPool = feePool.CommunityPool.Add(aa.ClaimDecCoin())
-	k.distributionKeeper.SetFeePool(ctx, feePool)
-	return nil
+	return k.distributionKeeper.FundCommunityPool(ctx, aa.ClaimCoins(), k.AirdropModuleAddress(ctx))
 }
 
 // AirdropModuleAddress returns the airdrop module account address
@@ -193,7 +191,10 @@ func (k Keeper) CreateOriginAccount(ctx sdk.Context, aa *types.AirdropAccount) e
 	}
 	baseAccount := authtypes.NewBaseAccountWithAddress(originAccAddress)
 	baseAccount = k.accountKeeper.NewAccount(ctx, baseAccount).(*authtypes.BaseAccount)
-	baseVestingAccount := authvesting.NewBaseVestingAccount(baseAccount, aa.OriginCoins().Sort(), aa.VestingEndTime)
+	baseVestingAccount, err := authvesting.NewBaseVestingAccount(baseAccount, aa.OriginCoins().Sort(), aa.VestingEndTime)
+	if err != nil {
+		return err
+	}
 	vestingAccount := authvesting.NewContinuousVestingAccountRaw(baseVestingAccount, ctx.BlockTime().Unix())
 	k.accountKeeper.SetAccount(ctx, vestingAccount)
 	return nil
@@ -207,7 +208,10 @@ func (k Keeper) CreateClaimAccount(ctx sdk.Context, aa *types.AirdropAccount) er
 	}
 	baseAccount := authtypes.NewBaseAccountWithAddress(claimAccAddress)
 	baseAccount = k.accountKeeper.NewAccount(ctx, baseAccount).(*authtypes.BaseAccount)
-	baseVestingAccount := authvesting.NewBaseVestingAccount(baseAccount, aa.ClaimCoins().Sort(), aa.VestingEndTime)
+	baseVestingAccount, err := authvesting.NewBaseVestingAccount(baseAccount, aa.ClaimCoins().Sort(), aa.VestingEndTime)
+	if err != nil {
+		return err
+	}
 	vestingAccount := authvesting.NewDelayedVestingAccountRaw(baseVestingAccount)
 	k.accountKeeper.SetAccount(ctx, vestingAccount)
 	return nil

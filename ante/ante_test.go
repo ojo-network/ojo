@@ -1,11 +1,8 @@
 package ante_test
 
 import (
-	"fmt"
 	"testing"
 
-	tmrand "github.com/cometbft/cometbft/libs/rand"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
@@ -29,10 +26,7 @@ type IntegrationTestSuite struct {
 
 func (s *IntegrationTestSuite) SetupTest() {
 	app := ojoapp.Setup(s.T())
-	ctx := app.BaseApp.NewContext(false, tmproto.Header{
-		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
-		Height:  1,
-	})
+	ctx := app.BaseApp.NewContext(false)
 
 	s.app = app
 	s.ctx = ctx
@@ -51,7 +45,7 @@ func (suite *IntegrationTestSuite) CreateTestTx(privs []cryptotypes.PrivKey, acc
 		sigV2 := signing.SignatureV2{
 			PubKey: priv.PubKey(),
 			Data: &signing.SingleSignatureData{
-				SignMode:  suite.clientCtx.TxConfig.SignModeHandler().DefaultMode(),
+				SignMode:  signing.SignMode(*suite.clientCtx.TxConfig.SignModeHandler().DefaultMode().Enum()),
 				Signature: nil,
 			},
 			Sequence: accSeqs[i],
@@ -72,8 +66,14 @@ func (suite *IntegrationTestSuite) CreateTestTx(privs []cryptotypes.PrivKey, acc
 			Sequence:      accSeqs[i],
 		}
 		sigV2, err := tx.SignWithPrivKey(
-			suite.clientCtx.TxConfig.SignModeHandler().DefaultMode(), signerData,
-			suite.txBuilder, priv, suite.clientCtx.TxConfig, accSeqs[i])
+			suite.ctx,
+			signing.SignMode(*suite.clientCtx.TxConfig.SignModeHandler().DefaultMode().Enum()),
+			signerData,
+			suite.txBuilder,
+			priv,
+			suite.clientCtx.TxConfig,
+			accSeqs[i],
+		)
 		if err != nil {
 			return nil, err
 		}

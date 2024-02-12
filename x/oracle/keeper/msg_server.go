@@ -127,7 +127,10 @@ func (ms msgServer) DelegateFeedConsent(
 		return nil, err
 	}
 
-	val := ms.StakingKeeper.Validator(ctx, operatorAddr)
+	val, err := ms.StakingKeeper.Validator(ctx, operatorAddr)
+	if err != nil {
+		return nil, err
+	}
 	if val == nil {
 		return nil, stakingtypes.ErrNoValidatorFound.Wrap(msg.Operator)
 	}

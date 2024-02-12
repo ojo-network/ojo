@@ -3,6 +3,7 @@ package keeper
 import (
 	"fmt"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ojo-network/ojo/util/decmath"
@@ -50,7 +51,7 @@ func (k Keeper) RewardBallotWinners(
 		return
 	}
 
-	distributionRatio := sdk.NewDec(votePeriod).QuoInt64(rewardDistributionWindow)
+	distributionRatio := math.LegacyNewDec(votePeriod).QuoInt64(rewardDistributionWindow)
 	var periodRewards sdk.DecCoins
 	rewardDenoms := prependOjoIfUnique(voteTargets)
 	for _, denom := range rewardDenoms {
@@ -63,7 +64,7 @@ func (k Keeper) RewardBallotWinners(
 
 		periodRewards = periodRewards.Add(sdk.NewDecCoinFromDec(
 			denom,
-			sdk.NewDecFromInt(rewardPool.Amount).Mul(distributionRatio),
+			math.LegacyNewDecFromInt(rewardPool.Amount).Mul(distributionRatio),
 		))
 	}
 
@@ -72,9 +73,9 @@ func (k Keeper) RewardBallotWinners(
 
 	smallestMissCount := k.smallestMissCountInBallot(ctx, ballotWinners)
 	for _, winner := range ballotWinners {
-		receiverVal := k.StakingKeeper.Validator(ctx, winner.Recipient)
+		receiverVal, err := k.StakingKeeper.Validator(ctx, winner.Recipient)
 		// in case absence of the validator, we just skip distribution
-		if receiverVal == nil {
+		if receiverVal == nil || err != nil {
 			continue
 		}
 

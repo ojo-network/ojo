@@ -1,37 +1,36 @@
 package types
 
 import (
+	"context"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
 // AccountKeeper defines the expected interface contract defined by the x/auth module.
 type AccountKeeper interface {
-	NewAccount(ctx sdk.Context, account authtypes.AccountI) authtypes.AccountI
-	SetAccount(ctx sdk.Context, account authtypes.AccountI)
-	GetAccount(ctx sdk.Context, addr sdk.AccAddress) authtypes.AccountI
+	NewAccount(ctx context.Context, account sdk.AccountI) sdk.AccountI
+	SetAccount(ctx context.Context, account sdk.AccountI)
+	GetAccount(ctx context.Context, addr sdk.AccAddress) sdk.AccountI
 	GetModuleAddress(moduleName string) sdk.AccAddress
 }
 
 // BankKeeper defines the expected interface contract defined by the x/bank module.
 type BankKeeper interface {
-	SendCoinsFromModuleToAccount(ctx sdk.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error
-	SendCoinsFromModuleToModule(ctx sdk.Context, senderModule, recipientModule string, amt sdk.Coins) error
-	MintCoins(ctx sdk.Context, moduleName string, amt sdk.Coins) error
+	SendCoinsFromModuleToAccount(ctx context.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error
+	SendCoinsFromModuleToModule(ctx context.Context, senderModule, recipientModule string, amt sdk.Coins) error
+	MintCoins(ctx context.Context, moduleName string, amt sdk.Coins) error
 }
 
 // StakingKeeper defines the expected interface contract defined by the x/staking module.
 type StakingKeeper interface {
 	GetDelegatorDelegations(
-		ctx sdk.Context,
+		ctx context.Context,
 		delegator sdk.AccAddress,
 		maxRetrieve uint16,
-	) (delegations []stakingtypes.Delegation)
+	) ([]stakingtypes.Delegation, error)
 }
 
 type DistributionKeeper interface {
-	GetFeePool(ctx sdk.Context) (feePool distributiontypes.FeePool)
-	SetFeePool(ctx sdk.Context, feePool distributiontypes.FeePool)
+	FundCommunityPool(ctx context.Context, amount sdk.Coins, sender sdk.AccAddress) error
 }

@@ -3,6 +3,7 @@ package oracle_test
 import (
 	"gotest.tools/v3/assert"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ojo-network/ojo/x/oracle"
@@ -15,7 +16,7 @@ const (
 	denom       = "ojo"
 )
 
-var exchangeRate = sdk.MustNewDecFromStr("8.8")
+var exchangeRate = math.LegacyMustNewDecFromStr("8.8")
 
 func (s *IntegrationTestSuite) TestGenesis_InitGenesis() {
 	keeper, ctx := s.app.OracleKeeper, s.ctx

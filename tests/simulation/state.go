@@ -10,17 +10,17 @@ import (
 	"testing"
 	"time"
 
+	"cosmossdk.io/log"
 	sdkmath "cosmossdk.io/math"
-	dbm "github.com/cometbft/cometbft-db"
-	tmjson "github.com/cometbft/cometbft/libs/json"
-	"github.com/cometbft/cometbft/libs/log"
-	tmtypes "github.com/cometbft/cometbft/types"
+	"cosmossdk.io/store"
+	storetypes "cosmossdk.io/store/types"
+	cmtjson "github.com/cometbft/cometbft/libs/json"
+	cmttypes "github.com/cometbft/cometbft/types"
+	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
-	"github.com/cosmos/cosmos-sdk/store"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
@@ -68,7 +68,7 @@ func fauxMerkleModeOpt(bapp *baseapp.BaseApp) {
 // simulation parameters. It panics if the user provides files for both of them.
 // If a file is not given for the genesis or the sim params, it creates a
 // randomized one.
-func initAppState(cdc codec.JSONCodec, simManager *module.SimulationManager) simtypes.AppStateFn {
+func initAppState(cdc codec.JSONCodec, simManager *module.SimulationManager, genesisState map[string]json.RawMessage) simtypes.AppStateFn {
 	return func(
 		r *rand.Rand,
 		accs []simtypes.Account,
@@ -109,11 +109,11 @@ func initAppState(cdc codec.JSONCodec, simManager *module.SimulationManager) sim
 				panic(err)
 			}
 
-			appState, simAccs = appStateRandomizedFn(simManager, r, cdc, accs, genesisTimestamp, appParams)
+			appState, simAccs = appStateRandomizedFn(simManager, r, cdc, accs, genesisTimestamp, appParams, genesisState)
 
 		default:
 			appParams := make(simtypes.AppParams)
-			appState, simAccs = appStateRandomizedFn(simManager, r, cdc, accs, genesisTimestamp, appParams)
+			appState, simAccs = appStateRandomizedFn(simManager, r, cdc, accs, genesisTimestamp, appParams, genesisState)
 		}
 
 		rawState := make(map[string]json.RawMessage)
@@ -132,7 +132,7 @@ func initAppState(cdc codec.JSONCodec, simManager *module.SimulationManager) sim
 		}
 
 		// compute not bonded balance
-		notBondedTokens := sdk.ZeroInt()
+		notBondedTokens := sdkmath.ZeroInt()
 		for _, val := range stakingState.Validators {
 			if val.Status != stakingtypes.Unbonded {
 				continue
@@ -192,23 +192,21 @@ func appStateRandomizedFn(
 	accs []simtypes.Account,
 	genesisTimestamp time.Time,
 	appParams simtypes.AppParams,
+	genesisState map[string]json.RawMessage,
 ) (json.RawMessage, []simtypes.Account) {
 	numAccs := int64(len(accs))
-	genesisState := ojoapp.NewDefaultGenesisState(cdc)
 
 	// Generate a random amount of initial stake coins and a random initial
 	// number of bonded accounts.
 	var numInitiallyBonded int64
 	var initialStake sdkmath.Int
 	appParams.GetOrGenerate(
-		cdc,
 		simtestutil.StakePerAccount,
 		&initialStake,
 		r,
 		func(r *rand.Rand) { initialStake = sdkmath.NewIntFromUint64(uint64(r.Int63n(1e12))) },
 	)
 	appParams.GetOrGenerate(
-		cdc,
 		simtestutil.InitiallyBondedValidators,
 		&numInitiallyBonded,
 		r,
@@ -254,15 +252,15 @@ func appStateFromGenesisFileFn(
 	r io.Reader,
 	cdc codec.JSONCodec,
 	genesisFile string,
-) (tmtypes.GenesisDoc, []simtypes.Account) {
+) (cmttypes.GenesisDoc, []simtypes.Account) {
 	bytes, err := ioutil.ReadFile(genesisFile)
 	if err != nil {
 		panic(err)
 	}
 
 	// NOTE: Tendermint uses a custom JSON decoder for GenesisDoc
-	var genesis tmtypes.GenesisDoc
-	if err := tmjson.Unmarshal(bytes, &genesis); err != nil {
+	var genesis cmttypes.GenesisDoc
+	if err := cmtjson.Unmarshal(bytes, &genesis); err != nil {
 		panic(err)
 	}
 
@@ -332,7 +330,7 @@ func appExportAndImport(t *testing.T) (
 		t,
 		os.Stdout,
 		app.BaseApp,
-		initAppState(app.AppCodec(), app.StateSimulationManager),
+		initAppState(app.AppCodec(), app.StateSimulationManager, app.DefaultGenesis()),
 		simtypes.RandomAccounts,
 		simtestutil.SimulationOperations(app, app.AppCodec(), config),
 		app.ModuleAccountAddrs(),

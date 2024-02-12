@@ -1,6 +1,7 @@
 package airdrop
 
 import (
+	"context"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ojo-network/ojo/x/airdrop/keeper"
@@ -12,9 +13,10 @@ const (
 )
 
 // EndBlocker is called at the end of every block
-func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
-	createOriginAccounts(ctx, k)
-	return distributeUnclaimedAirdrops(ctx, k)
+func EndBlocker(ctx context.Context, k keeper.Keeper) error {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	createOriginAccounts(sdkCtx, k)
+	return distributeUnclaimedAirdrops(sdkCtx, k)
 }
 
 // createOriginAccounts creates the airdrop accounts for all the

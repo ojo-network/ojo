@@ -1,7 +1,7 @@
 package ibctransfer
 
 import (
-	ibctransfer "github.com/cosmos/ibc-go/v7/modules/apps/transfer"
+	ibctransfer "github.com/cosmos/ibc-go/v8/modules/apps/transfer"
 )
 
 // IBCModule implements the ICS26 interface for transfer given the transfer keeper.

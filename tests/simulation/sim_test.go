@@ -9,22 +9,20 @@ import (
 	"strings"
 	"testing"
 
-	dbm "github.com/cometbft/cometbft-db"
+	"cosmossdk.io/log"
+	evidencetypes "cosmossdk.io/x/evidence/types"
 	abci "github.com/cometbft/cometbft/abci/types"
-	"github.com/cometbft/cometbft/libs/log"
-	tmrand "github.com/cometbft/cometbft/libs/rand"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	cmtrand "github.com/cometbft/cometbft/libs/rand"
+	cmtproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/cosmos/cosmos-sdk/x/authz"
 	authzkeeper "github.com/cosmos/cosmos-sdk/x/authz/keeper"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
-	evidencetypes "github.com/cosmos/cosmos-sdk/x/evidence/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -32,8 +30,9 @@ import (
 	simcli "github.com/cosmos/cosmos-sdk/x/simulation/client/cli"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/exported"
+	capabilitytypes "github.com/cosmos/ibc-go/modules/capability/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
+	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
 	"github.com/stretchr/testify/require"
 
 	ojoapp "github.com/ojo-network/ojo/app"
@@ -50,7 +49,7 @@ func init() {
 // TestFullAppSimulation tests application fuzzing given a random seed as input.
 func TestFullAppSimulation(t *testing.T) {
 	config := simcli.NewConfigFromFlags()
-	config.ChainID = fmt.Sprintf("simulation-chain-%s", tmrand.NewRand().Str(6))
+	config.ChainID = fmt.Sprintf("simulation-chain-%s", cmtrand.NewRand().Str(6))
 
 	db, dir, logger, skip, err := simtestutil.SetupSimulation(config, "leveldb-app-sim", "Simulation", simcli.FlagVerboseValue, simcli.FlagEnabledValue)
 	if skip {
@@ -83,7 +82,7 @@ func TestFullAppSimulation(t *testing.T) {
 		t,
 		os.Stdout,
 		app.BaseApp,
-		initAppState(app.AppCodec(), app.StateSimulationManager),
+		initAppState(app.AppCodec(), app.StateSimulationManager, app.DefaultGenesis()),
 		simtypes.RandomAccounts,
 		simtestutil.SimulationOperations(app, app.AppCodec(), config),
 		app.ModuleAccountAddrs(),
@@ -113,7 +112,7 @@ func TestAppStateDeterminism(t *testing.T) {
 	config.ExportParamsPath = ""
 	config.OnOperation = false
 	config.AllInvariants = false
-	config.ChainID = fmt.Sprintf("simulation-chain-%s", tmrand.NewRand().Str(6))
+	config.ChainID = fmt.Sprintf("simulation-chain-%s", cmtrand.NewRand().Str(6))
 
 	numSeeds := 3
 	numTimesToRunPerSeed := 5
@@ -125,7 +124,7 @@ func TestAppStateDeterminism(t *testing.T) {
 		for j := 0; j < numTimesToRunPerSeed; j++ {
 			var logger log.Logger
 			if simcli.FlagVerboseValue {
-				logger = log.TestingLogger()
+				logger = log.NewTestLogger(t)
 			} else {
 				logger = log.NewNopLogger()
 			}
@@ -153,7 +152,7 @@ func TestAppStateDeterminism(t *testing.T) {
 				t,
 				os.Stdout,
 				app.BaseApp,
-				initAppState(app.AppCodec(), app.StateSimulationManager),
+				initAppState(app.AppCodec(), app.StateSimulationManager, app.DefaultGenesis()),
 				simtypes.RandomAccounts,
 				simtestutil.SimulationOperations(app, app.AppCodec(), config),
 				app.ModuleAccountAddrs(),
@@ -184,7 +183,7 @@ func TestAppStateDeterminism(t *testing.T) {
 
 func BenchmarkFullAppSimulation(b *testing.B) {
 	config := simcli.NewConfigFromFlags()
-	config.ChainID = fmt.Sprintf("simulation-chain-%s", tmrand.NewRand().Str(6))
+	config.ChainID = fmt.Sprintf("simulation-chain-%s", cmtrand.NewRand().Str(6))
 
 	db, dir, logger, skip, err := simtestutil.SetupSimulation(config, "leveldb-app-sim", "Simulation", simcli.FlagVerboseValue, simcli.FlagEnabledValue)
 	if skip {
@@ -216,7 +215,7 @@ func BenchmarkFullAppSimulation(b *testing.B) {
 		b,
 		os.Stdout,
 		app.BaseApp,
-		initAppState(app.AppCodec(), app.StateSimulationManager),
+		initAppState(app.AppCodec(), app.StateSimulationManager, app.DefaultGenesis()),
 		simtypes.RandomAccounts,
 		simtestutil.SimulationOperations(app, app.AppCodec(), config),
 		app.ModuleAccountAddrs(),
@@ -264,12 +263,12 @@ func TestAppImportExport(t *testing.T) {
 		return
 	}
 
-	ctxA := app.NewContext(true, tmproto.Header{Height: app.LastBlockHeight()})
-	ctxB := newApp.NewContext(true, tmproto.Header{Height: app.LastBlockHeight()})
+	ctxA := app.NewContextLegacy(true, cmtproto.Header{Height: app.LastBlockHeight()})
+	ctxB := newApp.NewContextLegacy(true, cmtproto.Header{Height: app.LastBlockHeight()})
 
-	newApp.InitChainer(ctxB, abci.RequestInitChain{
+	newApp.InitChainer(ctxB, &abci.RequestInitChain{
 		AppStateBytes:   exported.AppState,
-		ConsensusParams: exported.ConsensusParams,
+		ConsensusParams: &exported.ConsensusParams,
 	})
 	newApp.StoreConsensusParams(ctxB, exported.ConsensusParams)
 
@@ -310,7 +309,7 @@ func TestAppImportExport(t *testing.T) {
 		storeA := ctxA.KVStore(skp.A)
 		storeB := ctxB.KVStore(skp.B)
 
-		failedKVAs, failedKVBs := sdk.DiffKVStores(storeA, storeB, skp.Prefixes)
+		failedKVAs, failedKVBs := simtestutil.DiffKVStores(storeA, storeB, skp.Prefixes)
 		require.Equal(t, len(failedKVAs), len(failedKVBs), "unequal sets of key-values to compare")
 
 		logger.Info(
@@ -354,10 +353,10 @@ func TestAppSimulationAfterImport(t *testing.T) {
 	}
 
 	// importing the old app genesis into new app
-	ctxB := newApp.NewContext(true, tmproto.Header{Height: app.LastBlockHeight()})
-	newApp.InitChainer(ctxB, abci.RequestInitChain{
+	ctxB := newApp.NewContext(true)
+	newApp.InitChainer(ctxB, &abci.RequestInitChain{
 		AppStateBytes:   exported.AppState,
-		ConsensusParams: exported.ConsensusParams,
+		ConsensusParams: &exported.ConsensusParams,
 	})
 	newApp.StoreConsensusParams(ctxB, exported.ConsensusParams)
 
@@ -365,7 +364,7 @@ func TestAppSimulationAfterImport(t *testing.T) {
 		t,
 		os.Stdout,
 		newApp.BaseApp,
-		initAppState(newApp.AppCodec(), newApp.StateSimulationManager),
+		initAppState(newApp.AppCodec(), newApp.StateSimulationManager, app.DefaultGenesis()),
 		simtypes.RandomAccounts, // Replace with own random account function if using keys other than secp256k1
 		simtestutil.SimulationOperations(newApp, newApp.AppCodec(), config),
 		newApp.ModuleAccountAddrs(),

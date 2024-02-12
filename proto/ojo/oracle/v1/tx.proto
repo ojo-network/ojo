@@ -154,7 +154,7 @@ message MsgGovAddDenoms {
   // asset in the proposal. If not provided, it will default.
   string reward_band = 7 [
     (gogoproto.moretags) = "yaml:\"vote_threshold\"",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = true
   ];
 
