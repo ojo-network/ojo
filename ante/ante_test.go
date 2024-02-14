@@ -17,7 +17,6 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	ojoapp "github.com/ojo-network/ojo/app"
-	appparams "github.com/ojo-network/ojo/app/params"
 )
 
 type IntegrationTestSuite struct {
@@ -29,11 +28,6 @@ type IntegrationTestSuite struct {
 }
 
 func (s *IntegrationTestSuite) SetupTest() {
-	config := sdk.GetConfig()
-	config.SetBech32PrefixForAccount(appparams.AccountAddressPrefix, appparams.AccountPubKeyPrefix)
-	config.SetBech32PrefixForValidator(appparams.ValidatorAddressPrefix, appparams.ValidatorPubKeyPrefix)
-	config.SetBech32PrefixForConsensusNode(appparams.ConsNodeAddressPrefix, appparams.ConsNodePubKeyPrefix)
-
 	app := ojoapp.Setup(s.T())
 	ctx := app.BaseApp.NewContextLegacy(false, cmtproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", cmtrand.Str(4)),

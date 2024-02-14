@@ -22,14 +22,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 	simcli "github.com/cosmos/cosmos-sdk/x/simulation/client/cli"
-	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/stretchr/testify/require"
 
 	ojoapp "github.com/ojo-network/ojo/app"
@@ -62,125 +59,6 @@ func interBlockCacheOpt() func(*baseapp.BaseApp) {
 // an IAVLStore for faster simulation speed.
 func fauxMerkleModeOpt(bapp *baseapp.BaseApp) {
 	bapp.SetFauxMerkleMode()
-}
-
-// initAppState returns the initial application state using a genesis file or
-// simulation parameters. It panics if the user provides files for both of them.
-// If a file is not given for the genesis or the sim params, it creates a
-// randomized one.
-func initAppState(cdc codec.JSONCodec, simManager *module.SimulationManager, genesisState map[string]json.RawMessage) simtypes.AppStateFn {
-	return func(
-		r *rand.Rand,
-		accs []simtypes.Account,
-		config simtypes.Config,
-	) (appState json.RawMessage, simAccs []simtypes.Account, chainID string, genesisTimestamp time.Time) {
-		if simcli.FlagGenesisTimeValue == 0 {
-			genesisTimestamp = simtypes.RandTimestamp(r)
-		} else {
-			genesisTimestamp = time.Unix(simcli.FlagGenesisTimeValue, 0)
-		}
-
-		chainID = config.ChainID
-		switch {
-		case config.ParamsFile != "" && config.GenesisFile != "":
-			panic("cannot provide both a genesis file and a params file")
-
-		case config.GenesisFile != "":
-			// override the default chain-id from simapp to set it later to the config
-			genesisDoc, accounts := appStateFromGenesisFileFn(r, cdc, config.GenesisFile)
-
-			if simcli.FlagGenesisTimeValue == 0 {
-				// use genesis timestamp if no custom timestamp is provided (i.e no random timestamp)
-				genesisTimestamp = genesisDoc.GenesisTime
-			}
-
-			appState = genesisDoc.AppState
-			chainID = genesisDoc.ChainID
-			simAccs = accounts
-
-		case config.ParamsFile != "":
-			appParams := make(simtypes.AppParams)
-			bz, err := ioutil.ReadFile(config.ParamsFile)
-			if err != nil {
-				panic(err)
-			}
-
-			if err := json.Unmarshal(bz, &appParams); err != nil {
-				panic(err)
-			}
-
-			appState, simAccs = appStateRandomizedFn(simManager, r, cdc, accs, genesisTimestamp, appParams, genesisState)
-
-		default:
-			appParams := make(simtypes.AppParams)
-			appState, simAccs = appStateRandomizedFn(simManager, r, cdc, accs, genesisTimestamp, appParams, genesisState)
-		}
-
-		rawState := make(map[string]json.RawMessage)
-		if err := json.Unmarshal(appState, &rawState); err != nil {
-			panic(err)
-		}
-
-		stakingStateBz, ok := rawState[stakingtypes.ModuleName]
-		if !ok {
-			panic("staking genesis state is missing")
-		}
-
-		stakingState := new(stakingtypes.GenesisState)
-		if err := cdc.UnmarshalJSON(stakingStateBz, stakingState); err != nil {
-			panic(err)
-		}
-
-		// compute not bonded balance
-		notBondedTokens := sdkmath.ZeroInt()
-		for _, val := range stakingState.Validators {
-			if val.Status != stakingtypes.Unbonded {
-				continue
-			}
-
-			notBondedTokens = notBondedTokens.Add(val.GetTokens())
-		}
-
-		notBondedCoins := sdk.NewCoin(stakingState.Params.BondDenom, notBondedTokens)
-
-		// edit bank state to make it have the not bonded pool tokens
-		bankStateBz, ok := rawState[banktypes.ModuleName]
-		if !ok {
-			panic("bank genesis state is missing")
-		}
-
-		bankState := new(banktypes.GenesisState)
-		if err := cdc.UnmarshalJSON(bankStateBz, bankState); err != nil {
-			panic(err)
-		}
-
-		stakingAddr := authtypes.NewModuleAddress(stakingtypes.NotBondedPoolName).String()
-
-		var found bool
-		for _, balance := range bankState.Balances {
-			if balance.Address == stakingAddr {
-				found = true
-				break
-			}
-		}
-
-		if !found {
-			bankState.Balances = append(bankState.Balances, banktypes.Balance{
-				Address: stakingAddr,
-				Coins:   sdk.NewCoins(notBondedCoins),
-			})
-		}
-
-		rawState[stakingtypes.ModuleName] = cdc.MustMarshalJSON(stakingState)
-		rawState[banktypes.ModuleName] = cdc.MustMarshalJSON(bankState)
-
-		appState, err := json.Marshal(rawState)
-		if err != nil {
-			panic(err)
-		}
-
-		return appState, simAccs, chainID, genesisTimestamp
-	}
 }
 
 // appStateRandomizedFn creates calls each module's GenesisState generator
@@ -330,7 +208,7 @@ func appExportAndImport(t *testing.T) (
 		t,
 		os.Stdout,
 		app.BaseApp,
-		initAppState(app.AppCodec(), app.StateSimulationManager, app.DefaultGenesis()),
+		simtestutil.AppStateFn(app.AppCodec(), app.StateSimulationManager, app.DefaultGenesis()),
 		simtypes.RandomAccounts,
 		simtestutil.SimulationOperations(app, app.AppCodec(), config),
 		app.ModuleAccountAddrs(),
