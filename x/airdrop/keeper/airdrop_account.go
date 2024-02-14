@@ -174,12 +174,12 @@ func (k Keeper) MintClaimTokensToDistribution(ctx sdk.Context, aa *types.Airdrop
 }
 
 // AirdropModuleAddress returns the airdrop module account address
-func (k Keeper) AirdropModuleAddress(ctx sdk.Context) sdk.AccAddress {
+func (k Keeper) AirdropModuleAddress(_ sdk.Context) sdk.AccAddress {
 	return k.accountKeeper.GetModuleAddress(types.ModuleName)
 }
 
 // DistributionModuleAddress returns the distribution module account address
-func (k Keeper) DistributionModuleAddress(ctx sdk.Context) sdk.AccAddress {
+func (k Keeper) DistributionModuleAddress(_ sdk.Context) sdk.AccAddress {
 	return k.accountKeeper.GetModuleAddress(distributiontypes.ModuleName)
 }
 

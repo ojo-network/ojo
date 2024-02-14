@@ -25,7 +25,6 @@ const (
 // WeightedOperations returns all the operations from the module with their respective weights
 func WeightedOperations(
 	appParams simtypes.AppParams,
-	cdc codec.JSONCodec,
 	ak types.AccountKeeper,
 	bk bankkeeper.Keeper,
 	k keeper.Keeper,

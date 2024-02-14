@@ -226,7 +226,6 @@ func IntegrationTestNetworkConfig() network.Config {
 	cfg := network.DefaultConfig(NewTestNetworkFixture)
 	app, genState := setup(true, 100)
 
-
 	var oracleGenState oracletypes.GenesisState
 	if err := app.appCodec.UnmarshalJSON(genState[oracletypes.ModuleName], &oracleGenState); err != nil {
 		panic(err)

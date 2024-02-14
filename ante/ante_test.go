@@ -82,7 +82,7 @@ func (suite *IntegrationTestSuite) CreateTestTx(privs []cryptotypes.PrivKey, acc
 			ChainID:       chainID,
 			AccountNumber: accNums[i],
 			Sequence:      accSeqs[i],
-			PubKey: 	   priv.PubKey(),
+			PubKey:        priv.PubKey(),
 		}
 		sigV2, err := tx.SignWithPrivKey(
 			suite.ctx,
