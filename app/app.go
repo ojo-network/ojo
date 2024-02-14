@@ -34,6 +34,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/runtime"
 	runtimeservices "github.com/cosmos/cosmos-sdk/runtime/services"
+	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/server/api"
 	"github.com/cosmos/cosmos-sdk/server/config"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
@@ -118,11 +119,11 @@ import (
 	airdroptypes "github.com/ojo-network/ojo/x/airdrop/types"
 
 	customante "github.com/ojo-network/ojo/ante"
+	ojoparams "github.com/ojo-network/ojo/app/params"
 )
 
 const (
-	AccountAddressPrefix = "ojo"
-	Name                 = "ojo"
+	Name = "ojo"
 )
 
 var (
@@ -314,8 +315,8 @@ func New(
 		runtime.NewKVStoreService(keys[authtypes.StoreKey]),
 		authtypes.ProtoBaseAccount,
 		maccPerms,
-		authcodec.NewBech32Codec(sdk.Bech32MainPrefix),
-		sdk.Bech32PrefixAccAddr,
+		authcodec.NewBech32Codec(ojoparams.AccountAddressPrefix),
+		ojoparams.AccountAddressPrefix,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 
@@ -334,8 +335,8 @@ func New(
 		app.AccountKeeper,
 		app.BankKeeper,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
-		authcodec.NewBech32Codec(sdk.Bech32PrefixValAddr),
-		authcodec.NewBech32Codec(sdk.Bech32PrefixConsAddr),
+		authcodec.NewBech32Codec(ojoparams.ValidatorAddressPrefix),
+		authcodec.NewBech32Codec(ojoparams.ConsNodeAddressPrefix),
 	)
 
 	app.MintKeeper = mintkeeper.NewKeeper(
@@ -833,6 +834,16 @@ func (app *App) GetKey(storeKey string) *storetypes.KVStoreKey {
 	return app.keys[storeKey]
 }
 
+// GetStoreKeys returns all the stored store keys.
+func (app *App) GetStoreKeys() []storetypes.StoreKey {
+	keys := make([]storetypes.StoreKey, len(app.keys))
+	for _, key := range app.keys {
+		keys = append(keys, key)
+	}
+
+	return keys
+}
+
 // GetTKey returns the TransientStoreKey for the provided store key.
 //
 // NOTE: This is solely to be used for testing purposes.
@@ -887,7 +898,7 @@ func (app *App) RegisterAPIRoutes(apiSvr *api.Server, _ config.APIConfig) {
 	clientCtx := apiSvr.ClientCtx
 	// Register new tx routes from grpc-gateway.
 	authtx.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
-	// Register new tendermint queries routes from grpc-gateway.
+	// Register new CometBFT queries routes from grpc-gateway.
 	cmtservice.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
 	// Register node gRPC service for grpc-gateway.
 	nodeservice.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
@@ -922,11 +933,12 @@ func (app *App) RegisterTxService(clientCtx client.Context) {
 
 // RegisterTendermintService implements the Application.RegisterTendermintService method.
 func (app *App) RegisterTendermintService(clientCtx client.Context) {
+	cmtApp := server.NewCometABCIWrapper(app)
 	cmtservice.RegisterTendermintService(
 		clientCtx,
 		app.BaseApp.GRPCQueryRouter(),
 		app.interfaceRegistry,
-		app.Query,
+		cmtApp.Query,
 	)
 }
 

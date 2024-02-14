@@ -86,12 +86,13 @@ message MsgAggregateExchangeRateVoteResponse {}
 // MsgDelegateFeedConsent represents a message to delegate oracle voting rights
 // to another address.
 message MsgDelegateFeedConsent {
+  option (cosmos.msg.v1.signer) = "operator";
   option (gogoproto.equal) = false;
   option (gogoproto.goproto_getters) = false;
 
   // Operator is the author and the signer of the message.
-  string operator = 1 [ (gogoproto.moretags) = "yaml:\"operator\"" ];
-  string delegate = 2 [ (gogoproto.moretags) = "yaml:\"delegate\"" ];
+  string operator = 1 [(cosmos_proto.scalar) = "cosmos.ValidatorAddressString"];
+  string delegate = 2 [(cosmos_proto.scalar) = "cosmos.ValidatorAddressString"];
 }
 
 // MsgDelegateFeedConsentResponse defines the Msg/DelegateFeedConsent response

@@ -1,8 +1,11 @@
 package ante_test
 
 import (
+	"fmt"
 	"testing"
 
+	cmtrand "github.com/cometbft/cometbft/libs/rand"
+	cmtproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
@@ -14,6 +17,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	ojoapp "github.com/ojo-network/ojo/app"
+	appparams "github.com/ojo-network/ojo/app/params"
 )
 
 type IntegrationTestSuite struct {
@@ -25,13 +29,26 @@ type IntegrationTestSuite struct {
 }
 
 func (s *IntegrationTestSuite) SetupTest() {
+	config := sdk.GetConfig()
+	config.SetBech32PrefixForAccount(appparams.AccountAddressPrefix, appparams.AccountPubKeyPrefix)
+	config.SetBech32PrefixForValidator(appparams.ValidatorAddressPrefix, appparams.ValidatorPubKeyPrefix)
+	config.SetBech32PrefixForConsensusNode(appparams.ConsNodeAddressPrefix, appparams.ConsNodePubKeyPrefix)
+
 	app := ojoapp.Setup(s.T())
-	ctx := app.BaseApp.NewContext(false)
+	ctx := app.BaseApp.NewContextLegacy(false, cmtproto.Header{
+		ChainID: fmt.Sprintf("test-chain-%s", cmtrand.Str(4)),
+		Height:  1,
+	})
 
 	s.app = app
 	s.ctx = ctx
 
-	encodingConfig := testutil.MakeTestEncodingConfig()
+	encodingConfig := testutil.TestEncodingConfig{
+		InterfaceRegistry: app.InterfaceRegistry(),
+		Codec:             app.AppCodec(),
+		TxConfig:          app.GetTxConfig(),
+		Amino:             app.LegacyAmino(),
+	}
 	encodingConfig.Amino.RegisterConcrete(&testdata.TestMsg{}, "testdata.TestMsg", nil)
 	testdata.RegisterInterfaces(encodingConfig.InterfaceRegistry)
 	s.clientCtx = client.Context{}.
@@ -61,9 +78,11 @@ func (suite *IntegrationTestSuite) CreateTestTx(privs []cryptotypes.PrivKey, acc
 	sigsV2 = []signing.SignatureV2{}
 	for i, priv := range privs {
 		signerData := xauthsigning.SignerData{
+			Address:       sdk.AccAddress(priv.PubKey().Bytes()).String(),
 			ChainID:       chainID,
 			AccountNumber: accNums[i],
 			Sequence:      accSeqs[i],
+			PubKey: 	   priv.PubKey(),
 		}
 		sigV2, err := tx.SignWithPrivKey(
 			suite.ctx,

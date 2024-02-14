@@ -1,11 +1,14 @@
 package keeper_test
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
 	"cosmossdk.io/math"
 	"github.com/cometbft/cometbft/crypto/secp256k1"
+	cmtrand "github.com/cometbft/cometbft/libs/rand"
+	cmtproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
@@ -49,7 +52,10 @@ func (s *IntegrationTestSuite) SetupTest() {
 	require := s.Require()
 	isCheckTx := false
 	app := ojoapp.Setup(s.T())
-	ctx := app.BaseApp.NewContext(isCheckTx)
+	ctx := app.BaseApp.NewContextLegacy(isCheckTx, cmtproto.Header{
+		ChainID: fmt.Sprintf("test-chain-%s", cmtrand.Str(4)),
+		Height:  9,
+	})
 
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
 	types.RegisterQueryServer(queryHelper, keeper.NewQuerier(app.OracleKeeper))

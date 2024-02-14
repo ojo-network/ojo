@@ -20,7 +20,6 @@ require (
 	github.com/armon/go-metrics v0.4.1
 	github.com/bufbuild/buf v1.15.1
 	github.com/cometbft/cometbft v0.38.1
-	github.com/cometbft/cometbft-db v0.8.0
 	github.com/cosmos/cosmos-db v1.0.0
 	github.com/cosmos/cosmos-proto v1.0.0-beta.3
 	github.com/cosmos/cosmos-sdk v0.50.1
@@ -42,6 +41,7 @@ require (
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.2
 	github.com/stretchr/testify v1.8.4
+	golang.org/x/tools v0.16.1
 	google.golang.org/genproto/googleapis/api v0.0.0-20240102182953-50ed04b92917
 	google.golang.org/grpc v1.61.0
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.1.0
@@ -117,6 +117,7 @@ require (
 	github.com/cockroachdb/pebble v0.0.0-20231102162011-844f0582c2eb // indirect
 	github.com/cockroachdb/redact v1.1.5 // indirect
 	github.com/cockroachdb/tokenbucket v0.0.0-20230807174530-cc333fc44b06 // indirect
+	github.com/cometbft/cometbft-db v0.8.0 // indirect
 	github.com/containerd/cgroups v1.1.0 // indirect
 	github.com/containerd/continuity v0.4.1 // indirect
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
@@ -446,7 +447,6 @@ require (
 	golang.org/x/term v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
-	golang.org/x/tools v0.16.1 // indirect
 	gonum.org/v1/gonum v0.12.0 // indirect
 	google.golang.org/api v0.153.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect

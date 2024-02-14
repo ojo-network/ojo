@@ -10,32 +10,32 @@ import (
 	"cosmossdk.io/log"
 	"cosmossdk.io/math"
 	pruningtypes "cosmossdk.io/store/pruning/types"
-	"cosmossdk.io/x/tx/signing"
+	//"cosmossdk.io/x/tx/signing"
 	abci "github.com/cometbft/cometbft/abci/types"
 	cmttypes "github.com/cometbft/cometbft/types"
 	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/codec/address"
-	"github.com/cosmos/cosmos-sdk/codec/types"
+	//"github.com/cosmos/cosmos-sdk/codec/address"
+	//"github.com/cosmos/cosmos-sdk/codec/types"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
-	"github.com/cosmos/cosmos-sdk/std"
+	//"github.com/cosmos/cosmos-sdk/std"
 	"github.com/cosmos/cosmos-sdk/testutil/mock"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
-	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
+	//authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/cosmos/gogoproto/proto"
+	//"github.com/cosmos/gogoproto/proto"
 	"github.com/stretchr/testify/require"
 
 	"github.com/ojo-network/ojo/app/params"
@@ -98,8 +98,6 @@ func SetupWithGenesisValSet(
 	)
 	require.NoError(t, err)
 
-	// commit genesis changes
-	app.Commit()
 	_, err = app.FinalizeBlock(&abci.RequestFinalizeBlock{
 		Height:             app.LastBlockHeight() + 1,
 		Hash:               app.LastCommitID().Hash,
@@ -149,7 +147,7 @@ func GenesisStateWithValSet(codec codec.Codec, genesisState map[string]json.RawM
 			MinSelfDelegation: math.ZeroInt(),
 		}
 		validators = append(validators, validator)
-		newDel := stakingtypes.NewDelegation(genAccs[0].GetAddress().String(), val.Address.String(), math.LegacyOneDec())
+		newDel := stakingtypes.NewDelegation(genAccs[0].GetAddress().String(), sdk.ValAddress(val.Address).String(), math.LegacyOneDec())
 		delegations = append(delegations, newDel)
 
 	}
@@ -221,30 +219,16 @@ func setup(withGenesis bool, invCheckPeriod uint) (*App, GenesisState) {
 // IntegrationTestNetworkConfig returns a networking configuration used for
 // integration tests using the SDK's in-process network test suite.
 func IntegrationTestNetworkConfig() network.Config {
+	config := sdk.GetConfig()
+	config.SetBech32PrefixForAccount(params.AccountAddressPrefix, params.AccountPubKeyPrefix)
+	config.SetBech32PrefixForValidator(params.ValidatorAddressPrefix, params.ValidatorPubKeyPrefix)
+	config.SetBech32PrefixForConsensusNode(params.ConsNodeAddressPrefix, params.ConsNodePubKeyPrefix)
 	cfg := network.DefaultConfig(NewTestNetworkFixture)
-	interfaceRegistry, _ := types.NewInterfaceRegistryWithOptions(types.InterfaceRegistryOptions{
-		ProtoFiles: proto.HybridResolver,
-		SigningOptions: signing.Options{
-			AddressCodec: address.Bech32Codec{
-				Bech32Prefix: sdk.GetConfig().GetBech32AccountAddrPrefix(),
-			},
-			ValidatorAddressCodec: address.Bech32Codec{
-				Bech32Prefix: sdk.GetConfig().GetBech32ValidatorAddrPrefix(),
-			},
-		},
-	})
-	appCodec := codec.NewProtoCodec(interfaceRegistry)
-	legacyAmino := codec.NewLegacyAmino()
-	txConfig := authtx.NewTxConfig(appCodec, authtx.DefaultSignModes)
+	app, genState := setup(true, 100)
 
-	std.RegisterLegacyAminoCodec(legacyAmino)
-	std.RegisterInterfaces(interfaceRegistry)
-
-	// Start with the default genesis state
-	appGenState := cfg.GenesisState
 
 	var oracleGenState oracletypes.GenesisState
-	if err := appCodec.UnmarshalJSON(appGenState[oracletypes.ModuleName], &oracleGenState); err != nil {
+	if err := app.appCodec.UnmarshalJSON(genState[oracletypes.ModuleName], &oracleGenState); err != nil {
 		panic(err)
 	}
 
@@ -256,31 +240,35 @@ func IntegrationTestNetworkConfig() network.Config {
 		params.DisplayDenom, math.LegacyMustNewDecFromStr("34.21"),
 	))
 
-	bz, err := appCodec.MarshalJSON(&oracleGenState)
+	bz, err := app.appCodec.MarshalJSON(&oracleGenState)
 	if err != nil {
 		panic(err)
 	}
-	appGenState[oracletypes.ModuleName] = bz
+	genState[oracletypes.ModuleName] = bz
 
 	var govGenState govv1.GenesisState
-	if err := appCodec.UnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState); err != nil {
+	if err := app.appCodec.UnmarshalJSON(genState[govtypes.ModuleName], &govGenState); err != nil {
 		panic(err)
 	}
 
 	votingPeriod := time.Minute
 	govGenState.Params.VotingPeriod = &votingPeriod
 
-	bz, err = appCodec.MarshalJSON(&govGenState)
+	bz, err = app.appCodec.MarshalJSON(&govGenState)
 	if err != nil {
 		panic(err)
 	}
-	appGenState[govtypes.ModuleName] = bz
+	genState[govtypes.ModuleName] = bz
 
-	cfg.Codec = appCodec
-	cfg.TxConfig = txConfig
-	cfg.LegacyAmino = legacyAmino
-	cfg.InterfaceRegistry = interfaceRegistry
-	cfg.GenesisState = appGenState
+	stakingGenesis := stakingtypes.GetGenesisStateFromAppState(app.appCodec, genState)
+	stakingGenesis.Params.BondDenom = params.BondDenom
+	genState[stakingtypes.ModuleName] = app.appCodec.MustMarshalJSON(stakingGenesis)
+
+	cfg.Codec = app.appCodec
+	cfg.TxConfig = app.txConfig
+	cfg.LegacyAmino = app.legacyAmino
+	cfg.InterfaceRegistry = app.interfaceRegistry
+	cfg.GenesisState = genState
 	cfg.MinGasPrices = params.ProtocolMinGasPrice.String()
 	cfg.BondDenom = params.BondDenom
 
