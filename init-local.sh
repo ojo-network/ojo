@@ -2,9 +2,9 @@
 
 rm -r ~/.ojo
 
-OJO_RPC=26657
-OJO_P2P=26656
-CELESTIA_RPC=36657
+OJO_RPC=36657
+OJO_P2P=36656
+CELESTIA_RPC=26650
 
 # Start the Celestia Devnet
 CONTAINER_NAME="celestia_devnet"
@@ -16,9 +16,9 @@ else
     docker rm -f $CONTAINER_NAME
 fi
 
-docker run -t -d --name $CONTAINER_NAME \
-    -p 36650:26650 -p 36657:26657 -p 36658:26658 -p 36659:26659 -p 9091:9090 \
-    ghcr.io/rollkit/local-celestia-devnet:v0.12.5
+docker run -t -i \
+    -p 26650:26650 -p 26657:26657 -p 26658:26658 -p 26659:26659 -p 9090:9090 \
+    ghcr.io/rollkit/local-celestia-devnet:v0.12.7
 sleep 5
 
 # set variables for the chain
@@ -104,18 +104,12 @@ ADDRESS=$(jq -r '.address' ~/.ojo/config/priv_validator_key.json)
 PUB_KEY=$(jq -r '.pub_key' ~/.ojo/config/priv_validator_key.json)
 jq --argjson pubKey "$PUB_KEY" '. + {"validators": [{"address": "'$ADDRESS'", "pub_key": $pubKey, "power": "1000", "name": "Rollkit Sequencer"}]}' ~/.ojo/config/genesis.json > temp.json && mv temp.json ~/.ojo/config/genesis.json
 
-AUTH_TOKEN=$(celestia light auth write)
-
 # create a restart-local.sh file to restart the chain later
 [ -f restart-local.sh ] && rm restart-local.sh
 echo "DA_BLOCK_HEIGHT=$DA_BLOCK_HEIGHT" >> restart-local.sh
 echo "NAMESPACE=$NAMESPACE" >> restart-local.sh
-echo "AUTH_TOKEN=$AUTH_TOKEN" >> restart-local.sh
 
-echo "ojod start --rollkit.aggregator true --rollkit.da_layer celestia --rollkit.da_config='{\"base_url\":\"http://localhost:$CELESTIA_RPC\",\"timeout\":60000000000,\"fee\":600000,\"gas_limit\":6000000,\"auth_token\":\"'\$AUTH_TOKEN'\"}' --rollkit.namespace_id \$NAMESPACE --rollkit.da_start_height \$DA_BLOCK_HEIGHT --rpc.laddr tcp://127.0.0.1:$OJO_RPC --minimum-gas-prices="0.025uojo" --p2p.laddr \"0.0.0.0:$OJO_P2P\"" >> restart-local.sh
+echo "ojod start --rollkit.aggregator --rollkit.da_address="http://localhost:'$CELESTIA_RPC'" --rollkit.da_start_height $DA_BLOCK_HEIGHT --rpc.laddr tcp://127.0.0.1:$OJO_RPC --grpc.address 127.0.0.1:9290 --p2p.laddr \"0.0.0.0:$OJO_P2P\" --minimum-gas-prices="0.025uojo"" >> restart-local.sh
 
 # start the chain
-ojod start --rollkit.aggregator true --rollkit.da_layer celestia --rollkit.da_config='{"base_url":"http://localhost:'$CELESTIA_RPC'","timeout":60000000000,"fee":600000,"gas_limit":6000000,"auth_token":"'$AUTH_TOKEN'"}' --rollkit.namespace_id $NAMESPACE --rollkit.da_start_height $DA_BLOCK_HEIGHT --rpc.laddr tcp://127.0.0.1:$OJO_RPC --p2p.laddr "0.0.0.0:$OJO_P2P" --minimum-gas-prices="0.025uojo"
-
-# uncomment the next command if you are using lazy aggregation
-# ojod start --rollkit.aggregator true --rollkit.da_layer celestia --rollkit.da_config='{"base_url":"http://localhost:26658","timeout":60000000000,"fee":600000,"gas_limit":6000000,"auth_token":"'$AUTH_TOKEN'"}' --rollkit.namespace_id $NAMESPACE --rollkit.da_start_height $DA_BLOCK_HEIGHT --rollkit.lazy_aggregator
+ojod start --rollkit.aggregator --rollkit.da_address="http://localhost:'$CELESTIA_RPC'" --rollkit.da_start_height $DA_BLOCK_HEIGHT --rpc.laddr tcp://127.0.0.1:$OJO_RPC --grpc.address 127.0.0.1:9290  --p2p.laddr \"0.0.0.0:$OJO_P2P\" --minimum-gas-prices="0.025uojo"
