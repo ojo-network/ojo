@@ -21,7 +21,7 @@ import (
 // NewRootCmd returns the root command handler for the Ojo daemon.
 func NewRootCmd() *cobra.Command {
 	// we "pre"-instantiate the application for getting the injected/configured encoding configuration
-	tempApp := newApp(log.NewNopLogger(), dbm.NewMemDB(), nil, simtestutil.NewAppOptionsWithFlagHome(tempDir())).(*app.App)
+	tempApp := app.New(log.NewNopLogger(), dbm.NewMemDB(), nil, true, map[int64]bool{}, tempDir(), uint(1), simtestutil.NewAppOptionsWithFlagHome(tempDir()))
 	encodingConfig := appparams.EncodingConfig{
 		InterfaceRegistry: tempApp.InterfaceRegistry(),
 		Codec:             tempApp.AppCodec(),
@@ -51,6 +51,7 @@ towards borrowing assets on another blockchain.`,
 			cmd.SetOut(cmd.OutOrStdout())
 			cmd.SetErr(cmd.ErrOrStderr())
 
+			initClientCtx = initClientCtx.WithCmdContext(cmd.Context())
 			initClientCtx, err := client.ReadPersistentCommandFlags(initClientCtx, cmd.Flags())
 			if err != nil {
 				return err
