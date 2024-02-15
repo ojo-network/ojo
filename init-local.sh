@@ -2,24 +2,8 @@
 
 rm -r ~/.ojo
 
-OJO_RPC=36657
-OJO_P2P=36656
-CELESTIA_RPC=26650
-
-# Start the Celestia Devnet
-CONTAINER_NAME="celestia_devnet"
-running=$(docker ps --filter name=$CONTAINER_NAME --format "{{.Names}}" | grep $CONTAINER_NAME)
-if [ -z "$running" ]; then
-    echo "Starting celestia devnet"
-else
-    echo "Celestia devnet is already running. Restarting..."
-    docker rm -f $CONTAINER_NAME
-fi
-
-docker run -t -i \
-    -p 26650:26650 -p 26657:26657 -p 26658:26658 -p 26659:26659 -p 9090:9090 \
-    ghcr.io/rollkit/local-celestia-devnet:v0.12.7
-sleep 5
+DENOM="${DENOM:-uojo}"
+STAKE_DENOM="${STAKE_DENOM:-$DENOM}"
 
 # set variables for the chain
 VALIDATOR_NAME=validator1
@@ -30,15 +14,12 @@ CHAINFLAG="--chain-id ${CHAIN_ID}"
 TOKEN_AMOUNT="10000000000000000000000000uojo"
 STAKING_AMOUNT="1000000000uojo"
 
-# create a random Namespace ID for your rollup to post blocks to
-NAMESPACE=$(openssl rand -hex 8)
-
 # query the DA Layer start height, in this case we are querying
 # our local devnet at port 26657, the RPC. The RPC endpoint is
 # to allow users to interact with Celestia's nodes by querying
 # the node's state and broadcasting transactions on the Celestia
 # network. The default port is 26657.
-DA_BLOCK_HEIGHT=$(curl http://0.0.0.0:$CELESTIA_RPC/block | jq -r '.result.block.header.height')
+DA_BLOCK_HEIGHT=$(curl http://0.0.0.0:26657/block | jq -r '.result.block.header.height')
 
 # rollkit logo
 cat <<'EOF'
@@ -73,7 +54,7 @@ cat <<'EOF'
 EOF
 
 # echo variables for the chain
-echo -e "\n\n\n\n\n Your NAMESPACE is $NAMESPACE \n\n Your DA_BLOCK_HEIGHT is $DA_BLOCK_HEIGHT \n\n\n\n\n"
+echo -e "\n Your DA_BLOCK_HEIGHT is $DA_BLOCK_HEIGHT \n"
 
 # build the ojo chain with Rollkit
 make install
@@ -92,6 +73,16 @@ ojod keys add $KEY_2_NAME --keyring-backend test
 ojod add-genesis-account $KEY_NAME $TOKEN_AMOUNT --keyring-backend test
 ojod add-genesis-account $KEY_2_NAME $TOKEN_AMOUNT --keyring-backend test
 
+# patch genesis
+echo "--- Patching genesis..."
+jq '.consensus_params["block"]["time_iota_ms"]="5000"
+    | .app_state["crisis"]["constant_fee"]["denom"]="'$DENOM'"
+    | .app_state["gov"]["deposit_params"]["min_deposit"][0]["denom"]="'$DENOM'"
+    | .app_state["mint"]["params"]["mint_denom"]="'$DENOM'"
+    | .app_state["staking"]["params"]["bond_denom"]="'$DENOM'"
+    | .app_state["gov"]["voting_params"]["voting_period"]="10s"' \
+    ~/.ojo/config/genesis.json > temp.json && mv temp.json ~/.ojo/config/genesis.json
+
 # set the staking amounts in the genesis transaction
 ojod gentx $KEY_NAME $STAKING_AMOUNT --chain-id $CHAIN_ID --keyring-backend test
 
@@ -102,14 +93,13 @@ ojod collect-gentxs
 # Note: validator and sequencer are used interchangeably here
 ADDRESS=$(jq -r '.address' ~/.ojo/config/priv_validator_key.json)
 PUB_KEY=$(jq -r '.pub_key' ~/.ojo/config/priv_validator_key.json)
-jq --argjson pubKey "$PUB_KEY" '. + {"validators": [{"address": "'$ADDRESS'", "pub_key": $pubKey, "power": "1000", "name": "Rollkit Sequencer"}]}' ~/.ojo/config/genesis.json > temp.json && mv temp.json ~/.ojo/config/genesis.json
+jq --argjson pubKey "$PUB_KEY" '.consensus["validators"]=[{"address": "'$ADDRESS'", "pub_key": $pubKey, "power": "1000", "name": "Rollkit Sequencer"}]' ~/.ojo/config/genesis.json > temp.json && mv temp.json ~/.ojo/config/genesis.json
 
 # create a restart-local.sh file to restart the chain later
 [ -f restart-local.sh ] && rm restart-local.sh
 echo "DA_BLOCK_HEIGHT=$DA_BLOCK_HEIGHT" >> restart-local.sh
-echo "NAMESPACE=$NAMESPACE" >> restart-local.sh
 
-echo "ojod start --rollkit.aggregator --rollkit.da_address="http://localhost:'$CELESTIA_RPC'" --rollkit.da_start_height $DA_BLOCK_HEIGHT --rpc.laddr tcp://127.0.0.1:$OJO_RPC --grpc.address 127.0.0.1:9290 --p2p.laddr \"0.0.0.0:$OJO_P2P\" --minimum-gas-prices="0.025uojo"" >> restart-local.sh
+echo "ojod start --rollkit.aggregator --rollkit.da_address=":26650" --rollkit.da_start_height \$DA_BLOCK_HEIGHT --rpc.laddr tcp://127.0.0.1:36657 --grpc.address 127.0.0.1:9290 --p2p.laddr \"0.0.0.0:36656\" --minimum-gas-prices="0.025uojo"" >> restart-local.sh
 
 # start the chain
-ojod start --rollkit.aggregator --rollkit.da_address="http://localhost:'$CELESTIA_RPC'" --rollkit.da_start_height $DA_BLOCK_HEIGHT --rpc.laddr tcp://127.0.0.1:$OJO_RPC --grpc.address 127.0.0.1:9290  --p2p.laddr \"0.0.0.0:$OJO_P2P\" --minimum-gas-prices="0.025uojo"
+ojod start --rollkit.aggregator --rollkit.da_address=":26650" --rollkit.da_start_height $DA_BLOCK_HEIGHT --rpc.laddr tcp://127.0.0.1:36657 --grpc.address 127.0.0.1:9290 --p2p.laddr "0.0.0.0:36656" --minimum-gas-prices="0.025uojo"
