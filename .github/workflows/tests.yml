@@ -79,7 +79,7 @@ jobs:
         run: |
           chmod +x ./build/ojod
           chmod +x ./scripts/celestia_devnet.sh
-          ./scripts/celestia_devnet.sh
+          ./scripts/celestia_devnet.sh &
       - name: Start ojod rollup
         if: env.GIT_DIFF
         run: |
