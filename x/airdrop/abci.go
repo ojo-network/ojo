@@ -2,6 +2,7 @@ package airdrop
 
 import (
 	"context"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ojo-network/ojo/x/airdrop/keeper"

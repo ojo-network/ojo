@@ -47,7 +47,10 @@ func (app *App) registerUpgrade0_1_4(_ upgradetypes.Plan) {
 			sdkCtx := sdk.UnwrapSDKContext(ctx)
 			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
 			upgrader := oraclekeeper.NewMigrator(&app.OracleKeeper)
-			upgrader.MigrateValidatorSet(sdkCtx)
+			err := upgrader.MigrateValidatorSet(sdkCtx)
+			if err != nil {
+				panic(err)
+			}
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)

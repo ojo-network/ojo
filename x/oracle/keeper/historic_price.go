@@ -12,6 +12,8 @@ import (
 	"github.com/ojo-network/ojo/util"
 )
 
+const denomErr = "denom: "
+
 // HistoricMedians returns a list of a given denom's last numStamps medians.
 func (k Keeper) HistoricMedians(
 	ctx sdk.Context,
@@ -53,7 +55,7 @@ func (k Keeper) CalcAndSetHistoricMedian(
 	historicPrices := k.historicPrices(ctx, denom, k.MaximumPriceStamps(ctx))
 	median, err := decmath.Median(historicPrices)
 	if err != nil {
-		return errors.Wrap(err, "denom: "+denom)
+		return errors.Wrap(err, denomErr+denom)
 	}
 
 	block := uint64(ctx.BlockHeight())
@@ -84,7 +86,7 @@ func (k Keeper) HistoricMedianDeviation(
 	blockNum := uint64(ctx.BlockHeight()) - blockDiff
 	bz := store.Get(types.KeyMedianDeviation(denom, blockNum))
 	if bz == nil {
-		return &types.PriceStamp{}, types.ErrNoMedianDeviation.Wrap("denom: " + denom)
+		return &types.PriceStamp{}, types.ErrNoMedianDeviation.Wrap(denomErr + denom)
 	}
 
 	decProto := sdk.DecProto{}
@@ -103,14 +105,14 @@ func (k Keeper) WithinHistoricMedianDeviation(
 	// get latest median
 	medians := k.HistoricMedians(ctx, denom, 1)
 	if len(medians) == 0 {
-		return false, types.ErrNoMedian.Wrap("denom: " + denom)
+		return false, types.ErrNoMedian.Wrap(denomErr + denom)
 	}
 	median := medians[0].ExchangeRate.Amount
 
 	// get latest historic price
 	prices := k.historicPrices(ctx, denom, 1)
 	if len(prices) == 0 {
-		return false, types.ErrNoHistoricPrice.Wrap("denom: " + denom)
+		return false, types.ErrNoHistoricPrice.Wrap(denomErr + denom)
 	}
 	price := prices[0]
 
@@ -132,7 +134,7 @@ func (k Keeper) calcAndSetHistoricMedianDeviation(
 ) error {
 	medianDeviation, err := decmath.MedianDeviation(median, prices)
 	if err != nil {
-		return errors.Wrap(err, "denom: "+denom)
+		return errors.Wrap(err, denomErr+denom)
 	}
 
 	block := uint64(ctx.BlockHeight())
@@ -165,7 +167,7 @@ func (k Keeper) MedianOfHistoricMedians(
 	}
 	median, err := decmath.Median(medians.Decs())
 	if err != nil {
-		return math.LegacyZeroDec(), 0, errors.Wrap(err, "denom: "+denom)
+		return math.LegacyZeroDec(), 0, errors.Wrap(err, denomErr+denom)
 	}
 
 	return median, uint32(len(medians)), nil
@@ -185,7 +187,7 @@ func (k Keeper) AverageOfHistoricMedians(
 	}
 	average, err := decmath.Average(medians.Decs())
 	if err != nil {
-		return math.LegacyZeroDec(), 0, errors.Wrap(err, "denom: "+denom)
+		return math.LegacyZeroDec(), 0, errors.Wrap(err, denomErr+denom)
 	}
 
 	return average, uint32(len(medians)), nil
@@ -205,7 +207,7 @@ func (k Keeper) MaxOfHistoricMedians(
 	}
 	max, err := decmath.Max(medians.Decs())
 	if err != nil {
-		return math.LegacyZeroDec(), 0, errors.Wrap(err, "denom: "+denom)
+		return math.LegacyZeroDec(), 0, errors.Wrap(err, denomErr+denom)
 	}
 
 	return max, uint32(len(medians)), nil
@@ -225,7 +227,7 @@ func (k Keeper) MinOfHistoricMedians(
 	}
 	min, err := decmath.Min(medians.Decs())
 	if err != nil {
-		return math.LegacyZeroDec(), 0, errors.Wrap(err, "denom: "+denom)
+		return math.LegacyZeroDec(), 0, errors.Wrap(err, denomErr+denom)
 	}
 
 	return min, uint32(len(medians)), nil

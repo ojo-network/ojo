@@ -1,15 +1,15 @@
 package e2e
 
 import (
-	// "time"
+// "time"
 
-	// "cosmossdk.io/math"
-	// sdk "github.com/cosmos/cosmos-sdk/types"
-	// "github.com/ojo-network/ojo/client/tx"
-	// "github.com/ojo-network/ojo/tests/grpc"
-	// airdroptypes "github.com/ojo-network/ojo/x/airdrop/types"
+// "cosmossdk.io/math"
+// sdk "github.com/cosmos/cosmos-sdk/types"
+// "github.com/ojo-network/ojo/client/tx"
+// "github.com/ojo-network/ojo/tests/grpc"
+// airdroptypes "github.com/ojo-network/ojo/x/airdrop/types"
 
-	// appparams "github.com/ojo-network/ojo/app/params"
+// appparams "github.com/ojo-network/ojo/app/params"
 )
 
 // TODO: Make e2e work with rollkit

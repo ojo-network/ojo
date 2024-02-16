@@ -141,7 +141,11 @@ func GenesisStateWithValSet(codec codec.Codec, genesisState map[string]json.RawM
 			MinSelfDelegation: math.ZeroInt(),
 		}
 		validators = append(validators, validator)
-		newDel := stakingtypes.NewDelegation(genAccs[0].GetAddress().String(), sdk.ValAddress(val.Address).String(), math.LegacyOneDec())
+		newDel := stakingtypes.NewDelegation(
+			genAccs[0].GetAddress().String(),
+			sdk.ValAddress(val.Address).String(),
+			math.LegacyOneDec(),
+		)
 		delegations = append(delegations, newDel)
 
 	}

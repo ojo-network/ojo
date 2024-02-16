@@ -99,7 +99,11 @@ func (k Keeper) RewardBallotWinners(
 			continue
 		}
 
-		k.distrKeeper.AllocateTokensToValidator(ctx, receiverVal, sdk.NewDecCoinsFromCoins(rewardCoins...))
+		err = k.distrKeeper.AllocateTokensToValidator(ctx, receiverVal, sdk.NewDecCoinsFromCoins(rewardCoins...))
+		if err != nil {
+			k.Logger(ctx).With(err).Error("Failed to allocate tokens to validator!")
+			return
+		}
 		distributedReward = distributedReward.Add(rewardCoins...)
 	}
 
