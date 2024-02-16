@@ -59,6 +59,9 @@ issues:
     - text: "SA1019: codec.NewAminoCodec is deprecated" # TODO remove once migration path is set out
       linters:
         - staticcheck
+    - text: "SA1019: "github.com/cosmos/ibc-go/v8/modules/core/02-client/types" is deprecated"
+      linters:
+        - staticcheck
   max-same-issues: 50
 
 linters-settings:
