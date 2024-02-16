@@ -78,11 +78,13 @@ jobs:
         if: env.GIT_DIFF
         run: |
           chmod +x ./build/ojod
+          chmod +x ./scripts/celestia_devnet.sh
           ./scripts/celestia_devnet.sh
       - name: Start ojod rollup
         if: env.GIT_DIFF
         run: |
           chmod +x ./build/ojod
+          chmod +x ./scripts/init-local.sh
           ./scripts/init-local.sh
       - name: Test Local Network Liveness
         if: env.GIT_DIFF
