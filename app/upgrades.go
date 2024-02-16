@@ -1,8 +1,11 @@
 package app
 
 import (
+	"context"
+
+	storetypes "cosmossdk.io/store/types"
+	upgradetypes "cosmossdk.io/x/upgrade/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -16,7 +19,6 @@ import (
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 
 	oraclekeeper "github.com/ojo-network/ojo/x/oracle/keeper"
@@ -42,10 +44,14 @@ func (app App) RegisterUpgradeHandlers() {
 func (app *App) registerUpgrade0_1_4(_ upgradetypes.Plan) {
 	const planName = "v0.1.4"
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
-		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			ctx.Logger().Info("Upgrade handler execution", "name", planName)
+		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			sdkCtx := sdk.UnwrapSDKContext(ctx)
+			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
 			upgrader := oraclekeeper.NewMigrator(&app.OracleKeeper)
-			upgrader.MigrateValidatorSet(ctx)
+			err := upgrader.MigrateValidatorSet(sdkCtx)
+			if err != nil {
+				panic(err)
+			}
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)
@@ -95,9 +101,13 @@ func (app *App) registerUpgrade0_2_0(upgradeInfo upgradetypes.Plan) {
 	)
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
-		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			sdkCtx := sdk.UnwrapSDKContext(ctx)
 			// Migrate CometBFT consensus parameters from x/params module to a dedicated x/consensus module.
-			baseapp.MigrateParams(ctx, baseAppLegacySS, &app.ConsensusParamsKeeper)
+			err := baseapp.MigrateParams(sdkCtx, baseAppLegacySS, &app.ConsensusParamsKeeper.ParamsStore)
+			if err != nil {
+				return nil, nil
+			}
 
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
@@ -114,8 +124,9 @@ func (app *App) registerUpgrade0_2_0(upgradeInfo upgradetypes.Plan) {
 func (app *App) registerUpgrade0_2_1(_ upgradetypes.Plan) {
 	const planName = "v0.2.1"
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
-		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			ctx.Logger().Info("Upgrade handler execution", "name", planName)
+		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			sdkCtx := sdk.UnwrapSDKContext(ctx)
+			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)
@@ -125,11 +136,12 @@ func (app *App) registerUpgrade0_2_1(_ upgradetypes.Plan) {
 func (app *App) registerUpgrade0_2_2(_ upgradetypes.Plan) {
 	const planName = "v0.2.2"
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
-		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			ctx.Logger().Info("Upgrade handler execution", "name", planName)
+		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			sdkCtx := sdk.UnwrapSDKContext(ctx)
+			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
 			upgrader := oraclekeeper.NewMigrator(&app.OracleKeeper)
-			upgrader.MigrateCurrencyPairProviders(ctx)
-			upgrader.MigrateCurrencyDeviationThresholds(ctx)
+			upgrader.MigrateCurrencyPairProviders(sdkCtx)
+			upgrader.MigrateCurrencyDeviationThresholds(sdkCtx)
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)
@@ -138,8 +150,9 @@ func (app *App) registerUpgrade0_2_2(_ upgradetypes.Plan) {
 func (app *App) registerUpgrade0_3_0(upgradeInfo upgradetypes.Plan) {
 	const planName = "v0.3.0"
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
-		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			ctx.Logger().Info("Upgrade handler execution", "name", planName)
+		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			sdkCtx := sdk.UnwrapSDKContext(ctx)
+			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)

@@ -49,6 +49,12 @@ func (AppModuleBasic) Name() string {
 	return types.ModuleName
 }
 
+// IsOnePerModuleType implements the module.AppModule interface.
+func (am AppModule) IsOnePerModuleType() {}
+
+// IsAppModule implements the module.AppModule interface.
+func (am AppModule) IsAppModule() {}
+
 func (AppModuleBasic) ConsensusVersion() uint64 {
 	return 1
 }
@@ -158,16 +164,16 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 }
 
 // BeginBlock executes all ABCI BeginBlock logic respective to the x/airdrop module.
-func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
+func (am AppModule) BeginBlock(_ context.Context) {}
 
 // EndBlock executes all ABCI EndBlock logic respective to the x/airdrop module.
 // It returns no validator updates.
-func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+func (am AppModule) EndBlock(ctx context.Context) ([]abci.ValidatorUpdate, error) {
 	if err := EndBlocker(ctx, am.keeper); err != nil {
 		panic(err)
 	}
 
-	return []abci.ValidatorUpdate{}
+	return []abci.ValidatorUpdate{}, nil
 }
 
 // GenerateGenesisState creates a randomized GenState of the distribution module.
@@ -177,7 +183,7 @@ func (AppModule) GenerateGenesisState(simState *module.SimulationState) {
 
 // WeightedOperations returns the all the airdrop module operations with their respective weights.
 func (am AppModule) WeightedOperations(simState module.SimulationState) []simtypes.WeightedOperation {
-	return simulation.WeightedOperations(simState.AppParams, simState.Cdc, am.accountKeeper, am.bankKeeper, am.keeper)
+	return simulation.WeightedOperations(simState.AppParams, am.accountKeeper, am.bankKeeper, am.keeper)
 }
 
 // ProposalContents returns all the airdrop content functions used to
@@ -187,6 +193,6 @@ func (am AppModule) ProposalContents(_ module.SimulationState) []simtypes.Weight
 }
 
 // RegisterStoreDecoder registers a decoder for airdrop module's types
-func (am AppModule) RegisterStoreDecoder(sdr sdk.StoreDecoderRegistry) {
+func (am AppModule) RegisterStoreDecoder(sdr simtypes.StoreDecoderRegistry) {
 	sdr[types.StoreKey] = simulation.NewDecodeStore(am.cdc)
 }

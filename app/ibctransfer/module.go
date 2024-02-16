@@ -3,9 +3,9 @@ package ibctransfer
 import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 
-	porttypes "github.com/cosmos/ibc-go/v7/modules/core/05-port/types"
+	porttypes "github.com/cosmos/ibc-go/v8/modules/core/05-port/types"
 
-	ibctransfer "github.com/cosmos/ibc-go/v7/modules/apps/transfer"
+	ibctransfer "github.com/cosmos/ibc-go/v8/modules/apps/transfer"
 )
 
 var (

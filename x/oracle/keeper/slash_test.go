@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/ojo-network/ojo/x/oracle/types"
@@ -8,14 +9,16 @@ import (
 
 func (s *IntegrationTestSuite) TestSlashAndResetMissCounters() {
 	initialTokens := sdk.TokensFromConsensusPower(100, sdk.DefaultPowerReduction)
-	s.Require().Equal(initialTokens, s.app.StakingKeeper.Validator(s.ctx, valAddr).GetBondedTokens())
+	validator, err := s.app.StakingKeeper.Validator(s.ctx, valAddr)
+	s.Require().NoError(err)
+	s.Require().Equal(initialTokens, validator.GetBondedTokens())
 
 	var (
 		slashFraction              = s.app.OracleKeeper.SlashFraction(s.ctx)
 		possibleWinsPerSlashWindow = s.app.OracleKeeper.PossibleWinsPerSlashWindow(s.ctx)
 		minValidPerWindow          = s.app.OracleKeeper.MinValidPerWindow(s.ctx)
 		minValidVotes              = minValidPerWindow.MulInt64(possibleWinsPerSlashWindow).TruncateInt()
-		maxMissesBeforeSlash       = sdk.NewInt(possibleWinsPerSlashWindow).Sub(minValidVotes).Uint64()
+		maxMissesBeforeSlash       = math.NewInt(possibleWinsPerSlashWindow).Sub(minValidVotes).Uint64()
 	)
 
 	testCases := []struct {

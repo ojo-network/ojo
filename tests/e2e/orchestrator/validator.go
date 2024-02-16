@@ -1,13 +1,15 @@
 package orchestrator
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path"
 	"path/filepath"
 
-	tmcfg "github.com/cometbft/cometbft/config"
+	"cosmossdk.io/math"
+	cmtcfg "github.com/cometbft/cometbft/config"
 	tmos "github.com/cometbft/cometbft/libs/os"
 	p2p "github.com/cometbft/cometbft/p2p"
 	"github.com/cometbft/cometbft/privval"
@@ -26,7 +28,6 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/ory/dockertest/v3"
 
-	ojoapp "github.com/ojo-network/ojo/app"
 	appparams "github.com/ojo-network/ojo/app/params"
 	"github.com/ojo-network/ojo/client/tx"
 )
@@ -59,7 +60,7 @@ func (v *validator) createConfig() error {
 	return os.MkdirAll(p, 0o755)
 }
 
-func (v *validator) init() error {
+func (v *validator) init(gen map[string]json.RawMessage) error {
 	if err := v.createConfig(); err != nil {
 		return err
 	}
@@ -70,25 +71,24 @@ func (v *validator) init() error {
 	config.SetRoot(v.configDir())
 	config.Moniker = v.moniker
 
-	genDoc, err := getGenDoc(v.configDir())
+	genesis, err := getAppGenesis(v.configDir())
 	if err != nil {
 		return err
 	}
 
-	appState, err := json.MarshalIndent(ojoapp.ModuleBasics.DefaultGenesis(v.chain.cdc), "", " ")
+	appState, err := json.MarshalIndent(gen, "", " ")
 	if err != nil {
 		return fmt.Errorf("failed to JSON encode app genesis state: %w", err)
 	}
 
-	genDoc.ChainID = v.chain.id
-	genDoc.Validators = nil
-	genDoc.AppState = appState
+	genesis.ChainID = v.chain.id
+	genesis.AppState = appState
 
-	if err = genutil.ExportGenesisFile(genDoc, config.GenesisFile()); err != nil {
+	if err = genutil.ExportGenesisFile(genesis, config.GenesisFile()); err != nil {
 		return fmt.Errorf("failed to export app genesis state: %w", err)
 	}
 
-	tmcfg.WriteConfigFile(filepath.Join(config.RootDir, "config", "config.toml"), config)
+	cmtcfg.WriteConfigFile(filepath.Join(config.RootDir, "config", "config.toml"), config)
 	return nil
 }
 
@@ -177,15 +177,15 @@ func (v *validator) createKey(name string) error {
 func (v *validator) buildCreateValidatorMsg(amount sdk.Coin) (sdk.Msg, error) {
 	description := stakingtypes.NewDescription(v.moniker, "", "", "", "")
 	commissionRates := stakingtypes.CommissionRates{
-		Rate:          sdk.MustNewDecFromStr("0.1"),
-		MaxRate:       sdk.MustNewDecFromStr("0.2"),
-		MaxChangeRate: sdk.MustNewDecFromStr("0.01"),
+		Rate:          math.LegacyMustNewDecFromStr("0.1"),
+		MaxRate:       math.LegacyMustNewDecFromStr("0.2"),
+		MaxChangeRate: math.LegacyMustNewDecFromStr("0.01"),
 	}
 
 	// get the initial validator min self delegation
-	minSelfDelegation, _ := sdk.NewIntFromString("1")
+	minSelfDelegation, _ := math.NewIntFromString("1")
 
-	valPubKey, err := cryptocodec.FromTmPubKeyInterface(v.consensusKey.PubKey)
+	valPubKey, err := cryptocodec.FromCmtPubKeyInterface(v.consensusKey.PubKey)
 	if err != nil {
 		return nil, err
 	}
@@ -195,7 +195,7 @@ func (v *validator) buildCreateValidatorMsg(amount sdk.Coin) (sdk.Msg, error) {
 	}
 
 	return stakingtypes.NewMsgCreateValidator(
-		sdk.ValAddress(valAddr),
+		sdk.ValAddress(valAddr).String(),
 		valPubKey,
 		amount,
 		description,
@@ -246,7 +246,9 @@ func (v *validator) signMsg(cdc codec.Codec, msgs ...sdk.Msg) (*sdktx.Tx, error)
 		return nil, err
 	}
 
-	bytesToSign, err := encodingConfig.TxConfig.SignModeHandler().GetSignBytes(
+	bytesToSign, err := authsigning.GetSignBytesAdapter(
+		context.TODO(),
+		encodingConfig.TxConfig.SignModeHandler(),
 		txsigning.SignMode_SIGN_MODE_DIRECT,
 		signerData,
 		txBuilder.GetTx(),

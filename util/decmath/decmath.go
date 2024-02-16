@@ -5,16 +5,16 @@ import (
 	"sort"
 	"strconv"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"cosmossdk.io/math"
 )
 
 var ErrEmptyList = fmt.Errorf("empty price list passed in")
 
-// Median returns the median of a list of sdk.Dec. Returns error
+// Median returns the median of a list of math.LegacyDec. Returns error
 // if ds is empty list.
-func Median(ds []sdk.Dec) (sdk.Dec, error) {
+func Median(ds []math.LegacyDec) (math.LegacyDec, error) {
 	if len(ds) == 0 {
-		return sdk.ZeroDec(), ErrEmptyList
+		return math.LegacyZeroDec(), ErrEmptyList
 	}
 
 	sort.Slice(ds, func(i, j int) bool {
@@ -31,14 +31,14 @@ func Median(ds []sdk.Dec) (sdk.Dec, error) {
 }
 
 // MedianDeviation returns the standard deviation around the
-// median of a list of sdk.Dec. Returns error if ds is empty list.
+// median of a list of math.LegacyDec. Returns error if ds is empty list.
 // MedianDeviation = ∑((d - median)^2 / len(ds))
-func MedianDeviation(median sdk.Dec, ds []sdk.Dec) (sdk.Dec, error) {
+func MedianDeviation(median math.LegacyDec, ds []math.LegacyDec) (math.LegacyDec, error) {
 	if len(ds) == 0 {
-		return sdk.ZeroDec(), ErrEmptyList
+		return math.LegacyZeroDec(), ErrEmptyList
 	}
 
-	variance := sdk.ZeroDec()
+	variance := math.LegacyZeroDec()
 	for _, d := range ds {
 		variance = variance.Add(
 			d.Sub(median).Abs().Power(2).QuoInt64(int64(len(ds))))
@@ -46,20 +46,20 @@ func MedianDeviation(median sdk.Dec, ds []sdk.Dec) (sdk.Dec, error) {
 
 	medianDeviation, err := variance.ApproxSqrt()
 	if err != nil {
-		return sdk.ZeroDec(), err
+		return math.LegacyZeroDec(), err
 	}
 
 	return medianDeviation, nil
 }
 
-// Average returns the average value of a list of sdk.Dec. Returns error
+// Average returns the average value of a list of math.LegacyDec. Returns error
 // if ds is empty list.
-func Average(ds []sdk.Dec) (sdk.Dec, error) {
+func Average(ds []math.LegacyDec) (math.LegacyDec, error) {
 	if len(ds) == 0 {
-		return sdk.ZeroDec(), ErrEmptyList
+		return math.LegacyZeroDec(), ErrEmptyList
 	}
 
-	sumPrices := sdk.ZeroDec()
+	sumPrices := math.LegacyZeroDec()
 	for _, d := range ds {
 		sumPrices = sumPrices.Add(d)
 	}
@@ -67,11 +67,11 @@ func Average(ds []sdk.Dec) (sdk.Dec, error) {
 	return sumPrices.QuoInt64(int64(len(ds))), nil
 }
 
-// Max returns the max value of a list of sdk.Dec. Returns error
+// Max returns the max value of a list of math.LegacyDec. Returns error
 // if ds is empty list.
-func Max(ds []sdk.Dec) (sdk.Dec, error) {
+func Max(ds []math.LegacyDec) (math.LegacyDec, error) {
 	if len(ds) == 0 {
-		return sdk.ZeroDec(), ErrEmptyList
+		return math.LegacyZeroDec(), ErrEmptyList
 	}
 
 	max := ds[0]
@@ -84,11 +84,11 @@ func Max(ds []sdk.Dec) (sdk.Dec, error) {
 	return max, nil
 }
 
-// Min returns the min value of a list of sdk.Dec. Returns error
+// Min returns the min value of a list of math.LegacyDec. Returns error
 // if ds is empty list.
-func Min(ds []sdk.Dec) (sdk.Dec, error) {
+func Min(ds []math.LegacyDec) (math.LegacyDec, error) {
 	if len(ds) == 0 {
-		return sdk.ZeroDec(), ErrEmptyList
+		return math.LegacyZeroDec(), ErrEmptyList
 	}
 
 	min := ds[0]
@@ -101,9 +101,9 @@ func Min(ds []sdk.Dec) (sdk.Dec, error) {
 	return min, nil
 }
 
-// NewDecFromFloat converts a float64 into a sdk.Dec. Returns error
+// NewDecFromFloat converts a float64 into a math.LegacyDec. Returns error
 // if float64 cannot be converted into a string, or into a subsequent
-// sdk.Dec.
-func NewDecFromFloat(f float64) (sdk.Dec, error) {
-	return sdk.NewDecFromStr(strconv.FormatFloat(f, 'f', -1, 64))
+// math.LegacyDec.
+func NewDecFromFloat(f float64) (math.LegacyDec, error) {
+	return math.LegacyNewDecFromStr(strconv.FormatFloat(f, 'f', -1, 64))
 }

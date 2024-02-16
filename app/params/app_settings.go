@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -26,7 +27,7 @@ var (
 	// ProtocolMinGasPrice is a consensus controlled gas price. Each validator must set his
 	// `minimum-gas-prices` in app.toml config to value above ProtocolMinGasPrice.
 	// Transactions with gas-price smaller than ProtocolMinGasPrice will fail during DeliverTx.
-	ProtocolMinGasPrice = sdk.NewDecCoinFromDec(BondDenom, sdk.MustNewDecFromStr("0.00"))
+	ProtocolMinGasPrice = sdk.NewDecCoinFromDec(BondDenom, math.LegacyMustNewDecFromStr("0.00"))
 
 	// DefaultGovPeriod is 3 days. This should be long enough for validators to react,
 	// and short enough for the team to list new assets competitively.

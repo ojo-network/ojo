@@ -38,7 +38,7 @@ func BroadcastTx(clientCtx client.Context, txf tx.Factory, msgs ...sdk.Msg) (*sd
 
 	unsignedTx.SetFeeGranter(clientCtx.GetFeeGranterAddress())
 
-	if err = tx.Sign(txf, clientCtx.GetFromName(), unsignedTx, true); err != nil {
+	if err = tx.Sign(clientCtx.CmdContext, txf, clientCtx.GetFromName(), unsignedTx, true); err != nil {
 		return nil, err
 	}
 

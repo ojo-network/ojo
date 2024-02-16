@@ -3,6 +3,7 @@ package types
 import (
 	"testing"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
@@ -43,7 +44,7 @@ func TestMsgAggregateExchangeRatePrevote(t *testing.T) {
 		sdk.AccAddress([]byte("addr1_______________")),
 	}
 
-	exchangeRates := sdk.DecCoins{sdk.NewDecCoinFromDec(OjoDenom, sdk.OneDec()), sdk.NewDecCoinFromDec(OjoDenom, sdk.NewDecWithPrec(32121, 1))}
+	exchangeRates := sdk.DecCoins{sdk.NewDecCoinFromDec(OjoDenom, math.LegacyOneDec()), sdk.NewDecCoinFromDec(OjoDenom, math.LegacyNewDecWithPrec(32121, 1))}
 	bz := GetAggregateVoteHash("1", exchangeRates.String(), sdk.ValAddress(addrs[0]))
 	msgInvalidHashLength := "invalid hash length; should equal 20"
 	msgInvalidFeederAddr := "invalid feeder address (empty address string is not allowed): invalid address"
@@ -133,7 +134,7 @@ func TestNewMsgAggregateExchangeRatePrevote(t *testing.T) {
 	vals := GenerateRandomValAddr(2)
 	feederAddr := sdk.AccAddress(vals[1])
 
-	exchangeRates := sdk.DecCoins{sdk.NewDecCoinFromDec(OjoDenom, sdk.OneDec()), sdk.NewDecCoinFromDec(OjoDenom, sdk.NewDecWithPrec(32121, 1))}
+	exchangeRates := sdk.DecCoins{sdk.NewDecCoinFromDec(OjoDenom, math.LegacyOneDec()), sdk.NewDecCoinFromDec(OjoDenom, math.LegacyNewDecWithPrec(32121, 1))}
 	bz := GetAggregateVoteHash("1", exchangeRates.String(), sdk.ValAddress(vals[0]))
 
 	aggregateExchangeRatePreVote := NewMsgAggregateExchangeRatePrevote(
@@ -142,7 +143,6 @@ func TestNewMsgAggregateExchangeRatePrevote(t *testing.T) {
 		vals[0],
 	)
 
-	require.NotNil(t, aggregateExchangeRatePreVote.GetSignBytes())
 	require.Equal(t, aggregateExchangeRatePreVote.GetSigners(), []sdk.AccAddress{feederAddr})
 }
 
@@ -157,7 +157,6 @@ func TestNewMsgAggregateExchangeRateVote(t *testing.T) {
 		vals[0],
 	)
 
-	require.NotNil(t, aggregateExchangeRateVote.GetSignBytes())
 	require.Equal(t, aggregateExchangeRateVote.GetSigners(), []sdk.AccAddress{feederAddr})
 }
 
@@ -165,6 +164,5 @@ func TestMsgDelegateFeedConsent(t *testing.T) {
 	vals := GenerateRandomValAddr(2)
 	msgFeedConsent := NewMsgDelegateFeedConsent(vals[0], sdk.AccAddress(vals[1]))
 
-	require.NotNil(t, msgFeedConsent.GetSignBytes())
 	require.Equal(t, msgFeedConsent.GetSigners(), []sdk.AccAddress{sdk.AccAddress(vals[0])})
 }

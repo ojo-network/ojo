@@ -5,15 +5,15 @@ import (
 	"strings"
 	"testing"
 
+	"cosmossdk.io/math"
 	"github.com/cometbft/cometbft/crypto/secp256k1"
-	tmrand "github.com/cometbft/cometbft/libs/rand"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	cmtrand "github.com/cometbft/cometbft/libs/rand"
+	cmtproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
-	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingtestutil "github.com/cosmos/cosmos-sdk/x/staking/testutil"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/stretchr/testify/suite"
@@ -52,8 +52,8 @@ func (s *IntegrationTestSuite) SetupTest() {
 	require := s.Require()
 	isCheckTx := false
 	app := ojoapp.Setup(s.T())
-	ctx := app.BaseApp.NewContext(isCheckTx, tmproto.Header{
-		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
+	ctx := app.BaseApp.NewContextLegacy(isCheckTx, cmtproto.Header{
+		ChainID: fmt.Sprintf("test-chain-%s", cmtrand.Str(4)),
 		Height:  9,
 	})
 
@@ -73,7 +73,8 @@ func (s *IntegrationTestSuite) SetupTest() {
 	sh.CreateValidator(valAddr, valPubKey, amt, true)
 	sh.CreateValidator(valAddr2, valPubKey2, amt, true)
 
-	staking.EndBlocker(ctx, app.StakingKeeper)
+	_, err := app.StakingKeeper.EndBlocker(ctx)
+	require.NoError(err)
 
 	s.app = app
 	s.ctx = ctx
@@ -100,11 +101,11 @@ var (
 )
 
 // NewTestMsgCreateValidator test msg creator
-func NewTestMsgCreateValidator(address sdk.ValAddress, pubKey cryptotypes.PubKey, amt sdk.Int) *stakingtypes.MsgCreateValidator {
-	commission := stakingtypes.NewCommissionRates(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec())
+func NewTestMsgCreateValidator(address sdk.ValAddress, pubKey cryptotypes.PubKey, amt math.Int) *stakingtypes.MsgCreateValidator {
+	commission := stakingtypes.NewCommissionRates(math.LegacyZeroDec(), math.LegacyZeroDec(), math.LegacyZeroDec())
 	msg, _ := stakingtypes.NewMsgCreateValidator(
-		address, pubKey, sdk.NewCoin(types.OjoDenom, amt),
-		stakingtypes.Description{}, commission, sdk.OneInt(),
+		address.String(), pubKey, sdk.NewCoin(types.OjoDenom, amt),
+		stakingtypes.Description{}, commission, math.OneInt(),
 	)
 
 	return msg
@@ -175,7 +176,7 @@ func (s *IntegrationTestSuite) TestAggregateExchangeRateVote() {
 	var decCoins sdk.DecCoins
 	decCoins = append(decCoins, sdk.DecCoin{
 		Denom:  displayDenom,
-		Amount: sdk.ZeroDec(),
+		Amount: math.LegacyZeroDec(),
 	})
 
 	vote := types.AggregateExchangeRateVote{
@@ -202,11 +203,11 @@ func (s *IntegrationTestSuite) TestAggregateExchangeRateVoteError() {
 
 func (s *IntegrationTestSuite) TestSetExchangeRateWithEvent() {
 	app, ctx := s.app, s.ctx
-	err := app.OracleKeeper.SetExchangeRateWithEvent(ctx, displayDenom, sdk.OneDec())
+	err := app.OracleKeeper.SetExchangeRateWithEvent(ctx, displayDenom, math.LegacyOneDec())
 	s.Require().NoError(err)
 	rate, err := app.OracleKeeper.GetExchangeRate(ctx, displayDenom)
 	s.Require().NoError(err)
-	s.Require().Equal(rate, sdk.OneDec())
+	s.Require().Equal(rate, math.LegacyOneDec())
 }
 
 func (s *IntegrationTestSuite) TestGetExchangeRate_InvalidDenom() {
@@ -226,15 +227,15 @@ func (s *IntegrationTestSuite) TestGetExchangeRate_NotSet() {
 func (s *IntegrationTestSuite) TestGetExchangeRate_Valid() {
 	app, ctx := s.app, s.ctx
 
-	app.OracleKeeper.SetExchangeRate(ctx, displayDenom, sdk.OneDec())
+	app.OracleKeeper.SetExchangeRate(ctx, displayDenom, math.LegacyOneDec())
 	rate, err := app.OracleKeeper.GetExchangeRate(ctx, displayDenom)
 	s.Require().NoError(err)
-	s.Require().Equal(rate, sdk.OneDec())
+	s.Require().Equal(rate, math.LegacyOneDec())
 
-	app.OracleKeeper.SetExchangeRate(ctx, strings.ToLower(displayDenom), sdk.OneDec())
+	app.OracleKeeper.SetExchangeRate(ctx, strings.ToLower(displayDenom), math.LegacyOneDec())
 	rate, err = app.OracleKeeper.GetExchangeRate(ctx, displayDenom)
 	s.Require().NoError(err)
-	s.Require().Equal(rate, sdk.OneDec())
+	s.Require().Equal(rate, math.LegacyOneDec())
 }
 
 func (s *IntegrationTestSuite) TestGetExchangeRateBase() {
@@ -247,23 +248,23 @@ func (s *IntegrationTestSuite) TestGetExchangeRateBase() {
 		}
 	}
 
-	power := sdk.MustNewDecFromStr("10").Power(exponent)
+	power := math.LegacyMustNewDecFromStr("10").Power(exponent)
 
-	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec())
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, math.LegacyOneDec())
 	rate, err := s.app.OracleKeeper.GetExchangeRateBase(s.ctx, bondDenom)
 	s.Require().NoError(err)
-	s.Require().Equal(rate.Mul(power), sdk.OneDec())
+	s.Require().Equal(rate.Mul(power), math.LegacyOneDec())
 
-	s.app.OracleKeeper.SetExchangeRate(s.ctx, strings.ToLower(displayDenom), sdk.OneDec())
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, strings.ToLower(displayDenom), math.LegacyOneDec())
 	rate, err = s.app.OracleKeeper.GetExchangeRateBase(s.ctx, bondDenom)
 	s.Require().NoError(err)
-	s.Require().Equal(rate.Mul(power), sdk.OneDec())
+	s.Require().Equal(rate.Mul(power), math.LegacyOneDec())
 }
 
 func (s *IntegrationTestSuite) TestClearExchangeRate() {
 	app, ctx := s.app, s.ctx
 
-	app.OracleKeeper.SetExchangeRate(ctx, displayDenom, sdk.OneDec())
+	app.OracleKeeper.SetExchangeRate(ctx, displayDenom, math.LegacyOneDec())
 	app.OracleKeeper.ClearExchangeRates(ctx)
 	_, err := app.OracleKeeper.GetExchangeRate(ctx, displayDenom)
 	s.Require().Error(err)

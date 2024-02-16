@@ -55,8 +55,8 @@ The relayer will loop through:
 
 The client module should have an easy-to-use API specific to the type of data being relayed. At this level, data should not be generic. An example of the Keeper APIs we could implement here are:
 
-- `GetPrice(denom) sdk.Dec` - returns relayed price of the asset `denom`.
-- `GetReservesProof(denom) sdk.Dec` - returns an `sdk.Dec` in the range of `[0, 1]`, determining how valid a set of reserves are.
+- `GetPrice(denom) math.LegacyDec` - returns relayed price of the asset `denom`.
+- `GetReservesProof(denom) math.LegacyDec` - returns an `math.LegacyDec` in the range of `[0, 1]`, determining how valid a set of reserves are.
 
 ### Outcomes
 

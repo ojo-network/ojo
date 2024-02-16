@@ -3,8 +3,8 @@ package ante
 import (
 	"testing"
 
+	evidence "cosmossdk.io/x/evidence/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	evidence "github.com/cosmos/cosmos-sdk/x/evidence/types"
 	"github.com/stretchr/testify/assert"
 )
 

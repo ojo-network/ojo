@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	proposal "github.com/cosmos/cosmos-sdk/x/params/types/proposal"
 	"github.com/ojo-network/ojo/client"
@@ -55,7 +56,7 @@ func ParseProposalID(response *sdk.TxResponse) (uint64, error) {
 }
 
 func SubmitAndPassProposal(ojoClient *client.OjoClient, msgs []sdk.Msg, title, summary string) error {
-	deposit := sdk.NewCoins(sdk.NewCoin("uojo", sdk.NewInt(10000000)))
+	deposit := sdk.NewCoins(sdk.NewCoin("uojo", math.NewInt(10000000)))
 	resp, err := ojoClient.TxClient.TxSubmitProposal(msgs, deposit, title, summary)
 	if err != nil {
 		return err

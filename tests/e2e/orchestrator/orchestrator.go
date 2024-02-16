@@ -18,10 +18,10 @@ import (
 	appparams "github.com/ojo-network/ojo/app/params"
 	"github.com/ojo-network/ojo/client"
 
-	dbm "github.com/cometbft/cometbft-db"
-	tmconfig "github.com/cometbft/cometbft/config"
-	tmjson "github.com/cometbft/cometbft/libs/json"
+	cmtconfig "github.com/cometbft/cometbft/config"
+	cmtjson "github.com/cometbft/cometbft/libs/json"
 	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
+	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/server"
 	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -91,6 +91,7 @@ func (o *Orchestrator) InitResources(t *testing.T) {
 		TxConfig:          app.GetTxConfig(),
 		Amino:             app.LegacyAmino(),
 	}
+	defaultGenesis := app.DefaultGenesis()
 
 	// codec
 	cdc := encodingConfig.Codec
@@ -107,7 +108,7 @@ func (o *Orchestrator) InitResources(t *testing.T) {
 	o.dkrNet, err = o.dkrPool.CreateNetwork(fmt.Sprintf("%s-testnet", o.chain.id))
 	require.NoError(t, err)
 
-	o.initNodes(t)
+	o.initNodes(t, defaultGenesis)
 	o.initUserAccounts(t)
 	o.initGenesis(t)
 	o.initValidatorConfigs(t)
@@ -135,8 +136,8 @@ func (o *Orchestrator) TearDownResources(t *testing.T) {
 	}
 }
 
-func (o *Orchestrator) initNodes(t *testing.T) {
-	require.NoError(t, o.chain.createAndInitValidators(2))
+func (o *Orchestrator) initNodes(t *testing.T, gen map[string]json.RawMessage) {
+	require.NoError(t, o.chain.createAndInitValidators(2, gen))
 
 	// initialize a genesis file for the first validator
 	val0ConfigDir := o.chain.validators[0].configDir()
@@ -256,7 +257,7 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 
 	genDoc.AppState = bz
 
-	bz, err = tmjson.MarshalIndent(genDoc, "", "  ")
+	bz, err = cmtjson.MarshalIndent(genDoc, "", "  ")
 	require.NoError(t, err)
 
 	// write the updated genesis file to each validator
@@ -268,13 +269,13 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 
 func (o *Orchestrator) initValidatorConfigs(t *testing.T) {
 	for i, val := range o.chain.validators {
-		tmCfgPath := filepath.Join(val.configDir(), "config", "config.toml")
+		cmtCfgPath := filepath.Join(val.configDir(), "config", "config.toml")
 
 		vpr := viper.New()
-		vpr.SetConfigFile(tmCfgPath)
+		vpr.SetConfigFile(cmtCfgPath)
 		require.NoError(t, vpr.ReadInConfig())
 
-		valConfig := tmconfig.DefaultConfig()
+		valConfig := cmtconfig.DefaultConfig()
 		require.NoError(t, vpr.Unmarshal(valConfig))
 
 		valConfig.P2P.ListenAddress = fmt.Sprintf("tcp://0.0.0.0:%s", ojoP2pPort)
@@ -298,7 +299,7 @@ func (o *Orchestrator) initValidatorConfigs(t *testing.T) {
 
 		valConfig.P2P.PersistentPeers = strings.Join(peers, ",")
 
-		tmconfig.WriteConfigFile(tmCfgPath, valConfig)
+		cmtconfig.WriteConfigFile(cmtCfgPath, valConfig)
 
 		// set application configuration
 		appCfgPath := filepath.Join(val.configDir(), "config", "app.toml")
@@ -405,7 +406,7 @@ func (o *Orchestrator) runPriceFeeder(t *testing.T) {
 	require.NoError(t, err)
 
 	grpcEndpoint := fmt.Sprintf("tcp://%s:%s", delegateVal.instanceName(), ojoGrpcPort)
-	tmrpcEndpoint := fmt.Sprintf("http://%s:%s", delegateVal.instanceName(), ojoTmrpcPort)
+	cmtrpcEndpoint := fmt.Sprintf("http://%s:%s", delegateVal.instanceName(), ojoTmrpcPort)
 
 	o.priceFeederResource, err = o.dkrPool.RunWithOptions(
 		&dockertest.RunOptions{
@@ -425,7 +426,7 @@ func (o *Orchestrator) runPriceFeeder(t *testing.T) {
 				fmt.Sprintf("KEYRING_DIR=%s", "/root/.ojo"),
 				fmt.Sprintf("ACCOUNT_CHAIN_ID=%s", o.chain.id),
 				fmt.Sprintf("RPC_GRPC_ENDPOINT=%s", grpcEndpoint),
-				fmt.Sprintf("RPC_TMRPC_ENDPOINT=%s", tmrpcEndpoint),
+				fmt.Sprintf("RPC_TMRPC_ENDPOINT=%s", cmtrpcEndpoint),
 			},
 			Cmd: []string{"--skip-provider-check", "--log-level=debug"},
 		},
