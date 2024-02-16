@@ -1,3 +1,4 @@
+// TODO: Make e2e work with rollkit
 package e2e
 
 import (
@@ -14,7 +15,6 @@ type IntegrationTestSuite struct {
 	orchestrator *orchestrator.Orchestrator
 }
 
-// TODO: Make e2e work with rollkit
 // func TestIntegrationTestSuite(t *testing.T) {
 // 	suite.Run(t, new(IntegrationTestSuite))
 // }

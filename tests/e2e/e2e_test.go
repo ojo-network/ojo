@@ -1,3 +1,4 @@
+// TODO: Make e2e work with rollkit
 package e2e
 
 import (
@@ -12,7 +13,6 @@ import (
 // appparams "github.com/ojo-network/ojo/app/params"
 )
 
-// TODO: Make e2e work with rollkit
 // // TestMedians queries for the oracle params, collects historical
 // // prices based on those params, checks that the stored medians and
 // // medians deviations are correct, updates the oracle params with
