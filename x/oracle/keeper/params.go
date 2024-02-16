@@ -6,6 +6,7 @@ import (
 
 	"github.com/ojo-network/ojo/x/oracle/types"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -22,14 +23,14 @@ func (k Keeper) SetVotePeriod(ctx sdk.Context, votePeriod uint64) {
 
 // VoteThreshold returns the minimum percentage of votes that must be received
 // for a ballot to pass.
-func (k Keeper) VoteThreshold(ctx sdk.Context) (res sdk.Dec) {
+func (k Keeper) VoteThreshold(ctx sdk.Context) (res math.LegacyDec) {
 	k.paramSpace.Get(ctx, types.KeyVoteThreshold, &res)
 	return
 }
 
 // SetVoteThreshold updates the minimum percentage of votes that must be received
 // for a ballot to pass.
-func (k Keeper) SetVoteThreshold(ctx sdk.Context, voteThreshold sdk.Dec) {
+func (k Keeper) SetVoteThreshold(ctx sdk.Context, voteThreshold math.LegacyDec) {
 	k.paramSpace.Set(ctx, types.KeyVoteThreshold, voteThreshold)
 }
 
@@ -84,13 +85,13 @@ func (k Keeper) SetMandatoryList(ctx sdk.Context, mandatoryList types.DenomList)
 }
 
 // SlashFraction returns the oracle voting penalty rate.
-func (k Keeper) SlashFraction(ctx sdk.Context) (res sdk.Dec) {
+func (k Keeper) SlashFraction(ctx sdk.Context) (res math.LegacyDec) {
 	k.paramSpace.Get(ctx, types.KeySlashFraction, &res)
 	return
 }
 
 // SetSlashFraction updates the oracle voting penalty rate.
-func (k Keeper) SetSlashFraction(ctx sdk.Context, slashFraction sdk.Dec) {
+func (k Keeper) SetSlashFraction(ctx sdk.Context, slashFraction math.LegacyDec) {
 	k.paramSpace.Set(ctx, types.KeySlashFraction, slashFraction)
 }
 
@@ -106,13 +107,13 @@ func (k Keeper) SetSlashWindow(ctx sdk.Context, slashWindow uint64) {
 }
 
 // MinValidPerWindow returns the oracle slashing threshold.
-func (k Keeper) MinValidPerWindow(ctx sdk.Context) (res sdk.Dec) {
+func (k Keeper) MinValidPerWindow(ctx sdk.Context) (res math.LegacyDec) {
 	k.paramSpace.Get(ctx, types.KeyMinValidPerWindow, &res)
 	return
 }
 
 // MinValidPerWindow updates the oracle slashing threshold.
-func (k Keeper) SetMinValidPerWindow(ctx sdk.Context, minValidPerWindow sdk.Dec) {
+func (k Keeper) SetMinValidPerWindow(ctx sdk.Context, minValidPerWindow math.LegacyDec) {
 	k.paramSpace.Set(ctx, types.KeyMinValidPerWindow, minValidPerWindow)
 }
 

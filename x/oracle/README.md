@@ -102,9 +102,9 @@ The control flow for vote-tallying, exchange rate updates, ballot rewards and sl
 
 ### ExchangeRate
 
-An `sdk.Dec` that stores an exchange rate against USD.
+An `math.LegacyDec` that stores an exchange rate against USD.
 
-- ExchangeRate: `0x01 | byte(denom) -> sdk.Dec`
+- ExchangeRate: `0x01 | byte(denom) -> math.LegacyDec`
 
 ### FeederDelegation
 
@@ -145,7 +145,7 @@ type AggregateExchangeRatePrevote struct {
 ```go
 type DecCoin struct {
     Denom     string  `json:"denom"`
-    Amount    sdk.Dec `json:"amount"`
+    Amount    math.LegacyDec `json:"amount"`
 }
 
 type DecCoins []DecCoin

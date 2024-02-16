@@ -7,11 +7,12 @@ import (
 	"testing"
 	"time"
 
-	dbm "github.com/cometbft/cometbft-db"
+	"cosmossdk.io/log"
+	"cosmossdk.io/math"
+	pruningtypes "cosmossdk.io/store/pruning/types"
 	abci "github.com/cometbft/cometbft/abci/types"
-	"github.com/cometbft/cometbft/libs/log"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	tmtypes "github.com/cometbft/cometbft/types"
+	cmttypes "github.com/cometbft/cometbft/types"
+	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -19,7 +20,6 @@ import (
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
-	pruningtypes "github.com/cosmos/cosmos-sdk/store/pruning/types"
 	"github.com/cosmos/cosmos-sdk/testutil/mock"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
@@ -48,15 +48,15 @@ func Setup(t *testing.T) *App {
 	require.NoError(t, err)
 
 	// create validator set with single validator
-	validator := tmtypes.NewValidator(pubKey, 1)
-	valSet := tmtypes.NewValidatorSet([]*tmtypes.Validator{validator})
+	validator := cmttypes.NewValidator(pubKey, 1)
+	valSet := cmttypes.NewValidatorSet([]*cmttypes.Validator{validator})
 
 	// generate genesis account
 	senderPrivKey := secp256k1.GenPrivKey()
 	acc := authtypes.NewBaseAccount(senderPrivKey.PubKey().Address().Bytes(), senderPrivKey.PubKey(), 0, 0)
 	balance := banktypes.Balance{
 		Address: acc.GetAddress().String(),
-		Coins:   sdk.NewCoins(sdk.NewCoin(params.BondDenom, sdk.NewInt(10000000000000000))),
+		Coins:   sdk.NewCoins(sdk.NewCoin(params.BondDenom, math.NewInt(10000000000000000))),
 	}
 
 	app := SetupWithGenesisValSet(t, valSet, []authtypes.GenesisAccount{acc}, balance)
@@ -69,7 +69,7 @@ func Setup(t *testing.T) *App {
 // account. A Nop logger is set in app.
 func SetupWithGenesisValSet(
 	t *testing.T,
-	valSet *tmtypes.ValidatorSet,
+	valSet *cmttypes.ValidatorSet,
 	genAccs []authtypes.GenesisAccount,
 	balances ...banktypes.Balance,
 ) *App {
@@ -83,29 +83,28 @@ func SetupWithGenesisValSet(
 	require.NoError(t, err)
 
 	// init chain will set the validator set and initialize the genesis accounts
-	app.InitChain(
-		abci.RequestInitChain{
+	_, err = app.InitChain(
+		&abci.RequestInitChain{
 			Validators:      []abci.ValidatorUpdate{},
 			ConsensusParams: simtestutil.DefaultConsensusParams,
 			AppStateBytes:   stateBytes,
 		},
 	)
+	require.NoError(t, err)
 
-	// commit genesis changes
-	app.Commit()
-	app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{
+	_, err = app.FinalizeBlock(&abci.RequestFinalizeBlock{
 		Height:             app.LastBlockHeight() + 1,
-		AppHash:            app.LastCommitID().Hash,
-		ValidatorsHash:     valSet.Hash(),
+		Hash:               app.LastCommitID().Hash,
 		NextValidatorsHash: valSet.Hash(),
-	}})
+	})
+	require.NoError(t, err)
 
 	return app
 }
 
 // GenesisStateWithValSet returns a new genesis state with the validator set
 func GenesisStateWithValSet(codec codec.Codec, genesisState map[string]json.RawMessage,
-	valSet *tmtypes.ValidatorSet, genAccs []authtypes.GenesisAccount,
+	valSet *cmttypes.ValidatorSet, genAccs []authtypes.GenesisAccount,
 	balances ...banktypes.Balance,
 ) (map[string]json.RawMessage, error) {
 	// set genesis accounts
@@ -118,7 +117,7 @@ func GenesisStateWithValSet(codec codec.Codec, genesisState map[string]json.RawM
 	bondAmt := sdk.DefaultPowerReduction
 
 	for _, val := range valSet.Validators {
-		pk, err := cryptocodec.FromTmPubKeyInterface(val.PubKey)
+		pk, err := cryptocodec.FromCmtPubKeyInterface(val.PubKey)
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert pubkey: %w", err)
 		}
@@ -134,15 +133,19 @@ func GenesisStateWithValSet(codec codec.Codec, genesisState map[string]json.RawM
 			Jailed:            false,
 			Status:            stakingtypes.Bonded,
 			Tokens:            bondAmt,
-			DelegatorShares:   sdk.OneDec(),
+			DelegatorShares:   math.LegacyOneDec(),
 			Description:       stakingtypes.Description{},
 			UnbondingHeight:   int64(0),
 			UnbondingTime:     time.Unix(0, 0).UTC(),
-			Commission:        stakingtypes.NewCommission(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()),
-			MinSelfDelegation: sdk.ZeroInt(),
+			Commission:        stakingtypes.NewCommission(math.LegacyZeroDec(), math.LegacyZeroDec(), math.LegacyZeroDec()),
+			MinSelfDelegation: math.ZeroInt(),
 		}
 		validators = append(validators, validator)
-		newDel := stakingtypes.NewDelegation(genAccs[0].GetAddress(), val.Address.Bytes(), sdk.OneDec())
+		newDel := stakingtypes.NewDelegation(
+			genAccs[0].GetAddress().String(),
+			sdk.ValAddress(val.Address).String(),
+			math.LegacyOneDec(),
+		)
 		delegations = append(delegations, newDel)
 
 	}
@@ -215,14 +218,10 @@ func setup(withGenesis bool, invCheckPeriod uint) (*App, GenesisState) {
 // integration tests using the SDK's in-process network test suite.
 func IntegrationTestNetworkConfig() network.Config {
 	cfg := network.DefaultConfig(NewTestNetworkFixture)
-	encCfg := MakeEncodingConfig()
-	cdc := encCfg.Codec
-
-	// Start with the default genesis state
-	appGenState := ModuleBasics.DefaultGenesis(encCfg.Codec)
+	app, genState := setup(true, 100)
 
 	var oracleGenState oracletypes.GenesisState
-	if err := cdc.UnmarshalJSON(appGenState[oracletypes.ModuleName], &oracleGenState); err != nil {
+	if err := app.appCodec.UnmarshalJSON(genState[oracletypes.ModuleName], &oracleGenState); err != nil {
 		panic(err)
 	}
 
@@ -231,34 +230,38 @@ func IntegrationTestNetworkConfig() network.Config {
 	// are not running a price-feeder.
 	oracleGenState.Params.VotePeriod = 1000
 	oracleGenState.ExchangeRates = append(oracleGenState.ExchangeRates, sdk.NewDecCoinFromDec(
-		params.DisplayDenom, sdk.MustNewDecFromStr("34.21"),
+		params.DisplayDenom, math.LegacyMustNewDecFromStr("34.21"),
 	))
 
-	bz, err := cdc.MarshalJSON(&oracleGenState)
+	bz, err := app.appCodec.MarshalJSON(&oracleGenState)
 	if err != nil {
 		panic(err)
 	}
-	appGenState[oracletypes.ModuleName] = bz
+	genState[oracletypes.ModuleName] = bz
 
 	var govGenState govv1.GenesisState
-	if err := cdc.UnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState); err != nil {
+	if err := app.appCodec.UnmarshalJSON(genState[govtypes.ModuleName], &govGenState); err != nil {
 		panic(err)
 	}
 
 	votingPeriod := time.Minute
 	govGenState.Params.VotingPeriod = &votingPeriod
 
-	bz, err = cdc.MarshalJSON(&govGenState)
+	bz, err = app.appCodec.MarshalJSON(&govGenState)
 	if err != nil {
 		panic(err)
 	}
-	appGenState[govtypes.ModuleName] = bz
+	genState[govtypes.ModuleName] = bz
 
-	cfg.Codec = encCfg.Codec
-	cfg.TxConfig = encCfg.TxConfig
-	cfg.LegacyAmino = encCfg.Amino
-	cfg.InterfaceRegistry = encCfg.InterfaceRegistry
-	cfg.GenesisState = appGenState
+	stakingGenesis := stakingtypes.GetGenesisStateFromAppState(app.appCodec, genState)
+	stakingGenesis.Params.BondDenom = params.BondDenom
+	genState[stakingtypes.ModuleName] = app.appCodec.MustMarshalJSON(stakingGenesis)
+
+	cfg.Codec = app.appCodec
+	cfg.TxConfig = app.txConfig
+	cfg.LegacyAmino = app.legacyAmino
+	cfg.InterfaceRegistry = app.interfaceRegistry
+	cfg.GenesisState = genState
 	cfg.MinGasPrices = params.ProtocolMinGasPrice.String()
 	cfg.BondDenom = params.BondDenom
 

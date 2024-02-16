@@ -1,8 +1,10 @@
 package oracle
 
 import (
+	"context"
 	"time"
 
+	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -11,40 +13,44 @@ import (
 )
 
 // EndBlocker is called at the end of every block
-func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
+func EndBlocker(ctx context.Context, k keeper.Keeper) error {
 	defer telemetry.ModuleMeasureSince(types.ModuleName, time.Now(), telemetry.MetricKeyEndBlocker)
+
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
 	// Check for Oracle parameter update plans and execute plans that are
 	// at their plan height.
-	plans := k.GetParamUpdatePlans(ctx)
+	plans := k.GetParamUpdatePlans(sdkCtx)
 	for _, plan := range plans {
-		if plan.ShouldExecute(ctx) {
-			if err := k.ExecuteParamUpdatePlan(ctx, plan); err != nil {
+		if plan.ShouldExecute(sdkCtx) {
+			if err := k.ExecuteParamUpdatePlan(sdkCtx, plan); err != nil {
 				return err
 			}
 		}
 	}
 
-	params := k.GetParams(ctx)
+	params := k.GetParams(sdkCtx)
 
 	// Set all current active validators into the ValidatorRewardSet at
 	// the beginning of a new Slash Window.
-	if k.IsPeriodLastBlock(ctx, params.SlashWindow+1) {
-		k.SetValidatorRewardSet(ctx)
+	if k.IsPeriodLastBlock(sdkCtx, params.SlashWindow+1) {
+		if err := k.SetValidatorRewardSet(sdkCtx); err != nil {
+			return err
+		}
 	}
 
-	if k.IsPeriodLastBlock(ctx, params.VotePeriod) {
-		if err := CalcPrices(ctx, params, k); err != nil {
+	if k.IsPeriodLastBlock(sdkCtx, params.VotePeriod) {
+		if err := CalcPrices(sdkCtx, params, k); err != nil {
 			return err
 		}
 	}
 
 	// Slash oracle providers who missed voting over the threshold and reset
 	// miss counters of all validators at the last block of slash window.
-	if k.IsPeriodLastBlock(ctx, params.SlashWindow) {
-		k.SlashAndResetMissCounters(ctx)
+	if k.IsPeriodLastBlock(sdkCtx, params.SlashWindow) {
+		k.SlashAndResetMissCounters(sdkCtx)
 	}
-	k.PruneAllPrices(ctx)
+	k.PruneAllPrices(sdkCtx)
 	return nil
 }
 
@@ -54,11 +60,19 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 	powerReduction := k.StakingKeeper.PowerReduction(ctx)
 	// Calculate total validator power
 	var totalBondedPower int64
-	for _, v := range k.StakingKeeper.GetBondedValidatorsByPower(ctx) {
-		addr := v.GetOperator()
+	vals, err := k.StakingKeeper.GetBondedValidatorsByPower(ctx)
+	if err != nil {
+		return err
+	}
+	for _, v := range vals {
+		addrString := v.GetOperator()
+		addr, err := sdk.ValAddressFromBech32(addrString)
+		if err != nil {
+			return err
+		}
 		power := v.GetConsensusPower(powerReduction)
 		totalBondedPower += power
-		validatorClaimMap[addr.String()] = types.NewClaim(power, 0, 0, addr)
+		validatorClaimMap[addrString] = types.NewClaim(power, 0, 0, addr)
 	}
 
 	// voteTargets defines the symbol (ticker) denoms that we require votes on
@@ -156,22 +170,22 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 // the store. Note, the ballot is sorted by ExchangeRate.
 func Tally(
 	ballot types.ExchangeRateBallot,
-	rewardBand sdk.Dec,
+	rewardBand math.LegacyDec,
 	validatorClaimMap map[string]types.Claim,
 	incrementWin bool,
-) (sdk.Dec, error) {
+) (math.LegacyDec, error) {
 	weightedMedian, err := ballot.WeightedMedian()
 	if err != nil {
-		return sdk.ZeroDec(), err
+		return math.LegacyZeroDec(), err
 	}
 	standardDeviation, err := ballot.StandardDeviation()
 	if err != nil {
-		return sdk.ZeroDec(), err
+		return math.LegacyZeroDec(), err
 	}
 
 	// rewardSpread is the MAX((weightedMedian * (rewardBand/2)), standardDeviation)
 	rewardSpread := weightedMedian.Mul(rewardBand.QuoInt64(2))
-	rewardSpread = sdk.MaxDec(rewardSpread, standardDeviation)
+	rewardSpread = math.LegacyMaxDec(rewardSpread, standardDeviation)
 
 	for _, tallyVote := range ballot {
 		// Filter ballot winners. For voters, we filter out the tally vote iff:

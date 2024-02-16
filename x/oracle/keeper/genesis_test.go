@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
@@ -12,16 +13,16 @@ func (s *IntegrationTestSuite) TestIterateAllHistoricPrices() {
 
 	historicPrices := []types.PriceStamp{
 		{BlockNum: 10, ExchangeRate: &sdk.DecCoin{
-			Denom: "ojo", Amount: sdk.MustNewDecFromStr("20.45"),
+			Denom: "ojo", Amount: math.LegacyMustNewDecFromStr("20.45"),
 		}},
 		{BlockNum: 11, ExchangeRate: &sdk.DecCoin{
-			Denom: "ojo", Amount: sdk.MustNewDecFromStr("20.44"),
+			Denom: "ojo", Amount: math.LegacyMustNewDecFromStr("20.44"),
 		}},
 		{BlockNum: 10, ExchangeRate: &sdk.DecCoin{
-			Denom: "btc", Amount: sdk.MustNewDecFromStr("1200.56"),
+			Denom: "btc", Amount: math.LegacyMustNewDecFromStr("1200.56"),
 		}},
 		{BlockNum: 11, ExchangeRate: &sdk.DecCoin{
-			Denom: "btc", Amount: sdk.MustNewDecFromStr("1200.19"),
+			Denom: "btc", Amount: math.LegacyMustNewDecFromStr("1200.19"),
 		}},
 	}
 
@@ -57,9 +58,9 @@ FOUND:
 func (s *IntegrationTestSuite) TestIterateAllMedianPrices() {
 	keeper, ctx := s.app.OracleKeeper, s.ctx
 	medians := sdk.DecCoins{
-		{Denom: "ojo", Amount: sdk.MustNewDecFromStr("20.44")},
-		{Denom: "atom", Amount: sdk.MustNewDecFromStr("2.66")},
-		{Denom: "osmo", Amount: sdk.MustNewDecFromStr("13.64")},
+		{Denom: "ojo", Amount: math.LegacyMustNewDecFromStr("20.44")},
+		{Denom: "atom", Amount: math.LegacyMustNewDecFromStr("2.66")},
+		{Denom: "osmo", Amount: math.LegacyMustNewDecFromStr("13.64")},
 	}
 
 	for _, m := range medians {
@@ -91,9 +92,9 @@ FOUND:
 func (s *IntegrationTestSuite) TestIterateAllMedianDeviationPrices() {
 	keeper, ctx := s.app.OracleKeeper, s.ctx
 	medians := sdk.DecCoins{
-		{Denom: "ojo", Amount: sdk.MustNewDecFromStr("21.44")},
-		{Denom: "atom", Amount: sdk.MustNewDecFromStr("3.66")},
-		{Denom: "osmo", Amount: sdk.MustNewDecFromStr("14.64")},
+		{Denom: "ojo", Amount: math.LegacyMustNewDecFromStr("21.44")},
+		{Denom: "atom", Amount: math.LegacyMustNewDecFromStr("3.66")},
+		{Denom: "osmo", Amount: math.LegacyMustNewDecFromStr("14.64")},
 	}
 
 	for _, m := range medians {

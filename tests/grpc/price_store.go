@@ -3,7 +3,7 @@ package grpc
 import (
 	"fmt"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"cosmossdk.io/math"
 	"github.com/ojo-network/ojo/util/decmath"
 )
 
@@ -11,22 +11,22 @@ import (
 // recorded by the price_listener with helper methods
 // for calculating and verifying medians and median deviations
 type PriceStore struct {
-	historicStamps   map[string][]sdk.Dec
-	medians          map[string]sdk.Dec
-	medianDeviations map[string]sdk.Dec
+	historicStamps   map[string][]math.LegacyDec
+	medians          map[string]math.LegacyDec
+	medianDeviations map[string]math.LegacyDec
 }
 
 func NewPriceStore() *PriceStore {
 	return &PriceStore{
-		historicStamps:   map[string][]sdk.Dec{},
-		medians:          map[string]sdk.Dec{},
-		medianDeviations: map[string]sdk.Dec{},
+		historicStamps:   map[string][]math.LegacyDec{},
+		medians:          map[string]math.LegacyDec{},
+		medianDeviations: map[string]math.LegacyDec{},
 	}
 }
 
-func (ps *PriceStore) addStamp(denom string, stamp sdk.Dec) {
+func (ps *PriceStore) addStamp(denom string, stamp math.LegacyDec) {
 	if _, ok := ps.historicStamps[denom]; !ok {
-		ps.historicStamps[denom] = []sdk.Dec{}
+		ps.historicStamps[denom] = []math.LegacyDec{}
 	}
 	ps.historicStamps[denom] = append(ps.historicStamps[denom], stamp)
 }

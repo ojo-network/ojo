@@ -3,6 +3,7 @@ package oracle_test
 import (
 	"testing"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/suite"
 
@@ -29,7 +30,7 @@ type IntegrationTestSuite struct {
 
 func (s *IntegrationTestSuite) SetupTest() {
 	s.app, s.ctx, s.keys = integration.SetupAppWithContext(s.T())
-	s.app.OracleKeeper.SetVoteThreshold(s.ctx, sdk.MustNewDecFromStr("0.4"))
+	s.app.OracleKeeper.SetVoteThreshold(s.ctx, math.LegacyMustNewDecFromStr("0.4"))
 }
 
 func createVotes(hash string, val sdk.ValAddress, rates sdk.DecCoins, blockHeight uint64) (types.AggregateExchangeRatePrevote, types.AggregateExchangeRateVote) {
@@ -60,22 +61,22 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		val1DecCoins = append(val1DecCoins, sdk.DecCoin{
 			Denom:  denom.SymbolDenom,
-			Amount: sdk.MustNewDecFromStr("1.0"),
+			Amount: math.LegacyMustNewDecFromStr("1.0"),
 		})
 		val2DecCoins = append(val2DecCoins, sdk.DecCoin{
 			Denom:  denom.SymbolDenom,
-			Amount: sdk.MustNewDecFromStr("0.5"),
+			Amount: math.LegacyMustNewDecFromStr("0.5"),
 		})
 		val3DecCoins = append(val3DecCoins, sdk.DecCoin{
 			Denom:  denom.SymbolDenom,
-			Amount: sdk.MustNewDecFromStr("0.6"),
+			Amount: math.LegacyMustNewDecFromStr("0.6"),
 		})
 	}
 
 	// add junk coin and ensure ballot still is counted
 	junkCoin := sdk.DecCoin{
 		Denom:  "JUNK",
-		Amount: sdk.MustNewDecFromStr("0.05"),
+		Amount: math.LegacyMustNewDecFromStr("0.05"),
 	}
 	val1DecCoins = append(val1DecCoins, junkCoin)
 	val2DecCoins = append(val2DecCoins, junkCoin)
@@ -102,7 +103,7 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		rate, err := app.OracleKeeper.GetExchangeRate(ctx, denom.SymbolDenom)
 		s.Require().NoError(err)
-		s.Require().Equal(sdk.MustNewDecFromStr("1.0"), rate)
+		s.Require().Equal(math.LegacyMustNewDecFromStr("1.0"), rate)
 	}
 
 	// Test: only val2 votes (has 39% vote power).
@@ -122,7 +123,7 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		rate, err := app.OracleKeeper.GetExchangeRate(ctx, denom.SymbolDenom)
 		s.Require().ErrorIs(err, types.ErrUnknownDenom.Wrap(denom.SymbolDenom))
-		s.Require().Equal(sdk.ZeroDec(), rate)
+		s.Require().Equal(math.LegacyZeroDec(), rate)
 	}
 
 	// Test: val2 and val3 votes.
@@ -144,7 +145,7 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		rate, err := app.OracleKeeper.GetExchangeRate(ctx, denom.SymbolDenom)
 		s.Require().NoError(err)
-		s.Require().Equal(sdk.MustNewDecFromStr("0.5"), rate)
+		s.Require().Equal(math.LegacyMustNewDecFromStr("0.5"), rate)
 	}
 
 	// Test: val1 and val2 vote again
@@ -155,10 +156,10 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	val2PreVotes.SubmitBlock = h
 
 	val1Votes.ExchangeRates = sdk.DecCoins{
-		sdk.NewDecCoinFromDec("ojo", sdk.MustNewDecFromStr("1.0")),
+		sdk.NewDecCoinFromDec("ojo", math.LegacyMustNewDecFromStr("1.0")),
 	}
 	val2Votes.ExchangeRates = sdk.DecCoins{
-		sdk.NewDecCoinFromDec("atom", sdk.MustNewDecFromStr("0.5")),
+		sdk.NewDecCoinFromDec("atom", math.LegacyMustNewDecFromStr("0.5")),
 	}
 
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr1, val1PreVotes)
@@ -172,10 +173,10 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 
 	rate, err := app.OracleKeeper.GetExchangeRate(ctx, "ojo")
 	s.Require().NoError(err)
-	s.Require().Equal(sdk.MustNewDecFromStr("1.0"), rate)
+	s.Require().Equal(math.LegacyMustNewDecFromStr("1.0"), rate)
 	rate, err = app.OracleKeeper.GetExchangeRate(ctx, "atom")
 	s.Require().ErrorIs(err, types.ErrUnknownDenom.Wrap("atom"))
-	s.Require().Equal(sdk.ZeroDec(), rate)
+	s.Require().Equal(math.LegacyZeroDec(), rate)
 }
 
 func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
@@ -209,15 +210,15 @@ func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		val1DecCoins = append(val1DecCoins, sdk.DecCoin{
 			Denom:  denom.SymbolDenom,
-			Amount: sdk.MustNewDecFromStr("0.6"),
+			Amount: math.LegacyMustNewDecFromStr("0.6"),
 		})
 		val2DecCoins = append(val2DecCoins, sdk.DecCoin{
 			Denom:  denom.SymbolDenom,
-			Amount: sdk.MustNewDecFromStr("0.6"),
+			Amount: math.LegacyMustNewDecFromStr("0.6"),
 		})
 		val3DecCoins = append(val3DecCoins, sdk.DecCoin{
 			Denom:  denom.SymbolDenom,
-			Amount: sdk.MustNewDecFromStr("0.6"),
+			Amount: math.LegacyMustNewDecFromStr("0.6"),
 		})
 	}
 
@@ -237,9 +238,15 @@ func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 142), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1).Rewards[0])
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 142), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr2).Rewards[0])
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 142), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr3).Rewards[0])
+	currRewards1, err := app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1)
+	s.Require().NoError(err)
+	currRewards2, err := app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr2)
+	s.Require().NoError(err)
+	currRewards3, err := app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr3)
+	s.Require().NoError(err)
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 142), currRewards1.Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 142), currRewards2.Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 142), currRewards3.Rewards[0])
 
 	// update prevotes' block
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
@@ -252,27 +259,27 @@ func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 	val1DecCoins = sdk.DecCoins{
 		sdk.DecCoin{
 			Denom:  "ojo",
-			Amount: sdk.MustNewDecFromStr("0.6"),
+			Amount: math.LegacyMustNewDecFromStr("0.6"),
 		},
 		sdk.DecCoin{
 			Denom:  "atom",
-			Amount: sdk.MustNewDecFromStr("0.6"),
+			Amount: math.LegacyMustNewDecFromStr("0.6"),
 		},
 	}
 	val2DecCoins = sdk.DecCoins{
 		sdk.DecCoin{
 			Denom:  "ojo",
-			Amount: sdk.MustNewDecFromStr("0.6"),
+			Amount: math.LegacyMustNewDecFromStr("0.6"),
 		},
 	}
 	val3DecCoins = sdk.DecCoins{
 		sdk.DecCoin{
 			Denom:  "ojo",
-			Amount: sdk.MustNewDecFromStr("0.6"),
+			Amount: math.LegacyMustNewDecFromStr("0.6"),
 		},
 		sdk.DecCoin{
 			Denom:  "atom",
-			Amount: sdk.MustNewDecFromStr("0.6"),
+			Amount: math.LegacyMustNewDecFromStr("0.6"),
 		},
 	}
 	val1Votes.ExchangeRates = val1DecCoins
@@ -290,9 +297,15 @@ func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 284), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1).Rewards[0])
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 275), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr2).Rewards[0])
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 284), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr3).Rewards[0])
+	currRewards1, err = app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1)
+	s.Require().NoError(err)
+	currRewards2, err = app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr2)
+	s.Require().NoError(err)
+	currRewards3, err = app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr3)
+	s.Require().NoError(err)
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 284), currRewards1.Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 275), currRewards2.Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 284), currRewards3.Rewards[0])
 
 	// update prevotes' block
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
@@ -316,23 +329,29 @@ func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 426), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1).Rewards[0])
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 408), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr2).Rewards[0])
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 426), app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr3).Rewards[0])
+	currRewards1, err = app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1)
+	s.Require().NoError(err)
+	currRewards2, err = app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr2)
+	s.Require().NoError(err)
+	currRewards3, err = app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr3)
+	s.Require().NoError(err)
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 426), currRewards1.Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 408), currRewards2.Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 426), currRewards3.Rewards[0])
 }
 
-var exchangeRates = map[string][]sdk.Dec{
+var exchangeRates = map[string][]math.LegacyDec{
 	"ATOM": {
-		sdk.MustNewDecFromStr("12.99"),
-		sdk.MustNewDecFromStr("12.22"),
-		sdk.MustNewDecFromStr("13.1"),
-		sdk.MustNewDecFromStr("11.6"),
+		math.LegacyMustNewDecFromStr("12.99"),
+		math.LegacyMustNewDecFromStr("12.22"),
+		math.LegacyMustNewDecFromStr("13.1"),
+		math.LegacyMustNewDecFromStr("11.6"),
 	},
 	"OJO": {
-		sdk.MustNewDecFromStr("1.89"),
-		sdk.MustNewDecFromStr("2.05"),
-		sdk.MustNewDecFromStr("2.34"),
-		sdk.MustNewDecFromStr("1.71"),
+		math.LegacyMustNewDecFromStr("1.89"),
+		math.LegacyMustNewDecFromStr("2.05"),
+		math.LegacyMustNewDecFromStr("2.34"),
+		math.LegacyMustNewDecFromStr("1.71"),
 	},
 }
 
@@ -439,7 +458,7 @@ func (s *IntegrationTestSuite) TestUpdateOracleParams() {
 			Keys:   []string{"VoteThreshold"},
 			Height: blockHeight,
 			Changes: types.Params{
-				VoteThreshold: sdk.NewDecWithPrec(40, 2),
+				VoteThreshold: math.LegacyNewDecWithPrec(40, 2),
 			},
 		},
 	)
@@ -450,7 +469,7 @@ func (s *IntegrationTestSuite) TestUpdateOracleParams() {
 			Keys:   []string{"VoteThreshold"},
 			Height: blockHeight + 1,
 			Changes: types.Params{
-				VoteThreshold: sdk.NewDecWithPrec(50, 2),
+				VoteThreshold: math.LegacyNewDecWithPrec(50, 2),
 			},
 		},
 	)
@@ -460,12 +479,12 @@ func (s *IntegrationTestSuite) TestUpdateOracleParams() {
 
 	// Check Vote Threshold was updated by first plan
 	oracle.EndBlocker(ctx, app.OracleKeeper)
-	s.Require().Equal(sdk.NewDecWithPrec(40, 2), app.OracleKeeper.VoteThreshold(ctx))
+	s.Require().Equal(math.LegacyNewDecWithPrec(40, 2), app.OracleKeeper.VoteThreshold(ctx))
 
 	// Check Vote Threshold was updated by second plan in next block
 	ctx = ctx.WithBlockHeight(blockHeight + 1)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
-	s.Require().Equal(sdk.NewDecWithPrec(50, 2), app.OracleKeeper.VoteThreshold(ctx))
+	s.Require().Equal(math.LegacyNewDecWithPrec(50, 2), app.OracleKeeper.VoteThreshold(ctx))
 
 	// Schedule param update plan for current block height and then cancel it
 	err = app.OracleKeeper.ScheduleParamUpdatePlan(
@@ -474,7 +493,7 @@ func (s *IntegrationTestSuite) TestUpdateOracleParams() {
 			Keys:   []string{"VoteThreshold"},
 			Height: blockHeight + 1,
 			Changes: types.Params{
-				VoteThreshold: sdk.NewDecWithPrec(60, 2),
+				VoteThreshold: math.LegacyNewDecWithPrec(60, 2),
 			},
 		},
 	)
@@ -490,7 +509,7 @@ func (s *IntegrationTestSuite) TestUpdateOracleParams() {
 
 	// Check Vote Threshold wasn't updated
 	oracle.EndBlocker(ctx, app.OracleKeeper)
-	s.Require().Equal(sdk.NewDecWithPrec(50, 2), app.OracleKeeper.VoteThreshold(ctx))
+	s.Require().Equal(math.LegacyNewDecWithPrec(50, 2), app.OracleKeeper.VoteThreshold(ctx))
 }
 
 func TestOracleTestSuite(t *testing.T) {

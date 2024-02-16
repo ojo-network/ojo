@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"math/rand"
 
+	"cosmossdk.io/errors"
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ojo-network/ojo/x/oracle"
 	"github.com/ojo-network/ojo/x/oracle/types"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
@@ -103,7 +104,7 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 
 	// No existing prevote
 	_, err = s.msgServer.AggregateExchangeRateVote(sdk.WrapSDKContext(ctx), voteMsg)
-	s.Require().EqualError(err, sdkerrors.Wrap(types.ErrNoAggregatePrevote, valAddr.String()).Error())
+	s.Require().EqualError(err, errors.Wrap(types.ErrNoAggregatePrevote, valAddr.String()).Error())
 	_, err = s.msgServer.AggregateExchangeRatePrevote(sdk.WrapSDKContext(ctx), prevoteMsg)
 	s.Require().NoError(err)
 	// Reveal period mismatch
@@ -260,15 +261,15 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 						RewardBands: types.RewardBandList{
 							{
 								SymbolDenom: types.OjoSymbol,
-								RewardBand:  sdk.NewDecWithPrec(2, 2),
+								RewardBand:  math.LegacyNewDecWithPrec(2, 2),
 							},
 							{
 								SymbolDenom: types.AtomSymbol,
-								RewardBand:  sdk.NewDecWithPrec(2, 2),
+								RewardBand:  math.LegacyNewDecWithPrec(2, 2),
 							},
 							{
 								SymbolDenom: "symbol",
-								RewardBand:  sdk.NewDecWithPrec(2, 2),
+								RewardBand:  math.LegacyNewDecWithPrec(2, 2),
 							},
 						},
 					},
@@ -290,11 +291,11 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 						RewardBands: types.RewardBandList{
 							{
 								SymbolDenom: types.OjoSymbol,
-								RewardBand:  sdk.NewDecWithPrec(2, 0),
+								RewardBand:  math.LegacyNewDecWithPrec(2, 0),
 							},
 							{
 								SymbolDenom: types.AtomSymbol,
-								RewardBand:  sdk.NewDecWithPrec(2, 2),
+								RewardBand:  math.LegacyNewDecWithPrec(2, 2),
 							},
 						},
 					},
@@ -325,11 +326,11 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 					Height: 9,
 					Changes: types.Params{
 						VotePeriod:               10,
-						VoteThreshold:            sdk.NewDecWithPrec(40, 2),
+						VoteThreshold:            math.LegacyNewDecWithPrec(40, 2),
 						RewardDistributionWindow: types.BlocksPerWeek,
-						SlashFraction:            sdk.NewDecWithPrec(2, 4),
+						SlashFraction:            math.LegacyNewDecWithPrec(2, 4),
 						SlashWindow:              types.BlocksPerDay,
-						MinValidPerWindow:        sdk.NewDecWithPrec(4, 2),
+						MinValidPerWindow:        math.LegacyNewDecWithPrec(4, 2),
 						HistoricStampPeriod:      10 * types.BlocksPerMinute,
 						MedianStampPeriod:        5 * types.BlocksPerHour,
 						MaximumPriceStamps:       40,
@@ -350,7 +351,7 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 					Keys:   []string{"VoteThreshold"},
 					Height: 9,
 					Changes: types.Params{
-						VoteThreshold: sdk.NewDecWithPrec(10, 2),
+						VoteThreshold: math.LegacyNewDecWithPrec(10, 2),
 					},
 				},
 			},
@@ -403,7 +404,7 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 						RewardBands: types.RewardBandList{
 							{
 								SymbolDenom: types.OjoSymbol,
-								RewardBand:  sdk.NewDecWithPrec(2, 2),
+								RewardBand:  math.LegacyNewDecWithPrec(2, 2),
 							},
 						},
 					},
@@ -467,15 +468,15 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 					s.Require().Equal(rewardBand, types.RewardBandList{
 						{
 							SymbolDenom: types.OjoSymbol,
-							RewardBand:  sdk.NewDecWithPrec(2, 2),
+							RewardBand:  math.LegacyNewDecWithPrec(2, 2),
 						},
 						{
 							SymbolDenom: types.AtomSymbol,
-							RewardBand:  sdk.NewDecWithPrec(2, 2),
+							RewardBand:  math.LegacyNewDecWithPrec(2, 2),
 						},
 						{
 							SymbolDenom: "symbol",
-							RewardBand:  sdk.NewDecWithPrec(2, 2),
+							RewardBand:  math.LegacyNewDecWithPrec(2, 2),
 						},
 					})
 
@@ -491,11 +492,11 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 					maximumPriceStamps := s.app.OracleKeeper.MaximumPriceStamps(s.ctx)
 					maximumMedianStamps := s.app.OracleKeeper.MaximumMedianStamps(s.ctx)
 					s.Require().Equal(votePeriod, uint64(10))
-					s.Require().Equal(voteThreshold, sdk.NewDecWithPrec(40, 2))
+					s.Require().Equal(voteThreshold, math.LegacyNewDecWithPrec(40, 2))
 					s.Require().Equal(rewardDistributionWindow, types.BlocksPerWeek)
-					s.Require().Equal(slashFraction, sdk.NewDecWithPrec(2, 4))
+					s.Require().Equal(slashFraction, math.LegacyNewDecWithPrec(2, 4))
 					s.Require().Equal(slashWindow, types.BlocksPerDay)
-					s.Require().Equal(minValidPerWindow, sdk.NewDecWithPrec(4, 2))
+					s.Require().Equal(minValidPerWindow, math.LegacyNewDecWithPrec(4, 2))
 					s.Require().Equal(historicStampPeriod, 10*types.BlocksPerMinute)
 					s.Require().Equal(medianStampPeriod, 5*types.BlocksPerHour)
 					s.Require().Equal(maximumPriceStamps, uint64(40))
@@ -508,7 +509,7 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 
 func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 	govAccAddr := s.app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String()
-	bandArgument := sdk.NewDecWithPrec(2, 3)
+	bandArgument := math.LegacyNewDecWithPrec(2, 3)
 	foo := &oracletypes.Denom{
 		SymbolDenom: "FOO",
 		BaseDenom:   "FOO",
@@ -777,10 +778,10 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 
 					rwb := s.app.OracleKeeper.RewardBands(s.ctx)
 					band, err := rwb.GetBandFromDenom("foo")
-					s.Require().Equal(band, sdk.NewDecWithPrec(2, 2))
+					s.Require().Equal(band, math.LegacyNewDecWithPrec(2, 2))
 					s.Require().NoError(err)
 					band, err = rwb.GetBandFromDenom("bar")
-					s.Require().Equal(band, sdk.NewDecWithPrec(2, 2))
+					s.Require().Equal(band, math.LegacyNewDecWithPrec(2, 2))
 					s.Require().NoError(err)
 
 				case "valid mandatory denom addition with currency pair providers and currency deviation thresholds":
@@ -795,10 +796,10 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 
 					rwb := s.app.OracleKeeper.RewardBands(s.ctx)
 					band, err := rwb.GetBandFromDenom("foo")
-					s.Require().Equal(band, sdk.NewDecWithPrec(2, 2))
+					s.Require().Equal(band, math.LegacyNewDecWithPrec(2, 2))
 					s.Require().NoError(err)
 					band, err = rwb.GetBandFromDenom("bar")
-					s.Require().Equal(band, sdk.NewDecWithPrec(2, 2))
+					s.Require().Equal(band, math.LegacyNewDecWithPrec(2, 2))
 					s.Require().NoError(err)
 
 					cpp := s.app.OracleKeeper.CurrencyPairProviders(s.ctx)
@@ -819,7 +820,7 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 
 					rwb := s.app.OracleKeeper.RewardBands(s.ctx)
 					band, err := rwb.GetBandFromDenom("REWARD")
-					s.Require().Equal(band, sdk.NewDecWithPrec(2, 3))
+					s.Require().Equal(band, math.LegacyNewDecWithPrec(2, 3))
 					s.Require().NoError(err)
 
 				case "valid currency pair providers and currency deviation thresholds addition with no new denoms":
@@ -1169,7 +1170,7 @@ func (s *IntegrationTestSuite) TestMsgServer_CancelUpdateGovParams() {
 				Keys:   []string{"VoteThreshold"},
 				Height: 100,
 				Changes: types.Params{
-					VoteThreshold: sdk.NewDecWithPrec(40, 2),
+					VoteThreshold: math.LegacyNewDecWithPrec(40, 2),
 				},
 			},
 		},

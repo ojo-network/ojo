@@ -1,7 +1,7 @@
 package keeper_test
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"cosmossdk.io/math"
 
 	"github.com/ojo-network/ojo/x/airdrop/types"
 )
@@ -9,8 +9,8 @@ import (
 func (s *IntegrationTestSuite) TestSetAndGetParams() {
 	app, ctx := s.app, s.ctx
 
-	delegationRequirement := sdk.MustNewDecFromStr("0.5")
-	airdropFactor := sdk.MustNewDecFromStr("3")
+	delegationRequirement := math.LegacyMustNewDecFromStr("0.5")
+	airdropFactor := math.LegacyMustNewDecFromStr("3")
 
 	params := types.Params{
 		ExpiryBlock:           uint64(10000),

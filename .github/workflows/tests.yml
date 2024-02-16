@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.20'
+          go-version: '1.21.1'
       - name: Display Go Version
         run: go version
       - uses: actions/cache@v4
@@ -38,7 +38,7 @@ jobs:
       - uses: actions/setup-go@v5
         if: env.GIT_DIFF
         with:
-          go-version: '1.20'
+          go-version: '1.21.1'
           cache: true
       - name: Test and Create Coverage Report
         if: env.GIT_DIFF
@@ -74,16 +74,24 @@ jobs:
           name: ojod-linux-amd64
           path: ./build
 
-      - name: Start single node chain
+      - name: Start celestia devnet
         if: env.GIT_DIFF
         run: |
           chmod +x ./build/ojod
-          ./scripts/single-node.sh
+          chmod +x ./scripts/celestia_devnet.sh
+          ./scripts/celestia_devnet.sh &
+      - name: Start ojod rollup
+        if: env.GIT_DIFF
+        run: |
+          sleep 30s
+          chmod +x ./build/ojod
+          chmod +x ./scripts/init-local.sh
+          ./scripts/init-local.sh &
       - name: Test Local Network Liveness
         if: env.GIT_DIFF
         run: |
           sleep 1m
-          ./scripts/localnet-liveness.sh 50 5 50 localhost:26657
+          ./scripts/localnet-liveness.sh 50 5 50 localhost:36657
 
   test-e2e:
     runs-on: ubuntu-latest
@@ -100,7 +108,7 @@ jobs:
       - uses: actions/setup-go@v5
         if: env.GIT_DIFF
         with:
-          go-version: '1.20'
+          go-version: '1.21.1'
           cache: true
 
       - name: Test E2E

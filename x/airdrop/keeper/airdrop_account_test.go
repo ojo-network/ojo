@@ -1,6 +1,8 @@
 package keeper_test
 
 import (
+	"time"
+
 	"github.com/ojo-network/ojo/x/airdrop/types"
 )
 
@@ -67,15 +69,17 @@ func (s *IntegrationTestSuite) TestPaginatedAirdropAccounts() {
 
 func (s *IntegrationTestSuite) TestCreateAirdropAccount() {
 	app, ctx := s.app, s.ctx
+	ctx = ctx.WithBlockTime(time.Now())
 
 	tokensToReceive := uint64(1000)
 	originAddress := CreateAccount(s)
 	vestingEndTime := ctx.BlockTime().Unix() + 20
 	airdropAccount := types.NewAirdropAccount(originAddress.String(), tokensToReceive, vestingEndTime)
 
-	app.AirdropKeeper.CreateAirdropAccount(ctx, airdropAccount)
+	err := app.AirdropKeeper.CreateAirdropAccount(ctx, airdropAccount)
+	s.Require().NoError(err)
 
-	airdropAccount, err := s.app.AirdropKeeper.GetAirdropAccount(s.ctx, originAddress.String(), airdropAccount.State)
+	airdropAccount, err = s.app.AirdropKeeper.GetAirdropAccount(s.ctx, originAddress.String(), airdropAccount.State)
 	s.Require().NoError(err)
 	s.Require().Equal(originAddress.String(), airdropAccount.OriginAddress)
 	s.Require().Equal(tokensToReceive, airdropAccount.OriginAmount)

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	tmrand "github.com/cometbft/cometbft/libs/rand"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	cmtrand "github.com/cometbft/cometbft/libs/rand"
+	cmtproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
@@ -29,15 +29,20 @@ type IntegrationTestSuite struct {
 
 func (s *IntegrationTestSuite) SetupTest() {
 	app := ojoapp.Setup(s.T())
-	ctx := app.BaseApp.NewContext(false, tmproto.Header{
-		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
+	ctx := app.BaseApp.NewContextLegacy(false, cmtproto.Header{
+		ChainID: fmt.Sprintf("test-chain-%s", cmtrand.Str(4)),
 		Height:  1,
 	})
 
 	s.app = app
 	s.ctx = ctx
 
-	encodingConfig := testutil.MakeTestEncodingConfig()
+	encodingConfig := testutil.TestEncodingConfig{
+		InterfaceRegistry: app.InterfaceRegistry(),
+		Codec:             app.AppCodec(),
+		TxConfig:          app.GetTxConfig(),
+		Amino:             app.LegacyAmino(),
+	}
 	encodingConfig.Amino.RegisterConcrete(&testdata.TestMsg{}, "testdata.TestMsg", nil)
 	testdata.RegisterInterfaces(encodingConfig.InterfaceRegistry)
 	s.clientCtx = client.Context{}.
@@ -51,7 +56,7 @@ func (suite *IntegrationTestSuite) CreateTestTx(privs []cryptotypes.PrivKey, acc
 		sigV2 := signing.SignatureV2{
 			PubKey: priv.PubKey(),
 			Data: &signing.SingleSignatureData{
-				SignMode:  suite.clientCtx.TxConfig.SignModeHandler().DefaultMode(),
+				SignMode:  signing.SignMode(*suite.clientCtx.TxConfig.SignModeHandler().DefaultMode().Enum()),
 				Signature: nil,
 			},
 			Sequence: accSeqs[i],
@@ -67,13 +72,21 @@ func (suite *IntegrationTestSuite) CreateTestTx(privs []cryptotypes.PrivKey, acc
 	sigsV2 = []signing.SignatureV2{}
 	for i, priv := range privs {
 		signerData := xauthsigning.SignerData{
+			Address:       sdk.AccAddress(priv.PubKey().Bytes()).String(),
 			ChainID:       chainID,
 			AccountNumber: accNums[i],
 			Sequence:      accSeqs[i],
+			PubKey:        priv.PubKey(),
 		}
 		sigV2, err := tx.SignWithPrivKey(
-			suite.clientCtx.TxConfig.SignModeHandler().DefaultMode(), signerData,
-			suite.txBuilder, priv, suite.clientCtx.TxConfig, accSeqs[i])
+			suite.ctx,
+			signing.SignMode(*suite.clientCtx.TxConfig.SignModeHandler().DefaultMode().Enum()),
+			signerData,
+			suite.txBuilder,
+			priv,
+			suite.clientCtx.TxConfig,
+			accSeqs[i],
+		)
 		if err != nil {
 			return nil, err
 		}

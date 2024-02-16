@@ -1,6 +1,7 @@
 package types
 
 import (
+	"cosmossdk.io/math"
 	"github.com/cometbft/cometbft/crypto/tmhash"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -31,11 +32,6 @@ func NewMsgAggregateExchangeRatePrevote(
 
 // Type implements LegacyMsg interface
 func (msg MsgAggregateExchangeRatePrevote) Type() string { return sdk.MsgTypeURL(&msg) }
-
-// GetSignBytes implements sdk.Msg
-func (msg MsgAggregateExchangeRatePrevote) GetSignBytes() []byte {
-	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
-}
 
 // GetSigners implements sdk.Msg
 func (msg MsgAggregateExchangeRatePrevote) GetSigners() []sdk.AccAddress {
@@ -84,11 +80,6 @@ func NewMsgAggregateExchangeRateVote(
 // Type implements LegacyMsg interface
 func (msg MsgAggregateExchangeRateVote) Type() string { return sdk.MsgTypeURL(&msg) }
 
-// GetSignBytes implements sdk.Msg
-func (msg MsgAggregateExchangeRateVote) GetSignBytes() []byte {
-	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
-}
-
 // GetSigners implements sdk.Msg
 func (msg MsgAggregateExchangeRateVote) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Feeder)
@@ -119,7 +110,7 @@ func (msg MsgAggregateExchangeRateVote) ValidateBasic() error {
 
 	for _, exchangeRate := range exchangeRates {
 		// check overflow bit length
-		if exchangeRate.Amount.BigInt().BitLen() > 255+sdk.DecimalPrecisionBits {
+		if exchangeRate.Amount.BigInt().BitLen() > 255+math.LegacyDecimalPrecisionBits {
 			return ErrInvalidExchangeRate.Wrap("overflow")
 		}
 	}
@@ -145,11 +136,6 @@ func NewMsgDelegateFeedConsent(operatorAddress sdk.ValAddress, feederAddress sdk
 
 // Type implements LegacyMsg interface
 func (msg MsgDelegateFeedConsent) Type() string { return sdk.MsgTypeURL(&msg) }
-
-// GetSignBytes implements sdk.Msg
-func (msg MsgDelegateFeedConsent) GetSignBytes() []byte {
-	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
-}
 
 // GetSigners implements sdk.Msg
 func (msg MsgDelegateFeedConsent) GetSigners() []sdk.AccAddress {
@@ -191,12 +177,6 @@ func (msg MsgGovUpdateParams) String() string {
 	return string(out)
 }
 
-// GetSignBytes implements Msg
-func (msg MsgGovUpdateParams) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(&msg)
-	return sdk.MustSortJSON(bz)
-}
-
 // GetSigners implements Msg
 func (msg MsgGovUpdateParams) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
@@ -231,12 +211,6 @@ func (msg MsgGovCancelUpdateParamPlan) String() string {
 	return string(out)
 }
 
-// GetSignBytes implements Msg
-func (msg MsgGovCancelUpdateParamPlan) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(&msg)
-	return sdk.MustSortJSON(bz)
-}
-
 // GetSigners implements Msg
 func (msg MsgGovCancelUpdateParamPlan) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
@@ -251,7 +225,7 @@ func (msg MsgGovCancelUpdateParamPlan) ValidateBasic() error {
 func NewMsgGovAddDenoms(
 	authority, title, description string,
 	height int64, denoms DenomList, mandatory bool,
-	rewardBand sdk.Dec, currencyPairProviders CurrencyPairProvidersList,
+	rewardBand math.LegacyDec, currencyPairProviders CurrencyPairProvidersList,
 	currencyDeviationThresholds CurrencyDeviationThresholdList,
 ) *MsgGovAddDenoms {
 	return &MsgGovAddDenoms{
@@ -275,12 +249,6 @@ func (msg MsgGovAddDenoms) Type() string { return sdk.MsgTypeURL(&msg) }
 func (msg MsgGovAddDenoms) String() string {
 	out, _ := yaml.Marshal(msg)
 	return string(out)
-}
-
-// GetSignBytes implements Msg
-func (msg MsgGovAddDenoms) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(&msg)
-	return sdk.MustSortJSON(bz)
 }
 
 // GetSigners implements Msg
@@ -317,12 +285,6 @@ func (msg MsgGovRemoveCurrencyPairProviders) String() string {
 	return string(out)
 }
 
-// GetSignBytes implements Msg
-func (msg MsgGovRemoveCurrencyPairProviders) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(&msg)
-	return sdk.MustSortJSON(bz)
-}
-
 // GetSigners implements Msg
 func (msg MsgGovRemoveCurrencyPairProviders) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
@@ -354,12 +316,6 @@ func (msg MsgGovRemoveCurrencyDeviationThresholds) Type() string { return sdk.Ms
 func (msg MsgGovRemoveCurrencyDeviationThresholds) String() string {
 	out, _ := yaml.Marshal(msg)
 	return string(out)
-}
-
-// GetSignBytes implements Msg
-func (msg MsgGovRemoveCurrencyDeviationThresholds) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(&msg)
-	return sdk.MustSortJSON(bz)
 }
 
 // GetSigners implements Msg
