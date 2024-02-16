@@ -185,7 +185,7 @@ func (v *validator) buildCreateValidatorMsg(amount sdk.Coin) (sdk.Msg, error) {
 	// get the initial validator min self delegation
 	minSelfDelegation, _ := math.NewIntFromString("1")
 
-	valPubKey, err := cryptocodec.FromTmPubKeyInterface(v.consensusKey.PubKey)
+	valPubKey, err := cryptocodec.FromCmtPubKeyInterface(v.consensusKey.PubKey)
 	if err != nil {
 		return nil, err
 	}

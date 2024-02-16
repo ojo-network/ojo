@@ -56,6 +56,9 @@ issues:
     - linters:
         - lll
       source: "https://"
+    - text: "SA1019: codec.NewAminoCodec is deprecated" # TODO remove once migration path is set out
+      linters:
+        - staticcheck
   max-same-issues: 50
 
 linters-settings:
