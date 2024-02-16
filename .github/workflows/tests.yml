@@ -83,6 +83,7 @@ jobs:
       - name: Start ojod rollup
         if: env.GIT_DIFF
         run: |
+          sleep 30s
           chmod +x ./build/ojod
           chmod +x ./scripts/init-local.sh
           ./scripts/init-local.sh &
