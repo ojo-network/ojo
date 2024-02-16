@@ -85,7 +85,7 @@ jobs:
         run: |
           chmod +x ./build/ojod
           chmod +x ./scripts/init-local.sh
-          ./scripts/init-local.sh
+          ./scripts/init-local.sh &
       - name: Test Local Network Liveness
         if: env.GIT_DIFF
         run: |
