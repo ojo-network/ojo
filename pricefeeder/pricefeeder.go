@@ -27,20 +27,21 @@ import (
 )
 
 const (
-	configENV      = "PRICE_FEEDER_CONFIG"
-	chainConfigENV = "PRICE_FEEDER_CHAIN_CONFIG"
-	debugLevelENV  = "PRICE_FEEDER_LOG_LEVEL"
+	envConfig       = "PRICE_FEEDER_CONFIG"
+	envChainConfig  = "PRICE_FEEDER_CHAIN_CONFIG"
+	envDebugLevel   = "PRICE_FEEDER_LOG_LEVEL"
+	envVariablePass = "PRICE_FEEDER_PASS"
 )
 
-func Start(oracleParams types.Params) error {
+func Start(oracleParams types.Params, blockTime time.Duration) error {
 	logWriter := zerolog.ConsoleWriter{Out: os.Stderr}
-	logLevel, err := zerolog.ParseLevel(os.Getenv(debugLevelENV))
+	logLevel, err := zerolog.ParseLevel(os.Getenv(envDebugLevel))
 	if err != nil {
 		return err
 	}
 	logger := zerolog.New(logWriter).Level(logLevel).With().Timestamp().Logger()
 
-	cfg, err := config.LoadConfigFromFlags(os.Getenv(configENV), "")
+	cfg, err := config.LoadConfigFromFlags(os.Getenv(envConfig), "")
 	if err != nil {
 		return err
 	}
@@ -62,7 +63,7 @@ func Start(oracleParams types.Params) error {
 		return err
 	}
 
-	chainConfig, err := strconv.ParseBool(os.Getenv(chainConfigENV))
+	chainConfig, err := strconv.ParseBool(os.Getenv(envChainConfig))
 	if err != nil {
 		return err
 	}
@@ -101,8 +102,8 @@ func Start(oracleParams types.Params) error {
 		return startPriceFeeder(ctx, logger, cfg, oracle, metrics)
 	})
 	g.Go(func() error {
-		// start the process that calculates oracle prices and votes
-		return startPriceOracle(ctx, logger, oracle, oracleParams)
+		// start the process that calculates oracle prices
+		return startPriceOracle(ctx, logger, oracle, oracleParams, blockTime)
 	})
 
 	// Block main process until all spawned goroutines have gracefully exited and
@@ -185,12 +186,13 @@ func startPriceOracle(
 	logger zerolog.Logger,
 	oracle *oracle.Oracle,
 	oracleParams types.Params,
+	tickSleep time.Duration,
 ) error {
 	srvErrCh := make(chan error, 1)
 
 	go func() {
 		logger.Info().Msg("starting price-feeder oracle...")
-		srvErrCh <- oracle.StartClientless(ctx, oracleParams)
+		srvErrCh <- oracle.StartClientless(ctx, oracleParams, tickSleep)
 	}()
 
 	for {
