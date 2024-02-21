@@ -342,7 +342,3 @@ global-labels = [["chain_id", "ojo-devnet-01"]]
 service-name = "price-feeder"
 prometheus-retention-time = 100
 
-[[provider_endpoints]]
-name = "binance"
-rest = "https://api1.binance.com"
-websocket = "stream.binance.com:9443"
