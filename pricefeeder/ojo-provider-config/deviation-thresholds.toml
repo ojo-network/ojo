@@ -1,0 +1,71 @@
+[[deviation_thresholds]]
+base = "USDT"
+threshold = "1.5"
+
+[[deviation_thresholds]]
+base = "USDC"
+threshold = "1.5"
+
+[[deviation_thresholds]]
+base = "ATOM"
+threshold = "1.5"
+
+[[deviation_thresholds]]
+base = "USDC"
+threshold = "1.5"
+
+[[deviation_thresholds]]
+base = "ETH"
+threshold = "2"
+
+[[deviation_thresholds]]
+base = "BTC"
+threshold = "2"
+
+[[deviation_thresholds]]
+base = "OSMO"
+threshold = "2"
+
+[[deviation_thresholds]]
+base = "DAI"
+threshold = "2"
+
+[[deviation_thresholds]]
+base = "stOSMO"
+threshold = "2"
+
+[[deviation_thresholds]]
+base = "stATOM"
+threshold = "2"
+
+[[deviation_thresholds]]
+base = "stJUNO"
+threshold = "2"
+
+[[deviation_thresholds]]
+base = "JUNO"
+threshold = "2"
+
+[[deviation_thresholds]]
+base = "SCRT"
+threshold = "2"
+
+[[deviation_thresholds]]
+base = "WETH"
+threshold = "2"
+
+[[deviation_thresholds]]
+base = "WBTC"
+threshold = "2"
+
+[[deviation_thresholds]]
+base = "CBETH"
+threshold = "2"
+
+[[deviation_thresholds]]
+base = "LINK"
+threshold = "2"
+
+[[deviation_thresholds]]
+base = "RETH"
+threshold = "2"
