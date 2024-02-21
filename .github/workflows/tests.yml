@@ -82,6 +82,10 @@ jobs:
           ./scripts/celestia_devnet.sh &
       - name: Start ojod rollup
         if: env.GIT_DIFF
+        env:
+          PRICE_FEEDER_CONFIG: ./pricefeeder/price-feeder.example.toml
+          PRICE_FEEDER_LOG_LEVEL: DEBUG
+          PRICE_FEEDER_CHAIN_CONFIG: TRUE
         run: |
           sleep 30s
           chmod +x ./build/ojod
