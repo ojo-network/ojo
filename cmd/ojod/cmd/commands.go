@@ -208,7 +208,7 @@ func newApp(
 	var oracleGenState oracletypes.GenesisState
 	app.AppCodec().MustUnmarshalJSON(app.DefaultGenesis()[oracletypes.ModuleName], &oracleGenState)
 	go func() {
-		err := pricefeeder.Start(oracleGenState.Params, true)
+		err := pricefeeder.Start(oracleGenState.Params)
 		if err != nil {
 			panic(err)
 		}

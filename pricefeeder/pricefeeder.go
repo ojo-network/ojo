@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -26,17 +27,20 @@ import (
 )
 
 const (
-	configFilePath = "/Users/ryanbajollari/ojo/pricefeeder/price-feeder.example.toml"
+	configENV      = "PRICE_FEEDER_CONFIG"
+	chainConfigENV = "PRICE_FEEDER_CHAIN_CONFIG"
+	debugLevelENV  = "PRICE_FEEDER_LOG_LEVEL"
 )
 
-func Start(
-	oracleParams types.Params,
-	chainConfig bool,
-) error {
+func Start(oracleParams types.Params) error {
 	logWriter := zerolog.ConsoleWriter{Out: os.Stderr}
-	logger := zerolog.New(logWriter).Level(zerolog.InfoLevel).With().Timestamp().Logger()
+	logLevel, err := zerolog.ParseLevel(os.Getenv(debugLevelENV))
+	if err != nil {
+		return err
+	}
+	logger := zerolog.New(logWriter).Level(logLevel).With().Timestamp().Logger()
 
-	cfg, err := config.LoadConfigFromFlags(configFilePath, "")
+	cfg, err := config.LoadConfigFromFlags(os.Getenv(configENV), "")
 	if err != nil {
 		return err
 	}
@@ -54,6 +58,11 @@ func Start(
 
 	providers := cfg.ProviderPairs()
 	deviations, err := cfg.DeviationsMap()
+	if err != nil {
+		return err
+	}
+
+	chainConfig, err := strconv.ParseBool(os.Getenv(chainConfigENV))
 	if err != nil {
 		return err
 	}
