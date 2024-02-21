@@ -126,6 +126,8 @@ func trapSignal(cancel context.CancelFunc, logger zerolog.Logger) {
 	}()
 }
 
+// startPriceFeeder starts the price feeder server which listens to websocket connections
+// from price providers.
 func startPriceFeeder(
 	ctx context.Context,
 	logger zerolog.Logger,
@@ -181,6 +183,7 @@ func startPriceFeeder(
 	}
 }
 
+// startPriceOracle sets oracle prices fetched from price providers every tick sleep.
 func startPriceOracle(
 	ctx context.Context,
 	logger zerolog.Logger,
