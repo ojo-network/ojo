@@ -30,6 +30,8 @@ import (
 	"github.com/spf13/cobra"
 
 	app "github.com/ojo-network/ojo/app"
+	"github.com/ojo-network/ojo/pricefeeder"
+	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
 
 // initCometBFTConfig helps to override default CometBFT Config values.
@@ -194,13 +196,25 @@ func newApp(
 
 	baseappOptions := server.DefaultBaseappOptions(appOpts)
 
-	return app.New(
+	app := app.New(
 		logger, db, traceStore, true, skipUpgradeHeights,
 		cast.ToString(appOpts.Get(flags.FlagHome)),
 		cast.ToUint(appOpts.Get(server.FlagInvCheckPeriod)),
 		appOpts,
 		baseappOptions...,
 	)
+
+	// start price feeder
+	var oracleGenState oracletypes.GenesisState
+	app.AppCodec().MustUnmarshalJSON(app.DefaultGenesis()[oracletypes.ModuleName], &oracleGenState)
+	go func() {
+		err := pricefeeder.Start(oracleGenState.Params, cast.ToDuration(appOpts.Get("rollkit.block_time")))
+		if err != nil {
+			panic(err)
+		}
+	}()
+
+	return app
 }
 
 // appExport creates a new simapp, optionally at a given height.
