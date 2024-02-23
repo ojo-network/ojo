@@ -18,6 +18,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
 
+	"github.com/ojo-network/ojo/x/oracle/keeper"
 	"github.com/ojo-network/ojo/x/oracle/types"
 
 	"github.com/ojo-network/price-feeder/config"
@@ -33,7 +34,7 @@ const (
 	envVariablePass = "PRICE_FEEDER_PASS"
 )
 
-func Start(oracleParams types.Params, blockTime time.Duration) error {
+func Start(oracleKeeper keeper.Keeper, oracleParams types.Params, blockTime time.Duration) error {
 	logWriter := zerolog.ConsoleWriter{Out: os.Stderr}
 	logLevel, err := zerolog.ParseLevel(os.Getenv(envDebugLevel))
 	if err != nil {
@@ -96,6 +97,9 @@ func Start(oracleParams types.Params, blockTime time.Duration) error {
 	if err != nil {
 		return err
 	}
+
+	// set price feeder oracle in oracle module keeper
+	oracleKeeper.PriceFeederOracle = oracle
 
 	g.Go(func() error {
 		// start the process that observes and publishes exchange prices

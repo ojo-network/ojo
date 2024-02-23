@@ -208,7 +208,11 @@ func newApp(
 	var oracleGenState oracletypes.GenesisState
 	app.AppCodec().MustUnmarshalJSON(app.DefaultGenesis()[oracletypes.ModuleName], &oracleGenState)
 	go func() {
-		err := pricefeeder.Start(oracleGenState.Params, cast.ToDuration(appOpts.Get("rollkit.block_time")))
+		err := pricefeeder.Start(
+			app.OracleKeeper,
+			oracleGenState.Params,
+			cast.ToDuration(appOpts.Get("rollkit.block_time")),
+		)
 		if err != nil {
 			panic(err)
 		}
