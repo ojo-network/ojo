@@ -3,7 +3,7 @@
 CWD="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 PRICE_FEEDER_CONFIG_PATH="${CWD}/../pricefeeder/price-feeder.example.toml"
 export PRICE_FEEDER_CONFIG=$(realpath "$PRICE_FEEDER_CONFIG_PATH")
-export PRICE_FEEDER_CHAIN_CONFIG="TRUE"
+export PRICE_FEEDER_CHAIN_CONFIG="FALSE"
 export PRICE_FEEDER_LOG_LEVEL="DEBUG"
 
 NODE_BIN="${1:-$CWD/../build/ojod}"
@@ -70,7 +70,7 @@ EOF
 echo -e "\n Your DA_BLOCK_HEIGHT is $DA_BLOCK_HEIGHT \n"
 
 # reset any existing genesis/chain data
-$NODE_BIN $home0 tendermint unsafe-reset-all
+# $NODE_BIN $home0 tendermint unsafe-reset-all
 
 # initialize the validator with the chain ID you set
 $NODE_BIN $home0 init $VALIDATOR_NAME --chain-id $CHAIN_ID
@@ -85,7 +85,7 @@ $NODE_BIN $home0 add-genesis-account $KEY_2_NAME $TOKEN_AMOUNT --keyring-backend
 
 # patch genesis
 echo "--- Patching genesis..."
-jq '.consensus_params["block"]["time_iota_ms"]="5000"
+jq '.consensus["params"]["abci"]["vote_extensions_enable_height"]="2"
     | .app_state["crisis"]["constant_fee"]["denom"]="'$DENOM'"
     | .app_state["gov"]["deposit_params"]["min_deposit"][0]["denom"]="'$DENOM'"
     | .app_state["mint"]["params"]["mint_denom"]="'$DENOM'"

@@ -15,26 +15,22 @@ import (
 
 // OracleVoteExtension defines the canonical vote extension structure.
 type OracleVoteExtension struct {
-	Height           int64
-	ExchangeRateVote types.AggregateExchangeRateVote
+	Height        int64
+	ExchangeRates sdk.DecCoins
 }
 
 type VoteExtHandler struct {
 	logger       log.Logger
-	voterAddress sdk.ValAddress
-
 	OracleKeeper keeper.Keeper
 }
 
 // NewVoteExtensionHandler returns a new VoteExtensionHandler.
 func NewVoteExtensionHandler(
 	logger log.Logger,
-	voterAddress sdk.ValAddress,
 	oracleKeeper keeper.Keeper,
 ) *VoteExtHandler {
 	return &VoteExtHandler{
 		logger:       logger,
-		voterAddress: voterAddress,
 		OracleKeeper: oracleKeeper,
 	}
 }
@@ -52,9 +48,10 @@ func (h *VoteExtHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 
 		// Get prices from Oracle Keeper's pricefeeder and generate vote msg
 		prices := h.OracleKeeper.PriceFeederOracle.GetPrices()
+		h.logger.Info("Oracle price feeder prices", "prices", prices)
 		exchangeRatesStr := oracle.GenerateExchangeRatesString(prices)
 
-		// Parse as DecCoins and filter out rates which aren't included in the AcceptList
+		// Parse as DecCoins
 		exchangeRates, err := types.ParseExchangeRateDecCoins(exchangeRatesStr)
 		if err != nil {
 			err := fmt.Errorf("extend vote handler received invalid exchange rate", types.ErrInvalidExchangeRate)
@@ -64,6 +61,7 @@ func (h *VoteExtHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 			)
 			return nil, err
 		}
+		// Filter out rates which aren't included in the AcceptList
 		acceptList := h.OracleKeeper.AcceptList(ctx)
 		filteredDecCoins := sdk.DecCoins{}
 		for _, decCoin := range exchangeRates {
@@ -72,11 +70,9 @@ func (h *VoteExtHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 			}
 		}
 
-		vote := types.NewAggregateExchangeRateVote(filteredDecCoins, h.voterAddress)
-
 		voteExt := OracleVoteExtension{
-			Height:           req.Height,
-			ExchangeRateVote: vote,
+			Height:        req.Height,
+			ExchangeRates: filteredDecCoins,
 		}
 
 		bz, err := json.Marshal(voteExt)
@@ -88,6 +84,10 @@ func (h *VoteExtHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 			)
 			return nil, err
 		}
+		h.logger.Info(
+			"created vote extension",
+			"height", req.Height,
+		)
 
 		return &cometabci.ResponseExtendVote{VoteExtension: bz}, nil
 	}

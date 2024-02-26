@@ -15,7 +15,7 @@ import (
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
 
-type OracleExchangeRateVotes struct {
+type AggregateExchangeRateVotes struct {
 	ExchangeRateVotes  []oracletypes.AggregateExchangeRateVote
 	ExtendedCommitInfo cometabci.ExtendedCommitInfo
 }
@@ -36,20 +36,39 @@ func NewProposalHandler(logger log.Logger, keeper keeper.Keeper, valStore baseap
 
 func (h *ProposalHandler) PrepareProposal() sdk.PrepareProposalHandler {
 	return func(ctx sdk.Context, req *cometabci.RequestPrepareProposal) (*cometabci.ResponsePrepareProposal, error) {
+		if req == nil {
+			err := fmt.Errorf("prepare proposal received a nil request")
+			h.logger.Error(
+				"height", req.Height,
+				err.Error(),
+			)
+			return nil, err
+		}
+
 		err := baseapp.ValidateVoteExtensions(ctx, h.valStore, req.Height, ctx.ChainID(), req.LocalLastCommit)
 		if err != nil {
 			return nil, err
 		}
 
+		if req.Txs == nil {
+			err := fmt.Errorf("prepare proposal received a request with nil Txs")
+			h.logger.Error(
+				"height", req.Height,
+				err.Error(),
+			)
+			return nil, err
+		}
+
 		proposalTxs := req.Txs
 
-		if req.Height > ctx.ConsensusParams().Abci.VoteExtensionsEnableHeight {
+		voteExtensionsEnabled := VoteExtensionsEnabled(ctx)
+		if voteExtensionsEnabled {
 			exchangeRateVotes, err := h.generateExchangeRateVotes(ctx, req.LocalLastCommit)
 			if err != nil {
 				return nil, errors.New("failed to generate exchange rate votes")
 			}
 
-			injectedVoteExtTx := OracleExchangeRateVotes{
+			injectedVoteExtTx := AggregateExchangeRateVotes{
 				ExchangeRateVotes:  exchangeRateVotes,
 				ExtendedCommitInfo: req.LocalLastCommit,
 			}
@@ -66,6 +85,12 @@ func (h *ProposalHandler) PrepareProposal() sdk.PrepareProposalHandler {
 			proposalTxs = append([][]byte{bz}, proposalTxs...)
 		}
 
+		h.logger.Info(
+			"prepared proposal",
+			"txs", len(proposalTxs),
+			"vote_extensions_enabled", voteExtensionsEnabled,
+		)
+
 		return &cometabci.ResponsePrepareProposal{
 			Txs: proposalTxs,
 		}, nil
@@ -74,8 +99,27 @@ func (h *ProposalHandler) PrepareProposal() sdk.PrepareProposalHandler {
 
 func (h *ProposalHandler) ProcessProposal() sdk.ProcessProposalHandler {
 	return func(ctx sdk.Context, req *cometabci.RequestProcessProposal) (*cometabci.ResponseProcessProposal, error) {
-		if req.Height > ctx.ConsensusParams().Abci.VoteExtensionsEnableHeight {
-			var injectedVoteExtTx OracleExchangeRateVotes
+		if req == nil {
+			err := fmt.Errorf("process proposal received a nil request")
+			h.logger.Error(
+				"height", req.Height,
+				err.Error(),
+			)
+			return nil, err
+		}
+
+		if req.Txs == nil {
+			err := fmt.Errorf("process proposal received a request with nil Txs")
+			h.logger.Error(
+				"height", req.Height,
+				err.Error(),
+			)
+			return nil, err
+		}
+
+		voteExtensionsEnabled := VoteExtensionsEnabled(ctx)
+		if voteExtensionsEnabled {
+			var injectedVoteExtTx AggregateExchangeRateVotes
 			if err := json.Unmarshal(req.Txs[0], &injectedVoteExtTx); err != nil {
 				h.logger.Error("failed to decode injected vote extension tx", "err", err)
 				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, nil
@@ -96,55 +140,36 @@ func (h *ProposalHandler) ProcessProposal() sdk.ProcessProposalHandler {
 			// calculation and comparing the results.
 		}
 
+		h.logger.Info(
+			"processed proposal",
+			"txs", len(req.Txs),
+			"vote_extensions_enabled", voteExtensionsEnabled,
+		)
+
 		return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_ACCEPT}, nil
 	}
-}
-
-func (h *ProposalHandler) PreBlocker(ctx sdk.Context, req *cometabci.RequestFinalizeBlock) (*sdk.ResponsePreBlock, error) {
-	res := &sdk.ResponsePreBlock{}
-	if len(req.Txs) == 0 {
-		return res, nil
-	}
-
-	if req.Height > ctx.ConsensusParams().Abci.VoteExtensionsEnableHeight {
-		var injectedVoteExtTx OracleExchangeRateVotes
-		if err := json.Unmarshal(req.Txs[0], &injectedVoteExtTx); err != nil {
-			h.logger.Error("failed to decode injected vote extension tx", "err", err)
-			return nil, err
-		}
-
-		// set oracle exchange rate votes using the passed in context, which will make
-		// these votes available in the current block.
-		for _, exchangeRateVote := range injectedVoteExtTx.ExchangeRateVotes {
-			valAddr, err := sdk.ValAddressFromBech32(exchangeRateVote.Voter)
-			if err != nil {
-				return nil, err
-			}
-			h.keeper.SetAggregateExchangeRateVote(ctx, valAddr, exchangeRateVote)
-		}
-	}
-	return res, nil
 }
 
 func (h *ProposalHandler) generateExchangeRateVotes(
 	ctx sdk.Context,
 	ci cometabci.ExtendedCommitInfo,
 ) (votes []oracletypes.AggregateExchangeRateVote, err error) {
-	for _, v := range ci.Votes {
-		if v.BlockIdFlag != cmtproto.BlockIDFlagCommit {
+	for _, vote := range ci.Votes {
+		if vote.BlockIdFlag != cmtproto.BlockIDFlagCommit {
 			continue
 		}
 
 		var voteExt OracleVoteExtension
-		if err := json.Unmarshal(v.VoteExtension, &voteExt); err != nil {
+		if err := json.Unmarshal(vote.VoteExtension, &voteExt); err != nil {
 			h.logger.Error(
 				"failed to decode vote extension",
 				"err", err,
-				"validator", fmt.Sprintf("%x", v.Validator.Address),
+				"validator", fmt.Sprintf("%x", vote.Validator.Address),
 			)
 			return nil, err
 		}
-		votes = append(votes, voteExt.ExchangeRateVote)
+		exchangeRateVote := oracletypes.NewAggregateExchangeRateVote(voteExt.ExchangeRates, vote.Validator.Address)
+		votes = append(votes, exchangeRateVote)
 	}
 
 	return votes, nil

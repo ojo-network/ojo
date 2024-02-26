@@ -87,6 +87,7 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 	ballotDenomSlice := k.OrganizeBallotByDenom(ctx, validatorClaimMap)
 	threshold := k.VoteThreshold(ctx).MulInt64(types.MaxVoteThresholdMultiplier).TruncateInt64()
 
+	ctx.Logger().Info("Endblocker log", "ballotDenomSlice", ballotDenomSlice)
 	// Iterate through ballots and update exchange rates; drop if not enough votes have been achieved.
 	for _, ballotDenom := range ballotDenomSlice {
 		// Increment Mandatory Win count if Denom in Mandatory list
