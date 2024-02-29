@@ -13,6 +13,10 @@
 # e.g. run this with ojod1, stop ojod1, then run it with ojod2 to continue.
 
 CWD="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+PRICE_FEEDER_CONFIG_PATH="${CWD}/../pricefeeder/price-feeder.example.toml"
+export PRICE_FEEDER_CONFIG=$(realpath "$PRICE_FEEDER_CONFIG_PATH")
+export PRICE_FEEDER_CHAIN_CONFIG="TRUE"
+export PRICE_FEEDER_LOG_LEVEL="DEBUG"
 
 NODE_BIN="${1:-$CWD/../build/ojod}"
 

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io"
 	"os"
+	"time"
 
 	"cosmossdk.io/log"
 	"cosmossdk.io/tools/confix/cmd"
@@ -208,7 +209,7 @@ func newApp(
 	var oracleGenState oracletypes.GenesisState
 	app.AppCodec().MustUnmarshalJSON(app.DefaultGenesis()[oracletypes.ModuleName], &oracleGenState)
 	go func() {
-		err := pricefeeder.Start(oracleGenState.Params, cast.ToDuration(appOpts.Get("rollkit.block_time")))
+		err := pricefeeder.Start(oracleGenState.Params, time.Second * 5)
 		if err != nil {
 			panic(err)
 		}
