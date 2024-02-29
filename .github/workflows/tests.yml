@@ -74,24 +74,16 @@ jobs:
           name: ojod-linux-amd64
           path: ./build
 
-      - name: Start celestia devnet
+      - name: Start single node chain
         if: env.GIT_DIFF
         run: |
           chmod +x ./build/ojod
-          chmod +x ./scripts/celestia_devnet.sh
-          ./scripts/celestia_devnet.sh &
-      - name: Start ojod rollup
-        if: env.GIT_DIFF
-        run: |
-          sleep 30s
-          chmod +x ./build/ojod
-          chmod +x ./scripts/init-local.sh
-          ./scripts/init-local.sh &
+          ./scripts/single-node.sh
       - name: Test Local Network Liveness
         if: env.GIT_DIFF
         run: |
           sleep 1m
-          ./scripts/localnet-liveness.sh 50 5 50 localhost:36657
+          ./scripts/localnet-liveness.sh 50 5 50 localhost:26657
 
   test-e2e:
     runs-on: ubuntu-latest
