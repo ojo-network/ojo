@@ -54,13 +54,14 @@ func (h *VoteExtHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 		// Parse as DecCoins
 		exchangeRates, err := types.ParseExchangeRateDecCoins(exchangeRatesStr)
 		if err != nil {
-			err := fmt.Errorf("extend vote handler received invalid exchange rate", types.ErrInvalidExchangeRate)
+			err := fmt.Errorf("extend vote handler received invalid exchange rate %w", types.ErrInvalidExchangeRate)
 			h.logger.Error(
 				"height", req.Height,
 				err.Error(),
 			)
 			return nil, err
 		}
+
 		// Filter out rates which aren't included in the AcceptList
 		acceptList := h.OracleKeeper.AcceptList(ctx)
 		filteredDecCoins := sdk.DecCoins{}
@@ -124,17 +125,6 @@ func (h *VoteExtHandler) VerifyVoteExtensionHandler() sdk.VerifyVoteExtensionHan
 			)
 			h.logger.Error(err.Error())
 			return &cometabci.ResponseVerifyVoteExtension{Status: cometabci.ResponseVerifyVoteExtension_REJECT}, err
-		}
-
-		// Verify vote extension signer and exchange rate vote signer match
-		validatorAddress := sdk.ConsAddress{}
-		if err := validatorAddress.Unmarshal(req.ValidatorAddress); err != nil {
-			err := fmt.Errorf("verify vote extension handler failed to unmarshal validator address: %w", err)
-			h.logger.Error(
-				"height", req.Height,
-				err.Error(),
-			)
-			return nil, err
 		}
 
 		h.logger.Info(

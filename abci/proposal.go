@@ -60,6 +60,7 @@ func (h *ProposalHandler) PrepareProposal() sdk.PrepareProposalHandler {
 		}
 
 		proposalTxs := req.Txs
+		h.logger.Info("proposalTxs before", "txs", proposalTxs)
 
 		voteExtensionsEnabled := VoteExtensionsEnabled(ctx)
 		if voteExtensionsEnabled {
@@ -84,6 +85,8 @@ func (h *ProposalHandler) PrepareProposal() sdk.PrepareProposalHandler {
 			// and store the oracle exchange rate votes.
 			proposalTxs = append([][]byte{bz}, proposalTxs...)
 		}
+
+		h.logger.Info("proposalTxs after", "txs", proposalTxs)
 
 		h.logger.Info(
 			"prepared proposal",
@@ -124,7 +127,7 @@ func (h *ProposalHandler) ProcessProposal() sdk.ProcessProposalHandler {
 				h.logger.Error("failed to decode injected vote extension tx", "err", err)
 				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, nil
 			}
-
+			h.logger.Info("ProcessProposal injectedVoteExtTx", "tx", injectedVoteExtTx)
 			err := baseapp.ValidateVoteExtensions(
 				ctx,
 				h.valStore,
