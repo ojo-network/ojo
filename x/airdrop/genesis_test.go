@@ -3,7 +3,7 @@ package airdrop_test
 import (
 	"gotest.tools/v3/assert"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"cosmossdk.io/math"
 
 	"github.com/ojo-network/ojo/x/airdrop"
 	"github.com/ojo-network/ojo/x/airdrop/types"
@@ -29,7 +29,7 @@ func (s *IntegrationTestSuite) TestGenesis_ExportGenesis() {
 		{
 			VestingEndTime: 100,
 			OriginAddress:  "ojo1ner6kc63xl903wrv2n8p9mtun79gegjld93lx0",
-			OriginAmount:   sdk.NewInt(100).Uint64(),
+			OriginAmount:   math.NewInt(100).Uint64(),
 		},
 	}
 

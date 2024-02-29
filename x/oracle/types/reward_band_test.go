@@ -3,14 +3,14 @@ package types
 import (
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"cosmossdk.io/math"
 	"github.com/stretchr/testify/require"
 )
 
 func TestRewardBandString(t *testing.T) {
 	rb := RewardBand{
 		SymbolDenom: "ojo",
-		RewardBand:  sdk.OneDec(),
+		RewardBand:  math.LegacyOneDec(),
 	}
 	require.Equal(t, rb.String(), "symbol_denom: ojo\nreward_band: \"1.000000000000000000\"\n")
 
@@ -21,15 +21,15 @@ func TestRewardBandString(t *testing.T) {
 func TestRewardBandEqual(t *testing.T) {
 	rb := RewardBand{
 		SymbolDenom: "ojo",
-		RewardBand:  sdk.OneDec(),
+		RewardBand:  math.LegacyOneDec(),
 	}
 	rb2 := RewardBand{
 		SymbolDenom: "ojo",
-		RewardBand:  sdk.OneDec(),
+		RewardBand:  math.LegacyOneDec(),
 	}
 	rb3 := RewardBand{
 		SymbolDenom: "inequal",
-		RewardBand:  sdk.OneDec(),
+		RewardBand:  math.LegacyOneDec(),
 	}
 
 	require.True(t, rb.Equal(&rb2))
@@ -41,23 +41,23 @@ func TestRewardBandDenomFinder(t *testing.T) {
 	rbl := RewardBandList{
 		{
 			SymbolDenom: "foo",
-			RewardBand:  sdk.OneDec(),
+			RewardBand:  math.LegacyOneDec(),
 		},
 		{
 			SymbolDenom: "bar",
-			RewardBand:  sdk.ZeroDec(),
+			RewardBand:  math.LegacyZeroDec(),
 		},
 	}
 
 	band, err := rbl.GetBandFromDenom("foo")
 	require.NoError(t, err)
-	require.Equal(t, band, sdk.OneDec())
+	require.Equal(t, band, math.LegacyOneDec())
 
 	band, err = rbl.GetBandFromDenom("bar")
 	require.NoError(t, err)
-	require.Equal(t, band, sdk.ZeroDec())
+	require.Equal(t, band, math.LegacyZeroDec())
 
 	band, err = rbl.GetBandFromDenom("baz")
 	require.Error(t, err)
-	require.Equal(t, band, sdk.ZeroDec())
+	require.Equal(t, band, math.LegacyZeroDec())
 }

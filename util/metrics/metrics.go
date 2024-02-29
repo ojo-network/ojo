@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"cosmossdk.io/math"
 	"github.com/armon/go-metrics"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -22,7 +23,7 @@ func RecordMissCounter(operator sdk.ValAddress, missCounter uint64) {
 }
 
 // RecordExchangeRate records the exchange rate gauge for a denom
-func RecordExchangeRate(denom string, exchangeRate sdk.Dec) {
+func RecordExchangeRate(denom string, exchangeRate math.LegacyDec) {
 	metrics.SetGaugeWithLabels(
 		[]string{exchangeRateLabel},
 		float32(exchangeRate.MustFloat64()),
@@ -31,7 +32,7 @@ func RecordExchangeRate(denom string, exchangeRate sdk.Dec) {
 }
 
 // RecordAggregateExchangeRate records the median price gauge for a denom
-func RecordMedianPrice(denom string, price sdk.Dec) {
+func RecordMedianPrice(denom string, price math.LegacyDec) {
 	metrics.SetGaugeWithLabels(
 		[]string{medianPriceLabel},
 		float32(price.MustFloat64()),
@@ -40,7 +41,7 @@ func RecordMedianPrice(denom string, price sdk.Dec) {
 }
 
 // RecordAggregateExchangeRate records the median deviation price gauge for a denom
-func RecordMedianDeviationPrice(denom string, price sdk.Dec) {
+func RecordMedianDeviationPrice(denom string, price math.LegacyDec) {
 	metrics.SetGaugeWithLabels(
 		[]string{medianDeviationPriceLabel},
 		float32(price.MustFloat64()),

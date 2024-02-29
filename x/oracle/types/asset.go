@@ -1,6 +1,7 @@
 package types
 
 import (
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/ojo-network/ojo/app/params"
@@ -36,7 +37,7 @@ type (
 	// ExchangeRateVote defines a structure to store a validator's vote on the
 	// rate of USD in the denom asset.
 	ExchangeRateVote struct {
-		ExchangeRate sdk.Dec        `json:"exchange_rate"` // Exchange rate of a denomination against USD
+		ExchangeRate math.LegacyDec `json:"exchange_rate"` // Exchange rate of a denomination against USD
 		Denom        string         `json:"denom"`         // Ticker symbol of denomination exchanged against USD
 		Voter        sdk.ValAddress `json:"voter"`         // Voter validator address
 	}

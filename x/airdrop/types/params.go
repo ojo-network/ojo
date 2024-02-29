@@ -3,14 +3,14 @@ package types
 import (
 	"fmt"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"cosmossdk.io/math"
 )
 
 var (
 	DefaultOriginAccountsCreated = false
 	DefaultExpiryBlock           = uint64(5000)
-	DefaultDelegationRequirement = sdk.NewDecWithPrec(1, 1)
-	DefaultAirdropFactor         = sdk.NewDecWithPrec(1, 1)
+	DefaultDelegationRequirement = math.LegacyNewDecWithPrec(1, 1)
+	DefaultAirdropFactor         = math.LegacyNewDecWithPrec(1, 1)
 )
 
 func DefaultParams() Params {

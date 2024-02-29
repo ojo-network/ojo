@@ -1,6 +1,7 @@
 package types
 
 import (
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ojo-network/ojo/util/checkers"
@@ -17,8 +18,8 @@ var (
 
 func NewMsgSetParams(
 	expiryBlock uint64,
-	delegationRequirement *sdk.Dec,
-	airdropFactor *sdk.Dec,
+	delegationRequirement *math.LegacyDec,
+	airdropFactor *math.LegacyDec,
 	govAddress string,
 ) *MsgSetParams {
 	params := &Params{
@@ -34,11 +35,6 @@ func NewMsgSetParams(
 
 // Type implements LegacyMsg interface
 func (msg MsgSetParams) Type() string { return sdk.MsgTypeURL(&msg) }
-
-// GetSignBytes implements sdk.Msg
-func (msg MsgSetParams) GetSignBytes() []byte {
-	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
-}
 
 // GetSigners implements sdk.Msg
 func (msg MsgSetParams) GetSigners() []sdk.AccAddress {
@@ -63,11 +59,6 @@ func NewMsgClaimAirdrop(
 
 // Type implements LegacyMsg interface
 func (msg MsgClaimAirdrop) Type() string { return sdk.MsgTypeURL(&msg) }
-
-// GetSignBytes implements sdk.Msg
-func (msg MsgClaimAirdrop) GetSignBytes() []byte {
-	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
-}
 
 // GetSigners implements sdk.Msg
 func (msg MsgClaimAirdrop) GetSigners() []sdk.AccAddress {

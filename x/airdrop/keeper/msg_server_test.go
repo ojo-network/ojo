@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ojo-network/ojo/x/airdrop/types"
@@ -8,7 +9,7 @@ import (
 
 func (s *IntegrationTestSuite) TestMsgServer_SetParams() {
 	expiryBlock := uint64(22000)
-	delegationRequirement := sdk.MustNewDecFromStr("0.25")
+	delegationRequirement := math.LegacyMustNewDecFromStr("0.25")
 	SetParams(s, expiryBlock, &delegationRequirement)
 
 	params := types.DefaultParams()
@@ -22,42 +23,42 @@ func (s *IntegrationTestSuite) TestMsgServer_ClaimAirdrop() {
 	testCases := []struct {
 		name                  string
 		expiryBlock           uint64
-		delegationRequirement sdk.Dec
+		delegationRequirement math.LegacyDec
 		originAccount         sdk.AccAddress
 		errMsg                string
 	}{
 		{
 			name:                  "airdrop account doesn't exist",
 			expiryBlock:           10000,
-			delegationRequirement: sdk.MustNewDecFromStr("0"),
+			delegationRequirement: math.LegacyMustNewDecFromStr("0"),
 			originAccount:         CreateAccount(s),
 			errMsg:                "no airdrop account found",
 		},
 		{
 			name:                  "airdrop account already claimed",
 			expiryBlock:           10000,
-			delegationRequirement: sdk.MustNewDecFromStr("0"),
+			delegationRequirement: math.LegacyMustNewDecFromStr("0"),
 			originAccount:         CreateClaimedAccount(s),
 			errMsg:                "no airdrop account found",
 		},
 		{
 			name:                  "past the expiry block",
 			expiryBlock:           1,
-			delegationRequirement: sdk.MustNewDecFromStr("0"),
+			delegationRequirement: math.LegacyMustNewDecFromStr("0"),
 			originAccount:         CreateAirdropAccount(s),
 			errMsg:                "airdrop expired; chain is past the expire block",
 		},
 		{
 			name:                  "delegation requirement not met",
 			expiryBlock:           10000,
-			delegationRequirement: sdk.MustNewDecFromStr("0.75"),
+			delegationRequirement: math.LegacyMustNewDecFromStr("0.75"),
 			originAccount:         CreateAirdropAccount(s),
 			errMsg:                "delegation requirement not met",
 		},
 		{
 			name:                  "claim successful",
 			expiryBlock:           10000,
-			delegationRequirement: sdk.MustNewDecFromStr("0"),
+			delegationRequirement: math.LegacyMustNewDecFromStr("0"),
 			originAccount:         CreateAirdropAccount(s),
 			errMsg:                "",
 		},
@@ -112,7 +113,7 @@ func CreateAirdropAccount(s *IntegrationTestSuite) sdk.AccAddress {
 }
 
 func CreateClaimedAccount(s *IntegrationTestSuite) sdk.AccAddress {
-	delegationRequirement := sdk.MustNewDecFromStr("0")
+	delegationRequirement := math.LegacyMustNewDecFromStr("0")
 	SetParams(s, uint64(20000), &delegationRequirement)
 	alreadyClaimedAcct := CreateAirdropAccount(s)
 	claimAddress := CreateAccount(s)
@@ -129,7 +130,7 @@ func CreateClaimedAccount(s *IntegrationTestSuite) sdk.AccAddress {
 func SetParams(
 	s *IntegrationTestSuite,
 	expiryBlock uint64,
-	delegationRequirement *sdk.Dec,
+	delegationRequirement *math.LegacyDec,
 ) {
 	params := types.DefaultParams()
 	params.ExpiryBlock = expiryBlock

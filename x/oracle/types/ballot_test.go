@@ -7,8 +7,9 @@ import (
 	"strconv"
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/cometbft/cometbft/crypto/secp256k1"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	cmtproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
@@ -22,19 +23,19 @@ func TestToMap(t *testing.T) {
 			{
 				Voter:        sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address()),
 				Denom:        OjoDenom,
-				ExchangeRate: sdk.NewDec(1600),
+				ExchangeRate: sdkmath.LegacyNewDec(1600),
 				Power:        100,
 			},
 			{
 				Voter:        sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address()),
 				Denom:        OjoDenom,
-				ExchangeRate: sdk.ZeroDec(),
+				ExchangeRate: sdkmath.LegacyZeroDec(),
 				Power:        100,
 			},
 			{
 				Voter:        sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address()),
 				Denom:        OjoDenom,
-				ExchangeRate: sdk.NewDec(1500),
+				ExchangeRate: sdkmath.LegacyNewDec(1500),
 				Power:        100,
 			},
 		},
@@ -56,27 +57,29 @@ func TestToMap(t *testing.T) {
 }
 
 func TestSqrt(t *testing.T) {
-	num := sdk.NewDecWithPrec(144, 4)
+	num := sdkmath.LegacyNewDecWithPrec(144, 4)
 	floatNum, err := strconv.ParseFloat(num.String(), 64)
 	require.NoError(t, err)
 
 	floatNum = math.Sqrt(floatNum)
-	num, err = sdk.NewDecFromStr(fmt.Sprintf("%f", floatNum))
+	num, err = sdkmath.LegacyNewDecFromStr(fmt.Sprintf("%f", floatNum))
 	require.NoError(t, err)
 
-	require.Equal(t, sdk.NewDecWithPrec(12, 2), num)
+	require.Equal(t, sdkmath.LegacyNewDecWithPrec(12, 2), num)
 }
 
 func TestPBPower(t *testing.T) {
-	ctx := sdk.NewContext(nil, tmproto.Header{}, false, nil)
+	ctx := sdk.NewContext(nil, cmtproto.Header{}, false, nil)
 	valAccAddrs, sk := GenerateRandomTestCase()
 	pb := ExchangeRateBallot{}
 	ballotPower := int64(0)
 
 	for i := 0; i < len(sk.Validators()); i++ {
-		power := sk.Validator(ctx, valAccAddrs[i]).GetConsensusPower(sdk.DefaultPowerReduction)
+		val, err := sk.Validator(ctx, valAccAddrs[i])
+		require.NoError(t, err)
+		power := val.GetConsensusPower(sdk.DefaultPowerReduction)
 		vote := NewVoteForTally(
-			sdk.ZeroDec(),
+			sdkmath.LegacyZeroDec(),
 			OjoDenom,
 			valAccAddrs[i],
 			power,
@@ -94,7 +97,7 @@ func TestPBPower(t *testing.T) {
 	pubKey := secp256k1.GenPrivKey().PubKey()
 	faceValAddr := sdk.ValAddress(pubKey.Address())
 	fakeVote := NewVoteForTally(
-		sdk.OneDec(),
+		sdkmath.LegacyOneDec(),
 		OjoDenom,
 		faceValAddr,
 		0,
@@ -109,7 +112,7 @@ func TestPBWeightedMedian(t *testing.T) {
 		inputs      []int64
 		weights     []int64
 		isValidator []bool
-		median      sdk.Dec
+		median      sdkmath.LegacyDec
 		errMsg      string
 	}{
 		{
@@ -117,7 +120,7 @@ func TestPBWeightedMedian(t *testing.T) {
 			[]int64{1, 2, 10, 100000},
 			[]int64{1, 1, 100, 1},
 			[]bool{true, true, true, true},
-			sdk.NewDec(10),
+			sdkmath.LegacyNewDec(10),
 			"",
 		},
 		{
@@ -125,7 +128,7 @@ func TestPBWeightedMedian(t *testing.T) {
 			[]int64{1, 2, 10, 100000, 10000000000},
 			[]int64{1, 1, 100, 1, 10000},
 			[]bool{true, true, true, true, false},
-			sdk.NewDec(10),
+			sdkmath.LegacyNewDec(10),
 			"",
 		},
 		{
@@ -133,7 +136,7 @@ func TestPBWeightedMedian(t *testing.T) {
 			[]int64{1, 2, 3, 4},
 			[]int64{1, 100, 100, 1},
 			[]bool{true, true, true, true},
-			sdk.NewDec(2),
+			sdkmath.LegacyNewDec(2),
 			"",
 		},
 		{
@@ -141,7 +144,7 @@ func TestPBWeightedMedian(t *testing.T) {
 			[]int64{},
 			[]int64{},
 			[]bool{true, true, true, true},
-			sdk.NewDec(0),
+			sdkmath.LegacyNewDec(0),
 			"",
 		},
 		{
@@ -149,7 +152,7 @@ func TestPBWeightedMedian(t *testing.T) {
 			[]int64{1, 2, 10, 3},
 			[]int64{1, 1, 100, 1},
 			[]bool{true, true, true, true},
-			sdk.NewDec(10),
+			sdkmath.LegacyNewDec(10),
 			"ballot must be sorted before this operation",
 		},
 	}
@@ -165,7 +168,7 @@ func TestPBWeightedMedian(t *testing.T) {
 			}
 
 			vote := NewVoteForTally(
-				sdk.NewDec(int64(input)),
+				sdkmath.LegacyNewDec(int64(input)),
 				OjoDenom,
 				valAddr,
 				power,
@@ -186,54 +189,54 @@ func TestPBWeightedMedian(t *testing.T) {
 
 func TestPBStandardDeviation(t *testing.T) {
 	tests := []struct {
-		inputs            []sdk.Dec
+		inputs            []sdkmath.LegacyDec
 		weights           []int64
 		isValidator       []bool
-		standardDeviation sdk.Dec
+		standardDeviation sdkmath.LegacyDec
 	}{
 		{
 			// Supermajority one number
-			[]sdk.Dec{
-				sdk.MustNewDecFromStr("1.0"),
-				sdk.MustNewDecFromStr("2.0"),
-				sdk.MustNewDecFromStr("10.0"),
-				sdk.MustNewDecFromStr("100000.00"),
+			[]sdkmath.LegacyDec{
+				sdkmath.LegacyMustNewDecFromStr("1.0"),
+				sdkmath.LegacyMustNewDecFromStr("2.0"),
+				sdkmath.LegacyMustNewDecFromStr("10.0"),
+				sdkmath.LegacyMustNewDecFromStr("100000.00"),
 			},
 			[]int64{1, 1, 100, 1},
 			[]bool{true, true, true, true},
-			sdk.MustNewDecFromStr("49995.000362536252310905"),
+			sdkmath.LegacyMustNewDecFromStr("49995.000362536252310906"),
 		},
 		{
 			// Adding fake validator doesn't change outcome
-			[]sdk.Dec{
-				sdk.MustNewDecFromStr("1.0"),
-				sdk.MustNewDecFromStr("2.0"),
-				sdk.MustNewDecFromStr("10.0"),
-				sdk.MustNewDecFromStr("100000.00"),
-				sdk.MustNewDecFromStr("10000000000"),
+			[]sdkmath.LegacyDec{
+				sdkmath.LegacyMustNewDecFromStr("1.0"),
+				sdkmath.LegacyMustNewDecFromStr("2.0"),
+				sdkmath.LegacyMustNewDecFromStr("10.0"),
+				sdkmath.LegacyMustNewDecFromStr("100000.00"),
+				sdkmath.LegacyMustNewDecFromStr("10000000000"),
 			},
 			[]int64{1, 1, 100, 1, 10000},
 			[]bool{true, true, true, true, false},
-			sdk.MustNewDecFromStr("4472135950.751005519905537611"),
+			sdkmath.LegacyMustNewDecFromStr("4472135950.751005519905537611"),
 		},
 		{
 			// Tie votes
-			[]sdk.Dec{
-				sdk.MustNewDecFromStr("1.0"),
-				sdk.MustNewDecFromStr("2.0"),
-				sdk.MustNewDecFromStr("3.0"),
-				sdk.MustNewDecFromStr("4.00"),
+			[]sdkmath.LegacyDec{
+				sdkmath.LegacyMustNewDecFromStr("1.0"),
+				sdkmath.LegacyMustNewDecFromStr("2.0"),
+				sdkmath.LegacyMustNewDecFromStr("3.0"),
+				sdkmath.LegacyMustNewDecFromStr("4.00"),
 			},
 			[]int64{1, 100, 100, 1},
 			[]bool{true, true, true, true},
-			sdk.MustNewDecFromStr("1.224744871391589049"),
+			sdkmath.LegacyMustNewDecFromStr("1.224744871391589049"),
 		},
 		{
 			// No votes
-			[]sdk.Dec{},
+			[]sdkmath.LegacyDec{},
 			[]int64{},
 			[]bool{true, true, true, true},
-			sdk.NewDecWithPrec(0, 0),
+			sdkmath.LegacyNewDecWithPrec(0, 0),
 		},
 	}
 
@@ -264,17 +267,17 @@ func TestPBStandardDeviation(t *testing.T) {
 
 func TestPBStandardDeviation_Overflow(t *testing.T) {
 	valAddr := sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address())
-	overflowRate, err := sdk.NewDecFromStr("100000000000000000000000000000000000000000000000000000000.0")
+	overflowRate, err := sdkmath.LegacyNewDecFromStr("100000000000000000000000000000000000000000000000000000000.0")
 	require.NoError(t, err)
 	pb := ExchangeRateBallot{
 		NewVoteForTally(
-			sdk.OneDec(),
+			sdkmath.LegacyOneDec(),
 			OjoSymbol,
 			valAddr,
 			2,
 		),
 		NewVoteForTally(
-			sdk.NewDec(1234),
+			sdkmath.LegacyNewDec(1234),
 			OjoSymbol,
 			valAddr,
 			2,
@@ -289,7 +292,7 @@ func TestPBStandardDeviation_Overflow(t *testing.T) {
 
 	deviation, err := pb.StandardDeviation()
 	require.NoError(t, err)
-	expectedDevation := sdk.MustNewDecFromStr("871.862661203013097586")
+	expectedDevation := sdkmath.LegacyMustNewDecFromStr("871.862661203013097586")
 	require.Equal(t, expectedDevation, deviation)
 }
 
@@ -298,13 +301,13 @@ func TestBallotMapToSlice(t *testing.T) {
 
 	pb := ExchangeRateBallot{
 		NewVoteForTally(
-			sdk.NewDec(1234),
+			sdkmath.LegacyNewDec(1234),
 			OjoSymbol,
 			valAddress[0],
 			2,
 		),
 		NewVoteForTally(
-			sdk.NewDec(12345),
+			sdkmath.LegacyNewDec(12345),
 			OjoSymbol,
 			valAddress[0],
 			1,
@@ -323,13 +326,13 @@ func TestExchangeRateBallotSwap(t *testing.T) {
 
 	voteTallies := []VoteForTally{
 		NewVoteForTally(
-			sdk.NewDec(1234),
+			sdkmath.LegacyNewDec(1234),
 			OjoSymbol,
 			valAddress[0],
 			2,
 		),
 		NewVoteForTally(
-			sdk.NewDec(12345),
+			sdkmath.LegacyNewDec(12345),
 			OjoSymbol,
 			valAddress[1],
 			1,
@@ -349,13 +352,13 @@ func TestStandardDeviationUnsorted(t *testing.T) {
 	valAddress := GenerateRandomValAddr(1)
 	pb := ExchangeRateBallot{
 		NewVoteForTally(
-			sdk.NewDec(1234),
+			sdkmath.LegacyNewDec(1234),
 			OjoSymbol,
 			valAddress[0],
 			2,
 		),
 		NewVoteForTally(
-			sdk.NewDec(12),
+			sdkmath.LegacyNewDec(12),
 			OjoSymbol,
 			valAddress[0],
 			1,
@@ -385,11 +388,11 @@ func TestClaimMapToSlices(t *testing.T) {
 }
 
 func TestExchangeRateBallotSort(t *testing.T) {
-	v1 := VoteForTally{ExchangeRate: sdk.MustNewDecFromStr("0.2"), Voter: sdk.ValAddress{0, 1}}
-	v1Cpy := VoteForTally{ExchangeRate: sdk.MustNewDecFromStr("0.2"), Voter: sdk.ValAddress{0, 1}}
-	v2 := VoteForTally{ExchangeRate: sdk.MustNewDecFromStr("0.1"), Voter: sdk.ValAddress{0, 1, 1}}
-	v3 := VoteForTally{ExchangeRate: sdk.MustNewDecFromStr("0.1"), Voter: sdk.ValAddress{0, 1}}
-	v4 := VoteForTally{ExchangeRate: sdk.MustNewDecFromStr("0.5"), Voter: sdk.ValAddress{1}}
+	v1 := VoteForTally{ExchangeRate: sdkmath.LegacyMustNewDecFromStr("0.2"), Voter: sdk.ValAddress{0, 1}}
+	v1Cpy := VoteForTally{ExchangeRate: sdkmath.LegacyMustNewDecFromStr("0.2"), Voter: sdk.ValAddress{0, 1}}
+	v2 := VoteForTally{ExchangeRate: sdkmath.LegacyMustNewDecFromStr("0.1"), Voter: sdk.ValAddress{0, 1, 1}}
+	v3 := VoteForTally{ExchangeRate: sdkmath.LegacyMustNewDecFromStr("0.1"), Voter: sdk.ValAddress{0, 1}}
+	v4 := VoteForTally{ExchangeRate: sdkmath.LegacyMustNewDecFromStr("0.5"), Voter: sdk.ValAddress{1}}
 
 	tcs := []struct {
 		got      ExchangeRateBallot

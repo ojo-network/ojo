@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ojo-network/ojo/x/oracle/types"
@@ -8,7 +9,7 @@ import (
 
 func (s *IntegrationTestSuite) TestBallot_OrganizeBallotByDenom() {
 	require := s.Require()
-	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec())
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, math.LegacyOneDec())
 	claimMap := make(map[string]types.Claim)
 
 	// Empty Map
@@ -20,7 +21,7 @@ func (s *IntegrationTestSuite) TestBallot_OrganizeBallotByDenom() {
 			ExchangeRates: sdk.DecCoins{
 				sdk.DecCoin{
 					Denom:  "OJO",
-					Amount: sdk.OneDec(),
+					Amount: math.LegacyOneDec(),
 				},
 			},
 			Voter: valAddr.String(),
@@ -36,7 +37,7 @@ func (s *IntegrationTestSuite) TestBallot_OrganizeBallotByDenom() {
 	res = s.app.OracleKeeper.OrganizeBallotByDenom(s.ctx, claimMap)
 	require.Equal([]types.BallotDenom{
 		{
-			Ballot: types.ExchangeRateBallot{types.NewVoteForTally(sdk.OneDec(), "OJO", valAddr, 1)},
+			Ballot: types.ExchangeRateBallot{types.NewVoteForTally(math.LegacyOneDec(), "OJO", valAddr, 1)},
 			Denom:  "OJO",
 		},
 	}, res)
@@ -56,7 +57,7 @@ func (s *IntegrationTestSuite) TestBallot_ClearBallots() {
 	var decCoins sdk.DecCoins
 	decCoins = append(decCoins, sdk.DecCoin{
 		Denom:  "OJO",
-		Amount: sdk.ZeroDec(),
+		Amount: math.LegacyZeroDec(),
 	})
 	vote := types.AggregateExchangeRateVote{
 		ExchangeRates: decCoins,

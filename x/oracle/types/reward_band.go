@@ -3,7 +3,7 @@ package types
 import (
 	"strings"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"cosmossdk.io/math"
 	"gopkg.in/yaml.v3"
 )
 
@@ -36,11 +36,11 @@ func (rbl RewardBandList) String() (out string) {
 
 // GetRewardBand returns the reward band of a given Denom.
 // It will return an error if it can not find it.
-func (rbl RewardBandList) GetBandFromDenom(denom string) (sdk.Dec, error) {
+func (rbl RewardBandList) GetBandFromDenom(denom string) (math.LegacyDec, error) {
 	for _, rb := range rbl {
 		if strings.EqualFold(denom, rb.SymbolDenom) {
 			return rb.RewardBand, nil
 		}
 	}
-	return sdk.ZeroDec(), ErrNoRewardBand
+	return math.LegacyZeroDec(), ErrNoRewardBand
 }

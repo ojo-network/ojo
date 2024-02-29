@@ -4,7 +4,7 @@ import (
 	"os"
 
 	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
-	tmjsonclient "github.com/cometbft/cometbft/rpc/jsonrpc/client"
+	cmtjsonclient "github.com/cometbft/cometbft/rpc/jsonrpc/client"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
@@ -22,8 +22,8 @@ const (
 // TxClient is a wrapper around the cosmos sdk client context and transaction
 // factory for signing and broadcasting transactions
 type Client struct {
-	ChainID       string
-	TMRPCEndpoint string
+	ChainID        string
+	CMTRPCEndpoint string
 
 	ClientContext *client.Context
 
@@ -36,13 +36,13 @@ type Client struct {
 // signing and broadcasting transactions
 func NewClient(
 	chainID string,
-	tmrpcEndpoint string,
+	cmtrpcEndpoint string,
 	accountName string,
 	accountMnemonic string,
 ) (c *Client, err error) {
 	c = &Client{
-		ChainID:       chainID,
-		TMRPCEndpoint: tmrpcEndpoint,
+		ChainID:        chainID,
+		CMTRPCEndpoint: cmtrpcEndpoint,
 	}
 
 	c.keyringRecord, c.keyringKeyring, err = CreateAccountFromMnemonic(accountName, accountMnemonic)
@@ -63,12 +63,12 @@ func (c *Client) createClientContext() error {
 	encoding := ojoapp.MakeEncodingConfig()
 	fromAddress, _ := c.keyringRecord.GetAddress()
 
-	tmHTTPClient, err := tmjsonclient.DefaultHTTPClient(c.TMRPCEndpoint)
+	cmtHTTPClient, err := cmtjsonclient.DefaultHTTPClient(c.CMTRPCEndpoint)
 	if err != nil {
 		return err
 	}
 
-	tmRPCClient, err := rpchttp.NewWithClient(c.TMRPCEndpoint, "/websocket", tmHTTPClient)
+	cmtRPCClient, err := rpchttp.NewWithClient(c.CMTRPCEndpoint, "/websocket", cmtHTTPClient)
 	if err != nil {
 		return err
 	}
@@ -83,8 +83,8 @@ func (c *Client) createClientContext() error {
 		Codec:             encoding.Codec,
 		LegacyAmino:       encoding.Amino,
 		Input:             os.Stdin,
-		NodeURI:           c.TMRPCEndpoint,
-		Client:            tmRPCClient,
+		NodeURI:           c.CMTRPCEndpoint,
+		Client:            cmtRPCClient,
 		Keyring:           c.keyringKeyring,
 		FromAddress:       fromAddress,
 		FromName:          c.keyringRecord.Name,

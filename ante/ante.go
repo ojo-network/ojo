@@ -1,14 +1,14 @@
 package ante
 
 import (
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	storetypes "cosmossdk.io/store/types"
+	txsigning "cosmossdk.io/x/tx/signing"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	cosmosante "github.com/cosmos/cosmos-sdk/x/auth/ante"
-	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
-	ibcante "github.com/cosmos/ibc-go/v7/modules/core/ante"
-	ibckeeper "github.com/cosmos/ibc-go/v7/modules/core/keeper"
+	ibcante "github.com/cosmos/ibc-go/v8/modules/core/ante"
+	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
 )
 
 type HandlerOptions struct {
@@ -17,7 +17,7 @@ type HandlerOptions struct {
 	FeegrantKeeper    cosmosante.FeegrantKeeper
 	OracleKeeper      OracleKeeper
 	IBCKeeper         *ibckeeper.Keeper
-	SignModeHandler   signing.SignModeHandler
+	SignModeHandler   *txsigning.HandlerMap
 	SigGasConsumer    cosmosante.SignatureVerificationGasConsumer
 	TXCounterStoreKey storetypes.StoreKey
 }
