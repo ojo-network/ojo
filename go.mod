@@ -36,7 +36,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/ojo-network/price-feeder v0.1.10-0.20240221234245-b3d7d675adc9
 	github.com/ory/dockertest/v3 v3.10.0
-	github.com/rs/zerolog v1.31.0
+	github.com/rs/zerolog v1.32.0
 	github.com/spf13/cast v1.6.0
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.2
