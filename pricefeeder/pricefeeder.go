@@ -27,13 +27,14 @@ import (
 )
 
 const (
-	envConfig       = "PRICE_FEEDER_CONFIG"
-	envChainConfig  = "PRICE_FEEDER_CHAIN_CONFIG"
-	envDebugLevel   = "PRICE_FEEDER_LOG_LEVEL"
-	envVariablePass = "PRICE_FEEDER_PASS"
+	envConfig         = "PRICE_FEEDER_CONFIG"
+	envChainConfig    = "PRICE_FEEDER_CHAIN_CONFIG"
+	envDebugLevel     = "PRICE_FEEDER_LOG_LEVEL"
+	envVariablePass   = "PRICE_FEEDER_PASS"
+	envOracleTickTime = "PRICE_FEEDER_ORACLE_TICK_TIME"
 )
 
-func Start(oracleParams types.Params, blockTime time.Duration) error {
+func Start(oracleParams types.Params) error {
 	logWriter := zerolog.ConsoleWriter{Out: os.Stderr}
 	logLevel, err := zerolog.ParseLevel(os.Getenv(envDebugLevel))
 	if err != nil {
@@ -97,13 +98,18 @@ func Start(oracleParams types.Params, blockTime time.Duration) error {
 		return err
 	}
 
+	oracleTickTime, err := time.ParseDuration(os.Getenv(envOracleTickTime))
+	if err != nil {
+		return err
+	}
+
 	g.Go(func() error {
 		// start the process that observes and publishes exchange prices
 		return startPriceFeeder(ctx, logger, cfg, oracle, metrics)
 	})
 	g.Go(func() error {
 		// start the process that calculates oracle prices
-		return startPriceOracle(ctx, logger, oracle, oracleParams, blockTime)
+		return startPriceOracle(ctx, logger, oracle, oracleParams, oracleTickTime)
 	})
 
 	// Block main process until all spawned goroutines have gracefully exited and

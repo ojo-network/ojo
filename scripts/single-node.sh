@@ -17,6 +17,7 @@ PRICE_FEEDER_CONFIG_PATH="${CWD}/../pricefeeder/price-feeder.example.toml"
 export PRICE_FEEDER_CONFIG=$(realpath "$PRICE_FEEDER_CONFIG_PATH")
 export PRICE_FEEDER_CHAIN_CONFIG="TRUE"
 export PRICE_FEEDER_LOG_LEVEL="DEBUG"
+export PRICE_FEEDER_ORACLE_TICK_TIME="5s"
 
 NODE_BIN="${1:-$CWD/../build/ojod}"
 
