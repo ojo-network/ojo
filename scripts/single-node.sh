@@ -15,7 +15,7 @@
 CWD="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 PRICE_FEEDER_CONFIG_PATH="${CWD}/../pricefeeder/price-feeder.example.toml"
 export PRICE_FEEDER_CONFIG=$(realpath "$PRICE_FEEDER_CONFIG_PATH")
-export PRICE_FEEDER_CHAIN_CONFIG="TRUE"
+export PRICE_FEEDER_CHAIN_CONFIG="FALSE"
 export PRICE_FEEDER_LOG_LEVEL="DEBUG"
 export PRICE_FEEDER_ORACLE_TICK_TIME="5s"
 
@@ -125,7 +125,7 @@ if [[ ! -d "$hdir" ]]; then
 
   echo "--- Patching genesis..."
   if [[ "$STAKE_DENOM" == "$DENOM" ]]; then
-    jq '.consensus_params["block"]["time_iota_ms"]="5000"
+    jq '.consensus["params"]["abci"]["vote_extensions_enable_height"]="2"
       | .app_state["crisis"]["constant_fee"]["denom"]="'$DENOM'"
       | .app_state["gov"]["deposit_params"]["min_deposit"][0]["denom"]="'$DENOM'"
       | .app_state["mint"]["params"]["mint_denom"]="'$DENOM'"
@@ -141,6 +141,12 @@ if [[ ! -d "$hdir" ]]; then
   $NODE_BIN $home0 gentx $VAL0_KEY 1000$SCALE_FACTOR$STAKE_DENOM $kbt $cid
 
   $NODE_BIN $home0 collect-gentxs > /dev/null
+
+  # copy centralized sequencer address into genesis.json
+  # Note: validator and sequencer are used interchangeably here
+  ADDRESS=$(jq -r '.address' $n0cfgDir/priv_validator_key.json)
+  PUB_KEY=$(jq -r '.pub_key' $n0cfgDir/priv_validator_key.json)
+  jq --argjson pubKey "$PUB_KEY" '.consensus["validators"]=[{"address": "'$ADDRESS'", "pub_key": $pubKey, "power": "1000000000000", "name": "Rollkit Sequencer"}]' $n0cfgDir/genesis.json > $n0cfgDir/tmp_genesis.json && mv $n0cfgDir/tmp_genesis.json $n0cfgDir/genesis.json
 
   echo "--- Validating genesis..."
   $NODE_BIN $home0 validate-genesis
@@ -182,7 +188,7 @@ echo
 echo "Command Line Access:"
 echo "  * $NODE_BIN --home $hdir status"
 
-$NODE_BIN $home0 start --api.enable true --grpc.address="0.0.0.0:9090" --grpc-web.enable=false --log_level trace > $log_path 2>&1 &
+$NODE_BIN $home0 start --api.enable true --grpc.address="0.0.0.0:9090" --grpc-web.enable=false
 
 # Adds 1 sec to create the log and makes it easier to debug it on CI
 sleep 1

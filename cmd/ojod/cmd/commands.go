@@ -30,7 +30,6 @@ import (
 	"github.com/spf13/cobra"
 
 	app "github.com/ojo-network/ojo/app"
-	"github.com/ojo-network/ojo/pricefeeder"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
 
@@ -208,7 +207,7 @@ func newApp(
 	var oracleGenState oracletypes.GenesisState
 	app.AppCodec().MustUnmarshalJSON(app.DefaultGenesis()[oracletypes.ModuleName], &oracleGenState)
 	go func() {
-		err := pricefeeder.Start(oracleGenState.Params)
+		err := app.PriceFeeder.Start(oracleGenState.Params)
 		if err != nil {
 			panic(err)
 		}
