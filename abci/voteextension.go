@@ -50,7 +50,8 @@ func (h *VoteExtHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 					"err", r,
 				)
 
-				resp, err = &cometabci.ResponseExtendVote{VoteExtension: []byte{}}, fmt.Errorf("recovered application panic in ExtendVote: %v", r)
+				resp, err = &cometabci.ResponseExtendVote{VoteExtension: []byte{}},
+					fmt.Errorf("recovered application panic in ExtendVote: %v", r)
 			}
 		}()
 
@@ -62,7 +63,7 @@ func (h *VoteExtHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 
 		// Get prices from Oracle Keeper's pricefeeder and generate vote msg
 		if h.priceFeeder.Oracle == nil {
-			err := fmt.Errorf("Price Feeder Oracle not set")
+			err := fmt.Errorf("price feeder oracle not set")
 			h.logger.Error(err.Error())
 			return nil, err
 		}
@@ -114,7 +115,10 @@ func (h *VoteExtHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 }
 
 func (h *VoteExtHandler) VerifyVoteExtensionHandler() sdk.VerifyVoteExtensionHandler {
-	return func(ctx sdk.Context, req *cometabci.RequestVerifyVoteExtension) (*cometabci.ResponseVerifyVoteExtension, error) {
+	return func(ctx sdk.Context, req *cometabci.RequestVerifyVoteExtension) (
+		*cometabci.ResponseVerifyVoteExtension,
+		error,
+	) {
 		if req == nil {
 			err := fmt.Errorf("verify vote extension handler received a nil request")
 			h.logger.Error(err.Error())
