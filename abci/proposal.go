@@ -61,7 +61,7 @@ func (h *ProposalHandler) PrepareProposal() sdk.PrepareProposalHandler {
 
 		voteExtensionsEnabled := VoteExtensionsEnabled(ctx)
 		if voteExtensionsEnabled {
-			exchangeRateVotes, err := h.generateExchangeRateVotes(ctx, req.LocalLastCommit)
+			exchangeRateVotes, err := h.generateExchangeRateVotes(req.LocalLastCommit)
 			if err != nil {
 				return nil, errors.New("failed to generate exchange rate votes")
 			}
@@ -148,7 +148,6 @@ func (h *ProposalHandler) ProcessProposal() sdk.ProcessProposalHandler {
 }
 
 func (h *ProposalHandler) generateExchangeRateVotes(
-	ctx sdk.Context,
 	ci cometabci.ExtendedCommitInfo,
 ) (votes []oracletypes.AggregateExchangeRateVote, err error) {
 	for _, vote := range ci.Votes {

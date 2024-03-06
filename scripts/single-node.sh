@@ -17,7 +17,7 @@ PRICE_FEEDER_CONFIG_PATH="${CWD}/../pricefeeder/price-feeder.example.toml"
 export PRICE_FEEDER_CONFIG=$(realpath "$PRICE_FEEDER_CONFIG_PATH")
 export PRICE_FEEDER_CHAIN_CONFIG="FALSE"
 export PRICE_FEEDER_LOG_LEVEL="DEBUG"
-export PRICE_FEEDER_ORACLE_TICK_TIME="5s"
+export PRICE_FEEDER_ORACLE_TICK_TIME="1s"
 
 NODE_BIN="${1:-$CWD/../build/ojod}"
 
@@ -141,12 +141,6 @@ if [[ ! -d "$hdir" ]]; then
   $NODE_BIN $home0 gentx $VAL0_KEY 1000$SCALE_FACTOR$STAKE_DENOM $kbt $cid
 
   $NODE_BIN $home0 collect-gentxs > /dev/null
-
-  # copy centralized sequencer address into genesis.json
-  # Note: validator and sequencer are used interchangeably here
-  ADDRESS=$(jq -r '.address' $n0cfgDir/priv_validator_key.json)
-  PUB_KEY=$(jq -r '.pub_key' $n0cfgDir/priv_validator_key.json)
-  jq --argjson pubKey "$PUB_KEY" '.consensus["validators"]=[{"address": "'$ADDRESS'", "pub_key": $pubKey, "power": "1000000000000", "name": "Rollkit Sequencer"}]' $n0cfgDir/genesis.json > $n0cfgDir/tmp_genesis.json && mv $n0cfgDir/tmp_genesis.json $n0cfgDir/genesis.json
 
   echo "--- Validating genesis..."
   $NODE_BIN $home0 validate-genesis

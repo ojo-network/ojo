@@ -759,7 +759,6 @@ func New(
 
 	// initialize BaseApp
 	app.SetInitChainer(app.InitChainer)
-	app.SetPreBlocker(app.PreBlocker)
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
 	app.setAnteHandler(txConfig)

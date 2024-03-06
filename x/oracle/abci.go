@@ -83,6 +83,8 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 
 	k.ClearExchangeRates(ctx)
 
+	ctx.Logger().Info("Endblocker log", "validatorClaimMap", validatorClaimMap)
+
 	// NOTE: it filters out inactive or jailed validators
 	ballotDenomSlice := k.OrganizeBallotByDenom(ctx, validatorClaimMap)
 	threshold := k.VoteThreshold(ctx).MulInt64(types.MaxVoteThresholdMultiplier).TruncateInt64()
