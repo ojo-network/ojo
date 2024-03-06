@@ -17,6 +17,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ojo-network/ojo/x/oracle/types"
 
@@ -35,7 +36,8 @@ const (
 )
 
 type PriceFeeder struct {
-	Oracle *oracle.Oracle
+	Oracle           *oracle.Oracle
+	ValidatorAddress *sdk.ValAddress
 }
 
 func (pf *PriceFeeder) Start(oracleParams types.Params) error {
@@ -50,6 +52,13 @@ func (pf *PriceFeeder) Start(oracleParams types.Params) error {
 	if err != nil {
 		return err
 	}
+
+	// set validator address
+	validatorAddr, err := sdk.ValAddressFromBech32(cfg.Account.Validator)
+	if err != nil {
+		return err
+	}
+	pf.ValidatorAddress = &validatorAddr
 
 	// listen for and trap any OS signal to gracefully shutdown and exit
 	ctx, cancel := context.WithCancel(context.TODO())

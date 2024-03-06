@@ -121,7 +121,6 @@ func (h *ProposalHandler) ProcessProposal() sdk.ProcessProposalHandler {
 				h.logger.Error("failed to decode injected vote extension tx", "err", err)
 				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, nil
 			}
-			h.logger.Info("ProcessProposal injectedVoteExtTx", "tx", injectedVoteExtTx)
 			err := baseapp.ValidateVoteExtensions(
 				ctx,
 				h.valStore,
@@ -164,7 +163,7 @@ func (h *ProposalHandler) generateExchangeRateVotes(
 			)
 			return nil, err
 		}
-		exchangeRateVote := oracletypes.NewAggregateExchangeRateVote(voteExt.ExchangeRates, vote.Validator.Address)
+		exchangeRateVote := oracletypes.NewAggregateExchangeRateVote(voteExt.ExchangeRates, voteExt.ValidatorAddress)
 		votes = append(votes, exchangeRateVote)
 	}
 

@@ -16,8 +16,9 @@ import (
 
 // OracleVoteExtension defines the canonical vote extension structure.
 type OracleVoteExtension struct {
-	Height        int64
-	ExchangeRates sdk.DecCoins
+	Height           int64
+	ExchangeRates    sdk.DecCoins
+	ValidatorAddress sdk.ValAddress
 }
 
 type VoteExtHandler struct {
@@ -66,7 +67,6 @@ func (h *VoteExtHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 			return nil, err
 		}
 		prices := h.priceFeeder.Oracle.GetPrices()
-		h.logger.Info("Price feeder prices", "prices", prices)
 		exchangeRatesStr := oracle.GenerateExchangeRatesString(prices)
 
 		// Parse as DecCoins
@@ -90,8 +90,9 @@ func (h *VoteExtHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 		}
 
 		voteExt := OracleVoteExtension{
-			Height:        req.Height,
-			ExchangeRates: filteredDecCoins,
+			Height:           req.Height,
+			ExchangeRates:    filteredDecCoins,
+			ValidatorAddress: *h.priceFeeder.ValidatorAddress,
 		}
 
 		bz, err := json.Marshal(voteExt)

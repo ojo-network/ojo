@@ -43,7 +43,7 @@ func (h *PreBlockHandler) PreBlocker() sdk.PreBlocker {
 				h.logger.Error("failed to decode injected vote extension tx", "err", err)
 				return nil, err
 			}
-			h.logger.Info("PreBlocker injectedVoteExtTx", "tx", injectedVoteExtTx)
+
 			// set oracle exchange rate votes using the passed in context, which will make
 			// these votes available in the current block.
 			for _, exchangeRateVote := range injectedVoteExtTx.ExchangeRateVotes {
@@ -51,10 +51,6 @@ func (h *PreBlockHandler) PreBlocker() sdk.PreBlocker {
 				if err != nil {
 					return nil, err
 				}
-				h.logger.Info(
-					"setting oracle exchange rate vote",
-					"exchange rate vote", exchangeRateVote,
-				)
 				h.keeper.SetAggregateExchangeRateVote(ctx, valAddr, exchangeRateVote)
 			}
 		}

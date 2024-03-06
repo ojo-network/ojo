@@ -182,7 +182,7 @@ echo
 echo "Command Line Access:"
 echo "  * $NODE_BIN --home $hdir status"
 
-$NODE_BIN $home0 start --api.enable true --grpc.address="0.0.0.0:9090" --grpc-web.enable=false
+$NODE_BIN $home0 start --api.enable true --grpc.address="0.0.0.0:9090" --grpc-web.enable=false --log_level trace > $log_path 2>&1 &
 
 # Adds 1 sec to create the log and makes it easier to debug it on CI
 sleep 1
