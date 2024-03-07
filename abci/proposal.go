@@ -136,8 +136,9 @@ func (h *ProposalHandler) ProcessProposal() sdk.ProcessProposalHandler {
 				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT},
 					errors.New("failed to generate exchange rate votes")
 			}
-			if err := h.compareExchangeRateVotes(injectedVoteExtTx.ExchangeRateVotes, exchangeRateVotes); err != nil {
-				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
+			if len(injectedVoteExtTx.ExchangeRateVotes) != len(exchangeRateVotes) {
+				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT},
+					errors.New("number of votes in vote extension and extended commit info are not equal")
 			}
 		}
 
@@ -173,30 +174,4 @@ func (h *ProposalHandler) generateExchangeRateVotes(
 	}
 
 	return votes, nil
-}
-
-func (h *ProposalHandler) compareExchangeRateVotes(
-	voteExtVotes []oracletypes.AggregateExchangeRateVote,
-	generatedVotes []oracletypes.AggregateExchangeRateVote,
-) (err error) {
-	// h.logger.Info("voteExtVotes", "votes", voteExtVotes)
-	// h.logger.Info("generatedVotes", "votes", generatedVotes)
-	// if len(voteExtVotes) != len(generatedVotes) {
-	// 	err = fmt.Errorf(
-	// 		"failed to process proposal due to unequal amount of votes in vote extension and extended commit info",
-	// 	)
-	// 	h.logger.Error(err.Error())
-	// 	return err
-	// }
-
-	// for i, vote := range voteExtVotes {
-	// 	if vote.Voter != generatedVotes[i].Voter || vote.ExchangeRates.Equal(generatedVotes[i].ExchangeRates) {
-	// 		err = fmt.Errorf(
-	// 			"failed to process proposal due to mismatch in votes bewteen vote extension and extended commit info",
-	// 		)
-	// 		h.logger.Error(err.Error())
-	// 		return err
-	// 	}
-	// }
-	return nil
 }
