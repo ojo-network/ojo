@@ -57,7 +57,6 @@ func (h *ProposalHandler) PrepareProposal() sdk.PrepareProposalHandler {
 		}
 
 		proposalTxs := req.Txs
-		h.logger.Info("proposalTxs before", "txs", proposalTxs)
 
 		voteExtensionsEnabled := VoteExtensionsEnabled(ctx)
 		if voteExtensionsEnabled {
@@ -82,8 +81,6 @@ func (h *ProposalHandler) PrepareProposal() sdk.PrepareProposalHandler {
 			// and store the oracle exchange rate votes.
 			proposalTxs = append([][]byte{bz}, proposalTxs...)
 		}
-
-		h.logger.Info("proposalTxs after", "txs", proposalTxs)
 
 		h.logger.Info(
 			"prepared proposal",
@@ -134,6 +131,14 @@ func (h *ProposalHandler) ProcessProposal() sdk.ProcessProposalHandler {
 
 			// Verify the proposer's oracle exchange rate votes by computing the same
 			// calculation and comparing the results.
+			exchangeRateVotes, err := h.generateExchangeRateVotes(injectedVoteExtTx.ExtendedCommitInfo)
+			if err != nil {
+				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT},
+					errors.New("failed to generate exchange rate votes")
+			}
+			if err := h.compareExchangeRateVotes(injectedVoteExtTx.ExchangeRateVotes, exchangeRateVotes); err != nil {
+				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
+			}
 		}
 
 		h.logger.Info(
@@ -168,4 +173,30 @@ func (h *ProposalHandler) generateExchangeRateVotes(
 	}
 
 	return votes, nil
+}
+
+func (h *ProposalHandler) compareExchangeRateVotes(
+	voteExtVotes []oracletypes.AggregateExchangeRateVote,
+	generatedVotes []oracletypes.AggregateExchangeRateVote,
+) (err error) {
+	// h.logger.Info("voteExtVotes", "votes", voteExtVotes)
+	// h.logger.Info("generatedVotes", "votes", generatedVotes)
+	// if len(voteExtVotes) != len(generatedVotes) {
+	// 	err = fmt.Errorf(
+	// 		"failed to process proposal due to unequal amount of votes in vote extension and extended commit info",
+	// 	)
+	// 	h.logger.Error(err.Error())
+	// 	return err
+	// }
+
+	// for i, vote := range voteExtVotes {
+	// 	if vote.Voter != generatedVotes[i].Voter || vote.ExchangeRates.Equal(generatedVotes[i].ExchangeRates) {
+	// 		err = fmt.Errorf(
+	// 			"failed to process proposal due to mismatch in votes bewteen vote extension and extended commit info",
+	// 		)
+	// 		h.logger.Error(err.Error())
+	// 		return err
+	// 	}
+	// }
+	return nil
 }
