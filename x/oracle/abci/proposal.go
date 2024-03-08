@@ -34,7 +34,7 @@ func NewProposalHandler(logger log.Logger, keeper keeper.Keeper, valStore baseap
 	}
 }
 
-func (h *ProposalHandler) PrepareProposal() sdk.PrepareProposalHandler {
+func (h *ProposalHandler) PrepareProposalHandler() sdk.PrepareProposalHandler {
 	return func(ctx sdk.Context, req *cometabci.RequestPrepareProposal) (*cometabci.ResponsePrepareProposal, error) {
 		if req == nil {
 			err := fmt.Errorf("prepare proposal received a nil request")
@@ -94,7 +94,7 @@ func (h *ProposalHandler) PrepareProposal() sdk.PrepareProposalHandler {
 	}
 }
 
-func (h *ProposalHandler) ProcessProposal() sdk.ProcessProposalHandler {
+func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 	return func(ctx sdk.Context, req *cometabci.RequestProcessProposal) (*cometabci.ResponseProcessProposal, error) {
 		if req == nil {
 			err := fmt.Errorf("process proposal received a nil request")

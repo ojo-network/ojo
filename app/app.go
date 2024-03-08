@@ -119,8 +119,8 @@ import (
 	airdropkeeper "github.com/ojo-network/ojo/x/airdrop/keeper"
 	airdroptypes "github.com/ojo-network/ojo/x/airdrop/types"
 
-	ojoabci "github.com/ojo-network/ojo/abci"
 	"github.com/ojo-network/ojo/pricefeeder"
+	ojoabci "github.com/ojo-network/ojo/x/oracle/abci"
 
 	customante "github.com/ojo-network/ojo/ante"
 )
@@ -733,8 +733,8 @@ func New(
 		app.OracleKeeper,
 		app.StakingKeeper,
 	)
-	app.SetPrepareProposal(proposalHandler.PrepareProposal())
-	app.SetProcessProposal(proposalHandler.ProcessProposal())
+	app.SetPrepareProposal(proposalHandler.PrepareProposalHandler())
+	app.SetProcessProposal(proposalHandler.ProcessProposalHandler())
 
 	preBlockHandler := ojoabci.NewPreBlockHandler(
 		app.Logger(),

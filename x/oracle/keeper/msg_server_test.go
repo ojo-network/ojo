@@ -8,7 +8,7 @@ import (
 	"cosmossdk.io/errors"
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ojo-network/ojo/x/oracle"
+	"github.com/ojo-network/ojo/x/oracle/abci"
 	"github.com/ojo-network/ojo/x/oracle/types"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
@@ -420,7 +420,7 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 			err := tc.req.ValidateBasic()
 			if err == nil {
 				_, err = s.msgServer.GovUpdateParams(s.ctx, tc.req)
-				oracle.EndBlocker(s.ctx, s.app.OracleKeeper)
+				abci.EndBlocker(s.ctx, s.app.OracleKeeper)
 			}
 			if tc.expectErr {
 				s.Require().ErrorContains(err, tc.errMsg)
@@ -762,7 +762,7 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 			err := tc.req.ValidateBasic()
 			if err == nil {
 				_, err = s.msgServer.GovAddDenoms(s.ctx, tc.req)
-				oracle.EndBlocker(s.ctx, s.app.OracleKeeper)
+				abci.EndBlocker(s.ctx, s.app.OracleKeeper)
 			}
 			if tc.expectErr {
 				s.Require().ErrorContains(err, tc.errMsg)
@@ -986,7 +986,7 @@ func (s *IntegrationTestSuite) TestMsgServer_GovRemoveCurrencyPairProviders() {
 			err := tc.req.ValidateBasic()
 			if err == nil {
 				_, err = s.msgServer.GovRemoveCurrencyPairProviders(s.ctx, tc.req)
-				oracle.EndBlocker(s.ctx, s.app.OracleKeeper)
+				abci.EndBlocker(s.ctx, s.app.OracleKeeper)
 			}
 
 			if tc.expectErr {
@@ -1113,7 +1113,7 @@ func (s *IntegrationTestSuite) TestMsgServer_GovRemoveCurrencyDeviationThreshold
 			err := tc.req.ValidateBasic()
 			if err == nil {
 				_, err = s.msgServer.GovRemoveCurrencyDeviationThresholds(s.ctx, tc.req)
-				oracle.EndBlocker(s.ctx, s.app.OracleKeeper)
+				abci.EndBlocker(s.ctx, s.app.OracleKeeper)
 			}
 
 			if tc.expectErr {
