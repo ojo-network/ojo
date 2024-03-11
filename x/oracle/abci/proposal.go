@@ -4,14 +4,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
 
 	"cosmossdk.io/log"
 	cometabci "github.com/cometbft/cometbft/abci/types"
 	cmtproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 
-	"github.com/ojo-network/ojo/x/oracle/keeper"
+	oraclekeeper "github.com/ojo-network/ojo/x/oracle/keeper"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
 
@@ -21,16 +23,20 @@ type AggregateExchangeRateVotes struct {
 }
 
 type ProposalHandler struct {
-	logger   log.Logger
-	keeper   keeper.Keeper
-	valStore baseapp.ValidatorStore
+	logger        log.Logger
+	oracleKeeper  oraclekeeper.Keeper
+	stakingKeeper *stakingkeeper.Keeper
 }
 
-func NewProposalHandler(logger log.Logger, keeper keeper.Keeper, valStore baseapp.ValidatorStore) *ProposalHandler {
+func NewProposalHandler(
+	logger log.Logger,
+	oracleKeeper oraclekeeper.Keeper,
+	stakingKeeper *stakingkeeper.Keeper,
+) *ProposalHandler {
 	return &ProposalHandler{
-		logger:   logger,
-		keeper:   keeper,
-		valStore: valStore,
+		logger:        logger,
+		oracleKeeper:  oracleKeeper,
+		stakingKeeper: stakingKeeper,
 	}
 }
 
@@ -42,7 +48,7 @@ func (h *ProposalHandler) PrepareProposalHandler() sdk.PrepareProposalHandler {
 			return nil, err
 		}
 
-		err := baseapp.ValidateVoteExtensions(ctx, h.valStore, req.Height, ctx.ChainID(), req.LocalLastCommit)
+		err := baseapp.ValidateVoteExtensions(ctx, h.stakingKeeper, req.Height, ctx.ChainID(), req.LocalLastCommit)
 		if err != nil {
 			return nil, err
 		}
@@ -60,9 +66,9 @@ func (h *ProposalHandler) PrepareProposalHandler() sdk.PrepareProposalHandler {
 
 		voteExtensionsEnabled := VoteExtensionsEnabled(ctx)
 		if voteExtensionsEnabled {
-			exchangeRateVotes, err := h.generateExchangeRateVotes(req.LocalLastCommit)
+			exchangeRateVotes, err := h.generateExchangeRateVotes(ctx, req.LocalLastCommit)
 			if err != nil {
-				return nil, errors.New("failed to generate exchange rate votes")
+				return nil, err
 			}
 
 			injectedVoteExtTx := AggregateExchangeRateVotes{
@@ -120,7 +126,7 @@ func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 			}
 			err := baseapp.ValidateVoteExtensions(
 				ctx,
-				h.valStore,
+				h.stakingKeeper,
 				req.Height,
 				ctx.ChainID(),
 				injectedVoteExtTx.ExtendedCommitInfo,
@@ -131,14 +137,12 @@ func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 
 			// Verify the proposer's oracle exchange rate votes by computing the same
 			// calculation and comparing the results.
-			exchangeRateVotes, err := h.generateExchangeRateVotes(injectedVoteExtTx.ExtendedCommitInfo)
+			exchangeRateVotes, err := h.generateExchangeRateVotes(ctx, injectedVoteExtTx.ExtendedCommitInfo)
 			if err != nil {
-				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT},
-					errors.New("failed to generate exchange rate votes")
+				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
 			}
-			if len(injectedVoteExtTx.ExchangeRateVotes) != len(exchangeRateVotes) {
-				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT},
-					errors.New("number of votes in vote extension and extended commit info are not equal")
+			if err := h.verifyExchangeRateVotes(injectedVoteExtTx.ExchangeRateVotes, exchangeRateVotes); err != nil {
+				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
 			}
 		}
 
@@ -153,6 +157,7 @@ func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 }
 
 func (h *ProposalHandler) generateExchangeRateVotes(
+	ctx sdk.Context,
 	ci cometabci.ExtendedCommitInfo,
 ) (votes []oracletypes.AggregateExchangeRateVote, err error) {
 	for _, vote := range ci.Votes {
@@ -165,13 +170,59 @@ func (h *ProposalHandler) generateExchangeRateVotes(
 			h.logger.Error(
 				"failed to decode vote extension",
 				"err", err,
-				"validator", fmt.Sprintf("%x", vote.Validator.Address),
 			)
 			return nil, err
 		}
-		exchangeRateVote := oracletypes.NewAggregateExchangeRateVote(voteExt.ExchangeRates, voteExt.ValidatorAddress)
+
+		var valConsAddr sdk.ConsAddress
+		if err := valConsAddr.Unmarshal(vote.Validator.Address); err != nil {
+			h.logger.Error(
+				"failed to unmarshal validator consensus address",
+				"err", err,
+			)
+			return nil, err
+		}
+		val, err := h.stakingKeeper.GetValidatorByConsAddr(ctx, valConsAddr)
+		if err != nil {
+			h.logger.Error(
+				"failed to get consensus validator from staking keeper",
+				"err", err,
+			)
+			return nil, err
+		}
+		valAddr, err := sdk.ValAddressFromBech32(val.OperatorAddress)
+		if err != nil {
+			return nil, err
+		}
+
+		exchangeRateVote := oracletypes.NewAggregateExchangeRateVote(voteExt.ExchangeRates, valAddr)
 		votes = append(votes, exchangeRateVote)
 	}
 
+	// sort votes so they are verified in the same order in ProcessProposalHandler
+	sort.Slice(votes, func(i, j int) bool {
+		return votes[i].Voter < votes[j].Voter
+	})
+
 	return votes, nil
+}
+
+func (h *ProposalHandler) verifyExchangeRateVotes(
+	injectedVotes []oracletypes.AggregateExchangeRateVote,
+	generatedVotes []oracletypes.AggregateExchangeRateVote,
+) error {
+	if len(injectedVotes) != len(generatedVotes) {
+		return errors.New("number of exchange rate votes in vote extension and extended commit info are not equal")
+	}
+
+	for i := range injectedVotes {
+		injectedVote := injectedVotes[i]
+		generatedVote := generatedVotes[i]
+
+		if injectedVote.Voter != generatedVote.Voter || !injectedVote.ExchangeRates.Equal(generatedVote.ExchangeRates) {
+			return errors.New("injected exhange rate votes and generated exchange votes are not equal")
+		}
+	}
+
+	return nil
 }

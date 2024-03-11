@@ -120,7 +120,7 @@ import (
 	airdroptypes "github.com/ojo-network/ojo/x/airdrop/types"
 
 	"github.com/ojo-network/ojo/pricefeeder"
-	ojoabci "github.com/ojo-network/ojo/x/oracle/abci"
+	oracleabci "github.com/ojo-network/ojo/x/oracle/abci"
 
 	customante "github.com/ojo-network/ojo/ante"
 )
@@ -728,7 +728,7 @@ func New(
 	app.StateSimulationManager = module.NewSimulationManagerFromAppModules(app.mm.Modules, overrideModules)
 	app.StateSimulationManager.RegisterStoreDecoders()
 
-	proposalHandler := ojoabci.NewProposalHandler(
+	proposalHandler := oracleabci.NewProposalHandler(
 		app.Logger(),
 		app.OracleKeeper,
 		app.StakingKeeper,
@@ -736,7 +736,7 @@ func New(
 	app.SetPrepareProposal(proposalHandler.PrepareProposalHandler())
 	app.SetProcessProposal(proposalHandler.ProcessProposalHandler())
 
-	preBlockHandler := ojoabci.NewPreBlockHandler(
+	preBlockHandler := oracleabci.NewPreBlockHandler(
 		app.Logger(),
 		app.OracleKeeper,
 	)
@@ -744,7 +744,7 @@ func New(
 
 	// initialize empty price feeder object to pass reference into vote extension handler
 	app.PriceFeeder = &pricefeeder.PriceFeeder{}
-	voteExtensionsHandler := ojoabci.NewVoteExtensionHandler(
+	voteExtensionsHandler := oracleabci.NewVoteExtensionHandler(
 		app.Logger(),
 		app.OracleKeeper,
 		app.PriceFeeder,

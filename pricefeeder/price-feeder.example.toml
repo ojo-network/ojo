@@ -319,9 +319,6 @@ read_timeout = "20s"
 verbose_cors = true
 write_timeout = "20s"
 
-[account]
-validator = "ojovaloper1zypqa76je7pxsdwkfah6mu9a583sju6x6tnq6w"
-
 [rpc]
 grpc_endpoint = "localhost:9090"
 rpc_timeout = "100ms"

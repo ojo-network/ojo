@@ -16,12 +16,11 @@ import (
 
 // OracleVoteExtension defines the canonical vote extension structure.
 type OracleVoteExtension struct {
-	Height           int64
-	ExchangeRates    sdk.DecCoins
-	ValidatorAddress sdk.ValAddress
+	Height        int64
+	ExchangeRates sdk.DecCoins
 }
 
-type VoteExtHandler struct {
+type VoteExtensionHandler struct {
 	logger       log.Logger
 	oracleKeeper keeper.Keeper
 	priceFeeder  *pricefeeder.PriceFeeder
@@ -32,15 +31,15 @@ func NewVoteExtensionHandler(
 	logger log.Logger,
 	oracleKeeper keeper.Keeper,
 	priceFeeder *pricefeeder.PriceFeeder,
-) *VoteExtHandler {
-	return &VoteExtHandler{
+) *VoteExtensionHandler {
+	return &VoteExtensionHandler{
 		logger:       logger,
 		oracleKeeper: oracleKeeper,
 		priceFeeder:  priceFeeder,
 	}
 }
 
-func (h *VoteExtHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
+func (h *VoteExtensionHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 	return func(ctx sdk.Context, req *cometabci.RequestExtendVote) (resp *cometabci.ResponseExtendVote, err error) {
 		defer func() {
 			// catch panics if possible
@@ -91,9 +90,8 @@ func (h *VoteExtHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 		}
 
 		voteExt := OracleVoteExtension{
-			Height:           req.Height,
-			ExchangeRates:    filteredDecCoins,
-			ValidatorAddress: *h.priceFeeder.ValidatorAddress,
+			Height:        req.Height,
+			ExchangeRates: filteredDecCoins,
 		}
 
 		bz, err := json.Marshal(voteExt)
@@ -114,7 +112,7 @@ func (h *VoteExtHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 	}
 }
 
-func (h *VoteExtHandler) VerifyVoteExtensionHandler() sdk.VerifyVoteExtensionHandler {
+func (h *VoteExtensionHandler) VerifyVoteExtensionHandler() sdk.VerifyVoteExtensionHandler {
 	return func(ctx sdk.Context, req *cometabci.RequestVerifyVoteExtension) (
 		*cometabci.ResponseVerifyVoteExtension,
 		error,
