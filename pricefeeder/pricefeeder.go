@@ -34,7 +34,11 @@ const (
 	envOracleTickTime = "PRICE_FEEDER_ORACLE_TICK_TIME"
 )
 
-func Start(oracleParams types.Params) error {
+type PriceFeeder struct {
+	Oracle *oracle.Oracle
+}
+
+func (pf *PriceFeeder) Start(oracleParams types.Params) error {
 	logWriter := zerolog.ConsoleWriter{Out: os.Stderr}
 	logLevel, err := zerolog.ParseLevel(os.Getenv(envDebugLevel))
 	if err != nil {
@@ -78,7 +82,7 @@ func Start(oracleParams types.Params) error {
 		}
 	}
 
-	oracle := oracle.New(
+	pf.Oracle = oracle.New(
 		logger,
 		client.OracleClient{},
 		providers,
@@ -105,11 +109,11 @@ func Start(oracleParams types.Params) error {
 
 	g.Go(func() error {
 		// start the process that observes and publishes exchange prices
-		return startPriceFeeder(ctx, logger, cfg, oracle, metrics)
+		return startPriceFeeder(ctx, logger, cfg, pf.Oracle, metrics)
 	})
 	g.Go(func() error {
 		// start the process that calculates oracle prices
-		return startPriceOracle(ctx, logger, oracle, oracleParams, oracleTickTime)
+		return startPriceOracle(ctx, logger, pf.Oracle, oracleParams, oracleTickTime)
 	})
 
 	// Block main process until all spawned goroutines have gracefully exited and

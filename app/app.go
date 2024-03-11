@@ -119,6 +119,9 @@ import (
 	airdropkeeper "github.com/ojo-network/ojo/x/airdrop/keeper"
 	airdroptypes "github.com/ojo-network/ojo/x/airdrop/types"
 
+	"github.com/ojo-network/ojo/pricefeeder"
+	oracleabci "github.com/ojo-network/ojo/x/oracle/abci"
+
 	customante "github.com/ojo-network/ojo/ante"
 )
 
@@ -216,6 +219,8 @@ type App struct {
 
 	// module configurator
 	configurator module.Configurator
+
+	PriceFeeder *pricefeeder.PriceFeeder
 }
 
 // New returns a reference to an initialized blockchain app
@@ -723,6 +728,30 @@ func New(
 	app.StateSimulationManager = module.NewSimulationManagerFromAppModules(app.mm.Modules, overrideModules)
 	app.StateSimulationManager.RegisterStoreDecoders()
 
+	proposalHandler := oracleabci.NewProposalHandler(
+		app.Logger(),
+		app.OracleKeeper,
+		app.StakingKeeper,
+	)
+	app.SetPrepareProposal(proposalHandler.PrepareProposalHandler())
+	app.SetProcessProposal(proposalHandler.ProcessProposalHandler())
+
+	preBlockHandler := oracleabci.NewPreBlockHandler(
+		app.Logger(),
+		app.OracleKeeper,
+	)
+	app.SetPreBlocker(preBlockHandler.PreBlocker())
+
+	// initialize empty price feeder object to pass reference into vote extension handler
+	app.PriceFeeder = &pricefeeder.PriceFeeder{}
+	voteExtensionsHandler := oracleabci.NewVoteExtensionHandler(
+		app.Logger(),
+		app.OracleKeeper,
+		app.PriceFeeder,
+	)
+	app.SetExtendVoteHandler(voteExtensionsHandler.ExtendVoteHandler())
+	app.SetVerifyVoteExtensionHandler(voteExtensionsHandler.VerifyVoteExtensionHandler())
+
 	// initialize stores
 	app.MountKVStores(keys)
 	app.MountTransientStores(tkeys)
@@ -730,7 +759,6 @@ func New(
 
 	// initialize BaseApp
 	app.SetInitChainer(app.InitChainer)
-	app.SetPreBlocker(app.PreBlocker)
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
 	app.setAnteHandler(txConfig)

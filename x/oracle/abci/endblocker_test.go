@@ -1,37 +1,14 @@
-package oracle_test
+package abci_test
 
 import (
-	"testing"
-
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/stretchr/testify/suite"
 
-	ojoapp "github.com/ojo-network/ojo/app"
 	appparams "github.com/ojo-network/ojo/app/params"
-	"github.com/ojo-network/ojo/tests/integration"
 	"github.com/ojo-network/ojo/util/decmath"
-	"github.com/ojo-network/ojo/x/oracle"
+	"github.com/ojo-network/ojo/x/oracle/abci"
 	"github.com/ojo-network/ojo/x/oracle/types"
 )
-
-const (
-	displayDenom string = appparams.DisplayDenom
-	bondDenom    string = appparams.BondDenom
-)
-
-type IntegrationTestSuite struct {
-	suite.Suite
-
-	ctx  sdk.Context
-	app  *ojoapp.App
-	keys []integration.TestValidatorKey
-}
-
-func (s *IntegrationTestSuite) SetupTest() {
-	s.app, s.ctx, s.keys = integration.SetupAppWithContext(s.T())
-	s.app.OracleKeeper.SetVoteThreshold(s.ctx, math.LegacyMustNewDecFromStr("0.4"))
-}
 
 func createVotes(hash string, val sdk.ValAddress, rates sdk.DecCoins, blockHeight uint64) (types.AggregateExchangeRatePrevote, types.AggregateExchangeRateVote) {
 	preVote := types.AggregateExchangeRatePrevote{
@@ -91,13 +68,13 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr1, val1PreVotes)
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr3, val3PreVotes)
-	oracle.EndBlocker(ctx, app.OracleKeeper)
+	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
-	err := oracle.EndBlocker(ctx, app.OracleKeeper)
+	err := abci.EndBlocker(ctx, app.OracleKeeper)
 	s.Require().NoError(err)
 
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
@@ -114,11 +91,11 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	val2PreVotes.SubmitBlock = h
 
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
-	oracle.EndBlocker(ctx, app.OracleKeeper)
+	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
-	oracle.EndBlocker(ctx, app.OracleKeeper)
+	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		rate, err := app.OracleKeeper.GetExchangeRate(ctx, denom.SymbolDenom)
@@ -135,12 +112,12 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr3, val3PreVotes)
-	oracle.EndBlocker(ctx, app.OracleKeeper)
+	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
-	oracle.EndBlocker(ctx, app.OracleKeeper)
+	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		rate, err := app.OracleKeeper.GetExchangeRate(ctx, denom.SymbolDenom)
@@ -164,12 +141,12 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr1, val1PreVotes)
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
-	oracle.EndBlocker(ctx, app.OracleKeeper)
+	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
-	oracle.EndBlocker(ctx, app.OracleKeeper)
+	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	rate, err := app.OracleKeeper.GetExchangeRate(ctx, "ojo")
 	s.Require().NoError(err)
@@ -187,11 +164,11 @@ func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 
 	// start test in new slash window
 	ctx = ctx.WithBlockHeight(int64(app.OracleKeeper.SlashWindow(ctx)))
-	oracle.EndBlocker(ctx, app.OracleKeeper)
+	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	app.OracleKeeper.SetMandatoryList(ctx, types.DenomList{
 		{
-			BaseDenom:   bondDenom,
+			BaseDenom:   appparams.BondDenom,
 			SymbolDenom: appparams.DisplayDenom,
 			Exponent:    uint32(6),
 		},
@@ -230,13 +207,13 @@ func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr1, val1PreVotes)
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr3, val3PreVotes)
-	oracle.EndBlocker(ctx, app.OracleKeeper)
+	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
-	oracle.EndBlocker(ctx, app.OracleKeeper)
+	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	currRewards1, err := app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1)
 	s.Require().NoError(err)
@@ -289,13 +266,13 @@ func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr1, val1PreVotes)
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr3, val3PreVotes)
-	oracle.EndBlocker(ctx, app.OracleKeeper)
+	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
-	oracle.EndBlocker(ctx, app.OracleKeeper)
+	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	currRewards1, err = app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1)
 	s.Require().NoError(err)
@@ -321,13 +298,13 @@ func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr1, val1PreVotes)
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr3, val3PreVotes)
-	oracle.EndBlocker(ctx, app.OracleKeeper)
+	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
-	oracle.EndBlocker(ctx, app.OracleKeeper)
+	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	currRewards1, err = app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1)
 	s.Require().NoError(err)
@@ -394,7 +371,7 @@ func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 				Voter:         valAddr1.String(),
 			}
 			app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, vote)
-			oracle.EndBlocker(ctx, app.OracleKeeper)
+			abci.EndBlocker(ctx, app.OracleKeeper)
 		}
 
 		for denom, denomRates := range exchangeRates {
@@ -478,12 +455,12 @@ func (s *IntegrationTestSuite) TestUpdateOracleParams() {
 	s.Require().Len(plans, 2)
 
 	// Check Vote Threshold was updated by first plan
-	oracle.EndBlocker(ctx, app.OracleKeeper)
+	abci.EndBlocker(ctx, app.OracleKeeper)
 	s.Require().Equal(math.LegacyNewDecWithPrec(40, 2), app.OracleKeeper.VoteThreshold(ctx))
 
 	// Check Vote Threshold was updated by second plan in next block
 	ctx = ctx.WithBlockHeight(blockHeight + 1)
-	oracle.EndBlocker(ctx, app.OracleKeeper)
+	abci.EndBlocker(ctx, app.OracleKeeper)
 	s.Require().Equal(math.LegacyNewDecWithPrec(50, 2), app.OracleKeeper.VoteThreshold(ctx))
 
 	// Schedule param update plan for current block height and then cancel it
@@ -508,10 +485,6 @@ func (s *IntegrationTestSuite) TestUpdateOracleParams() {
 	s.Require().Len(plans, 0)
 
 	// Check Vote Threshold wasn't updated
-	oracle.EndBlocker(ctx, app.OracleKeeper)
+	abci.EndBlocker(ctx, app.OracleKeeper)
 	s.Require().Equal(math.LegacyNewDecWithPrec(50, 2), app.OracleKeeper.VoteThreshold(ctx))
-}
-
-func TestOracleTestSuite(t *testing.T) {
-	suite.Run(t, new(IntegrationTestSuite))
 }
