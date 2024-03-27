@@ -6,6 +6,7 @@ import (
 	"cosmossdk.io/log"
 	"cosmossdk.io/math"
 	cometabci "github.com/cometbft/cometbft/abci/types"
+	cometprototypes "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ojo-network/ojo/x/oracle/abci"
@@ -17,13 +18,22 @@ func (s *IntegrationTestSuite) TestPreBlocker() {
 	app, ctx, keys := s.app, s.ctx, s.keys
 	voter := keys[0].ValAddress
 
+	// enable vote extensions
+	ctx = ctx.WithBlockHeight(3)
+	consensusParams := ctx.ConsensusParams()
+	consensusParams.Abci = &cometprototypes.ABCIParams{
+		VoteExtensionsEnableHeight: 2,
+	}
+	ctx = ctx.WithConsensusParams(consensusParams)
+
 	// build injected vote extention tx
+	exchangeRateVoteAtom := oracletypes.AggregateExchangeRateVote{
+		ExchangeRates: sdk.NewDecCoinsFromCoins(sdk.NewCoin("ATOM", math.NewInt(11))),
+		Voter:         voter.String(),
+	}
 	injectedVoteExtTx := abci.AggregateExchangeRateVotes{
 		ExchangeRateVotes: []oracletypes.AggregateExchangeRateVote{
-			{
-				ExchangeRates: sdk.NewDecCoinsFromCoins(sdk.NewCoin("ATOM", math.NewInt(11))),
-				Voter:         voter.String(),
-			},
+			exchangeRateVoteAtom,
 		},
 	}
 	bz, err := json.Marshal(injectedVoteExtTx)
@@ -74,9 +84,9 @@ func (s *IntegrationTestSuite) TestPreBlocker() {
 				s.Require().NotNil(resp)
 
 				// check exchange rate vote was set
-				// exchangeRateVotes, err := tc.oracleKeeper.GetAggregateExchangeRateVote(ctx, voter)
-				// s.Require().NoError(err)
-				// fmt.Println("exchangeRateVotes", exchangeRateVotes)
+				exchangeRateVote, err := tc.oracleKeeper.GetAggregateExchangeRateVote(ctx, voter)
+				s.Require().NoError(err)
+				s.Require().Equal(exchangeRateVoteAtom, exchangeRateVote)
 			}
 		})
 	}
