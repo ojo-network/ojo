@@ -30,7 +30,6 @@ const (
 	envConfig         = "PRICE_FEEDER_CONFIG"
 	envChainConfig    = "PRICE_FEEDER_CHAIN_CONFIG"
 	envDebugLevel     = "PRICE_FEEDER_LOG_LEVEL"
-	envVariablePass   = "PRICE_FEEDER_PASS"
 	envOracleTickTime = "PRICE_FEEDER_ORACLE_TICK_TIME"
 )
 

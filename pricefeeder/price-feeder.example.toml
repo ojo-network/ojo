@@ -306,13 +306,6 @@ providers = [
 ]
 quote = "USD"
 
-[[currency_pairs]]
-base = "STINJ"
-providers = [
-  "astroport",
-]
-quote = "INJ"
-
 [server]
 listen_addr = "0.0.0.0:7171"
 read_timeout = "20s"
@@ -329,6 +322,6 @@ enable-hostname = true
 enable-hostname-label = true
 enable-service-label = true
 enabled = true
-global-labels = [["chain_id", "ojotest-1"]]
+global-labels = [["chain_id", "ojo-testnet"]]
 service-name = "price-feeder"
 prometheus-retention-time = 100

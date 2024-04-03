@@ -83,11 +83,22 @@ var (
 				"coinbase",
 			},
 		},
+		CurrencyPairProviders{
+			BaseDenom:  AtomSymbol,
+			QuoteDenom: USDDenom,
+			Providers: []string{
+				"kraken",
+			},
+		},
 	}
 
 	DefaultCurrencyDeviationThresholds = CurrencyDeviationThresholdList{
 		CurrencyDeviationThreshold{
 			BaseDenom: OjoSymbol,
+			Threshold: "2",
+		},
+		CurrencyDeviationThreshold{
+			BaseDenom: AtomSymbol,
 			Threshold: "2",
 		},
 	}
