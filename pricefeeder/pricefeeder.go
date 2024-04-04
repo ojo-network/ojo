@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 	"time"
 
@@ -26,26 +25,19 @@ import (
 	v1 "github.com/ojo-network/price-feeder/router/v1"
 )
 
-const (
-	envConfig         = "PRICE_FEEDER_CONFIG"
-	envChainConfig    = "PRICE_FEEDER_CHAIN_CONFIG"
-	envDebugLevel     = "PRICE_FEEDER_LOG_LEVEL"
-	envOracleTickTime = "PRICE_FEEDER_ORACLE_TICK_TIME"
-)
-
 type PriceFeeder struct {
 	Oracle *oracle.Oracle
 }
 
-func (pf *PriceFeeder) Start(oracleParams types.Params) error {
+func (pf *PriceFeeder) Start(oracleParams types.Params, appConfig AppConfig) error {
 	logWriter := zerolog.ConsoleWriter{Out: os.Stderr}
-	logLevel, err := zerolog.ParseLevel(os.Getenv(envDebugLevel))
+	logLevel, err := zerolog.ParseLevel(appConfig.LogLevel)
 	if err != nil {
 		return err
 	}
 	logger := zerolog.New(logWriter).Level(logLevel).With().Timestamp().Logger()
 
-	cfg, err := config.LoadConfigFromFlags(os.Getenv(envConfig), "")
+	cfg, err := config.LoadConfigFromFlags(appConfig.ConfigPath, "")
 	if err != nil {
 		return err
 	}
@@ -67,13 +59,8 @@ func (pf *PriceFeeder) Start(oracleParams types.Params) error {
 		return err
 	}
 
-	chainConfig, err := strconv.ParseBool(os.Getenv(envChainConfig))
-	if err != nil {
-		return err
-	}
-
 	// overwite providers and deviations with on chain values if specified
-	if chainConfig {
+	if appConfig.ChainConfig {
 		providers = oracle.CreatePairProvidersFromCurrencyPairProvidersList(oracleParams.CurrencyPairProviders)
 		deviations, err = oracle.CreateDeviationsFromCurrencyDeviationThresholdList(oracleParams.CurrencyDeviationThresholds)
 		if err != nil {
@@ -88,7 +75,7 @@ func (pf *PriceFeeder) Start(oracleParams types.Params) error {
 		providerTimeout,
 		deviations,
 		cfg.ProviderEndpointsMap(),
-		chainConfig,
+		appConfig.ChainConfig,
 	)
 
 	telemetryCfg := telemetry.Config{}
@@ -101,18 +88,13 @@ func (pf *PriceFeeder) Start(oracleParams types.Params) error {
 		return err
 	}
 
-	oracleTickTime, err := time.ParseDuration(os.Getenv(envOracleTickTime))
-	if err != nil {
-		return err
-	}
-
 	g.Go(func() error {
 		// start the process that observes and publishes exchange prices
 		return startPriceFeeder(ctx, logger, cfg, pf.Oracle, metrics)
 	})
 	g.Go(func() error {
 		// start the process that calculates oracle prices
-		return startPriceOracle(ctx, logger, pf.Oracle, oracleParams, oracleTickTime)
+		return startPriceOracle(ctx, logger, pf.Oracle, oracleParams, appConfig.OracleTickTime)
 	})
 
 	// Block main process until all spawned goroutines have gracefully exited and

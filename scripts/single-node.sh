@@ -14,10 +14,6 @@
 
 CWD="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 PRICE_FEEDER_CONFIG_PATH="${CWD}/../pricefeeder/price-feeder.example.toml"
-export PRICE_FEEDER_CONFIG=$(realpath "$PRICE_FEEDER_CONFIG_PATH")
-export PRICE_FEEDER_CHAIN_CONFIG="FALSE"
-export PRICE_FEEDER_LOG_LEVEL="DEBUG"
-export PRICE_FEEDER_ORACLE_TICK_TIME="1s"
 
 NODE_BIN="${1:-$CWD/../build/ojod}"
 
@@ -161,6 +157,7 @@ if [[ ! -d "$hdir" ]]; then
 
   echo "--- Modifying app..."
   perl -i -pe 's|minimum-gas-prices = ""|minimum-gas-prices = "0.05uojo"|g' $n0app
+  perl -i -pe 's|config_path = ""|config_path = "'$PRICE_FEEDER_CONFIG_PATH'"|g' $n0app
 
 else
   echo "===================================="

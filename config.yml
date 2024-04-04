@@ -41,3 +41,6 @@ genesis:
 validators:
 - name: alice
   bonded: 33500000000000uojo
+  app:
+    pricefeeder:
+      config_path: "PATH TO PRICE FEEDER CONFIG HERE"
