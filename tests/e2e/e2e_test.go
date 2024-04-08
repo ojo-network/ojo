@@ -1,17 +1,16 @@
-// TODO: Make e2e work with rollkit
 package e2e
 
-import (
-// "time"
+// import (
+// 	"time"
 
-// "cosmossdk.io/math"
-// sdk "github.com/cosmos/cosmos-sdk/types"
-// "github.com/ojo-network/ojo/client/tx"
-// "github.com/ojo-network/ojo/tests/grpc"
-// airdroptypes "github.com/ojo-network/ojo/x/airdrop/types"
+// 	"cosmossdk.io/math"
+// 	sdk "github.com/cosmos/cosmos-sdk/types"
+// 	"github.com/ojo-network/ojo/client/tx"
+// 	"github.com/ojo-network/ojo/tests/grpc"
+// 	airdroptypes "github.com/ojo-network/ojo/x/airdrop/types"
 
-// appparams "github.com/ojo-network/ojo/app/params"
-)
+// 	appparams "github.com/ojo-network/ojo/app/params"
+// )
 
 // // TestMedians queries for the oracle params, collects historical
 // // prices based on those params, checks that the stored medians and

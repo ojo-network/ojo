@@ -25,6 +25,7 @@ import (
 	txsigning "github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
+	"github.com/cosmos/cosmos-sdk/x/genutil/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/ory/dockertest/v3"
 
@@ -83,6 +84,9 @@ func (v *validator) init(gen map[string]json.RawMessage) error {
 
 	genesis.ChainID = v.chain.id
 	genesis.AppState = appState
+	genesis.Consensus = &types.ConsensusGenesis{
+		Validators: nil,
+	}
 
 	if err = genutil.ExportGenesisFile(genesis, config.GenesisFile()); err != nil {
 		return fmt.Errorf("failed to export app genesis state: %w", err)

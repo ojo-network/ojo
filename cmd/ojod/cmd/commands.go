@@ -64,11 +64,6 @@ func initAppConfig() (string, interface{}) {
 	srvCfg := serverconfig.DefaultConfig()
 	srvCfg.MinGasPrices = "" // validators MUST set mininum-gas-prices in their app.toml, otherwise the app will halt.
 
-	dir, err := os.UserHomeDir()
-	if err != nil {
-		panic(err)
-	}
-
 	customAppConfig := CustomAppConfig{
 		Config: *srvCfg,
 		WASM: WASMConfig{
@@ -76,7 +71,7 @@ func initAppConfig() (string, interface{}) {
 			QueryGasLimit: 300000,
 		},
 		PriceFeeder: pricefeeder.AppConfig{
-			ConfigPath:     dir + "/ojo/pricefeeder/price-feeder.example.toml",
+			ConfigPath:     "",
 			ChainConfig:    true,
 			LogLevel:       "info",
 			OracleTickTime: time.Second * 5,
@@ -236,6 +231,7 @@ func newApp(
 	if err != nil {
 		panic(err)
 	}
+
 	var oracleGenState oracletypes.GenesisState
 	app.AppCodec().MustUnmarshalJSON(app.DefaultGenesis()[oracletypes.ModuleName], &oracleGenState)
 	go func() {
