@@ -2,7 +2,6 @@ package abci
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"sort"
 
@@ -82,10 +81,11 @@ func (h *ProposalHandler) PrepareProposalHandler() sdk.PrepareProposalHandler {
 			}
 
 			// TODO: Switch from stdlib JSON encoding to a more performant mechanism.
+			// REF: https://github.com/ojo-network/ojo/issues/411
 			bz, err := json.Marshal(injectedVoteExtTx)
 			if err != nil {
 				h.logger.Error("failed to encode injected vote extension tx", "err", err)
-				return nil, errors.New("failed to encode injected vote extension tx")
+				return nil, oracletypes.ErrEncodeInjVoteExt
 			}
 
 			// Inject a placeholder tx into the proposal s.t. validators can decode, verify,
@@ -220,7 +220,7 @@ func (h *ProposalHandler) verifyExchangeRateVotes(
 	generatedVotes []oracletypes.AggregateExchangeRateVote,
 ) error {
 	if len(injectedVotes) != len(generatedVotes) {
-		return errors.New("number of exchange rate votes in vote extension and extended commit info are not equal")
+		return oracletypes.ErrNonEqualInjVotesLen
 	}
 
 	for i := range injectedVotes {
@@ -228,7 +228,7 @@ func (h *ProposalHandler) verifyExchangeRateVotes(
 		generatedVote := generatedVotes[i]
 
 		if injectedVote.Voter != generatedVote.Voter || !injectedVote.ExchangeRates.Equal(generatedVote.ExchangeRates) {
-			return errors.New("injected exhange rate votes and generated exchange votes are not equal")
+			return oracletypes.ErrNonEqualInjVotesRates
 		}
 	}
 

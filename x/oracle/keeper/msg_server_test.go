@@ -174,23 +174,11 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 					Keys:   []string{"AcceptList"},
 					Height: 9,
 					Changes: types.Params{
-						AcceptList: types.DenomList{
-							{
-								BaseDenom:   oracletypes.OjoDenom,
-								SymbolDenom: oracletypes.OjoSymbol,
-								Exponent:    6,
-							},
-							{
-								BaseDenom:   oracletypes.AtomDenom,
-								SymbolDenom: oracletypes.AtomSymbol,
-								Exponent:    6,
-							},
-							{
-								BaseDenom:   "base",
-								SymbolDenom: "symbol",
-								Exponent:    6,
-							},
-						},
+						AcceptList: append(oracletypes.DefaultAcceptList, types.Denom{
+							BaseDenom:   "base",
+							SymbolDenom: "symbol",
+							Exponent:    6,
+						}),
 					},
 				},
 			},
@@ -207,18 +195,7 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 					Keys:   []string{"MandatoryList"},
 					Height: 9,
 					Changes: types.Params{
-						MandatoryList: types.DenomList{
-							{
-								BaseDenom:   oracletypes.OjoDenom,
-								SymbolDenom: oracletypes.OjoSymbol,
-								Exponent:    6,
-							},
-							{
-								BaseDenom:   oracletypes.AtomDenom,
-								SymbolDenom: oracletypes.AtomSymbol,
-								Exponent:    6,
-							},
-						},
+						MandatoryList: oracletypes.DefaultMandatoryList,
 					},
 				},
 			},
@@ -258,20 +235,10 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 					Keys:   []string{"RewardBands"},
 					Height: 9,
 					Changes: types.Params{
-						RewardBands: types.RewardBandList{
-							{
-								SymbolDenom: types.OjoSymbol,
-								RewardBand:  math.LegacyNewDecWithPrec(2, 2),
-							},
-							{
-								SymbolDenom: types.AtomSymbol,
-								RewardBand:  math.LegacyNewDecWithPrec(2, 2),
-							},
-							{
-								SymbolDenom: "symbol",
-								RewardBand:  math.LegacyNewDecWithPrec(2, 2),
-							},
-						},
+						RewardBands: append(oracletypes.DefaultRewardBands(), oracletypes.RewardBand{
+							SymbolDenom: "symbol",
+							RewardBand:  math.LegacyNewDecWithPrec(2, 2),
+						}),
 					},
 				},
 			},
@@ -430,55 +397,22 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 				switch tc.name {
 				case "valid accept list":
 					acceptList := s.app.OracleKeeper.AcceptList(s.ctx)
-					s.Require().Equal(acceptList, types.DenomList{
-						{
-							BaseDenom:   oracletypes.OjoDenom,
-							SymbolDenom: oracletypes.OjoSymbol,
-							Exponent:    6,
-						},
-						{
-							BaseDenom:   oracletypes.AtomDenom,
-							SymbolDenom: oracletypes.AtomSymbol,
-							Exponent:    6,
-						},
-						{
-							BaseDenom:   "base",
-							SymbolDenom: "symbol",
-							Exponent:    6,
-						},
-					}.Normalize())
+					s.Require().Equal(acceptList, append(oracletypes.DefaultAcceptList, types.Denom{
+						BaseDenom:   "base",
+						SymbolDenom: "symbol",
+						Exponent:    6,
+					}).Normalize())
 
 				case "valid mandatory list":
 					mandatoryList := s.app.OracleKeeper.MandatoryList(s.ctx)
-					s.Require().Equal(mandatoryList, types.DenomList{
-						{
-							BaseDenom:   oracletypes.OjoDenom,
-							SymbolDenom: oracletypes.OjoSymbol,
-							Exponent:    6,
-						},
-						{
-							BaseDenom:   oracletypes.AtomDenom,
-							SymbolDenom: oracletypes.AtomSymbol,
-							Exponent:    6,
-						},
-					}.Normalize())
+					s.Require().Equal(mandatoryList, oracletypes.DefaultMandatoryList.Normalize())
 
 				case "valid reward band list":
 					rewardBand := s.app.OracleKeeper.RewardBands(s.ctx)
-					s.Require().Equal(rewardBand, types.RewardBandList{
-						{
-							SymbolDenom: types.OjoSymbol,
-							RewardBand:  math.LegacyNewDecWithPrec(2, 2),
-						},
-						{
-							SymbolDenom: types.AtomSymbol,
-							RewardBand:  math.LegacyNewDecWithPrec(2, 2),
-						},
-						{
-							SymbolDenom: "symbol",
-							RewardBand:  math.LegacyNewDecWithPrec(2, 2),
-						},
-					})
+					s.Require().Equal(rewardBand, append(oracletypes.DefaultRewardBands(), oracletypes.RewardBand{
+						SymbolDenom: "symbol",
+						RewardBand:  math.LegacyNewDecWithPrec(2, 2),
+					}))
 
 				case "multiple valid params":
 					votePeriod := s.app.OracleKeeper.VotePeriod(s.ctx)
@@ -870,7 +804,7 @@ func (s *IntegrationTestSuite) TestMsgServer_GovRemoveCurrencyPairProviders() {
 		},
 		{
 			BaseDenom:  types.OjoSymbol,
-			QuoteDenom: types.USDDenom,
+			QuoteDenom: types.USDSymbol,
 			Providers: []string{
 				"binance",
 				"coinbase",
@@ -1012,7 +946,7 @@ func (s *IntegrationTestSuite) TestMsgServer_GovRemoveCurrencyPairProviders() {
 					s.Require().Equal(types.CurrencyPairProvidersList{
 						{
 							BaseDenom:  types.OjoSymbol,
-							QuoteDenom: types.USDDenom,
+							QuoteDenom: types.USDSymbol,
 							Providers: []string{
 								"binance",
 								"coinbase",

@@ -62,12 +62,42 @@ var (
 			SymbolDenom: AtomSymbol,
 			Exponent:    AtomExponent,
 		},
+		{
+			BaseDenom:   USDTDenom,
+			SymbolDenom: USDTSymbol,
+			Exponent:    USDTExponent,
+		},
+		{
+			BaseDenom:   BitcoinDenom,
+			SymbolDenom: BitcoinSymbol,
+			Exponent:    BitcoinExponent,
+		},
+		{
+			BaseDenom:   EthereumDenom,
+			SymbolDenom: EthereumSymbol,
+			Exponent:    EthereumExponent,
+		},
 	}
 	DefaultMandatoryList = DenomList{
 		{
 			BaseDenom:   AtomDenom,
 			SymbolDenom: AtomSymbol,
 			Exponent:    AtomExponent,
+		},
+		{
+			BaseDenom:   USDTDenom,
+			SymbolDenom: USDTSymbol,
+			Exponent:    USDTExponent,
+		},
+		{
+			BaseDenom:   BitcoinDenom,
+			SymbolDenom: BitcoinSymbol,
+			Exponent:    BitcoinExponent,
+		},
+		{
+			BaseDenom:   EthereumDenom,
+			SymbolDenom: EthereumSymbol,
+			Exponent:    EthereumExponent,
 		},
 	}
 	DefaultSlashFraction     = math.LegacyNewDecWithPrec(1, 4) // 0.01%
@@ -77,17 +107,66 @@ var (
 	DefaultCurrencyPairProviders = CurrencyPairProvidersList{
 		CurrencyPairProviders{
 			BaseDenom:  OjoSymbol,
-			QuoteDenom: USDDenom,
+			QuoteDenom: USDSymbol,
 			Providers: []string{
 				"binance",
 				"coinbase",
 			},
 		},
 		CurrencyPairProviders{
-			BaseDenom:  AtomSymbol,
-			QuoteDenom: USDDenom,
+			BaseDenom:  USDTSymbol,
+			QuoteDenom: USDSymbol,
 			Providers: []string{
 				"kraken",
+				"coinbase",
+				"crypto",
+			},
+		},
+		CurrencyPairProviders{
+			BaseDenom:  AtomSymbol,
+			QuoteDenom: USDSymbol,
+			Providers: []string{
+				"kraken",
+			},
+		},
+		CurrencyPairProviders{
+			BaseDenom:  AtomSymbol,
+			QuoteDenom: USDTSymbol,
+			Providers: []string{
+				"okx",
+				"bitget",
+				"gate",
+			},
+		},
+		CurrencyPairProviders{
+			BaseDenom:  BitcoinSymbol,
+			QuoteDenom: USDSymbol,
+			Providers: []string{
+				"coinbase",
+			},
+		},
+		CurrencyPairProviders{
+			BaseDenom:  BitcoinSymbol,
+			QuoteDenom: USDTSymbol,
+			Providers: []string{
+				"okx",
+				"gate",
+				"bitget",
+			},
+		},
+		CurrencyPairProviders{
+			BaseDenom:  EthereumSymbol,
+			QuoteDenom: USDSymbol,
+			Providers: []string{
+				"kraken",
+			},
+		},
+		CurrencyPairProviders{
+			BaseDenom:  EthereumSymbol,
+			QuoteDenom: USDTSymbol,
+			Providers: []string{
+				"okx",
+				"bitget",
 			},
 		},
 	}
@@ -98,7 +177,19 @@ var (
 			Threshold: "2",
 		},
 		CurrencyDeviationThreshold{
+			BaseDenom: USDTSymbol,
+			Threshold: "2",
+		},
+		CurrencyDeviationThreshold{
 			BaseDenom: AtomSymbol,
+			Threshold: "2",
+		},
+		CurrencyDeviationThreshold{
+			BaseDenom: BitcoinSymbol,
+			Threshold: "2",
+		},
+		CurrencyDeviationThreshold{
+			BaseDenom: EthereumSymbol,
 			Threshold: "2",
 		},
 	}
@@ -118,6 +209,18 @@ func DefaultRewardBands() RewardBandList {
 		},
 		{
 			SymbolDenom: AtomSymbol,
+			RewardBand:  defaultRewardBand,
+		},
+		{
+			SymbolDenom: USDTSymbol,
+			RewardBand:  defaultRewardBand,
+		},
+		{
+			SymbolDenom: BitcoinSymbol,
+			RewardBand:  defaultRewardBand,
+		},
+		{
+			SymbolDenom: EthereumSymbol,
 			RewardBand:  defaultRewardBand,
 		},
 	}

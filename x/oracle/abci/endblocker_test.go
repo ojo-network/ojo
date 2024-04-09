@@ -166,7 +166,7 @@ func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 	ctx = ctx.WithBlockHeight(int64(app.OracleKeeper.SlashWindow(ctx)))
 	abci.EndBlocker(ctx, app.OracleKeeper)
 
-	app.OracleKeeper.SetMandatoryList(ctx, types.DenomList{
+	denomList := types.DenomList{
 		{
 			BaseDenom:   appparams.BondDenom,
 			SymbolDenom: appparams.DisplayDenom,
@@ -177,7 +177,9 @@ func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 			SymbolDenom: "atom",
 			Exponent:    uint32(6),
 		},
-	})
+	}
+	app.OracleKeeper.SetAcceptList(ctx, denomList)
+	app.OracleKeeper.SetMandatoryList(ctx, denomList)
 
 	var (
 		val1DecCoins sdk.DecCoins
