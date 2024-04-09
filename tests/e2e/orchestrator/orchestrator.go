@@ -234,6 +234,7 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 	for i, val := range o.chain.validators {
 		var createValmsg sdk.Msg
 		if i == 2 {
+			createValmsg, err = val.buildCreateValidatorMsg(majorityValidatorStake)
 		} else {
 			createValmsg, err = val.buildCreateValidatorMsg(minorityValidatorStake)
 		}
