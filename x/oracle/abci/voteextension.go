@@ -82,7 +82,7 @@ func (h *VoteExtensionHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 			return nil, err
 		}
 
-		// Filter out rates which aren't included in the AcceptList
+		// Filter out rates which aren't included in the AcceptList.
 		acceptList := h.oracleKeeper.AcceptList(ctx)
 		filteredDecCoins := sdk.DecCoins{}
 		for _, decCoin := range exchangeRates {
