@@ -11,14 +11,16 @@ import (
 const (
 	DefaultConfigTemplate = `
 [pricefeeder]
-# Path to price feeder config file
+# Path to price feeder config file.
 config_path = ""
-# Specifies whether the currency pair providers and currency deviation threshold values should
-# be read from the oracle module's on chain parameters or the price feeder config
+
+# Specifies whether to use the on chain price feeder provider pair and deviation threshold values or the config file.
 chain_config = true
-# Log level of price feeder process
+
+# Log level of price feeder process.
 log_level = "info"
-# Time interval that the price feeder's oracle process waits before fetching for new prices
+
+# Time interval that the price feeder's oracle process waits before fetching for new prices.
 oracle_tick_time = "5s"
 `
 )
