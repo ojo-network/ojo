@@ -15,7 +15,7 @@ const (
 config_path = ""
 # Specifies whether the currency pair providers and currency deviation threshold values should
 # be read from the oracle module's on chain parameters or the price feeder config
-chain_config = true
+chain_config = false
 # Log level of price feeder process
 log_level = "info"
 # Time interval that the price feeder's oracle process waits before fetching for new prices
