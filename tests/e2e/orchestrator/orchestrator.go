@@ -32,9 +32,9 @@ import (
 
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	govtypesv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
+	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	airdroptypes "github.com/ojo-network/ojo/x/airdrop/types"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
-	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
 const (
@@ -48,12 +48,12 @@ const (
 )
 
 type Orchestrator struct {
-	tmpDirs             []string
-	chain               *chain
-	dkrPool             *dockertest.Pool
-	dkrNet              *dockertest.Network
-	OjoClient           *client.OjoClient // signs tx with val[0]
-	AirdropClient       *client.OjoClient // signs tx with account[0]
+	tmpDirs       []string
+	chain         *chain
+	dkrPool       *dockertest.Pool
+	dkrNet        *dockertest.Network
+	OjoClient     *client.OjoClient // signs tx with val[0]
+	AirdropClient *client.OjoClient // signs tx with account[0]
 }
 
 // SetupSuite initializes and runs all the resources needed for the
@@ -326,7 +326,7 @@ func (o *Orchestrator) runValidators(t *testing.T) {
 
 	for _, val := range o.chain.validators {
 		// Define command-line arguments for price feeder configuration
-        priceFeederConfigArgs := []string{
+		priceFeederConfigArgs := []string{
 			"start",
 			"--pricefeeder.config_path=/root/pricefeeder/price-feeder.example.toml",
 			"--pricefeeder.chain_config=false",
@@ -343,7 +343,7 @@ func (o *Orchestrator) runValidators(t *testing.T) {
 				fmt.Sprintf("%s/:/root/pricefeeder/price-feeder.example.toml", priceFeederConfigDirectory),
 			},
 			Repository: ojoContainerRepo,
-			Cmd: priceFeederConfigArgs,
+			Cmd:        priceFeederConfigArgs,
 		}
 
 		// expose the first validator

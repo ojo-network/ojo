@@ -18,6 +18,10 @@ import (
 	"github.com/ojo-network/price-feeder/oracle/types"
 )
 
+var (
+	VoteThreshold = math.LegacyMustNewDecFromStr("0.4")
+)
+
 type IntegrationTestSuite struct {
 	suite.Suite
 
@@ -28,7 +32,7 @@ type IntegrationTestSuite struct {
 
 func (s *IntegrationTestSuite) SetupTest() {
 	s.app, s.ctx, s.keys = integration.SetupAppWithContext(s.T())
-	s.app.OracleKeeper.SetVoteThreshold(s.ctx, math.LegacyMustNewDecFromStr("0.4"))
+	s.app.OracleKeeper.SetVoteThreshold(s.ctx, VoteThreshold)
 }
 
 func TestAbciTestSuite(t *testing.T) {
@@ -44,7 +48,7 @@ func MockPriceFeeder() *pricefeeder.PriceFeeder {
 		zerolog.Nop(),
 		client.OracleClient{},
 		providers,
-		time.Second*10,
+		time.Second*5,
 		deviations,
 		providerEndpointsMap,
 		false,

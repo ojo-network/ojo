@@ -43,4 +43,4 @@ validators:
   bonded: 33500000000000uojo
   app:
     pricefeeder:
-      config_path: "PATH TO PRICE FEEDER CONFIG HERE"
+      config_path: "./pricefeeder/price-feeder.example.toml"

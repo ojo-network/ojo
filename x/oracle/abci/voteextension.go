@@ -39,6 +39,8 @@ func NewVoteExtensionHandler(
 	}
 }
 
+// ExtendVoteHandler creates an OracleVoteExtension using the prices fetched from the price feeder
+// service. It will filter out exchange rates that are not part of the oracle module's accept list.
 func (h *VoteExtensionHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 	return func(ctx sdk.Context, req *cometabci.RequestExtendVote) (resp *cometabci.ResponseExtendVote, err error) {
 		defer func() {
@@ -112,6 +114,8 @@ func (h *VoteExtensionHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 	}
 }
 
+// VerifyVoteExtensionHandler validates the OracleVoteExtension created by the ExtendVoteHandler. It
+// verifies that the vote extension can unmarshal correctly and is for the correct height.
 func (h *VoteExtensionHandler) VerifyVoteExtensionHandler() sdk.VerifyVoteExtensionHandler {
 	return func(ctx sdk.Context, req *cometabci.RequestVerifyVoteExtension) (
 		*cometabci.ResponseVerifyVoteExtension,

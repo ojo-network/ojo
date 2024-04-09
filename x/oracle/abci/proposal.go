@@ -40,6 +40,11 @@ func NewProposalHandler(
 	}
 }
 
+// PrepareProposalHandler is called only on the selected validator as "block proposer" (selected by CometBFT, read more
+// about this process here: https://docs.cometbft.com/v0.38/spec/consensus/proposer-selection). The block proposer is in
+// charge of creating the next block by selecting the transactions from the mempool, and in this method it will create an
+// extra transaction using the vote extension from the previous block which are only available on the next height at which
+// vote extensions were enabled.
 func (h *ProposalHandler) PrepareProposalHandler() sdk.PrepareProposalHandler {
 	return func(ctx sdk.Context, req *cometabci.RequestPrepareProposal) (*cometabci.ResponsePrepareProposal, error) {
 		if req == nil {
@@ -100,6 +105,9 @@ func (h *ProposalHandler) PrepareProposalHandler() sdk.PrepareProposalHandler {
 	}
 }
 
+// ProcessProposalHandler is called on all validators, and they can verify if the proposed block is valid. In case an
+// invalid block is being proposed validators can reject it, causing a new round of PrepareProposal to happen. This
+// step MUST be deterministic.
 func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 	return func(ctx sdk.Context, req *cometabci.RequestProcessProposal) (*cometabci.ResponseProcessProposal, error) {
 		if req == nil {

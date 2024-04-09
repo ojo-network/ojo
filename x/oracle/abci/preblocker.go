@@ -23,6 +23,9 @@ func NewPreBlockHandler(logger log.Logger, keeper keeper.Keeper) *PreBlockHandle
 	}
 }
 
+// PreBlocker is run before finalize block to update the aggregrate exchange rate votes on the oracle module
+// that were verified by the vote etension handler so that the exchange rate votes are available during the
+// entire block execution (from BeginBlock).
 func (h *PreBlockHandler) PreBlocker() sdk.PreBlocker {
 	return func(ctx sdk.Context, req *cometabci.RequestFinalizeBlock) (*sdk.ResponsePreBlock, error) {
 		if req == nil {
@@ -49,7 +52,8 @@ func (h *PreBlockHandler) PreBlocker() sdk.PreBlocker {
 			for _, exchangeRateVote := range injectedVoteExtTx.ExchangeRateVotes {
 				valAddr, err := sdk.ValAddressFromBech32(exchangeRateVote.Voter)
 				if err != nil {
-					return nil, err
+					h.logger.Error("failed to get voter address", "err", err)
+					continue
 				}
 				h.keeper.SetAggregateExchangeRateVote(ctx, valAddr, exchangeRateVote)
 			}

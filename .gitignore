@@ -5,3 +5,8 @@ release/
 .vscode/
 .DS_Store
 build
+buf.work.yaml
+proto/buf.gen.pulsar.yaml
+proto/buf.gen.sta.yaml
+proto/buf.gen.swagger.yaml
+proto/buf.gen.ts.yaml
