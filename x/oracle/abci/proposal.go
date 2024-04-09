@@ -88,7 +88,7 @@ func (h *ProposalHandler) PrepareProposalHandler() sdk.PrepareProposalHandler {
 				return nil, errors.New("failed to encode injected vote extension tx")
 			}
 
-			// Inject a "fake" tx into the proposal s.t. validators can decode, verify,
+			// Inject a placeholder tx into the proposal s.t. validators can decode, verify,
 			// and store the oracle exchange rate votes.
 			proposalTxs = append([][]byte{bz}, proposalTxs...)
 		}
