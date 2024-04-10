@@ -52,9 +52,9 @@ func NewRootCmd() *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:   appparams.Name + "d",
 		Short: "Ojo application network daemon and client",
-		Long: `A daemon and client for interacting with the Ojo network. Ojo is a
-Universal Capital Facility that can collateralize assets on one blockchain
-towards borrowing assets on another blockchain.`,
+		Long: `A daemon and client for interacting with the Ojo network. Ojo is an
+oracle platform which other blockchains and smart contracts can use to receive
+up-to-date and accurate data.`,
 		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
 			// set the default command outputs
 			cmd.SetOut(cmd.OutOrStdout())

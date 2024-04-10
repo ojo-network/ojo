@@ -2,10 +2,15 @@ package oracle_test
 
 import (
 	"gotest.tools/v3/assert"
+	"testing"
 
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	appparams "github.com/ojo-network/ojo/app/params"
+	"github.com/ojo-network/ojo/tests/integration"
+	"github.com/stretchr/testify/suite"
 
+	ojoapp "github.com/ojo-network/ojo/app"
 	"github.com/ojo-network/ojo/x/oracle"
 	"github.com/ojo-network/ojo/x/oracle/types"
 )
@@ -16,7 +21,18 @@ const (
 	denom       = "ojo"
 )
 
+type IntegrationTestSuite struct {
+	suite.Suite
+
+	ctx sdk.Context
+	app *ojoapp.App
+}
+
 var exchangeRate = math.LegacyMustNewDecFromStr("8.8")
+
+func (s *IntegrationTestSuite) SetupTest() {
+	s.app, s.ctx, _ = integration.SetupAppWithContext(s.T())
+}
 
 func (s *IntegrationTestSuite) TestGenesis_InitGenesis() {
 	keeper, ctx := s.app.OracleKeeper, s.ctx
@@ -157,7 +173,7 @@ func (s *IntegrationTestSuite) TestGenesis_ExportGenesis() {
 	}
 	exchangeRates := sdk.DecCoins{
 		{
-			Denom:  displayDenom,
+			Denom:  appparams.DisplayDenom,
 			Amount: exchangeRate,
 		},
 	}
@@ -231,4 +247,8 @@ func (s *IntegrationTestSuite) TestGenesis_ExportGenesis() {
 	assert.DeepEqual(s.T(), medians, result.Medians)
 	assert.DeepEqual(s.T(), historicPrices, result.HistoricPrices)
 	assert.DeepEqual(s.T(), medianDeviations, result.MedianDeviations)
+}
+
+func TestOracleTestSuite(t *testing.T) {
+	suite.Run(t, new(IntegrationTestSuite))
 }
