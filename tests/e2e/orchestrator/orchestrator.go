@@ -24,12 +24,16 @@ import (
 	"github.com/cosmos/cosmos-sdk/server"
 	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/module/testutil"
+	//"github.com/cosmos/cosmos-sdk/types/module/testutil"
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
+	"github.com/ojo-network/ojo/tests/grpc"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
 	"github.com/spf13/viper"
 
+	cmttypes "github.com/cometbft/cometbft/types"
+	consensustypes "github.com/cosmos/cosmos-sdk/x/consensus/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	govtypesv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
@@ -62,24 +66,21 @@ type Orchestrator struct {
 // 2. initializes the genesis files for all validators
 // 3. starts up each validator in its own docker container with the 3rd validator holding the majority of the stake
 // 4. initializes the ojo client used to send transactions and queries to the validators
-// 5. delegates voting power from the majority share validator to another one for the price feeder
-// 6. starts up the price feeder in its own docker container
 func (o *Orchestrator) InitResources(t *testing.T) {
 	t.Log("setting up e2e integration test suite...")
 	appparams.SetAddressPrefixes()
 
-	db := dbm.NewMemDB()
 	app := app.New(
 		log.NewNopLogger(),
-		db,
+		dbm.NewMemDB(),
 		nil,
 		true,
 		map[int64]bool{},
 		"",
-		0,
-		app.EmptyAppOptions{},
+		uint(1),
+		simtestutil.NewAppOptionsWithFlagHome(""),
 	)
-	encodingConfig = testutil.TestEncodingConfig{
+	encodingConfig = appparams.EncodingConfig{
 		InterfaceRegistry: app.InterfaceRegistry(),
 		Codec:             app.AppCodec(),
 		TxConfig:          app.GetTxConfig(),
@@ -109,6 +110,7 @@ func (o *Orchestrator) InitResources(t *testing.T) {
 	o.runValidators(t)
 	o.initOjoClient(t)
 	o.initAirdropClient(t)
+	// o.updateConsensusParams(t)
 }
 
 func (o *Orchestrator) TearDownResources(t *testing.T) {
@@ -127,7 +129,7 @@ func (o *Orchestrator) TearDownResources(t *testing.T) {
 }
 
 func (o *Orchestrator) initNodes(t *testing.T, gen map[string]json.RawMessage) {
-	require.NoError(t, o.chain.createAndInitValidators(2, gen))
+	require.NoError(t, o.chain.createAndInitValidators(3, gen))
 
 	// initialize a genesis file for the first validator
 	val0ConfigDir := o.chain.validators[0].configDir()
@@ -222,9 +224,6 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 	bz, err = o.chain.cdc.MarshalJSON(&stakingGenState)
 	require.NoError(t, err)
 	appGenState[stakingtypes.ModuleName] = bz
-
-	// Consensus
-	genDoc.Consensus.Params.ABCI.VoteExtensionsEnableHeight = 2
 
 	// Genesis Txs
 	var genUtilGenState genutiltypes.GenesisState
@@ -415,13 +414,36 @@ func (o *Orchestrator) initOjoClient(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func (o *Orchestrator) updateConsensusParams(t *testing.T) {
+	ojoClient := o.OjoClient
+
+	govAddress, err := ojoClient.QueryClient.QueryGovAccount()
+	require.NoError(t, err)
+
+	abciParams := cmttypes.DefaultConsensusParams().ToProto().Abci
+	abciParams.VoteExtensionsEnableHeight = 2
+
+	msg := &consensustypes.MsgUpdateParams{
+		Authority: govAddress.Address,
+		Block:     cmttypes.DefaultConsensusParams().ToProto().Block,
+		Evidence:  cmttypes.DefaultConsensusParams().ToProto().Evidence,
+		Validator: cmttypes.DefaultConsensusParams().ToProto().Validator,
+		Abci:      abciParams,
+	}
+	title := "Update Consensus Params"
+	summary := "Update Consensus Params vote extensions enabled height"
+
+	err = grpc.SubmitAndPassProposal(ojoClient, []sdk.Msg{msg}, title, summary)
+	require.NoError(t, err)
+}
+
 func (o *Orchestrator) initAirdropClient(t *testing.T) {
 	var err error
 	o.AirdropClient, err = client.NewOjoClient(
 		o.chain.id,
 		fmt.Sprintf("tcp://localhost:%s", ojoTmrpcPort),
 		fmt.Sprintf("tcp://localhost:%s", ojoGrpcPort),
-		"val1",
+		"val",
 		o.chain.accounts[0].Mnemonic,
 	)
 	require.NoError(t, err)

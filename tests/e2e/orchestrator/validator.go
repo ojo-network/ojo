@@ -10,6 +10,7 @@ import (
 
 	"cosmossdk.io/math"
 	cmtcfg "github.com/cometbft/cometbft/config"
+	cmttypes "github.com/cometbft/cometbft/types"
 	tmos "github.com/cometbft/cometbft/libs/os"
 	p2p "github.com/cometbft/cometbft/p2p"
 	"github.com/cometbft/cometbft/privval"
@@ -86,6 +87,15 @@ func (v *validator) init(gen map[string]json.RawMessage) error {
 	genesis.AppState = appState
 	genesis.Consensus = &types.ConsensusGenesis{
 		Validators: nil,
+		Params: &cmttypes.ConsensusParams{
+			Block: cmttypes.DefaultBlockParams(),
+			Evidence: cmttypes.DefaultEvidenceParams(),
+			Validator: cmttypes.DefaultValidatorParams(),
+			Version: cmttypes.DefaultVersionParams(),
+			ABCI: cmttypes.ABCIParams{
+				VoteExtensionsEnableHeight: 2,
+			},
+		},
 	}
 
 	if err = genutil.ExportGenesisFile(genesis, config.GenesisFile()); err != nil {

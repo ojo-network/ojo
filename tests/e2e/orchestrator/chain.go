@@ -8,8 +8,9 @@ import (
 	cmtrand "github.com/cometbft/cometbft/libs/rand"
 
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/types/module/testutil"
+	//"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	"github.com/ojo-network/ojo/client/tx"
+	appparams "github.com/ojo-network/ojo/app/params"
 )
 
 const (
@@ -17,7 +18,7 @@ const (
 	keyringAppName    = "testnet"
 )
 
-var encodingConfig testutil.TestEncodingConfig
+var encodingConfig appparams.EncodingConfig
 
 type chain struct {
 	cdc        codec.Codec
