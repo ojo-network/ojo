@@ -10,10 +10,10 @@ import (
 
 	"cosmossdk.io/math"
 	cmtcfg "github.com/cometbft/cometbft/config"
-	cmttypes "github.com/cometbft/cometbft/types"
 	tmos "github.com/cometbft/cometbft/libs/os"
 	p2p "github.com/cometbft/cometbft/p2p"
 	"github.com/cometbft/cometbft/privval"
+	cmttypes "github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdkcrypto "github.com/cosmos/cosmos-sdk/crypto"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
@@ -88,10 +88,10 @@ func (v *validator) init(gen map[string]json.RawMessage) error {
 	genesis.Consensus = &types.ConsensusGenesis{
 		Validators: nil,
 		Params: &cmttypes.ConsensusParams{
-			Block: cmttypes.DefaultBlockParams(),
-			Evidence: cmttypes.DefaultEvidenceParams(),
+			Block:     cmttypes.DefaultBlockParams(),
+			Evidence:  cmttypes.DefaultEvidenceParams(),
 			Validator: cmttypes.DefaultValidatorParams(),
-			Version: cmttypes.DefaultVersionParams(),
+			Version:   cmttypes.DefaultVersionParams(),
 			ABCI: cmttypes.ABCIParams{
 				VoteExtensionsEnableHeight: 2,
 			},

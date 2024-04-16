@@ -1,7 +1,6 @@
 package e2e
 
 import (
-	"fmt"
 	"time"
 
 	"cosmossdk.io/math"
@@ -25,8 +24,6 @@ func (s *IntegrationTestSuite) TestMedians() {
 // TestUpdateOracleParams updates the oracle params with a gov prop
 // and then verifies the new params are returned by the params query.
 func (s *IntegrationTestSuite) TestUpdateOracleParams() {
-	fmt.Printf("ojoClient tx %+v\n", s.orchestrator.OjoClient.TxClient)
-	fmt.Printf("ojoClient query %+v\n", s.orchestrator.OjoClient.QueryClient)
 	err := grpc.SubmitAndPassLegacyProposal(
 		s.orchestrator.OjoClient,
 		grpc.OracleParamChanges(10, 2, 20),

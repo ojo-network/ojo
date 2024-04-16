@@ -17,6 +17,7 @@ import (
 	"github.com/ojo-network/ojo/client"
 
 	"cosmossdk.io/log"
+	"cosmossdk.io/math"
 	cmtconfig "github.com/cometbft/cometbft/config"
 	cmtjson "github.com/cometbft/cometbft/libs/json"
 	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
@@ -24,8 +25,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/server"
 	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	//"github.com/cosmos/cosmos-sdk/types/module/testutil"
-	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	"github.com/ojo-network/ojo/tests/grpc"
 	"github.com/ory/dockertest/v3"
@@ -48,7 +48,8 @@ const (
 	ojoGrpcPort       = "9090"
 	ojoMaxStartupTime = 40 // seconds
 
-	initBalanceStr = "510000000000" + appparams.BondDenom
+	initBalanceStr             = "510000000000" + appparams.BondDenom
+	voteExtensionsEnableHeight = 15
 )
 
 type Orchestrator struct {
@@ -56,7 +57,7 @@ type Orchestrator struct {
 	chain         *chain
 	dkrPool       *dockertest.Pool
 	dkrNet        *dockertest.Network
-	OjoClient     *client.OjoClient // signs tx with val[0]
+	OjoClient     *client.OjoClient // signs tx with val[2]
 	AirdropClient *client.OjoClient // signs tx with account[0]
 }
 
@@ -66,21 +67,23 @@ type Orchestrator struct {
 // 2. initializes the genesis files for all validators
 // 3. starts up each validator in its own docker container with the 3rd validator holding the majority of the stake
 // 4. initializes the ojo client used to send transactions and queries to the validators
+// 5. updates the consensus params so vote extensions are enabled
 func (o *Orchestrator) InitResources(t *testing.T) {
 	t.Log("setting up e2e integration test suite...")
 	appparams.SetAddressPrefixes()
 
+	db := dbm.NewMemDB()
 	app := app.New(
 		log.NewNopLogger(),
-		dbm.NewMemDB(),
+		db,
 		nil,
 		true,
 		map[int64]bool{},
 		"",
-		uint(1),
-		simtestutil.NewAppOptionsWithFlagHome(""),
+		0,
+		app.EmptyAppOptions{},
 	)
-	encodingConfig = appparams.EncodingConfig{
+	encodingConfig = testutil.TestEncodingConfig{
 		InterfaceRegistry: app.InterfaceRegistry(),
 		Codec:             app.AppCodec(),
 		TxConfig:          app.GetTxConfig(),
@@ -108,9 +111,9 @@ func (o *Orchestrator) InitResources(t *testing.T) {
 	o.initGenesis(t)
 	o.initValidatorConfigs(t)
 	o.runValidators(t)
-	o.initOjoClient(t)
-	o.initAirdropClient(t)
-	// o.updateConsensusParams(t)
+	o.initOjoClient(t, encodingConfig)
+	o.initAirdropClient(t, encodingConfig)
+	o.updateConsensusParams(t)
 }
 
 func (o *Orchestrator) TearDownResources(t *testing.T) {
@@ -210,6 +213,8 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 
 	votingPeroid := 5 * time.Second
 	govGenState.Params.VotingPeriod = &votingPeroid
+
+	govGenState.Params.MinDeposit = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, math.NewInt(10000000)))
 
 	bz, err = o.chain.cdc.MarshalJSON(&govGenState)
 	require.NoError(t, err)
@@ -402,14 +407,15 @@ func (o *Orchestrator) runValidators(t *testing.T) {
 	}
 }
 
-func (o *Orchestrator) initOjoClient(t *testing.T) {
+func (o *Orchestrator) initOjoClient(t *testing.T, encCfg testutil.TestEncodingConfig) {
 	var err error
 	o.OjoClient, err = client.NewOjoClient(
 		o.chain.id,
 		fmt.Sprintf("tcp://localhost:%s", ojoTmrpcPort),
 		fmt.Sprintf("tcp://localhost:%s", ojoGrpcPort),
-		"val1",
-		o.chain.validators[1].mnemonic,
+		"val",
+		o.chain.validators[2].mnemonic,
+		encCfg,
 	)
 	require.NoError(t, err)
 }
@@ -421,7 +427,7 @@ func (o *Orchestrator) updateConsensusParams(t *testing.T) {
 	require.NoError(t, err)
 
 	abciParams := cmttypes.DefaultConsensusParams().ToProto().Abci
-	abciParams.VoteExtensionsEnableHeight = 2
+	abciParams.VoteExtensionsEnableHeight = voteExtensionsEnableHeight
 
 	msg := &consensustypes.MsgUpdateParams{
 		Authority: govAddress.Address,
@@ -437,7 +443,7 @@ func (o *Orchestrator) updateConsensusParams(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func (o *Orchestrator) initAirdropClient(t *testing.T) {
+func (o *Orchestrator) initAirdropClient(t *testing.T, encCfg testutil.TestEncodingConfig) {
 	var err error
 	o.AirdropClient, err = client.NewOjoClient(
 		o.chain.id,
@@ -445,6 +451,7 @@ func (o *Orchestrator) initAirdropClient(t *testing.T) {
 		fmt.Sprintf("tcp://localhost:%s", ojoGrpcPort),
 		"val",
 		o.chain.accounts[0].Mnemonic,
+		encCfg,
 	)
 	require.NoError(t, err)
 }

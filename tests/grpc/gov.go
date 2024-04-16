@@ -43,7 +43,7 @@ func SleepUntilProposalEndTime(ojoClient *client.OjoClient, proposalID uint64) e
 
 // ParseProposalID parses the proposalID from a tx response
 func ParseProposalID(response *sdk.TxResponse) (uint64, error) {
-	for _, event := range response.Logs[0].Events {
+	for _, event := range response.Events {
 		if event.Type == "submit_proposal" {
 			for _, attribute := range event.Attributes {
 				if attribute.Key == "proposal_id" {

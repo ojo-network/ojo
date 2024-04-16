@@ -18,7 +18,7 @@ const (
 // things like prompting for confirmation and printing the response. Instead,
 // we return the TxResponse.
 func BroadcastTx(clientCtx client.Context, txf tx.Factory, msgs ...sdk.Msg) (*sdk.TxResponse, error) {
-	txf, err := prepareFactory(clientCtx, txf)
+	txf, err := txf.Prepare(clientCtx)
 	if err != nil {
 		return nil, err
 	}
