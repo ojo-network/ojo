@@ -151,7 +151,7 @@ func (im IBCMiddleware) OnRecvPacket(
 	}
 
 	// parse the transfer amount
-	amt, ok := sdk.NewIntFromString(data.Amount)
+	amt, ok := math.NewIntFromString(data.Amount)
 	if !ok {
 		return channeltypes.NewErrorAcknowledgement(
 			errors.Wrapf(
