@@ -44,7 +44,6 @@ func (h GmpHandler) HandleGeneralMessage(
 		"srcAddress", srcAddress, // this is the Ojo contract address
 		"receiver", receiver,
 		"payload", payload,
-		"module", "x/gmp-middleware",
 		"coin", coin,
 	)
 
