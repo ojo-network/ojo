@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/ojo-network/ojo/x/airdrop/types"
@@ -24,14 +24,14 @@ func GenExpiryBlock(r *rand.Rand) uint64 {
 	return uint64(1 + r.Intn(10000))
 }
 
-// GenDelegationRequirement returns a randomized sdk.Dec in the range of [0.0, 1.0]
-func GenDelegationRequirement(r *rand.Rand) sdk.Dec {
-	return sdk.NewDecWithPrec(int64(r.Intn(100)), 1)
+// GenDelegationRequirement returns a randomized math.LegacyDec in the range of [0.0, 1.0]
+func GenDelegationRequirement(r *rand.Rand) math.LegacyDec {
+	return math.LegacyNewDecWithPrec(int64(r.Intn(100)), 1)
 }
 
-// GenAirdropFactor returns a randomized sdk.Dec in the range of [0.0, 1.0]
-func GenAirdropFactor(r *rand.Rand) sdk.Dec {
-	return sdk.NewDecWithPrec(int64(r.Intn(100)), 1)
+// GenAirdropFactor returns a randomized math.LegacyDec in the range of [0.0, 1.0]
+func GenAirdropFactor(r *rand.Rand) math.LegacyDec {
+	return math.LegacyNewDecWithPrec(int64(r.Intn(100)), 1)
 }
 
 func RandomizedGenState(simState *module.SimulationState) {
@@ -39,19 +39,19 @@ func RandomizedGenState(simState *module.SimulationState) {
 
 	var expiryBlock uint64
 	simState.AppParams.GetOrGenerate(
-		simState.Cdc, expiryBlockKey, &expiryBlock, simState.Rand,
+		expiryBlockKey, &expiryBlock, simState.Rand,
 		func(r *rand.Rand) { expiryBlock = GenExpiryBlock(r) },
 	)
 
-	var delegationRequirement sdk.Dec
+	var delegationRequirement math.LegacyDec
 	simState.AppParams.GetOrGenerate(
-		simState.Cdc, delegationRequirementKey, &delegationRequirement, simState.Rand,
+		delegationRequirementKey, &delegationRequirement, simState.Rand,
 		func(r *rand.Rand) { delegationRequirement = GenDelegationRequirement(r) },
 	)
 
-	var airdropFactor sdk.Dec
+	var airdropFactor math.LegacyDec
 	simState.AppParams.GetOrGenerate(
-		simState.Cdc, airdropFactorKey, &airdropFactor, simState.Rand,
+		airdropFactorKey, &airdropFactor, simState.Rand,
 		func(r *rand.Rand) { airdropFactor = GenAirdropFactor(r) },
 	)
 

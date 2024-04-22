@@ -46,6 +46,7 @@ func NewGmpDecoder(payload []byte) (GmpDecoder, error) {
 	}
 
 	// check to make sure each argument is the correct type
+	//nolint: all
 	if assetNames, ok := args[0].([][32]byte); !ok {
 		return GmpDecoder{}, fmt.Errorf("invalid asset names type: %T", args[0])
 	} else if contractAddress, ok := args[1].(common.Address); !ok {

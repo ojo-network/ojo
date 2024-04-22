@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
@@ -19,14 +20,14 @@ func TestGenesisValidation(t *testing.T) {
 
 	// Invalid VoteThreshold
 	genState = DefaultGenesisState()
-	genState.Params.VoteThreshold = sdk.NewDecWithPrec(33, 2)
+	genState.Params.VoteThreshold = math.LegacyNewDecWithPrec(33, 2)
 	require.Error(t, ValidateGenesis(genState))
 
 	// Invalid Rewardband
 	genState = DefaultGenesisState()
-	genState.Params.RewardBands[0].RewardBand = sdk.NewDec(2)
+	genState.Params.RewardBands[0].RewardBand = math.LegacyNewDec(2)
 	require.Error(t, ValidateGenesis(genState))
-	genState.Params.RewardBands[0].RewardBand = sdk.NewDec(-1)
+	genState.Params.RewardBands[0].RewardBand = math.LegacyNewDec(-1)
 	require.Error(t, ValidateGenesis(genState))
 
 	// Invalid RewardDistributionWindow
@@ -36,9 +37,9 @@ func TestGenesisValidation(t *testing.T) {
 
 	// Invalid SlashFraction
 	genState = DefaultGenesisState()
-	genState.Params.SlashFraction = sdk.NewDec(2)
+	genState.Params.SlashFraction = math.LegacyNewDec(2)
 	require.Error(t, ValidateGenesis(genState))
-	genState.Params.SlashFraction = sdk.NewDec(-1)
+	genState.Params.SlashFraction = math.LegacyNewDec(-1)
 	require.Error(t, ValidateGenesis(genState))
 
 	// Invalid SlashWindow
@@ -48,9 +49,9 @@ func TestGenesisValidation(t *testing.T) {
 
 	// Invalid MinValidPerWindow
 	genState = DefaultGenesisState()
-	genState.Params.MinValidPerWindow = sdk.NewDec(2)
+	genState.Params.MinValidPerWindow = math.LegacyNewDec(2)
 	require.Error(t, ValidateGenesis(genState))
-	genState.Params.MinValidPerWindow = sdk.NewDec(-1)
+	genState.Params.MinValidPerWindow = math.LegacyNewDec(-1)
 	require.Error(t, ValidateGenesis(genState))
 
 	// Invalid AcceptList

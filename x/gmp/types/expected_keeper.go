@@ -3,14 +3,15 @@ package types
 import (
 	context "context"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
 
 // OracleKeeper defines the expected Oracle interface that is needed by the gmp module.
 type OracleKeeper interface {
-	GetExchangeRate(ctx sdk.Context, symbol string) (sdk.Dec, error)
+	GetExchangeRate(ctx sdk.Context, symbol string) (math.LegacyDec, error)
 	GetExponent(ctx sdk.Context, denom string) (uint32, error)
 	MaximumMedianStamps(ctx sdk.Context) uint64
 	HistoricMedians(ctx sdk.Context, denom string, numStamps uint64) oracletypes.PriceStamps

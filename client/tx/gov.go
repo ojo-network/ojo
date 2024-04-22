@@ -46,6 +46,7 @@ func (c *Client) TxSubmitProposal(
 		"",
 		title,
 		summary,
+		false,
 	)
 	if err != nil {
 		return nil, err

@@ -17,6 +17,7 @@ import (
 	"github.com/spf13/cobra"
 
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
+	oracleabci "github.com/ojo-network/ojo/x/oracle/abci"
 	"github.com/ojo-network/ojo/x/oracle/client/cli"
 	"github.com/ojo-network/ojo/x/oracle/keeper"
 	simulation "github.com/ojo-network/ojo/x/oracle/simulations"
@@ -127,6 +128,12 @@ func (am AppModule) Name() string {
 	return am.AppModuleBasic.Name()
 }
 
+// IsOnePerModuleType implements the module.AppModule interface.
+func (am AppModule) IsOnePerModuleType() {}
+
+// IsAppModule implements the module.AppModule interface.
+func (am AppModule) IsAppModule() {}
+
 // QuerierRoute returns the x/oracle module's query routing key.
 func (AppModule) QuerierRoute() string { return types.QuerierRoute }
 
@@ -158,16 +165,16 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 }
 
 // BeginBlock executes all ABCI BeginBlock logic respective to the x/oracle module.
-func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
+func (am AppModule) BeginBlock(_ context.Context) {}
 
 // EndBlock executes all ABCI EndBlock logic respective to the x/oracle module.
 // It returns no validator updates.
-func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
-	if err := EndBlocker(ctx, am.keeper); err != nil {
+func (am AppModule) EndBlock(ctx context.Context) ([]abci.ValidatorUpdate, error) {
+	if err := oracleabci.EndBlocker(ctx, am.keeper); err != nil {
 		panic(err)
 	}
 
-	return []abci.ValidatorUpdate{}
+	return []abci.ValidatorUpdate{}, nil
 }
 
 // GenerateGenesisState creates a randomized GenState of the distribution module.
@@ -178,7 +185,7 @@ func (AppModule) GenerateGenesisState(simState *module.SimulationState) {
 // WeightedOperations returns the all the oracle module operations with their respective weights.
 func (am AppModule) WeightedOperations(simState module.SimulationState) []simtypes.WeightedOperation {
 	return simulation.WeightedOperations(
-		simState.AppParams, simState.Cdc, am.accountKeeper, am.bankKeeper, am.keeper,
+		simState.AppParams, am.accountKeeper, am.bankKeeper, am.keeper,
 	)
 }
 
@@ -189,6 +196,6 @@ func (am AppModule) ProposalContents(_ module.SimulationState) []simtypes.Weight
 }
 
 // RegisterStoreDecoder registers a decoder for oracle module's types
-func (am AppModule) RegisterStoreDecoder(sdr sdk.StoreDecoderRegistry) {
+func (am AppModule) RegisterStoreDecoder(sdr simtypes.StoreDecoderRegistry) {
 	sdr[types.StoreKey] = simulation.NewDecodeStore(am.cdc)
 }

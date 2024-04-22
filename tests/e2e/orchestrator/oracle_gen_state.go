@@ -1,6 +1,7 @@
 package orchestrator
 
 import (
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	appparams "github.com/ojo-network/ojo/app/params"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
@@ -29,17 +30,17 @@ var (
 	}
 
 	oracleRewardBands = []oracletypes.RewardBand{
-		{SymbolDenom: "UMEE", RewardBand: sdk.MustNewDecFromStr("1.0")},
-		{SymbolDenom: "ATOM", RewardBand: sdk.MustNewDecFromStr("1.0")},
-		{SymbolDenom: "USDC", RewardBand: sdk.MustNewDecFromStr("1.0")},
-		{SymbolDenom: "DAI", RewardBand: sdk.MustNewDecFromStr("1.0")},
-		{SymbolDenom: "ETH", RewardBand: sdk.MustNewDecFromStr("1.0")},
-		{SymbolDenom: "BTC", RewardBand: sdk.MustNewDecFromStr("1.0")},
-		{SymbolDenom: "BNB", RewardBand: sdk.MustNewDecFromStr("1.0")},
-		{SymbolDenom: "stATOM", RewardBand: sdk.MustNewDecFromStr("1.0")},
-		{SymbolDenom: "stOSMO", RewardBand: sdk.MustNewDecFromStr("1.0")},
-		{SymbolDenom: "OSMO", RewardBand: sdk.MustNewDecFromStr("1.0")},
-		{SymbolDenom: "IST", RewardBand: sdk.MustNewDecFromStr("1.0")},
+		{SymbolDenom: "UMEE", RewardBand: math.LegacyMustNewDecFromStr("1.0")},
+		{SymbolDenom: "ATOM", RewardBand: math.LegacyMustNewDecFromStr("1.0")},
+		{SymbolDenom: "USDC", RewardBand: math.LegacyMustNewDecFromStr("1.0")},
+		{SymbolDenom: "DAI", RewardBand: math.LegacyMustNewDecFromStr("1.0")},
+		{SymbolDenom: "ETH", RewardBand: math.LegacyMustNewDecFromStr("1.0")},
+		{SymbolDenom: "BTC", RewardBand: math.LegacyMustNewDecFromStr("1.0")},
+		{SymbolDenom: "BNB", RewardBand: math.LegacyMustNewDecFromStr("1.0")},
+		{SymbolDenom: "stATOM", RewardBand: math.LegacyMustNewDecFromStr("1.0")},
+		{SymbolDenom: "stOSMO", RewardBand: math.LegacyMustNewDecFromStr("1.0")},
+		{SymbolDenom: "OSMO", RewardBand: math.LegacyMustNewDecFromStr("1.0")},
+		{SymbolDenom: "IST", RewardBand: math.LegacyMustNewDecFromStr("1.0")},
 	}
 )
 
@@ -50,6 +51,6 @@ var (
 )
 
 func initStakeAmount(amount string) sdk.Coin {
-	stakeAmount, _ := sdk.NewIntFromString(amount)
+	stakeAmount, _ := math.NewIntFromString(amount)
 	return sdk.NewCoin(appparams.BondDenom, stakeAmount)
 }

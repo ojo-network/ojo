@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
+	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -82,7 +83,7 @@ type CrisisModule struct {
 // DefaultGenesis returns custom Ojo x/crisis module genesis state.
 func (CrisisModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	return cdc.MustMarshalJSON(&crisistypes.GenesisState{
-		ConstantFee: sdk.NewCoin(appparams.BondDenom, sdk.NewInt(1000)),
+		ConstantFee: sdk.NewCoin(appparams.BondDenom, math.NewInt(1000)),
 	})
 }
 

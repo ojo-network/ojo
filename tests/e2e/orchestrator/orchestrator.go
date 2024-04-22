@@ -4,8 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -18,21 +16,27 @@ import (
 	appparams "github.com/ojo-network/ojo/app/params"
 	"github.com/ojo-network/ojo/client"
 
-	dbm "github.com/cometbft/cometbft-db"
-	tmconfig "github.com/cometbft/cometbft/config"
-	tmjson "github.com/cometbft/cometbft/libs/json"
+	"cosmossdk.io/log"
+	"cosmossdk.io/math"
+	cmtconfig "github.com/cometbft/cometbft/config"
+	cmtjson "github.com/cometbft/cometbft/libs/json"
 	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
+	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/server"
 	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
+	"github.com/ojo-network/ojo/tests/grpc"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
 	"github.com/spf13/viper"
 
+	cmttypes "github.com/cometbft/cometbft/types"
+	consensustypes "github.com/cosmos/cosmos-sdk/x/consensus/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	govtypesv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
+	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	airdroptypes "github.com/ojo-network/ojo/x/airdrop/types"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
@@ -44,22 +48,17 @@ const (
 	ojoGrpcPort       = "9090"
 	ojoMaxStartupTime = 40 // seconds
 
-	// TODO: update original pf instance with sdk 0.47
-	priceFeederContainerRepo  = "ghcr.io/ojo-network/price-feeder-ojo-47"
-	priceFeederServerPort     = "7171/tcp"
-	priceFeederMaxStartupTime = 20 // seconds
-
-	initBalanceStr = "510000000000" + appparams.BondDenom
+	initBalanceStr             = "510000000000" + appparams.BondDenom
+	voteExtensionsEnableHeight = 15
 )
 
 type Orchestrator struct {
-	tmpDirs             []string
-	chain               *chain
-	dkrPool             *dockertest.Pool
-	dkrNet              *dockertest.Network
-	priceFeederResource *dockertest.Resource
-	OjoClient           *client.OjoClient // signs tx with val[0]
-	AirdropClient       *client.OjoClient // signs tx with account[0]
+	tmpDirs       []string
+	chain         *chain
+	dkrPool       *dockertest.Pool
+	dkrNet        *dockertest.Network
+	OjoClient     *client.OjoClient // signs tx with val[2]
+	AirdropClient *client.OjoClient // signs tx with account[0]
 }
 
 // SetupSuite initializes and runs all the resources needed for the
@@ -68,15 +67,14 @@ type Orchestrator struct {
 // 2. initializes the genesis files for all validators
 // 3. starts up each validator in its own docker container with the 3rd validator holding the majority of the stake
 // 4. initializes the ojo client used to send transactions and queries to the validators
-// 5. delegates voting power from the majority share validator to another one for the price feeder
-// 6. starts up the price feeder in its own docker container
+// 5. updates the consensus params so vote extensions are enabled
 func (o *Orchestrator) InitResources(t *testing.T) {
 	t.Log("setting up e2e integration test suite...")
 	appparams.SetAddressPrefixes()
 
 	db := dbm.NewMemDB()
 	app := app.New(
-		nil,
+		log.NewNopLogger(),
 		db,
 		nil,
 		true,
@@ -91,6 +89,7 @@ func (o *Orchestrator) InitResources(t *testing.T) {
 		TxConfig:          app.GetTxConfig(),
 		Amino:             app.LegacyAmino(),
 	}
+	defaultGenesis := app.DefaultGenesis()
 
 	// codec
 	cdc := encodingConfig.Codec
@@ -107,21 +106,18 @@ func (o *Orchestrator) InitResources(t *testing.T) {
 	o.dkrNet, err = o.dkrPool.CreateNetwork(fmt.Sprintf("%s-testnet", o.chain.id))
 	require.NoError(t, err)
 
-	o.initNodes(t)
+	o.initNodes(t, defaultGenesis)
 	o.initUserAccounts(t)
 	o.initGenesis(t)
 	o.initValidatorConfigs(t)
 	o.runValidators(t)
-	o.initOjoClient(t)
-	o.initAirdropClient(t)
-	o.delegatePriceFeederVoting(t)
-	o.runPriceFeeder(t)
+	o.initOjoClient(t, encodingConfig)
+	o.initAirdropClient(t, encodingConfig)
+	o.updateConsensusParams(t)
 }
 
 func (o *Orchestrator) TearDownResources(t *testing.T) {
 	t.Log("tearing down e2e integration test suite...")
-
-	require.NoError(t, o.dkrPool.Purge(o.priceFeederResource))
 
 	for _, val := range o.chain.validators {
 		require.NoError(t, o.dkrPool.Purge(val.dockerResource))
@@ -135,8 +131,8 @@ func (o *Orchestrator) TearDownResources(t *testing.T) {
 	}
 }
 
-func (o *Orchestrator) initNodes(t *testing.T) {
-	require.NoError(t, o.chain.createAndInitValidators(2))
+func (o *Orchestrator) initNodes(t *testing.T, gen map[string]json.RawMessage) {
+	require.NoError(t, o.chain.createAndInitValidators(3, gen))
 
 	// initialize a genesis file for the first validator
 	val0ConfigDir := o.chain.validators[0].configDir()
@@ -218,9 +214,21 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 	votingPeroid := 5 * time.Second
 	govGenState.Params.VotingPeriod = &votingPeroid
 
+	govGenState.Params.MinDeposit = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, math.NewInt(10000000)))
+
 	bz, err = o.chain.cdc.MarshalJSON(&govGenState)
 	require.NoError(t, err)
 	appGenState[govtypes.ModuleName] = bz
+
+	// Staking
+	var stakingGenState stakingtypes.GenesisState
+	require.NoError(t, o.chain.cdc.UnmarshalJSON(appGenState[stakingtypes.ModuleName], &stakingGenState))
+
+	stakingGenState.Params.BondDenom = appparams.BondDenom
+
+	bz, err = o.chain.cdc.MarshalJSON(&stakingGenState)
+	require.NoError(t, err)
+	appGenState[stakingtypes.ModuleName] = bz
 
 	// Genesis Txs
 	var genUtilGenState genutiltypes.GenesisState
@@ -256,7 +264,7 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 
 	genDoc.AppState = bz
 
-	bz, err = tmjson.MarshalIndent(genDoc, "", "  ")
+	bz, err = cmtjson.MarshalIndent(genDoc, "", "  ")
 	require.NoError(t, err)
 
 	// write the updated genesis file to each validator
@@ -268,13 +276,13 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 
 func (o *Orchestrator) initValidatorConfigs(t *testing.T) {
 	for i, val := range o.chain.validators {
-		tmCfgPath := filepath.Join(val.configDir(), "config", "config.toml")
+		cmtCfgPath := filepath.Join(val.configDir(), "config", "config.toml")
 
 		vpr := viper.New()
-		vpr.SetConfigFile(tmCfgPath)
+		vpr.SetConfigFile(cmtCfgPath)
 		require.NoError(t, vpr.ReadInConfig())
 
-		valConfig := tmconfig.DefaultConfig()
+		valConfig := cmtconfig.DefaultConfig()
 		require.NoError(t, vpr.Unmarshal(valConfig))
 
 		valConfig.P2P.ListenAddress = fmt.Sprintf("tcp://0.0.0.0:%s", ojoP2pPort)
@@ -298,7 +306,7 @@ func (o *Orchestrator) initValidatorConfigs(t *testing.T) {
 
 		valConfig.P2P.PersistentPeers = strings.Join(peers, ",")
 
-		tmconfig.WriteConfigFile(tmCfgPath, valConfig)
+		cmtconfig.WriteConfigFile(cmtCfgPath, valConfig)
 
 		// set application configuration
 		appCfgPath := filepath.Join(val.configDir(), "config", "app.toml")
@@ -318,16 +326,29 @@ func (o *Orchestrator) runValidators(t *testing.T) {
 
 	proposalsDirectory, err := proposalsDirectory()
 	require.NoError(t, err)
+	priceFeederConfigDirectory, err := priceFeederConfigDirectory()
+	require.NoError(t, err)
 
 	for _, val := range o.chain.validators {
+		// Define command-line arguments for price feeder configuration
+		priceFeederConfigArgs := []string{
+			"start",
+			"--pricefeeder.config_path=/root/pricefeeder/price-feeder.example.toml",
+			"--pricefeeder.chain_config=false",
+			"--pricefeeder.log_level=info",
+			"--pricefeeder.oracle_tick_time=5s",
+		}
+
 		runOpts := &dockertest.RunOptions{
 			Name:      val.instanceName(),
 			NetworkID: o.dkrNet.Network.ID,
 			Mounts: []string{
 				fmt.Sprintf("%s/:/root/.ojo", val.configDir()),
 				fmt.Sprintf("%s/:/root/proposals", proposalsDirectory),
+				fmt.Sprintf("%s/:/root/pricefeeder/price-feeder.example.toml", priceFeederConfigDirectory),
 			},
 			Repository: ojoContainerRepo,
+			Cmd:        priceFeederConfigArgs,
 		}
 
 		// expose the first validator
@@ -386,125 +407,51 @@ func (o *Orchestrator) runValidators(t *testing.T) {
 	}
 }
 
-func (o *Orchestrator) delegatePriceFeederVoting(t *testing.T) {
-	delegateAddr, err := o.chain.validators[0].keyInfo.GetAddress()
-	require.NoError(t, err)
-	_, err = o.OjoClient.TxClient.TxDelegateFeedConsent(delegateAddr)
-	require.NoError(t, err)
-}
-
-func (o *Orchestrator) runPriceFeeder(t *testing.T) {
-	t.Log("starting price-feeder container...")
-
-	votingVal := o.chain.validators[1]
-	votingValAddr, err := votingVal.keyInfo.GetAddress()
-	require.NoError(t, err)
-
-	delegateVal := o.chain.validators[0]
-	delegateValAddr, err := delegateVal.keyInfo.GetAddress()
-	require.NoError(t, err)
-
-	grpcEndpoint := fmt.Sprintf("tcp://%s:%s", delegateVal.instanceName(), ojoGrpcPort)
-	tmrpcEndpoint := fmt.Sprintf("http://%s:%s", delegateVal.instanceName(), ojoTmrpcPort)
-
-	o.priceFeederResource, err = o.dkrPool.RunWithOptions(
-		&dockertest.RunOptions{
-			Name:       "price-feeder",
-			NetworkID:  o.dkrNet.Network.ID,
-			Repository: priceFeederContainerRepo,
-			Mounts: []string{
-				fmt.Sprintf("%s/:/root/.ojo", delegateVal.configDir()),
-			},
-			PortBindings: map[docker.Port][]docker.PortBinding{
-				"7171/tcp": {{HostIP: "", HostPort: "7171"}},
-			},
-			Env: []string{
-				fmt.Sprintf("PRICE_FEEDER_PASS=%s", keyringPassphrase),
-				fmt.Sprintf("ACCOUNT_ADDRESS=%s", delegateValAddr),
-				fmt.Sprintf("ACCOUNT_VALIDATOR=%s", sdk.ValAddress(votingValAddr)),
-				fmt.Sprintf("KEYRING_DIR=%s", "/root/.ojo"),
-				fmt.Sprintf("ACCOUNT_CHAIN_ID=%s", o.chain.id),
-				fmt.Sprintf("RPC_GRPC_ENDPOINT=%s", grpcEndpoint),
-				fmt.Sprintf("RPC_TMRPC_ENDPOINT=%s", tmrpcEndpoint),
-			},
-			Cmd: []string{"--skip-provider-check", "--log-level=debug"},
-		},
-		noRestart,
-	)
-	require.NoError(t, err)
-
-	endpoint := fmt.Sprintf("http://%s/api/v1/prices", o.priceFeederResource.GetHostPort(priceFeederServerPort))
-
-	checkHealth := func() bool {
-		resp, err := http.Get(endpoint)
-		if err != nil {
-			t.Log("Price feeder endpoint not available", err, endpoint)
-			return false
-		}
-
-		defer resp.Body.Close()
-
-		bz, err := io.ReadAll(resp.Body)
-		if err != nil {
-			t.Log("Can't get price feeder response", err)
-			return false
-		}
-
-		var respBody map[string]interface{}
-		if err := json.Unmarshal(bz, &respBody); err != nil {
-			t.Log("Can't unmarshal price feed", err)
-			return false
-		}
-
-		prices, ok := respBody["prices"].(map[string]interface{})
-		if !ok {
-			t.Log("price feeder: no prices")
-			return false
-		}
-
-		return len(prices) > 0
-	}
-
-	isHealthy := false
-	for i := 0; i < priceFeederMaxStartupTime; i++ {
-		isHealthy = checkHealth()
-		if isHealthy {
-			break
-		}
-		time.Sleep(time.Second)
-	}
-
-	if !isHealthy {
-		err := o.outputLogs(o.priceFeederResource)
-		if err != nil {
-			t.Log("Error retrieving price feeder logs", err)
-		}
-		t.Fatal("price-feeder not healthy")
-	}
-
-	t.Logf("started price-feeder container: %s", o.priceFeederResource.Container.ID)
-}
-
-func (o *Orchestrator) initOjoClient(t *testing.T) {
+func (o *Orchestrator) initOjoClient(t *testing.T, encCfg testutil.TestEncodingConfig) {
 	var err error
 	o.OjoClient, err = client.NewOjoClient(
 		o.chain.id,
 		fmt.Sprintf("tcp://localhost:%s", ojoTmrpcPort),
 		fmt.Sprintf("tcp://localhost:%s", ojoGrpcPort),
-		"val1",
-		o.chain.validators[1].mnemonic,
+		"val",
+		o.chain.validators[2].mnemonic,
+		encCfg,
 	)
 	require.NoError(t, err)
 }
 
-func (o *Orchestrator) initAirdropClient(t *testing.T) {
+func (o *Orchestrator) updateConsensusParams(t *testing.T) {
+	ojoClient := o.OjoClient
+
+	govAddress, err := ojoClient.QueryClient.QueryGovAccount()
+	require.NoError(t, err)
+
+	abciParams := cmttypes.DefaultConsensusParams().ToProto().Abci
+	abciParams.VoteExtensionsEnableHeight = voteExtensionsEnableHeight
+
+	msg := &consensustypes.MsgUpdateParams{
+		Authority: govAddress.Address,
+		Block:     cmttypes.DefaultConsensusParams().ToProto().Block,
+		Evidence:  cmttypes.DefaultConsensusParams().ToProto().Evidence,
+		Validator: cmttypes.DefaultConsensusParams().ToProto().Validator,
+		Abci:      abciParams,
+	}
+	title := "Update Consensus Params"
+	summary := "Update Consensus Params vote extensions enabled height"
+
+	err = grpc.SubmitAndPassProposal(ojoClient, []sdk.Msg{msg}, title, summary)
+	require.NoError(t, err)
+}
+
+func (o *Orchestrator) initAirdropClient(t *testing.T, encCfg testutil.TestEncodingConfig) {
 	var err error
 	o.AirdropClient, err = client.NewOjoClient(
 		o.chain.id,
 		fmt.Sprintf("tcp://localhost:%s", ojoTmrpcPort),
 		fmt.Sprintf("tcp://localhost:%s", ojoGrpcPort),
-		"val1",
+		"val",
 		o.chain.accounts[0].Mnemonic,
+		encCfg,
 	)
 	require.NoError(t, err)
 }
@@ -534,6 +481,21 @@ func proposalsDirectory() (string, error) {
 
 	adjacentDirPath := filepath.Join(workingDir, "proposals")
 	absoluteAdjacentDirPath, err := filepath.Abs(adjacentDirPath)
+	if err != nil {
+		return "", err
+	}
+
+	return absoluteAdjacentDirPath, nil
+}
+
+func priceFeederConfigDirectory() (string, error) {
+	workingDir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+
+	priceFeederConfigDirPath := filepath.Join(workingDir, "../../pricefeeder/price-feeder.example.toml")
+	absoluteAdjacentDirPath, err := filepath.Abs(priceFeederConfigDirPath)
 	if err != nil {
 		return "", err
 	}

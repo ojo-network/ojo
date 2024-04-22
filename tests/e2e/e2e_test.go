@@ -3,6 +3,7 @@ package e2e
 import (
 	"time"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ojo-network/ojo/client/tx"
 	"github.com/ojo-network/ojo/tests/grpc"
@@ -41,8 +42,8 @@ func (s *IntegrationTestSuite) TestUpdateOracleParams() {
 // and then verifies the new params are returned by the params query.
 func (s *IntegrationTestSuite) TestUpdateAirdropParams() {
 	expiryBlock := uint64(100)
-	delegationRequirement := sdk.MustNewDecFromStr("8")
-	airdropFactor := sdk.MustNewDecFromStr("7")
+	delegationRequirement := math.LegacyMustNewDecFromStr("8")
+	airdropFactor := math.LegacyMustNewDecFromStr("7")
 
 	params := airdroptypes.Params{
 		ExpiryBlock:           expiryBlock,
@@ -93,7 +94,7 @@ func (s *IntegrationTestSuite) TestClaimAirdrop() {
 	_, err = ojoClient.TxClient.TxDelegate(
 		originAccAddress,
 		val1ValAddress,
-		sdk.NewCoin(appparams.BondDenom, sdk.NewInt(int64(airdropAccount.OriginAmount))),
+		sdk.NewCoin(appparams.BondDenom, math.NewInt(int64(airdropAccount.OriginAmount))),
 	)
 	s.Require().NoError(err)
 

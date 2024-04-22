@@ -1,11 +1,12 @@
 package keeper_test
 
 import (
+	"cosmossdk.io/math"
 	"github.com/cometbft/cometbft/crypto/secp256k1"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
-	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	clienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
+	clienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
 	appparams "github.com/ojo-network/ojo/app/params"
 	"github.com/ojo-network/ojo/x/gmp/types"
 )
@@ -13,7 +14,7 @@ import (
 var (
 	pubKey    = secp256k1.GenPrivKey().PubKey()
 	addr      = sdk.AccAddress(pubKey.Address())
-	initCoins = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdk.NewInt(1000000000000000000)))
+	initCoins = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, math.NewInt(1000000000000000000)))
 )
 
 func (s *IntegrationTestSuite) TestMsgServer_SetParams() {
@@ -67,7 +68,7 @@ func (s *IntegrationTestSuite) TestMsgServer_RelayPrices() {
 		"0x0000",
 		sdk.Coin{
 			Denom:  "uojo",
-			Amount: sdk.NewInt(1),
+			Amount: math.NewInt(1),
 		},
 		[]string{"BTC", "ATOM"},
 		[]byte{1, 2, 3, 4},

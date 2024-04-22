@@ -3,12 +3,13 @@ package types
 import (
 	"sort"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 type PriceStamps []PriceStamp
 
-func NewPriceStamp(exchangeRate sdk.Dec, denom string, blockNum uint64) *PriceStamp {
+func NewPriceStamp(exchangeRate math.LegacyDec, denom string, blockNum uint64) *PriceStamp {
 	return &PriceStamp{
 		ExchangeRate: &sdk.DecCoin{
 			Amount: exchangeRate,
@@ -18,9 +19,9 @@ func NewPriceStamp(exchangeRate sdk.Dec, denom string, blockNum uint64) *PriceSt
 	}
 }
 
-// Decs returns the exchange rates in sdk.Dec format
-func (p *PriceStamps) Decs() []sdk.Dec {
-	decs := []sdk.Dec{}
+// Decs returns the exchange rates in math.LegacyDec format
+func (p *PriceStamps) Decs() []math.LegacyDec {
+	decs := []math.LegacyDec{}
 	for _, priceStamp := range *p {
 		decs = append(decs, priceStamp.ExchangeRate.Amount)
 	}
