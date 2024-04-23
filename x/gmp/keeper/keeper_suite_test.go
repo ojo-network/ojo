@@ -3,6 +3,7 @@ package keeper_test
 import (
 	"testing"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/suite"
 
@@ -39,6 +40,6 @@ func (s *IntegrationTestSuite) SetupSuite() {
 
 func (s *IntegrationTestSuite) SetOraclePrices() {
 	app, ctx := s.app, s.ctx
-	app.OracleKeeper.SetExchangeRate(ctx, "ATOM", sdk.NewDecWithPrec(1, 1))
-	app.OracleKeeper.SetExchangeRate(ctx, "BTC", sdk.NewDecWithPrec(1, 3))
+	app.OracleKeeper.SetExchangeRate(ctx, "ATOM", math.LegacyNewDecWithPrec(1, 1))
+	app.OracleKeeper.SetExchangeRate(ctx, "BTC", math.LegacyNewDecWithPrec(1, 3))
 }

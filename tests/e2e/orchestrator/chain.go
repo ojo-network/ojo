@@ -1,11 +1,11 @@
 package orchestrator
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
-	tmrand "github.com/cometbft/cometbft/libs/rand"
-
+	cmtrand "github.com/cometbft/cometbft/libs/rand"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	"github.com/ojo-network/ojo/client/tx"
@@ -33,7 +33,7 @@ func newChain(cdc codec.Codec) (*chain, error) {
 	}
 
 	return &chain{
-		id:      "chain-" + tmrand.NewRand().Str(6),
+		id:      "chain-" + cmtrand.NewRand().Str(6),
 		dataDir: tmpDir,
 		cdc:     cdc,
 	}, nil
@@ -43,12 +43,12 @@ func (c *chain) configDir() string {
 	return fmt.Sprintf("%s/%s", c.dataDir, c.id)
 }
 
-func (c *chain) createAndInitValidators(count int) error {
+func (c *chain) createAndInitValidators(count int, gen map[string]json.RawMessage) error {
 	for i := 0; i < count; i++ {
 		node := c.createValidator(i)
 
 		// generate genesis files
-		if err := node.init(); err != nil {
+		if err := node.init(gen); err != nil {
 			return err
 		}
 

@@ -3,7 +3,7 @@ package gmpmiddleware
 import (
 	"testing"
 
-	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
+	channeltypes "github.com/cosmos/ibc-go/v8/modules/core/04-channel/types"
 	"github.com/ojo-network/ojo/x/gmp/types"
 	"github.com/stretchr/testify/require"
 )

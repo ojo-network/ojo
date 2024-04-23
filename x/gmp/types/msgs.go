@@ -32,11 +32,6 @@ func NewMsgSetParams(
 // Type implements LegacyMsg interface
 func (msg MsgSetParams) Type() string { return sdk.MsgTypeURL(&msg) }
 
-// GetSignBytes implements sdk.Msg
-func (msg MsgSetParams) GetSignBytes() []byte {
-	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
-}
-
 // GetSigners implements sdk.Msg
 func (msg MsgSetParams) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
@@ -74,11 +69,6 @@ func NewMsgRelay(
 
 // Type implements LegacyMsg interface
 func (msg MsgRelayPrice) Type() string { return sdk.MsgTypeURL(&msg) }
-
-// GetSignBytes implements sdk.Msg
-func (msg MsgRelayPrice) GetSignBytes() []byte {
-	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
-}
 
 // GetSigners implements sdk.Msg
 func (msg MsgRelayPrice) GetSigners() []sdk.AccAddress {

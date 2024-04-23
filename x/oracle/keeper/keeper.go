@@ -4,18 +4,20 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
+	"cosmossdk.io/math"
+	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
 	"github.com/ojo-network/ojo/util/metrics"
 	"github.com/ojo-network/ojo/x/oracle/types"
+	"github.com/ojo-network/price-feeder/oracle"
 )
 
-var ten = sdk.MustNewDecFromStr("10")
+var ten = math.LegacyMustNewDecFromStr("10")
 
 // Keeper of the oracle store
 type Keeper struct {
@@ -27,6 +29,8 @@ type Keeper struct {
 	bankKeeper    types.BankKeeper
 	distrKeeper   types.DistributionKeeper
 	StakingKeeper types.StakingKeeper
+
+	PriceFeederOracle *oracle.Oracle
 
 	distrName        string
 	telemetryEnabled bool
@@ -79,12 +83,12 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 
 // GetExchangeRate gets the consensus exchange rate of USD denominated in the
 // denom asset from the store.
-func (k Keeper) GetExchangeRate(ctx sdk.Context, symbol string) (sdk.Dec, error) {
+func (k Keeper) GetExchangeRate(ctx sdk.Context, symbol string) (math.LegacyDec, error) {
 	store := ctx.KVStore(k.storeKey)
 	symbol = strings.ToUpper(symbol)
 	b := store.Get(types.GetExchangeRateKey(symbol))
 	if b == nil {
-		return sdk.ZeroDec(), types.ErrUnknownDenom.Wrap(symbol)
+		return math.LegacyZeroDec(), types.ErrUnknownDenom.Wrap(symbol)
 	}
 
 	decProto := sdk.DecProto{}
@@ -95,7 +99,7 @@ func (k Keeper) GetExchangeRate(ctx sdk.Context, symbol string) (sdk.Dec, error)
 
 // GetExchangeRateBase gets the consensus exchange rate of an asset
 // in the base denom (e.g. ATOM -> uatom)
-func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, error) {
+func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (math.LegacyDec, error) {
 	var symbol string
 	var exponent uint64
 	// Translate the base denom -> symbol
@@ -108,12 +112,12 @@ func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, err
 		}
 	}
 	if len(symbol) == 0 {
-		return sdk.ZeroDec(), types.ErrUnknownDenom.Wrap(denom)
+		return math.LegacyZeroDec(), types.ErrUnknownDenom.Wrap(denom)
 	}
 
 	exchangeRate, err := k.GetExchangeRate(ctx, symbol)
 	if err != nil {
-		return sdk.ZeroDec(), err
+		return math.LegacyZeroDec(), err
 	}
 
 	powerReduction := ten.Power(exponent)
@@ -122,7 +126,7 @@ func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, err
 
 // SetExchangeRate sets the consensus exchange rate of USD denominated in the
 // denom asset to the store.
-func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, exchangeRate sdk.Dec) {
+func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, exchangeRate math.LegacyDec) {
 	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: exchangeRate})
 	denom = strings.ToUpper(denom)
@@ -132,7 +136,7 @@ func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, exchangeRate sdk.
 
 // SetExchangeRateWithEvent sets an consensus
 // exchange rate to the store with ABCI event
-func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, exchangeRate sdk.Dec) error {
+func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, exchangeRate math.LegacyDec) error {
 	k.SetExchangeRate(ctx, denom, exchangeRate)
 	return ctx.EventManager().EmitTypedEvent(&types.EventSetFxRate{
 		Denom: denom, Rate: exchangeRate,
@@ -140,10 +144,10 @@ func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, exchange
 }
 
 // IterateExchangeRates iterates over USD rates in the store.
-func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, sdk.Dec) bool) {
+func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, math.LegacyDec) bool) {
 	store := ctx.KVStore(k.storeKey)
 
-	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixExchangeRate)
+	iter := storetypes.KVStorePrefixIterator(store, types.KeyPrefixExchangeRate)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
@@ -160,7 +164,7 @@ func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, sdk.D
 
 func (k Keeper) ClearExchangeRates(ctx sdk.Context) {
 	store := ctx.KVStore(k.storeKey)
-	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixExchangeRate)
+	iter := storetypes.KVStorePrefixIterator(store, types.KeyPrefixExchangeRate)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
 		store.Delete(iter.Key())
@@ -170,8 +174,12 @@ func (k Keeper) ClearExchangeRates(ctx sdk.Context) {
 // GetFeederDelegation gets the account address to which the validator operator
 // delegated oracle vote rights.
 func (k Keeper) GetFeederDelegation(ctx sdk.Context, vAddr sdk.ValAddress) (sdk.AccAddress, error) {
+	val, err := k.StakingKeeper.Validator(ctx, vAddr)
+	if err != nil {
+		return nil, err
+	}
 	// check that the given validator exists
-	if val := k.StakingKeeper.Validator(ctx, vAddr); val == nil || !val.IsBonded() {
+	if val == nil || !val.IsBonded() {
 		return nil, stakingtypes.ErrNoValidatorFound.Wrapf("validator %s is not in active set", vAddr)
 	}
 
@@ -198,7 +206,7 @@ type IterateFeederDelegationHandler func(delegator sdk.ValAddress, delegate sdk.
 func (k Keeper) IterateFeederDelegations(ctx sdk.Context, handler IterateFeederDelegationHandler) {
 	store := ctx.KVStore(k.storeKey)
 
-	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixFeederDelegation)
+	iter := storetypes.KVStorePrefixIterator(store, types.KeyPrefixFeederDelegation)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
@@ -263,7 +271,7 @@ func (k Keeper) IterateAggregateExchangeRatePrevotes(
 ) {
 	store := ctx.KVStore(k.storeKey)
 
-	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixAggregateExchangeRatePrevote)
+	iter := storetypes.KVStorePrefixIterator(store, types.KeyPrefixAggregateExchangeRatePrevote)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
@@ -326,7 +334,7 @@ func (k Keeper) IterateAggregateExchangeRateVotes(
 ) {
 	store := ctx.KVStore(k.storeKey)
 
-	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixAggregateExchangeRateVote)
+	iter := storetypes.KVStorePrefixIterator(store, types.KeyPrefixAggregateExchangeRateVote)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {

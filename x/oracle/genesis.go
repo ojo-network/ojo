@@ -3,6 +3,7 @@ package oracle
 import (
 	"fmt"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ojo-network/ojo/x/oracle/keeper"
@@ -98,7 +99,7 @@ func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) *types.GenesisState {
 	})
 
 	exchangeRates := sdk.DecCoins{}
-	keeper.IterateExchangeRates(ctx, func(denom string, rate sdk.Dec) (stop bool) {
+	keeper.IterateExchangeRates(ctx, func(denom string, rate math.LegacyDec) (stop bool) {
 		exchangeRates = append(exchangeRates, sdk.DecCoin{
 			Denom:  denom,
 			Amount: rate,

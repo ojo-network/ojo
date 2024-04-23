@@ -1,17 +1,13 @@
 package integration
 
 import (
-	"fmt"
 	"testing"
 
-	tmrand "github.com/cometbft/cometbft/libs/rand"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
-	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingtestutil "github.com/cosmos/cosmos-sdk/x/staking/testutil"
 	"github.com/stretchr/testify/require"
 
@@ -32,6 +28,7 @@ const (
 var validatorPowers = []int64{599, 398, 2}
 
 type TestValidatorKey struct {
+	PrivKey    secp256k1.PrivKey
 	PubKey     cryptotypes.PubKey
 	ValAddress sdk.ValAddress
 	AccAddress sdk.AccAddress
@@ -42,8 +39,10 @@ func CreateTestValidatorKeys(numValidators int) []TestValidatorKey {
 	var validatorKeys []TestValidatorKey
 
 	for i := 0; i < numValidators; i++ {
-		pubKey := secp256k1.GenPrivKey().PubKey()
+		privKey := secp256k1.GenPrivKey()
+		pubKey := privKey.PubKey()
 		valInfo := TestValidatorKey{
+			PrivKey:    *privKey,
 			PubKey:     pubKey,
 			ValAddress: sdk.ValAddress(pubKey.Address()),
 			AccAddress: sdk.AccAddress(pubKey.Address()),
@@ -68,9 +67,7 @@ func SetupAppWithContext(
 	config.SetBech32PrefixForConsensusNode(appparams.ConsNodeAddressPrefix, appparams.ConsNodePubKeyPrefix)
 
 	app := ojoapp.Setup(t)
-	ctx := app.BaseApp.NewContext(isCheckTx, tmproto.Header{
-		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
-	})
+	ctx := app.BaseApp.NewContext(isCheckTx)
 
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
 	oracletypes.RegisterQueryServer(queryHelper, oraclekeeper.NewQuerier(app.OracleKeeper))
@@ -97,7 +94,8 @@ func SetupAppWithContext(
 		app.BankKeeper.SendCoinsFromModuleToModule(ctx, minttypes.ModuleName, oracletypes.ModuleName, initCoins),
 	)
 
-	staking.EndBlocker(ctx, app.StakingKeeper)
+	_, err := app.StakingKeeper.EndBlocker(ctx)
+	require.NoError(t, err)
 
 	return app, ctx, validatorKeys
 }

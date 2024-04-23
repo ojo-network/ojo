@@ -5,17 +5,17 @@ import (
 	"errors"
 	"sync"
 
-	tmrpcclient "github.com/cometbft/cometbft/rpc/client"
+	cmtrpcclient "github.com/cometbft/cometbft/rpc/client"
 	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
-	tmctypes "github.com/cometbft/cometbft/rpc/core/types"
-	tmtypes "github.com/cometbft/cometbft/types"
+	cmtctypes "github.com/cometbft/cometbft/rpc/core/types"
+	cmttypes "github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/rs/zerolog"
 )
 
 var (
 	errParseEventDataNewBlockHeader = errors.New("error parsing EventDataNewBlockHeader")
-	queryEventNewBlockHeader        = tmtypes.QueryForEvent(tmtypes.EventNewBlockHeader)
+	queryEventNewBlockHeader        = cmttypes.QueryForEvent(cmttypes.EventNewBlockHeader)
 )
 
 // ChainHeight is used to cache the chain height of the
@@ -35,7 +35,7 @@ type ChainHeight struct {
 // starts a new goroutine subscribed to EventNewBlockHeader.
 func NewChainHeight(
 	ctx context.Context,
-	client client.TendermintRPC,
+	client client.CometRPC,
 	logger zerolog.Logger,
 ) (*ChainHeight, error) {
 	rpcClient := client.(*rpchttp.HTTP)
@@ -47,7 +47,7 @@ func NewChainHeight(
 	}
 
 	newBlockHeaderSubscription, err := rpcClient.Subscribe(
-		ctx, tmtypes.EventNewBlockHeader, queryEventNewBlockHeader.String())
+		ctx, cmttypes.EventNewBlockHeader, queryEventNewBlockHeader.String())
 	if err != nil {
 		return nil, err
 	}
@@ -81,13 +81,13 @@ func (chainHeight *ChainHeight) updateChainHeight(blockHeight int64, err error) 
 // and updates the chain height.
 func (chainHeight *ChainHeight) subscribe(
 	ctx context.Context,
-	eventsClient tmrpcclient.EventsClient,
-	newBlockHeaderSubscription <-chan tmctypes.ResultEvent,
+	eventsClient cmtrpcclient.EventsClient,
+	newBlockHeaderSubscription <-chan cmtctypes.ResultEvent,
 ) {
 	for {
 		select {
 		case <-ctx.Done():
-			err := eventsClient.Unsubscribe(ctx, tmtypes.EventNewBlockHeader, queryEventNewBlockHeader.String())
+			err := eventsClient.Unsubscribe(ctx, cmttypes.EventNewBlockHeader, queryEventNewBlockHeader.String())
 			if err != nil {
 				chainHeight.Logger.Err(err)
 				chainHeight.updateChainHeight(chainHeight.lastChainHeight, err)
@@ -96,7 +96,7 @@ func (chainHeight *ChainHeight) subscribe(
 			return
 
 		case resultEvent := <-newBlockHeaderSubscription:
-			eventDataNewBlockHeader, ok := resultEvent.Data.(tmtypes.EventDataNewBlockHeader)
+			eventDataNewBlockHeader, ok := resultEvent.Data.(cmttypes.EventDataNewBlockHeader)
 			if !ok {
 				chainHeight.Logger.Err(errParseEventDataNewBlockHeader)
 				chainHeight.updateChainHeight(chainHeight.lastChainHeight, errParseEventDataNewBlockHeader)

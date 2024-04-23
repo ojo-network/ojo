@@ -3,6 +3,7 @@ package keeper_test
 import (
 	"math/rand"
 
+	"cosmossdk.io/math"
 	"github.com/cometbft/cometbft/crypto/secp256k1"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -12,18 +13,18 @@ import (
 )
 
 func (s *IntegrationTestSuite) TestQuerier_ActiveExchangeRates() {
-	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec())
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, math.LegacyOneDec())
 	res, err := s.queryClient.ActiveExchangeRates(s.ctx.Context(), &types.QueryActiveExchangeRates{})
 	s.Require().NoError(err)
 	s.Require().Equal([]string{displayDenom}, res.ActiveRates)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_ExchangeRates() {
-	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec())
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, math.LegacyOneDec())
 	res, err := s.queryClient.ExchangeRates(s.ctx.Context(), &types.QueryExchangeRates{})
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.DecCoins{
-		sdk.NewDecCoinFromDec(displayDenom, sdk.OneDec()),
+		sdk.NewDecCoinFromDec(displayDenom, math.LegacyOneDec()),
 	}, res.ExchangeRates)
 
 	res, err = s.queryClient.ExchangeRates(s.ctx.Context(), &types.QueryExchangeRates{
@@ -31,7 +32,7 @@ func (s *IntegrationTestSuite) TestQuerier_ExchangeRates() {
 	})
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.DecCoins{
-		sdk.NewDecCoinFromDec(displayDenom, sdk.OneDec()),
+		sdk.NewDecCoinFromDec(displayDenom, math.LegacyOneDec()),
 	}, res.ExchangeRates)
 }
 
@@ -118,7 +119,7 @@ func (s *IntegrationTestSuite) TestQuerier_AggregateVote() {
 	var decCoins sdk.DecCoins
 	decCoins = append(decCoins, sdk.DecCoin{
 		Denom:  appparams.DisplayDenom,
-		Amount: sdk.ZeroDec(),
+		Amount: math.LegacyZeroDec(),
 	})
 
 	vote := types.AggregateExchangeRateVote{
@@ -205,10 +206,10 @@ func (s *IntegrationTestSuite) TestQuerier_AggregateVotesAppendVotes() {
 func (s *IntegrationTestSuite) TestQuerier_Medians() {
 	app, ctx := s.app, s.ctx
 
-	atomMedian0 := sdk.DecCoin{Denom: "atom", Amount: sdk.MustNewDecFromStr("49.99")}
-	umeeMedian0 := sdk.DecCoin{Denom: "umee", Amount: sdk.MustNewDecFromStr("6541.48")}
-	atomMedian1 := sdk.DecCoin{Denom: "atom", Amount: sdk.MustNewDecFromStr("51.09")}
-	umeeMedian1 := sdk.DecCoin{Denom: "umee", Amount: sdk.MustNewDecFromStr("6540.23")}
+	atomMedian0 := sdk.DecCoin{Denom: "atom", Amount: math.LegacyMustNewDecFromStr("49.99")}
+	umeeMedian0 := sdk.DecCoin{Denom: "umee", Amount: math.LegacyMustNewDecFromStr("6541.48")}
+	atomMedian1 := sdk.DecCoin{Denom: "atom", Amount: math.LegacyMustNewDecFromStr("51.09")}
+	umeeMedian1 := sdk.DecCoin{Denom: "umee", Amount: math.LegacyMustNewDecFromStr("6540.23")}
 
 	blockHeight0 := uint64(ctx.BlockHeight() - 4)
 	app.OracleKeeper.SetHistoricMedian(ctx, atomMedian0.Denom, blockHeight0, atomMedian0.Amount)
@@ -263,8 +264,8 @@ func (s *IntegrationTestSuite) TestQuerier_Medians() {
 func (s *IntegrationTestSuite) TestQuerier_MedianDeviations() {
 	app, ctx := s.app, s.ctx
 
-	atomMedianDeviation := sdk.DecCoin{Denom: "atom", Amount: sdk.MustNewDecFromStr("39.99")}
-	umeeMedianDeviation := sdk.DecCoin{Denom: "umee", Amount: sdk.MustNewDecFromStr("9541.48")}
+	atomMedianDeviation := sdk.DecCoin{Denom: "atom", Amount: math.LegacyMustNewDecFromStr("39.99")}
+	umeeMedianDeviation := sdk.DecCoin{Denom: "umee", Amount: math.LegacyMustNewDecFromStr("9541.48")}
 
 	app.OracleKeeper.SetMedianStampPeriod(ctx, 1)
 	blockHeight := uint64(ctx.BlockHeight() - 1)
@@ -295,7 +296,8 @@ func (s *IntegrationTestSuite) TestQuerier_ValidatorRewardSet() {
 
 	slashWindowBlock := int64(app.OracleKeeper.SlashWindow(ctx))
 	ctx = ctx.WithBlockHeight(slashWindowBlock)
-	app.OracleKeeper.SetValidatorRewardSet(ctx)
+	err := app.OracleKeeper.SetValidatorRewardSet(ctx)
+	s.Require().NoError(err)
 
 	ctx = ctx.WithBlockHeight(slashWindowBlock + 20)
 	valRewardSetResp, err := s.queryClient.ValidatorRewardSet(ctx.Context(), &types.QueryValidatorRewardSet{})

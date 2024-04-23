@@ -4,7 +4,7 @@ import (
 	fmt "fmt"
 	"math/big"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"cosmossdk.io/math"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
@@ -15,8 +15,6 @@ const (
 	TypeUnrecognized = iota
 	// TypeGeneralMessage is a pure message
 	TypeGeneralMessage
-	// TypeGeneralMessageWithToken is a general message with token
-	TypeGeneralMessageWithToken
 	// TypeSendToken is a direct token transfer
 	TypeSendToken
 )
@@ -101,7 +99,7 @@ func namesToBytes(assetNames []string) [][32]byte {
 
 func NewPriceData(
 	assetName string,
-	price sdk.Dec,
+	price math.LegacyDec,
 	resolveTime *big.Int,
 	medianData MedianData,
 ) (PriceData, error) {
@@ -122,11 +120,11 @@ func NewPriceData(
 }
 
 // DecToInt multiplies amount by rate factor to make it compatible with contracts.
-func decToInt(amount sdk.Dec) *big.Int {
+func decToInt(amount math.LegacyDec) *big.Int {
 	return amount.Mul(rateFactor).TruncateInt().BigInt()
 }
 
-var rateFactor = sdk.NewDec(10).Power(9)
+var rateFactor = math.LegacyNewDec(10).Power(9)
 
 // NewMedianData creates a MedianData object of medians and deviations and their block numbers.
 func NewMedianData(medians oracletypes.PriceStamps, deviations oracletypes.PriceStamps) (MedianData, error) {

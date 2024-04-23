@@ -24,7 +24,7 @@ func NewQuerier(keeper Keeper) types.QueryServer {
 // Params queries params of x/airdrop module.
 func (q querier) Params(
 	goCtx context.Context,
-	req *types.ParamsRequest,
+	_ *types.ParamsRequest,
 ) (*types.ParamsResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	params := q.GetParams(ctx)

@@ -2,6 +2,7 @@ package types
 
 import (
 	"cosmossdk.io/errors"
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/ojo-network/ojo/app/params"
@@ -29,11 +30,11 @@ func (aa *AirdropAccount) ClaimAccAddress() (sdk.AccAddress, error) {
 }
 
 func (aa AirdropAccount) OriginCoins() sdk.Coins {
-	return sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdk.NewIntFromUint64(aa.OriginAmount)))
+	return sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, math.NewIntFromUint64(aa.OriginAmount)))
 }
 
 func (aa AirdropAccount) ClaimCoin() sdk.Coin {
-	return sdk.NewCoin(appparams.BondDenom, sdk.NewIntFromUint64(aa.ClaimAmount))
+	return sdk.NewCoin(appparams.BondDenom, math.NewIntFromUint64(aa.ClaimAmount))
 }
 
 func (aa *AirdropAccount) ClaimCoins() sdk.Coins {

@@ -54,11 +54,12 @@ service Msg {
 message MsgAggregateExchangeRatePrevote {
   option (gogoproto.equal) = false;
   option (gogoproto.goproto_getters) = false;
+  option (cosmos.msg.v1.signer) = "feeder";
 
   string hash = 1 [ (gogoproto.moretags) = "yaml:\"hash\"" ];
   // Feeder is the author and the signer of the message.
-  string feeder = 2 [ (gogoproto.moretags) = "yaml:\"feeder\"" ];
-  string validator = 3 [ (gogoproto.moretags) = "yaml:\"validator\"" ];
+  string feeder = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string validator = 3 [(cosmos_proto.scalar) = "cosmos.ValidatorAddressString"];
 }
 
 // MsgAggregateExchangeRatePrevoteResponse defines the
@@ -70,13 +71,14 @@ message MsgAggregateExchangeRatePrevoteResponse {}
 message MsgAggregateExchangeRateVote {
   option (gogoproto.equal) = false;
   option (gogoproto.goproto_getters) = false;
+  option (cosmos.msg.v1.signer) = "feeder";
 
   string salt = 1 [ (gogoproto.moretags) = "yaml:\"salt\"" ];
   string exchange_rates = 2
       [ (gogoproto.moretags) = "yaml:\"exchange_rates\"" ];
   // Feeder is the author and the signer of the message.
-  string feeder = 3 [ (gogoproto.moretags) = "yaml:\"feeder\"" ];
-  string validator = 4 [ (gogoproto.moretags) = "yaml:\"validator\"" ];
+  string feeder = 3 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string validator = 4 [(cosmos_proto.scalar) = "cosmos.ValidatorAddressString"];
 }
 
 // MsgAggregateExchangeRateVoteResponse defines the
@@ -88,10 +90,11 @@ message MsgAggregateExchangeRateVoteResponse {}
 message MsgDelegateFeedConsent {
   option (gogoproto.equal) = false;
   option (gogoproto.goproto_getters) = false;
+  option (cosmos.msg.v1.signer) = "operator";
 
   // Operator is the author and the signer of the message.
-  string operator = 1 [ (gogoproto.moretags) = "yaml:\"operator\"" ];
-  string delegate = 2 [ (gogoproto.moretags) = "yaml:\"delegate\"" ];
+  string operator = 1 [(cosmos_proto.scalar) = "cosmos.ValidatorAddressString"];
+  string delegate = 2 [(cosmos_proto.scalar) = "cosmos.ValidatorAddressString"];
 }
 
 // MsgDelegateFeedConsentResponse defines the Msg/DelegateFeedConsent response
@@ -154,7 +157,7 @@ message MsgGovAddDenoms {
   // asset in the proposal. If not provided, it will default.
   string reward_band = 7 [
     (gogoproto.moretags) = "yaml:\"vote_threshold\"",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = true
   ];
 
