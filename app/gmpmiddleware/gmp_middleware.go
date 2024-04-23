@@ -142,46 +142,7 @@ func (im IBCMiddleware) OnRecvPacket(
 		return ack
 	}
 
-<<<<<<< HEAD
-	switch msg.Type {
-	case gmptypes.TypeGeneralMessage:
-		err = im.handler.HandleGeneralMessage(
-			ctx,
-			msg.SourceChain,   // e.g. "Ethereum"
-			msg.SourceAddress, // e.g. "0x1234..."
-			data.Receiver,     // e.g. "ojo1..."
-			msg.Payload,
-			data.Sender, // e.g. "ojo1..."
-			packet.DestinationChannel,
-		)
-	case gmptypes.TypeGeneralMessageWithToken:
-		// parse the transfer amount
-		amt, ok := sdk.NewIntFromString(data.Amount)
-		if !ok {
-			return channeltypes.NewErrorAcknowledgement(
-				errors.Wrapf(
-					types.ErrInvalidAmount,
-					"unable to parse transfer amount (%s) into sdk.Int",
-					data.Amount,
-				),
-			)
-		}
-		denom := parseDenom(packet, data.Denom)
-
-		err = im.handler.HandleGeneralMessageWithToken(
-			ctx,
-			msg.SourceChain,
-			msg.SourceAddress,
-			data.Receiver,
-			msg.Payload,
-			data.Sender,
-			packet.DestinationChannel,
-			sdk.NewCoin(denom, amt),
-		)
-	default:
-=======
 	if msg.Type != gmptypes.TypeGeneralMessage {
->>>>>>> a07c661 (fix: Use token from ibc packet in GMP handler for all GMP messages (#417))
 		ctx.Logger().With(
 			fmt.Errorf("unrecognized message type: %d", msg.Type)).
 			Error("unrecognized gmp message")
@@ -189,7 +150,7 @@ func (im IBCMiddleware) OnRecvPacket(
 	}
 
 	// parse the transfer amount
-	amt, ok := math.NewIntFromString(data.Amount)
+	amt, ok := sdk.NewIntFromString(data.Amount)
 	if !ok {
 		return channeltypes.NewErrorAcknowledgement(
 			errors.Wrapf(
