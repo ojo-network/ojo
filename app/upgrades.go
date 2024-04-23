@@ -38,6 +38,7 @@ func (app App) RegisterUpgradeHandlers() {
 	app.registerUpgrade0_2_2(upgradeInfo)
 	app.registerUpgrade0_3_0(upgradeInfo)
 	app.registerUpgrade0_3_0Rc8(upgradeInfo)
+	app.registerUpgrade0_3_1Rc1(upgradeInfo)
 }
 
 // performs upgrade from v0.1.3 to v0.1.4
@@ -166,6 +167,17 @@ func (app *App) registerUpgrade0_3_0(upgradeInfo upgradetypes.Plan) {
 
 func (app *App) registerUpgrade0_3_0Rc8(_ upgradetypes.Plan) {
 	const planName = "v0.3.0-rc8"
+	app.UpgradeKeeper.SetUpgradeHandler(planName,
+		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			sdkCtx := sdk.UnwrapSDKContext(ctx)
+			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		},
+	)
+}
+
+func (app *App) registerUpgrade0_3_1Rc1(_ upgradetypes.Plan) {
+	const planName = "v0.3.1-rc1"
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			sdkCtx := sdk.UnwrapSDKContext(ctx)
