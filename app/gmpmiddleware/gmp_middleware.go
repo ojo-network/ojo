@@ -143,7 +143,7 @@ func (im IBCMiddleware) OnRecvPacket(
 		return ack
 	}
 
-	if msg.Type != gmptypes.TypeGeneralMessage || msg.Type != gmptypes.TypeGeneralMessageWithToken {
+	if msg.Type != gmptypes.TypeGeneralMessage && msg.Type != gmptypes.TypeGeneralMessageWithToken {
 		ctx.Logger().With(
 			fmt.Errorf("unrecognized message type: %d", msg.Type)).
 			Error("unrecognized gmp message")
