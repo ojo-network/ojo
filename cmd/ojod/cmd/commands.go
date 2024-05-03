@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io"
 	"os"
+	"time"
 
 	"cosmossdk.io/log"
 	"cosmossdk.io/tools/confix/cmd"
@@ -55,7 +56,8 @@ func initAppConfig() (string, interface{}) {
 
 	type CustomAppConfig struct {
 		serverconfig.Config
-		WASM WASMConfig `mapstructure:"wasm"`
+		WASM        WASMConfig            `mapstructure:"wasm"`
+		PriceFeeder pricefeeder.AppConfig `mapstructure:"pricefeeder"`
 	}
 
 	// here we set a default initial app.toml values for validators.
@@ -68,6 +70,12 @@ func initAppConfig() (string, interface{}) {
 			LruSize:       1,
 			QueryGasLimit: 300000,
 		},
+		PriceFeeder: pricefeeder.AppConfig{
+			ConfigPath:     "",
+			ChainConfig:    true,
+			LogLevel:       "info",
+			OracleTickTime: time.Second * 5,
+		},
 	}
 
 	customAppTemplate := serverconfig.DefaultConfigTemplate + `
@@ -76,7 +84,7 @@ func initAppConfig() (string, interface{}) {
 query_gas_limit = 300000
 # This is the number of wasm vm instances we keep cached in memory for speed-up
 # Warning: this is currently unstable and may lead to crashes, best to keep for 0 unless testing locally
-lru_size = 0`
+lru_size = 0` + pricefeeder.DefaultConfigTemplate
 
 	return customAppTemplate, customAppConfig
 }
@@ -119,6 +127,20 @@ func initRootCmd(
 		queryCommand(),
 		txCommand(),
 		keys.Commands(),
+	)
+
+	// add price feeder flags
+	rootCmd.PersistentFlags().String(pricefeeder.FlagConfigPath, "", "Path to price feeder config file")
+	rootCmd.PersistentFlags().Bool(
+		pricefeeder.FlagChainConfig,
+		true,
+		"Specifies whether the currency pair providers and currency deviation threshold values should",
+	)
+	rootCmd.PersistentFlags().String(pricefeeder.FlagLogLevel, "", "Log level of price feeder process")
+	rootCmd.PersistentFlags().Duration(
+		pricefeeder.FlagOracleTickTime,
+		time.Second*5,
+		"Time interval that the price feeder's oracle process waits before fetching for new prices",
 	)
 }
 
@@ -205,10 +227,15 @@ func newApp(
 	)
 
 	// start price feeder
+	appConfig, err := pricefeeder.ReadConfigFromAppOpts(appOpts)
+	if err != nil {
+		panic(err)
+	}
+
 	var oracleGenState oracletypes.GenesisState
 	app.AppCodec().MustUnmarshalJSON(app.DefaultGenesis()[oracletypes.ModuleName], &oracleGenState)
 	go func() {
-		err := pricefeeder.Start(oracleGenState.Params)
+		err := app.PriceFeeder.Start(oracleGenState.Params, appConfig)
 		if err != nil {
 			panic(err)
 		}
