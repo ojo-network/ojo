@@ -10,9 +10,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	ojoapp "github.com/ojo-network/ojo/app"
 )
 
 const (
@@ -39,6 +39,7 @@ func NewClient(
 	cmtrpcEndpoint string,
 	accountName string,
 	accountMnemonic string,
+	encCfg testutil.TestEncodingConfig,
 ) (c *Client, err error) {
 	c = &Client{
 		ChainID:        chainID,
@@ -50,7 +51,7 @@ func NewClient(
 		return nil, err
 	}
 
-	err = c.createClientContext()
+	err = c.createClientContext(encCfg)
 	if err != nil {
 		return nil, err
 	}
@@ -59,8 +60,7 @@ func NewClient(
 	return c, err
 }
 
-func (c *Client) createClientContext() error {
-	encoding := ojoapp.MakeEncodingConfig()
+func (c *Client) createClientContext(encCfg testutil.TestEncodingConfig) error {
 	fromAddress, _ := c.keyringRecord.GetAddress()
 
 	cmtHTTPClient, err := cmtjsonclient.DefaultHTTPClient(c.CMTRPCEndpoint)
@@ -75,13 +75,13 @@ func (c *Client) createClientContext() error {
 
 	c.ClientContext = &client.Context{
 		ChainID:           c.ChainID,
-		InterfaceRegistry: encoding.InterfaceRegistry,
+		InterfaceRegistry: encCfg.InterfaceRegistry,
 		Output:            os.Stderr,
 		BroadcastMode:     flags.BroadcastSync,
-		TxConfig:          encoding.TxConfig,
+		TxConfig:          encCfg.TxConfig,
 		AccountRetriever:  authtypes.AccountRetriever{},
-		Codec:             encoding.Codec,
-		LegacyAmino:       encoding.Amino,
+		Codec:             encCfg.Codec,
+		LegacyAmino:       encCfg.Amino,
 		Input:             os.Stdin,
 		NodeURI:           c.CMTRPCEndpoint,
 		Client:            cmtRPCClient,
@@ -108,7 +108,8 @@ func (c *Client) createTxFactory() {
 		WithGasAdjustment(gasAdjustment).
 		WithKeybase(c.ClientContext.Keyring).
 		WithSignMode(signing.SignMode_SIGN_MODE_DIRECT).
-		WithSimulateAndExecute(true)
+		WithSimulateAndExecute(true).
+		WithFromName(c.ClientContext.FromName)
 	c.txFactory = &factory
 }
 

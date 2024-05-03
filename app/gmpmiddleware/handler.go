@@ -37,56 +37,9 @@ func (h GmpHandler) HandleGeneralMessage(
 	payload []byte,
 	sender string,
 	channel string,
-) error {
-	ctx.Logger().Info("HandleGeneralMessage called",
-		"srcChain", srcChain,
-		"srcAddress", srcAddress,
-		"receiver", receiver,
-		"payload", payload,
-		"module", "x/gmp-middleware",
-	)
-
-	err := verifyParams(h.gmp.GetParams(ctx), sender, channel)
-	if err != nil {
-		return err
-	}
-	msg, err := types.NewGmpDecoder(payload)
-	if err != nil {
-		return err
-	}
-	ctx.Logger().Info("HandleGeneralMessage GMP Decoder", "msg", msg)
-	tx := &types.MsgRelayPrice{
-		Relayer:               h.relayer,
-		DestinationChain:      srcChain,
-		ClientContractAddress: msg.ContractAddress.Hex(),
-		OjoContractAddress:    srcAddress,
-		Denoms:                msg.GetDenoms(),
-		CommandSelector:       msg.CommandSelector[:],
-		CommandParams:         msg.CommandParams,
-		Timestamp:             msg.Timestamp.Int64(),
-	}
-	err = tx.ValidateBasic()
-	if err != nil {
-		return err
-	}
-	ctx.Logger().Info("HandleGeneralMessage GMP Decoder", "tx", tx)
-	_, err = h.gmp.RelayPrice(ctx, tx)
-	return err
-}
-
-// HandleGeneralMessage takes the receiving message from axelar,
-// and sends it along to the GMP module.
-func (h GmpHandler) HandleGeneralMessageWithToken(
-	ctx sdk.Context,
-	srcChain,
-	srcAddress string,
-	receiver string,
-	payload []byte,
-	sender string,
-	channel string,
 	coin sdk.Coin,
 ) error {
-	ctx.Logger().Info("HandleGeneralMessageWithToken called",
+	ctx.Logger().Info("HandleGeneralMessage called",
 		"srcChain", srcChain,
 		"srcAddress", srcAddress, // this is the Ojo contract address
 		"receiver", receiver,
@@ -102,7 +55,7 @@ func (h GmpHandler) HandleGeneralMessageWithToken(
 	if err != nil {
 		return err
 	}
-	ctx.Logger().Info("HandleGeneralMessageWithToken GMP Decoder", "msg", msg)
+	ctx.Logger().Info("HandleGeneralMessage GMP Decoder", "msg", msg)
 	tx := &types.MsgRelayPrice{
 		Relayer:               h.relayer,
 		DestinationChain:      srcChain,

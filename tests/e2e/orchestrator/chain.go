@@ -6,7 +6,6 @@ import (
 	"os"
 
 	cmtrand "github.com/cometbft/cometbft/libs/rand"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	"github.com/ojo-network/ojo/client/tx"

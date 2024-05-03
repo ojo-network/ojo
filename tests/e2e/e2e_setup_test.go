@@ -1,28 +1,28 @@
 package e2e
 
-// import (
-// 	"testing"
+import (
+	"testing"
 
-// 	"github.com/stretchr/testify/suite"
+	"github.com/stretchr/testify/suite"
 
-// 	"github.com/ojo-network/ojo/tests/e2e/orchestrator"
-// )
+	"github.com/ojo-network/ojo/tests/e2e/orchestrator"
+)
 
-// type IntegrationTestSuite struct {
-// 	suite.Suite
+type IntegrationTestSuite struct {
+	suite.Suite
 
-// 	orchestrator *orchestrator.Orchestrator
-// }
+	orchestrator *orchestrator.Orchestrator
+}
 
-// func TestIntegrationTestSuite(t *testing.T) {
-// 	suite.Run(t, new(IntegrationTestSuite))
-// }
+func TestIntegrationTestSuite(t *testing.T) {
+	suite.Run(t, new(IntegrationTestSuite))
+}
 
-// func (s *IntegrationTestSuite) SetupSuite() {
-// 	s.orchestrator = &orchestrator.Orchestrator{}
-// 	s.orchestrator.InitResources(s.T())
-// }
+func (s *IntegrationTestSuite) SetupSuite() {
+	s.orchestrator = &orchestrator.Orchestrator{}
+	s.orchestrator.InitResources(s.T())
+}
 
-// func (s *IntegrationTestSuite) TearDownSuite() {
-// 	s.orchestrator.TearDownResources(s.T())
-// }
+func (s *IntegrationTestSuite) TearDownSuite() {
+	s.orchestrator.TearDownResources(s.T())
+}

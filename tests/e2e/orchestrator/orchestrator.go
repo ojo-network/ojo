@@ -17,6 +17,7 @@ import (
 	"github.com/ojo-network/ojo/client"
 
 	"cosmossdk.io/log"
+	"cosmossdk.io/math"
 	cmtconfig "github.com/cometbft/cometbft/config"
 	cmtjson "github.com/cometbft/cometbft/libs/json"
 	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
@@ -26,10 +27,13 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
+	"github.com/ojo-network/ojo/tests/grpc"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
 	"github.com/spf13/viper"
 
+	cmttypes "github.com/cometbft/cometbft/types"
+	consensustypes "github.com/cosmos/cosmos-sdk/x/consensus/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	govtypesv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
@@ -44,7 +48,8 @@ const (
 	ojoGrpcPort       = "9090"
 	ojoMaxStartupTime = 40 // seconds
 
-	initBalanceStr = "510000000000" + appparams.BondDenom
+	initBalanceStr             = "510000000000" + appparams.BondDenom
+	voteExtensionsEnableHeight = 15
 )
 
 type Orchestrator struct {
@@ -52,7 +57,7 @@ type Orchestrator struct {
 	chain         *chain
 	dkrPool       *dockertest.Pool
 	dkrNet        *dockertest.Network
-	OjoClient     *client.OjoClient // signs tx with val[0]
+	OjoClient     *client.OjoClient // signs tx with val[2]
 	AirdropClient *client.OjoClient // signs tx with account[0]
 }
 
@@ -62,8 +67,7 @@ type Orchestrator struct {
 // 2. initializes the genesis files for all validators
 // 3. starts up each validator in its own docker container with the 3rd validator holding the majority of the stake
 // 4. initializes the ojo client used to send transactions and queries to the validators
-// 5. delegates voting power from the majority share validator to another one for the price feeder
-// 6. starts up the price feeder in its own docker container
+// 5. updates the consensus params so vote extensions are enabled
 func (o *Orchestrator) InitResources(t *testing.T) {
 	t.Log("setting up e2e integration test suite...")
 	appparams.SetAddressPrefixes()
@@ -107,8 +111,9 @@ func (o *Orchestrator) InitResources(t *testing.T) {
 	o.initGenesis(t)
 	o.initValidatorConfigs(t)
 	o.runValidators(t)
-	o.initOjoClient(t)
-	o.initAirdropClient(t)
+	o.initOjoClient(t, encodingConfig)
+	o.initAirdropClient(t, encodingConfig)
+	o.updateConsensusParams(t)
 }
 
 func (o *Orchestrator) TearDownResources(t *testing.T) {
@@ -127,7 +132,7 @@ func (o *Orchestrator) TearDownResources(t *testing.T) {
 }
 
 func (o *Orchestrator) initNodes(t *testing.T, gen map[string]json.RawMessage) {
-	require.NoError(t, o.chain.createAndInitValidators(2, gen))
+	require.NoError(t, o.chain.createAndInitValidators(3, gen))
 
 	// initialize a genesis file for the first validator
 	val0ConfigDir := o.chain.validators[0].configDir()
@@ -209,6 +214,8 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 	votingPeroid := 5 * time.Second
 	govGenState.Params.VotingPeriod = &votingPeroid
 
+	govGenState.Params.MinDeposit = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, math.NewInt(10000000)))
+
 	bz, err = o.chain.cdc.MarshalJSON(&govGenState)
 	require.NoError(t, err)
 	appGenState[govtypes.ModuleName] = bz
@@ -222,9 +229,6 @@ func (o *Orchestrator) initGenesis(t *testing.T) {
 	bz, err = o.chain.cdc.MarshalJSON(&stakingGenState)
 	require.NoError(t, err)
 	appGenState[stakingtypes.ModuleName] = bz
-
-	// Consensus
-	genDoc.Consensus.Params.ABCI.VoteExtensionsEnableHeight = 2
 
 	// Genesis Txs
 	var genUtilGenState genutiltypes.GenesisState
@@ -403,26 +407,51 @@ func (o *Orchestrator) runValidators(t *testing.T) {
 	}
 }
 
-func (o *Orchestrator) initOjoClient(t *testing.T) {
+func (o *Orchestrator) initOjoClient(t *testing.T, encCfg testutil.TestEncodingConfig) {
 	var err error
 	o.OjoClient, err = client.NewOjoClient(
 		o.chain.id,
 		fmt.Sprintf("tcp://localhost:%s", ojoTmrpcPort),
 		fmt.Sprintf("tcp://localhost:%s", ojoGrpcPort),
-		"val1",
-		o.chain.validators[1].mnemonic,
+		"val",
+		o.chain.validators[2].mnemonic,
+		encCfg,
 	)
 	require.NoError(t, err)
 }
 
-func (o *Orchestrator) initAirdropClient(t *testing.T) {
+func (o *Orchestrator) updateConsensusParams(t *testing.T) {
+	ojoClient := o.OjoClient
+
+	govAddress, err := ojoClient.QueryClient.QueryGovAccount()
+	require.NoError(t, err)
+
+	abciParams := cmttypes.DefaultConsensusParams().ToProto().Abci
+	abciParams.VoteExtensionsEnableHeight = voteExtensionsEnableHeight
+
+	msg := &consensustypes.MsgUpdateParams{
+		Authority: govAddress.Address,
+		Block:     cmttypes.DefaultConsensusParams().ToProto().Block,
+		Evidence:  cmttypes.DefaultConsensusParams().ToProto().Evidence,
+		Validator: cmttypes.DefaultConsensusParams().ToProto().Validator,
+		Abci:      abciParams,
+	}
+	title := "Update Consensus Params"
+	summary := "Update Consensus Params vote extensions enabled height"
+
+	err = grpc.SubmitAndPassProposal(ojoClient, []sdk.Msg{msg}, title, summary)
+	require.NoError(t, err)
+}
+
+func (o *Orchestrator) initAirdropClient(t *testing.T, encCfg testutil.TestEncodingConfig) {
 	var err error
 	o.AirdropClient, err = client.NewOjoClient(
 		o.chain.id,
 		fmt.Sprintf("tcp://localhost:%s", ojoTmrpcPort),
 		fmt.Sprintf("tcp://localhost:%s", ojoGrpcPort),
-		"val1",
+		"val",
 		o.chain.accounts[0].Mnemonic,
+		encCfg,
 	)
 	require.NoError(t, err)
 }
