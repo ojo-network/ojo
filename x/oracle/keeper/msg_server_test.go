@@ -8,7 +8,7 @@ import (
 	"cosmossdk.io/errors"
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ojo-network/ojo/x/oracle"
+	"github.com/ojo-network/ojo/x/oracle/abci"
 	"github.com/ojo-network/ojo/x/oracle/types"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
@@ -174,23 +174,11 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 					Keys:   []string{"AcceptList"},
 					Height: 9,
 					Changes: types.Params{
-						AcceptList: types.DenomList{
-							{
-								BaseDenom:   oracletypes.OjoDenom,
-								SymbolDenom: oracletypes.OjoSymbol,
-								Exponent:    6,
-							},
-							{
-								BaseDenom:   oracletypes.AtomDenom,
-								SymbolDenom: oracletypes.AtomSymbol,
-								Exponent:    6,
-							},
-							{
-								BaseDenom:   "base",
-								SymbolDenom: "symbol",
-								Exponent:    6,
-							},
-						},
+						AcceptList: append(oracletypes.DefaultAcceptList, types.Denom{
+							BaseDenom:   "base",
+							SymbolDenom: "symbol",
+							Exponent:    6,
+						}),
 					},
 				},
 			},
@@ -207,18 +195,7 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 					Keys:   []string{"MandatoryList"},
 					Height: 9,
 					Changes: types.Params{
-						MandatoryList: types.DenomList{
-							{
-								BaseDenom:   oracletypes.OjoDenom,
-								SymbolDenom: oracletypes.OjoSymbol,
-								Exponent:    6,
-							},
-							{
-								BaseDenom:   oracletypes.AtomDenom,
-								SymbolDenom: oracletypes.AtomSymbol,
-								Exponent:    6,
-							},
-						},
+						MandatoryList: oracletypes.DefaultMandatoryList,
 					},
 				},
 			},
@@ -258,20 +235,10 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 					Keys:   []string{"RewardBands"},
 					Height: 9,
 					Changes: types.Params{
-						RewardBands: types.RewardBandList{
-							{
-								SymbolDenom: types.OjoSymbol,
-								RewardBand:  math.LegacyNewDecWithPrec(2, 2),
-							},
-							{
-								SymbolDenom: types.AtomSymbol,
-								RewardBand:  math.LegacyNewDecWithPrec(2, 2),
-							},
-							{
-								SymbolDenom: "symbol",
-								RewardBand:  math.LegacyNewDecWithPrec(2, 2),
-							},
-						},
+						RewardBands: append(oracletypes.DefaultRewardBands(), oracletypes.RewardBand{
+							SymbolDenom: "symbol",
+							RewardBand:  math.LegacyNewDecWithPrec(2, 2),
+						}),
 					},
 				},
 			},
@@ -420,7 +387,7 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 			err := tc.req.ValidateBasic()
 			if err == nil {
 				_, err = s.msgServer.GovUpdateParams(s.ctx, tc.req)
-				oracle.EndBlocker(s.ctx, s.app.OracleKeeper)
+				abci.EndBlocker(s.ctx, s.app.OracleKeeper)
 			}
 			if tc.expectErr {
 				s.Require().ErrorContains(err, tc.errMsg)
@@ -430,55 +397,22 @@ func (s *IntegrationTestSuite) TestMsgServer_UpdateGovParams() {
 				switch tc.name {
 				case "valid accept list":
 					acceptList := s.app.OracleKeeper.AcceptList(s.ctx)
-					s.Require().Equal(acceptList, types.DenomList{
-						{
-							BaseDenom:   oracletypes.OjoDenom,
-							SymbolDenom: oracletypes.OjoSymbol,
-							Exponent:    6,
-						},
-						{
-							BaseDenom:   oracletypes.AtomDenom,
-							SymbolDenom: oracletypes.AtomSymbol,
-							Exponent:    6,
-						},
-						{
-							BaseDenom:   "base",
-							SymbolDenom: "symbol",
-							Exponent:    6,
-						},
-					}.Normalize())
+					s.Require().Equal(acceptList, append(oracletypes.DefaultAcceptList, types.Denom{
+						BaseDenom:   "base",
+						SymbolDenom: "symbol",
+						Exponent:    6,
+					}).Normalize())
 
 				case "valid mandatory list":
 					mandatoryList := s.app.OracleKeeper.MandatoryList(s.ctx)
-					s.Require().Equal(mandatoryList, types.DenomList{
-						{
-							BaseDenom:   oracletypes.OjoDenom,
-							SymbolDenom: oracletypes.OjoSymbol,
-							Exponent:    6,
-						},
-						{
-							BaseDenom:   oracletypes.AtomDenom,
-							SymbolDenom: oracletypes.AtomSymbol,
-							Exponent:    6,
-						},
-					}.Normalize())
+					s.Require().Equal(mandatoryList, oracletypes.DefaultMandatoryList.Normalize())
 
 				case "valid reward band list":
 					rewardBand := s.app.OracleKeeper.RewardBands(s.ctx)
-					s.Require().Equal(rewardBand, types.RewardBandList{
-						{
-							SymbolDenom: types.OjoSymbol,
-							RewardBand:  math.LegacyNewDecWithPrec(2, 2),
-						},
-						{
-							SymbolDenom: types.AtomSymbol,
-							RewardBand:  math.LegacyNewDecWithPrec(2, 2),
-						},
-						{
-							SymbolDenom: "symbol",
-							RewardBand:  math.LegacyNewDecWithPrec(2, 2),
-						},
-					})
+					s.Require().Equal(rewardBand, append(oracletypes.DefaultRewardBands(), oracletypes.RewardBand{
+						SymbolDenom: "symbol",
+						RewardBand:  math.LegacyNewDecWithPrec(2, 2),
+					}))
 
 				case "multiple valid params":
 					votePeriod := s.app.OracleKeeper.VotePeriod(s.ctx)
@@ -762,7 +696,7 @@ func (s *IntegrationTestSuite) TestMsgServer_GovAddDenom() {
 			err := tc.req.ValidateBasic()
 			if err == nil {
 				_, err = s.msgServer.GovAddDenoms(s.ctx, tc.req)
-				oracle.EndBlocker(s.ctx, s.app.OracleKeeper)
+				abci.EndBlocker(s.ctx, s.app.OracleKeeper)
 			}
 			if tc.expectErr {
 				s.Require().ErrorContains(err, tc.errMsg)
@@ -870,7 +804,7 @@ func (s *IntegrationTestSuite) TestMsgServer_GovRemoveCurrencyPairProviders() {
 		},
 		{
 			BaseDenom:  types.OjoSymbol,
-			QuoteDenom: types.USDDenom,
+			QuoteDenom: types.USDSymbol,
 			Providers: []string{
 				"binance",
 				"coinbase",
@@ -986,7 +920,7 @@ func (s *IntegrationTestSuite) TestMsgServer_GovRemoveCurrencyPairProviders() {
 			err := tc.req.ValidateBasic()
 			if err == nil {
 				_, err = s.msgServer.GovRemoveCurrencyPairProviders(s.ctx, tc.req)
-				oracle.EndBlocker(s.ctx, s.app.OracleKeeper)
+				abci.EndBlocker(s.ctx, s.app.OracleKeeper)
 			}
 
 			if tc.expectErr {
@@ -1012,7 +946,7 @@ func (s *IntegrationTestSuite) TestMsgServer_GovRemoveCurrencyPairProviders() {
 					s.Require().Equal(types.CurrencyPairProvidersList{
 						{
 							BaseDenom:  types.OjoSymbol,
-							QuoteDenom: types.USDDenom,
+							QuoteDenom: types.USDSymbol,
 							Providers: []string{
 								"binance",
 								"coinbase",
@@ -1113,7 +1047,7 @@ func (s *IntegrationTestSuite) TestMsgServer_GovRemoveCurrencyDeviationThreshold
 			err := tc.req.ValidateBasic()
 			if err == nil {
 				_, err = s.msgServer.GovRemoveCurrencyDeviationThresholds(s.ctx, tc.req)
-				oracle.EndBlocker(s.ctx, s.app.OracleKeeper)
+				abci.EndBlocker(s.ctx, s.app.OracleKeeper)
 			}
 
 			if tc.expectErr {

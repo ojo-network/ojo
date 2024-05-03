@@ -28,6 +28,7 @@ const (
 var validatorPowers = []int64{599, 398, 2}
 
 type TestValidatorKey struct {
+	PrivKey    secp256k1.PrivKey
 	PubKey     cryptotypes.PubKey
 	ValAddress sdk.ValAddress
 	AccAddress sdk.AccAddress
@@ -38,8 +39,10 @@ func CreateTestValidatorKeys(numValidators int) []TestValidatorKey {
 	var validatorKeys []TestValidatorKey
 
 	for i := 0; i < numValidators; i++ {
-		pubKey := secp256k1.GenPrivKey().PubKey()
+		privKey := secp256k1.GenPrivKey()
+		pubKey := privKey.PubKey()
 		valInfo := TestValidatorKey{
+			PrivKey:    *privKey,
 			PubKey:     pubKey,
 			ValAddress: sdk.ValAddress(pubKey.Address()),
 			AccAddress: sdk.AccAddress(pubKey.Address()),

@@ -17,6 +17,7 @@ import (
 	"github.com/spf13/cobra"
 
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
+	oracleabci "github.com/ojo-network/ojo/x/oracle/abci"
 	"github.com/ojo-network/ojo/x/oracle/client/cli"
 	"github.com/ojo-network/ojo/x/oracle/keeper"
 	simulation "github.com/ojo-network/ojo/x/oracle/simulations"
@@ -169,7 +170,7 @@ func (am AppModule) BeginBlock(_ context.Context) {}
 // EndBlock executes all ABCI EndBlock logic respective to the x/oracle module.
 // It returns no validator updates.
 func (am AppModule) EndBlock(ctx context.Context) ([]abci.ValidatorUpdate, error) {
-	if err := EndBlocker(ctx, am.keeper); err != nil {
+	if err := oracleabci.EndBlocker(ctx, am.keeper); err != nil {
 		panic(err)
 	}
 

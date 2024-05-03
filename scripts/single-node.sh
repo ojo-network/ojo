@@ -13,6 +13,7 @@
 # e.g. run this with ojod1, stop ojod1, then run it with ojod2 to continue.
 
 CWD="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+PRICE_FEEDER_CONFIG_PATH="${CWD}/../pricefeeder/price-feeder.example.toml"
 
 NODE_BIN="${1:-$CWD/../build/ojod}"
 
@@ -120,7 +121,7 @@ if [[ ! -d "$hdir" ]]; then
 
   echo "--- Patching genesis..."
   if [[ "$STAKE_DENOM" == "$DENOM" ]]; then
-    jq '.consensus_params["block"]["time_iota_ms"]="5000"
+    jq '.consensus["params"]["abci"]["vote_extensions_enable_height"]="2"
       | .app_state["crisis"]["constant_fee"]["denom"]="'$DENOM'"
       | .app_state["gov"]["deposit_params"]["min_deposit"][0]["denom"]="'$DENOM'"
       | .app_state["mint"]["params"]["mint_denom"]="'$DENOM'"
@@ -156,6 +157,7 @@ if [[ ! -d "$hdir" ]]; then
 
   echo "--- Modifying app..."
   perl -i -pe 's|minimum-gas-prices = ""|minimum-gas-prices = "0.05uojo"|g' $n0app
+  perl -i -pe 's|config_path = ""|config_path = "'$PRICE_FEEDER_CONFIG_PATH'"|g' $n0app
 
 else
   echo "===================================="

@@ -13,6 +13,7 @@ import (
 	tmos "github.com/cometbft/cometbft/libs/os"
 	p2p "github.com/cometbft/cometbft/p2p"
 	"github.com/cometbft/cometbft/privval"
+	cmttypes "github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdkcrypto "github.com/cosmos/cosmos-sdk/crypto"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
@@ -25,6 +26,7 @@ import (
 	txsigning "github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
+	"github.com/cosmos/cosmos-sdk/x/genutil/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/ory/dockertest/v3"
 
@@ -83,6 +85,18 @@ func (v *validator) init(gen map[string]json.RawMessage) error {
 
 	genesis.ChainID = v.chain.id
 	genesis.AppState = appState
+	genesis.Consensus = &types.ConsensusGenesis{
+		Validators: nil,
+		Params: &cmttypes.ConsensusParams{
+			Block:     cmttypes.DefaultBlockParams(),
+			Evidence:  cmttypes.DefaultEvidenceParams(),
+			Validator: cmttypes.DefaultValidatorParams(),
+			Version:   cmttypes.DefaultVersionParams(),
+			ABCI: cmttypes.ABCIParams{
+				VoteExtensionsEnableHeight: 2,
+			},
+		},
+	}
 
 	if err = genutil.ExportGenesisFile(genesis, config.GenesisFile()); err != nil {
 		return fmt.Errorf("failed to export app genesis state: %w", err)
