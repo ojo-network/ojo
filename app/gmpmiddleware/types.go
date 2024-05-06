@@ -19,15 +19,6 @@ type GeneralMessageHandler interface {
 		payload []byte,
 		sender string,
 		channel string,
-	) error
-	HandleGeneralMessageWithToken(
-		ctx sdk.Context,
-		srcChain,
-		srcAddress string,
-		receiver string,
-		payload []byte,
-		sender string,
-		channel string,
 		coin sdk.Coin,
 	) error
 }

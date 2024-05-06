@@ -14,6 +14,7 @@ import (
 
 	"github.com/ojo-network/ojo/util/metrics"
 	"github.com/ojo-network/ojo/x/oracle/types"
+	"github.com/ojo-network/price-feeder/oracle"
 )
 
 var ten = math.LegacyMustNewDecFromStr("10")
@@ -28,6 +29,8 @@ type Keeper struct {
 	bankKeeper    types.BankKeeper
 	distrKeeper   types.DistributionKeeper
 	StakingKeeper types.StakingKeeper
+
+	PriceFeederOracle *oracle.Oracle
 
 	distrName        string
 	telemetryEnabled bool

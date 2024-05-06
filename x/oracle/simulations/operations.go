@@ -31,7 +31,7 @@ const (
 )
 
 var (
-	acceptList = []string{types.OjoSymbol, types.USDDenom}
+	acceptList = []string{types.OjoSymbol, types.USDSymbol}
 	ojoPrice   = math.LegacyMustNewDecFromStr("25.71")
 )
 
