@@ -10,7 +10,5 @@ import (
 // types and interfaces registered.
 func MakeEncodingConfig() testutil.TestEncodingConfig {
 	encodingConfig := params.MakeEncodingConfig()
-	ModuleBasics.RegisterLegacyAminoCodec(encodingConfig.Amino)
-	ModuleBasics.RegisterInterfaces(encodingConfig.InterfaceRegistry)
 	return encodingConfig
 }

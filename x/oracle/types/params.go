@@ -2,14 +2,13 @@ package types
 
 import (
 	"cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"gopkg.in/yaml.v3"
 )
 
 var (
-	oneDec           = sdk.OneDec()
-	minVoteThreshold = sdk.NewDecWithPrec(33, 2) // 0.33
+	oneDec           = math.LegacyOneDec()
+	minVoteThreshold = math.LegacyNewDecWithPrec(33, 2) // 0.33
 )
 
 // maxium number of decimals allowed for VoteThreshold
@@ -50,7 +49,7 @@ const (
 
 // Default parameter values
 var (
-	DefaultVoteThreshold = sdk.NewDecWithPrec(50, 2) // 50%
+	DefaultVoteThreshold = math.LegacyNewDecWithPrec(50, 2) // 50%
 
 	DefaultAcceptList = DenomList{
 		{
@@ -63,6 +62,21 @@ var (
 			SymbolDenom: AtomSymbol,
 			Exponent:    AtomExponent,
 		},
+		{
+			BaseDenom:   USDTDenom,
+			SymbolDenom: USDTSymbol,
+			Exponent:    USDTExponent,
+		},
+		{
+			BaseDenom:   BitcoinDenom,
+			SymbolDenom: BitcoinSymbol,
+			Exponent:    BitcoinExponent,
+		},
+		{
+			BaseDenom:   EthereumDenom,
+			SymbolDenom: EthereumSymbol,
+			Exponent:    EthereumExponent,
+		},
 	}
 	DefaultMandatoryList = DenomList{
 		{
@@ -70,18 +84,89 @@ var (
 			SymbolDenom: AtomSymbol,
 			Exponent:    AtomExponent,
 		},
+		{
+			BaseDenom:   USDTDenom,
+			SymbolDenom: USDTSymbol,
+			Exponent:    USDTExponent,
+		},
+		{
+			BaseDenom:   BitcoinDenom,
+			SymbolDenom: BitcoinSymbol,
+			Exponent:    BitcoinExponent,
+		},
+		{
+			BaseDenom:   EthereumDenom,
+			SymbolDenom: EthereumSymbol,
+			Exponent:    EthereumExponent,
+		},
 	}
-	DefaultSlashFraction     = sdk.NewDecWithPrec(1, 4) // 0.01%
-	DefaultMinValidPerWindow = sdk.NewDecWithPrec(5, 2) // 5%
-	defaultRewardBand        = sdk.NewDecWithPrec(2, 2) // 0.02
+	DefaultSlashFraction     = math.LegacyNewDecWithPrec(1, 4) // 0.01%
+	DefaultMinValidPerWindow = math.LegacyNewDecWithPrec(5, 2) // 5%
+	defaultRewardBand        = math.LegacyNewDecWithPrec(2, 2) // 0.02
 
 	DefaultCurrencyPairProviders = CurrencyPairProvidersList{
 		CurrencyPairProviders{
 			BaseDenom:  OjoSymbol,
-			QuoteDenom: USDDenom,
+			QuoteDenom: USDSymbol,
 			Providers: []string{
 				"binance",
 				"coinbase",
+			},
+		},
+		CurrencyPairProviders{
+			BaseDenom:  USDTSymbol,
+			QuoteDenom: USDSymbol,
+			Providers: []string{
+				"kraken",
+				"coinbase",
+				"crypto",
+			},
+		},
+		CurrencyPairProviders{
+			BaseDenom:  AtomSymbol,
+			QuoteDenom: USDSymbol,
+			Providers: []string{
+				"kraken",
+			},
+		},
+		CurrencyPairProviders{
+			BaseDenom:  AtomSymbol,
+			QuoteDenom: USDTSymbol,
+			Providers: []string{
+				"okx",
+				"bitget",
+				"gate",
+			},
+		},
+		CurrencyPairProviders{
+			BaseDenom:  BitcoinSymbol,
+			QuoteDenom: USDSymbol,
+			Providers: []string{
+				"coinbase",
+			},
+		},
+		CurrencyPairProviders{
+			BaseDenom:  BitcoinSymbol,
+			QuoteDenom: USDTSymbol,
+			Providers: []string{
+				"okx",
+				"gate",
+				"bitget",
+			},
+		},
+		CurrencyPairProviders{
+			BaseDenom:  EthereumSymbol,
+			QuoteDenom: USDSymbol,
+			Providers: []string{
+				"kraken",
+			},
+		},
+		CurrencyPairProviders{
+			BaseDenom:  EthereumSymbol,
+			QuoteDenom: USDTSymbol,
+			Providers: []string{
+				"okx",
+				"bitget",
 			},
 		},
 	}
@@ -89,6 +174,22 @@ var (
 	DefaultCurrencyDeviationThresholds = CurrencyDeviationThresholdList{
 		CurrencyDeviationThreshold{
 			BaseDenom: OjoSymbol,
+			Threshold: "2",
+		},
+		CurrencyDeviationThreshold{
+			BaseDenom: USDTSymbol,
+			Threshold: "2",
+		},
+		CurrencyDeviationThreshold{
+			BaseDenom: AtomSymbol,
+			Threshold: "2",
+		},
+		CurrencyDeviationThreshold{
+			BaseDenom: BitcoinSymbol,
+			Threshold: "2",
+		},
+		CurrencyDeviationThreshold{
+			BaseDenom: EthereumSymbol,
 			Threshold: "2",
 		},
 	}
@@ -108,6 +209,18 @@ func DefaultRewardBands() RewardBandList {
 		},
 		{
 			SymbolDenom: AtomSymbol,
+			RewardBand:  defaultRewardBand,
+		},
+		{
+			SymbolDenom: USDTSymbol,
+			RewardBand:  defaultRewardBand,
+		},
+		{
+			SymbolDenom: BitcoinSymbol,
+			RewardBand:  defaultRewardBand,
+		},
+		{
+			SymbolDenom: EthereumSymbol,
 			RewardBand:  defaultRewardBand,
 		},
 	}
@@ -255,7 +368,7 @@ func (p Params) Validate() error {
 	if p.VotePeriod == 0 {
 		return ErrInvalidParamValue.Wrap("oracle parameter VotePeriod must be > 0")
 	}
-	if p.VoteThreshold.LTE(sdk.NewDecWithPrec(33, 2)) {
+	if p.VoteThreshold.LTE(math.LegacyNewDecWithPrec(33, 2)) {
 		return ErrInvalidParamValue.Wrap("oracle parameter VoteThreshold must be greater than 33 percent")
 	}
 
@@ -265,7 +378,7 @@ func (p Params) Validate() error {
 		)
 	}
 
-	if p.SlashFraction.GT(sdk.OneDec()) || p.SlashFraction.IsNegative() {
+	if p.SlashFraction.GT(math.LegacyOneDec()) || p.SlashFraction.IsNegative() {
 		return ErrInvalidParamValue.Wrap("oracle parameter SlashFraction must be between [0, 1]")
 	}
 
@@ -277,7 +390,7 @@ func (p Params) Validate() error {
 		return ErrInvalidParamValue.Wrap("oracle parameter SlashWindow must be an exact multiple of VotePeriod")
 	}
 
-	if p.MinValidPerWindow.GT(sdk.OneDec()) || p.MinValidPerWindow.IsNegative() {
+	if p.MinValidPerWindow.GT(math.LegacyOneDec()) || p.MinValidPerWindow.IsNegative() {
 		return ErrInvalidParamValue.Wrap("oracle parameter MinValidPerWindow must be between [0, 1]")
 	}
 
@@ -327,7 +440,7 @@ func validateVotePeriod(i interface{}) error {
 }
 
 func validateVoteThreshold(i interface{}) error {
-	v, ok := i.(sdk.Dec)
+	v, ok := i.(math.LegacyDec)
 	if !ok {
 		return ErrInvalidParamValue.Wrapf("invalid parameter type: %T", i)
 	}
@@ -336,7 +449,7 @@ func validateVoteThreshold(i interface{}) error {
 		return ErrInvalidParamValue.Wrapf("threshold must be bigger than %s and <= 1", minVoteThreshold)
 	}
 	val := v.MulInt64(100).TruncateInt64()
-	v2 := sdk.NewDecWithPrec(val, MaxVoteThresholdPrecision)
+	v2 := math.LegacyNewDecWithPrec(val, MaxVoteThresholdPrecision)
 	if !v2.Equal(v) {
 		return ErrInvalidParamValue.Wrap("threshold precision must be maximum 2 decimals")
 	}
@@ -344,7 +457,7 @@ func validateVoteThreshold(i interface{}) error {
 }
 
 func validateRewardBand(i interface{}) error {
-	v, ok := i.(sdk.Dec)
+	v, ok := i.(math.LegacyDec)
 	if !ok {
 		return ErrInvalidParamValue.Wrapf("invalid parameter type: %T", i)
 	}
@@ -353,7 +466,7 @@ func validateRewardBand(i interface{}) error {
 		return ErrInvalidParamValue.Wrap("oracle parameter RewardBand must be between [0, 1]")
 	}
 
-	if v.GT(sdk.OneDec()) {
+	if v.GT(math.LegacyOneDec()) {
 		return ErrInvalidParamValue.Wrap("oracle parameter RewardBand must be between [0, 1]")
 	}
 
@@ -410,7 +523,7 @@ func validateRewardBands(i interface{}) error {
 }
 
 func validateSlashFraction(i interface{}) error {
-	v, ok := i.(sdk.Dec)
+	v, ok := i.(math.LegacyDec)
 	if !ok {
 		return ErrInvalidParamValue.Wrapf("invalid parameter type: %T", i)
 	}
@@ -419,7 +532,7 @@ func validateSlashFraction(i interface{}) error {
 		return ErrInvalidParamValue.Wrap("oracle parameter SlashFraction must be between [0, 1]")
 	}
 
-	if v.GT(sdk.OneDec()) {
+	if v.GT(math.LegacyOneDec()) {
 		return ErrInvalidParamValue.Wrap("oracle parameter SlashFraction must be between [0, 1]")
 	}
 
@@ -440,7 +553,7 @@ func validateSlashWindow(i interface{}) error {
 }
 
 func validateMinValidPerWindow(i interface{}) error {
-	v, ok := i.(sdk.Dec)
+	v, ok := i.(math.LegacyDec)
 	if !ok {
 		return ErrInvalidParamValue.Wrapf("invalid parameter type: %T", i)
 	}
@@ -449,7 +562,7 @@ func validateMinValidPerWindow(i interface{}) error {
 		return ErrInvalidParamValue.Wrap("oracle parameter MinValidPerWindow must be between [0, 1]")
 	}
 
-	if v.GT(sdk.OneDec()) {
+	if v.GT(math.LegacyOneDec()) {
 		return ErrInvalidParamValue.Wrap("oracle parameter MinValidPerWindow must be between [0, 1]")
 	}
 

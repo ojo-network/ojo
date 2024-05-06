@@ -47,6 +47,12 @@ func (AppModuleBasic) Name() string {
 	return types.ModuleName
 }
 
+// IsOnePerModuleType implements the module.AppModule interface.
+func (am AppModule) IsOnePerModuleType() {}
+
+// IsAppModule implements the module.AppModule interface.
+func (am AppModule) IsAppModule() {}
+
 func (AppModuleBasic) ConsensusVersion() uint64 {
 	return 1
 }
@@ -153,11 +159,11 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 }
 
 // BeginBlock executes all ABCI BeginBlock logic respective to the x/gmp module.
-func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
+func (am AppModule) BeginBlock(_ context.Context) {}
 
 // EndBlock is a no-op for the GMP module.
-func (am AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
-	return []abci.ValidatorUpdate{}
+func (am AppModule) EndBlock(_ context.Context) ([]abci.ValidatorUpdate, error) {
+	return []abci.ValidatorUpdate{}, nil
 }
 
 // GenerateGenesisState currently is a no-op.
@@ -175,4 +181,4 @@ func (am AppModule) ProposalContents(_ module.SimulationState) []simtypes.Weight
 }
 
 // RegisterStoreDecoder currently is a no-op.
-func (am AppModule) RegisterStoreDecoder(_ sdk.StoreDecoderRegistry) {}
+func (am AppModule) RegisterStoreDecoder(_ simtypes.StoreDecoderRegistry) {}

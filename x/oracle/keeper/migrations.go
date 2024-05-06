@@ -17,8 +17,11 @@ func NewMigrator(keeper *Keeper) Migrator {
 
 // MigrateValidatorSet fixes the validator set being stored as map
 // causing non determinism by storing it as a list.
-func (m Migrator) MigrateValidatorSet(ctx sdk.Context) {
-	m.keeper.SetValidatorRewardSet(ctx)
+func (m Migrator) MigrateValidatorSet(ctx sdk.Context) error {
+	if err := m.keeper.SetValidatorRewardSet(ctx); err != nil {
+		return err
+	}
+	return nil
 }
 
 // MigrateCurrencyPairProviders adds the price feeder

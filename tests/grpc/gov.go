@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	proposal "github.com/cosmos/cosmos-sdk/x/params/types/proposal"
 	"github.com/ojo-network/ojo/client"
@@ -42,7 +43,7 @@ func SleepUntilProposalEndTime(ojoClient *client.OjoClient, proposalID uint64) e
 
 // ParseProposalID parses the proposalID from a tx response
 func ParseProposalID(response *sdk.TxResponse) (uint64, error) {
-	for _, event := range response.Logs[0].Events {
+	for _, event := range response.Events {
 		if event.Type == "submit_proposal" {
 			for _, attribute := range event.Attributes {
 				if attribute.Key == "proposal_id" {
@@ -55,7 +56,7 @@ func ParseProposalID(response *sdk.TxResponse) (uint64, error) {
 }
 
 func SubmitAndPassProposal(ojoClient *client.OjoClient, msgs []sdk.Msg, title, summary string) error {
-	deposit := sdk.NewCoins(sdk.NewCoin("uojo", sdk.NewInt(10000000)))
+	deposit := sdk.NewCoins(sdk.NewCoin("uojo", math.NewInt(10000000)))
 	resp, err := ojoClient.TxClient.TxSubmitProposal(msgs, deposit, title, summary)
 	if err != nil {
 		return err

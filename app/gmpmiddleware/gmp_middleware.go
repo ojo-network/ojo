@@ -5,12 +5,13 @@ import (
 	"fmt"
 
 	"cosmossdk.io/errors"
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
-	"github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
-	porttypes "github.com/cosmos/ibc-go/v7/modules/core/05-port/types"
-	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/exported"
+	capabilitytypes "github.com/cosmos/ibc-go/modules/capability/types"
+	"github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
+	channeltypes "github.com/cosmos/ibc-go/v8/modules/core/04-channel/types"
+	porttypes "github.com/cosmos/ibc-go/v8/modules/core/05-port/types"
+	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
 	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 )
 
@@ -142,47 +143,36 @@ func (im IBCMiddleware) OnRecvPacket(
 		return ack
 	}
 
-	switch msg.Type {
-	case gmptypes.TypeGeneralMessage:
-		err = im.handler.HandleGeneralMessage(
-			ctx,
-			msg.SourceChain,   // e.g. "Ethereum"
-			msg.SourceAddress, // e.g. "0x1234..."
-			data.Receiver,     // e.g. "ojo1..."
-			msg.Payload,
-			data.Sender, // e.g. "ojo1..."
-			packet.DestinationChannel,
-		)
-	case gmptypes.TypeGeneralMessageWithToken:
-		// parse the transfer amount
-		amt, ok := sdk.NewIntFromString(data.Amount)
-		if !ok {
-			return channeltypes.NewErrorAcknowledgement(
-				errors.Wrapf(
-					types.ErrInvalidAmount,
-					"unable to parse transfer amount (%s) into sdk.Int",
-					data.Amount,
-				),
-			)
-		}
-		denom := parseDenom(packet, data.Denom)
-
-		err = im.handler.HandleGeneralMessageWithToken(
-			ctx,
-			msg.SourceChain,
-			msg.SourceAddress,
-			data.Receiver,
-			msg.Payload,
-			data.Sender,
-			packet.DestinationChannel,
-			sdk.NewCoin(denom, amt),
-		)
-	default:
+	if msg.Type != gmptypes.TypeGeneralMessage && msg.Type != gmptypes.TypeGeneralMessageWithToken {
 		ctx.Logger().With(
 			fmt.Errorf("unrecognized message type: %d", msg.Type)).
 			Error("unrecognized gmp message")
 		return ack
 	}
+
+	// parse the transfer amount
+	amt, ok := math.NewIntFromString(data.Amount)
+	if !ok {
+		return channeltypes.NewErrorAcknowledgement(
+			errors.Wrapf(
+				types.ErrInvalidAmount,
+				"unable to parse transfer amount (%s) into sdk.Int",
+				data.Amount,
+			),
+		)
+	}
+	denom := parseDenom(packet, data.Denom)
+
+	err = im.handler.HandleGeneralMessage(
+		ctx,
+		msg.SourceChain,   // e.g. "Ethereum"
+		msg.SourceAddress, // e.g. "0x1234..."
+		data.Receiver,     // e.g. "ojo1..."
+		msg.Payload,
+		data.Sender, // e.g. "ojo1..."
+		packet.DestinationChannel,
+		sdk.NewCoin(denom, amt),
+	)
 
 	if err != nil {
 		return channeltypes.NewErrorAcknowledgement(err)

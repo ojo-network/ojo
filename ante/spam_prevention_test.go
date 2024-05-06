@@ -1,6 +1,7 @@
 package ante_test
 
 import (
+	"cosmossdk.io/errors"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -70,5 +71,5 @@ func (ok dummyOracleKeeper) ValidateFeeder(ctx sdk.Context, feederAddr sdk.AccAd
 		return nil
 	}
 
-	return sdkerrors.Wrap(sdkerrors.ErrUnauthorized, "feeder is not authorized")
+	return errors.Wrap(sdkerrors.ErrUnauthorized, "feeder is not authorized")
 }

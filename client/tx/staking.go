@@ -11,8 +11,8 @@ func (c *Client) TxDelegate(
 	amount sdk.Coin,
 ) (*sdk.TxResponse, error) {
 	msg := stakingtypes.NewMsgDelegate(
-		fromAddress,
-		validatorAddress,
+		fromAddress.String(),
+		validatorAddress.String(),
 		amount,
 	)
 	return c.BroadcastTx(msg)

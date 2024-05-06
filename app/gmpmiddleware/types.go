@@ -5,22 +5,13 @@ import (
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
+	"github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
+	channeltypes "github.com/cosmos/ibc-go/v8/modules/core/04-channel/types"
 	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 )
 
 type GeneralMessageHandler interface {
 	HandleGeneralMessage(
-		ctx sdk.Context,
-		srcChain,
-		srcAddress string,
-		receiver string,
-		payload []byte,
-		sender string,
-		channel string,
-	) error
-	HandleGeneralMessageWithToken(
 		ctx sdk.Context,
 		srcChain,
 		srcAddress string,

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gopkg.in/yaml.v3"
 )
@@ -58,7 +59,7 @@ func ParseExchangeRateDecCoins(tuplesStr string) (sdk.DecCoins, error) {
 			return nil, fmt.Errorf("invalid exchange rate %s", decCoinStr)
 		}
 
-		dec, err := sdk.NewDecFromStr(denomAmountStr[1])
+		dec, err := math.LegacyNewDecFromStr(denomAmountStr[1])
 		if err != nil {
 			return nil, err
 		}

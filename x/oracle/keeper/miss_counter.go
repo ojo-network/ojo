@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	gogotypes "github.com/gogo/protobuf/types"
 	"github.com/ojo-network/ojo/x/oracle/types"
@@ -42,7 +43,7 @@ func (k Keeper) DeleteMissCounter(ctx sdk.Context, operator sdk.ValAddress) {
 func (k Keeper) IterateMissCounters(ctx sdk.Context, handler func(sdk.ValAddress, uint64) bool) {
 	store := ctx.KVStore(k.storeKey)
 
-	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixMissCounter)
+	iter := storetypes.KVStorePrefixIterator(store, types.KeyPrefixMissCounter)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {

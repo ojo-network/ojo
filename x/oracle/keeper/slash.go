@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ojo-network/ojo/x/oracle/types"
@@ -23,27 +24,33 @@ func (k Keeper) SlashAndResetMissCounters(ctx sdk.Context) {
 	)
 
 	k.IterateMissCounters(ctx, func(operator sdk.ValAddress, missCounter uint64) bool {
-		validVotes := sdk.NewInt(possibleWinsPerSlashWindow - int64(missCounter))
-		validVoteRate := sdk.NewDecFromInt(validVotes).QuoInt64(possibleWinsPerSlashWindow)
+		validVotes := math.NewInt(possibleWinsPerSlashWindow - int64(missCounter))
+		validVoteRate := math.LegacyNewDecFromInt(validVotes).QuoInt64(possibleWinsPerSlashWindow)
 
 		// Slash and jail the validator if their valid vote rate is smaller than the
 		// minimum threshold.
 		if validVoteRate.LT(minValidPerWindow) {
-			validator := k.StakingKeeper.Validator(ctx, operator)
-			if validator.IsBonded() && !validator.IsJailed() {
+			validator, err := k.StakingKeeper.Validator(ctx, operator)
+			if validator.IsBonded() && !validator.IsJailed() && err == nil {
 				consAddr, err := validator.GetConsAddr()
 				if err != nil {
 					panic(err)
 				}
 
-				k.StakingKeeper.Slash(
+				_, err = k.StakingKeeper.Slash(
 					ctx,
 					consAddr,
 					distributionHeight,
 					validator.GetConsensusPower(powerReduction), slashFraction,
 				)
+				if err != nil {
+					panic(err)
+				}
 
-				k.StakingKeeper.Jail(ctx, consAddr)
+				err = k.StakingKeeper.Jail(ctx, consAddr)
+				if err != nil {
+					panic(err)
+				}
 			}
 		}
 
@@ -59,7 +66,7 @@ func (k Keeper) PossibleWinsPerSlashWindow(ctx sdk.Context) int64 {
 	slashWindow := int64(k.SlashWindow(ctx))
 	votePeriod := int64(k.VotePeriod(ctx))
 
-	votePeriodsPerWindow := sdk.NewDec(slashWindow).QuoInt64(votePeriod).TruncateInt64()
+	votePeriodsPerWindow := math.LegacyNewDec(slashWindow).QuoInt64(votePeriod).TruncateInt64()
 	numberOfAssets := int64(len(k.GetParams(ctx).MandatoryList))
 
 	return (votePeriodsPerWindow * numberOfAssets)
@@ -67,18 +74,23 @@ func (k Keeper) PossibleWinsPerSlashWindow(ctx sdk.Context) int64 {
 
 // SetValidatorRewardSet will take all the current validators and store them
 // in the ValidatorRewardSet to earn rewards in the current Slash Window.
-func (k Keeper) SetValidatorRewardSet(ctx sdk.Context) {
+func (k Keeper) SetValidatorRewardSet(ctx sdk.Context) error {
 	validatorRewardSet := types.ValidatorRewardSet{
 		ValidatorSet: []string{},
 	}
-	for _, v := range k.StakingKeeper.GetBondedValidatorsByPower(ctx) {
+	vals, err := k.StakingKeeper.GetBondedValidatorsByPower(ctx)
+	if err != nil {
+		return err
+	}
+	for _, v := range vals {
 		addr := v.GetOperator()
-		validatorRewardSet.ValidatorSet = append(validatorRewardSet.ValidatorSet, addr.String())
+		validatorRewardSet.ValidatorSet = append(validatorRewardSet.ValidatorSet, addr)
 	}
 
 	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshal(&validatorRewardSet)
 	store.Set(types.KeyValidatorRewardSet(), bz)
+	return nil
 }
 
 // CurrentValidatorRewardSet returns the latest ValidatorRewardSet in the store.

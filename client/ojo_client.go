@@ -4,6 +4,7 @@ import (
 	"context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	"github.com/ojo-network/ojo/client/query"
 	"github.com/ojo-network/ojo/client/tx"
@@ -25,13 +26,14 @@ func NewOjoClient(
 	grpcEndpoint string,
 	accountName string,
 	accountMnemonic string,
+	encCfg testutil.TestEncodingConfig,
 ) (oc *OjoClient, err error) {
 	oc = &OjoClient{}
 	oc.QueryClient, err = query.NewClient(grpcEndpoint)
 	if err != nil {
 		return nil, err
 	}
-	oc.TxClient, err = tx.NewClient(chainID, tmrpcEndpoint, accountName, accountMnemonic)
+	oc.TxClient, err = tx.NewClient(chainID, tmrpcEndpoint, accountName, accountMnemonic, encCfg)
 	return oc, err
 }
 

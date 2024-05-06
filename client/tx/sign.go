@@ -18,7 +18,7 @@ const (
 // things like prompting for confirmation and printing the response. Instead,
 // we return the TxResponse.
 func BroadcastTx(clientCtx client.Context, txf tx.Factory, msgs ...sdk.Msg) (*sdk.TxResponse, error) {
-	txf, err := prepareFactory(clientCtx, txf)
+	txf, err := txf.Prepare(clientCtx)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func BroadcastTx(clientCtx client.Context, txf tx.Factory, msgs ...sdk.Msg) (*sd
 
 	unsignedTx.SetFeeGranter(clientCtx.GetFeeGranterAddress())
 
-	if err = tx.Sign(txf, clientCtx.GetFromName(), unsignedTx, true); err != nil {
+	if err = tx.Sign(clientCtx.CmdContext, txf, clientCtx.GetFromName(), unsignedTx, true); err != nil {
 		return nil, err
 	}
 
@@ -48,34 +48,4 @@ func BroadcastTx(clientCtx client.Context, txf tx.Factory, msgs ...sdk.Msg) (*sd
 	}
 
 	return clientCtx.BroadcastTx(txBytes)
-}
-
-// prepareFactory ensures the account defined by ctx.GetFromAddress() exists and
-// if the account number and/or the account sequence number are zero (not set),
-// they will be queried for and set on the provided Factory. A new Factory with
-// the updated fields will be returned.
-func prepareFactory(clientCtx client.Context, txf tx.Factory) (tx.Factory, error) {
-	from := clientCtx.GetFromAddress()
-
-	if err := txf.AccountRetriever().EnsureExists(clientCtx, from); err != nil {
-		return txf, err
-	}
-
-	initNum, initSeq := txf.AccountNumber(), txf.Sequence()
-	if initNum == 0 || initSeq == 0 {
-		num, seq, err := txf.AccountRetriever().GetAccountNumberSequence(clientCtx, from)
-		if err != nil {
-			return txf, err
-		}
-
-		if initNum == 0 {
-			txf = txf.WithAccountNumber(num)
-		}
-
-		if initSeq == 0 {
-			txf = txf.WithSequence(seq)
-		}
-	}
-
-	return txf, nil
 }
