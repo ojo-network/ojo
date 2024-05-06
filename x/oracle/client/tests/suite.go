@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/cometbft/cometbft/crypto/secp256k1"
-	tmcli "github.com/cometbft/cometbft/libs/cli"
+	cmtcli "github.com/cometbft/cometbft/libs/cli"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
@@ -150,7 +150,7 @@ func (s *IntegrationTestSuite) TestQueryFeedDelegate() {
 		tc := tc
 
 		s.Run(tc.name, func() {
-			tc.args = append(tc.args, fmt.Sprintf("--%s=json", tmcli.OutputFlag))
+			tc.args = append(tc.args, fmt.Sprintf("--%s=json", cmtcli.OutputFlag))
 			out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryFeederDelegation(), tc.args)
 			if tc.expectErr {
 				s.Require().Error(err)
@@ -167,7 +167,7 @@ func (s *IntegrationTestSuite) TestQueryExchangeRates() {
 	clientCtx := val.ClientCtx
 
 	args := []string{
-		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+		fmt.Sprintf("--%s=json", cmtcli.OutputFlag),
 	}
 	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryExchangeRates(), args)
 	s.Require().NoError(err)
@@ -185,7 +185,7 @@ func (s *IntegrationTestSuite) TestQueryParams() {
 	clientCtx := val.ClientCtx
 
 	args := []string{
-		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+		fmt.Sprintf("--%s=json", cmtcli.OutputFlag),
 	}
 	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryParams(), args)
 	s.Require().NoError(err)
@@ -210,7 +210,7 @@ func (s *IntegrationTestSuite) TestQueryExchangeRate() {
 			name: "valid denom",
 			args: []string{
 				"OJO",
-				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+				fmt.Sprintf("--%s=json", cmtcli.OutputFlag),
 			},
 			expectErr: false,
 			respType:  &types.QueryExchangeRatesResponse{},

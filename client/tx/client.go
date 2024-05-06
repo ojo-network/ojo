@@ -4,15 +4,15 @@ import (
 	"os"
 
 	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
-	tmjsonclient "github.com/cometbft/cometbft/rpc/jsonrpc/client"
+	cmtjsonclient "github.com/cometbft/cometbft/rpc/jsonrpc/client"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	ojoapp "github.com/ojo-network/ojo/app"
 )
 
 const (
@@ -22,8 +22,8 @@ const (
 // TxClient is a wrapper around the cosmos sdk client context and transaction
 // factory for signing and broadcasting transactions
 type Client struct {
-	ChainID       string
-	TMRPCEndpoint string
+	ChainID        string
+	CMTRPCEndpoint string
 
 	ClientContext *client.Context
 
@@ -36,13 +36,14 @@ type Client struct {
 // signing and broadcasting transactions
 func NewClient(
 	chainID string,
-	tmrpcEndpoint string,
+	cmtrpcEndpoint string,
 	accountName string,
 	accountMnemonic string,
+	encCfg testutil.TestEncodingConfig,
 ) (c *Client, err error) {
 	c = &Client{
-		ChainID:       chainID,
-		TMRPCEndpoint: tmrpcEndpoint,
+		ChainID:        chainID,
+		CMTRPCEndpoint: cmtrpcEndpoint,
 	}
 
 	c.keyringRecord, c.keyringKeyring, err = CreateAccountFromMnemonic(accountName, accountMnemonic)
@@ -50,7 +51,7 @@ func NewClient(
 		return nil, err
 	}
 
-	err = c.createClientContext()
+	err = c.createClientContext(encCfg)
 	if err != nil {
 		return nil, err
 	}
@@ -59,32 +60,31 @@ func NewClient(
 	return c, err
 }
 
-func (c *Client) createClientContext() error {
-	encoding := ojoapp.MakeEncodingConfig()
+func (c *Client) createClientContext(encCfg testutil.TestEncodingConfig) error {
 	fromAddress, _ := c.keyringRecord.GetAddress()
 
-	tmHTTPClient, err := tmjsonclient.DefaultHTTPClient(c.TMRPCEndpoint)
+	cmtHTTPClient, err := cmtjsonclient.DefaultHTTPClient(c.CMTRPCEndpoint)
 	if err != nil {
 		return err
 	}
 
-	tmRPCClient, err := rpchttp.NewWithClient(c.TMRPCEndpoint, "/websocket", tmHTTPClient)
+	cmtRPCClient, err := rpchttp.NewWithClient(c.CMTRPCEndpoint, "/websocket", cmtHTTPClient)
 	if err != nil {
 		return err
 	}
 
 	c.ClientContext = &client.Context{
 		ChainID:           c.ChainID,
-		InterfaceRegistry: encoding.InterfaceRegistry,
+		InterfaceRegistry: encCfg.InterfaceRegistry,
 		Output:            os.Stderr,
 		BroadcastMode:     flags.BroadcastSync,
-		TxConfig:          encoding.TxConfig,
+		TxConfig:          encCfg.TxConfig,
 		AccountRetriever:  authtypes.AccountRetriever{},
-		Codec:             encoding.Codec,
-		LegacyAmino:       encoding.Amino,
+		Codec:             encCfg.Codec,
+		LegacyAmino:       encCfg.Amino,
 		Input:             os.Stdin,
-		NodeURI:           c.TMRPCEndpoint,
-		Client:            tmRPCClient,
+		NodeURI:           c.CMTRPCEndpoint,
+		Client:            cmtRPCClient,
 		Keyring:           c.keyringKeyring,
 		FromAddress:       fromAddress,
 		FromName:          c.keyringRecord.Name,
@@ -108,7 +108,8 @@ func (c *Client) createTxFactory() {
 		WithGasAdjustment(gasAdjustment).
 		WithKeybase(c.ClientContext.Keyring).
 		WithSignMode(signing.SignMode_SIGN_MODE_DIRECT).
-		WithSimulateAndExecute(true)
+		WithSimulateAndExecute(true).
+		WithFromName(c.ClientContext.FromName)
 	c.txFactory = &factory
 }
 

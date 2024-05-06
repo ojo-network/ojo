@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ojo-network/ojo/x/oracle/types"
@@ -60,7 +61,7 @@ func (k Keeper) IterateParamUpdatePlans(
 ) {
 	store := ctx.KVStore(k.storeKey)
 
-	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixParamUpdatePlan)
+	iter := storetypes.KVStorePrefixIterator(store, types.KeyPrefixParamUpdatePlan)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {

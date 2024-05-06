@@ -25,7 +25,6 @@ const (
 // WeightedOperations returns all the operations from the module with their respective weights
 func WeightedOperations(
 	appParams simtypes.AppParams,
-	cdc codec.JSONCodec,
 	ak types.AccountKeeper,
 	bk bankkeeper.Keeper,
 	k keeper.Keeper,
@@ -35,13 +34,13 @@ func WeightedOperations(
 		weightMsgClaimAirdrop         int
 	)
 
-	appParams.GetOrGenerate(cdc, OpWeightMsgCreateAirdropAccount, &weightMsgCreateAirdropAccount, nil,
+	appParams.GetOrGenerate(OpWeightMsgCreateAirdropAccount, &weightMsgCreateAirdropAccount, nil,
 		func(_ *rand.Rand) {
 			weightMsgCreateAirdropAccount = ojosim.DefaultWeightMsgSend * 2
 		},
 	)
 
-	appParams.GetOrGenerate(cdc, OpWeightMsgClaimAirdrop, &weightMsgClaimAirdrop, nil,
+	appParams.GetOrGenerate(OpWeightMsgClaimAirdrop, &weightMsgClaimAirdrop, nil,
 		func(_ *rand.Rand) {
 			weightMsgClaimAirdrop = ojosim.DefaultWeightMsgSend * 2
 		},
@@ -101,7 +100,6 @@ func deliver(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, ak simulation.
 		TxGen:           cfg.TxConfig,
 		Cdc:             cfg.Codec.(*codec.ProtoCodec),
 		Msg:             msg,
-		MsgType:         sdk.MsgTypeURL(msg),
 		Context:         ctx,
 		SimAccount:      from,
 		AccountKeeper:   ak,

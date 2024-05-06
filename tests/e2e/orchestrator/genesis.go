@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	tmtypes "github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -15,13 +14,13 @@ import (
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 )
 
-func getGenDoc(path string) (*tmtypes.GenesisDoc, error) {
+func getAppGenesis(path string) (*genutiltypes.AppGenesis, error) {
 	serverCtx := server.NewDefaultContext()
 	config := serverCtx.Config
 	config.SetRoot(path)
 
 	genFile := config.GenesisFile()
-	doc := &tmtypes.GenesisDoc{}
+	gen := &genutiltypes.AppGenesis{}
 
 	if _, err := os.Stat(genFile); err != nil {
 		if !os.IsNotExist(err) {
@@ -30,13 +29,13 @@ func getGenDoc(path string) (*tmtypes.GenesisDoc, error) {
 	} else {
 		var err error
 
-		doc, err = tmtypes.GenesisDocFromFile(genFile)
+		gen, err = genutiltypes.AppGenesisFromFile(genFile)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read genesis doc from file: %w", err)
 		}
 	}
 
-	return doc, nil
+	return gen, nil
 }
 
 func addGenesisAccount(cdc codec.Codec, path, moniker, amountStr string, accAddr sdk.AccAddress) error {
