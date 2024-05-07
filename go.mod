@@ -34,7 +34,7 @@ require (
 	github.com/gorilla/mux v1.8.1
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.1
-	github.com/mgechev/revive v1.3.6
+	github.com/mgechev/revive v1.3.7
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/ojo-network/price-feeder v0.2.0
 	github.com/ory/dockertest/v3 v3.10.0
