@@ -26,7 +26,7 @@ require (
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/gogoproto v1.4.12
 	github.com/cosmos/ibc-go/modules/capability v1.0.0
-	github.com/cosmos/ibc-go/v8 v8.2.1
+	github.com/cosmos/ibc-go/v8 v8.3.0
 	github.com/ethereum/go-ethereum v1.14.2
 	github.com/gogo/protobuf v1.3.3
 	github.com/golang/protobuf v1.5.4
