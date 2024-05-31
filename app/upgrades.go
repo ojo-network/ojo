@@ -41,7 +41,7 @@ func (app App) RegisterUpgradeHandlers() {
 	app.registerUpgrade0_3_0Rc8(upgradeInfo)
 	app.registerUpgrade0_3_1Rc1(upgradeInfo)
 	app.registerUpgrade0_3_1Rc2(upgradeInfo)
-    app.registerUpgrade0_4_0(upgradeInfo)
+	app.registerUpgrade0_4_0(upgradeInfo)
 }
 
 // performs upgrade from v0.1.3 to v0.1.4
@@ -61,7 +61,7 @@ func (app *App) registerUpgrade0_1_4(_ upgradetypes.Plan) {
 	)
 }
 
-//nolint: all
+// nolint: all
 func (app *App) registerUpgrade0_2_0(upgradeInfo upgradetypes.Plan) {
 	const planName = "v0.2.0"
 
