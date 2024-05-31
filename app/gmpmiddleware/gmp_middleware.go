@@ -173,7 +173,6 @@ func (im IBCMiddleware) OnRecvPacket(
 		packet.DestinationChannel,
 		sdk.NewCoin(denom, amt),
 	)
-
 	if err != nil {
 		return channeltypes.NewErrorAcknowledgement(err)
 	}
