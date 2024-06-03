@@ -18,9 +18,7 @@ import (
 	"github.com/ojo-network/price-feeder/oracle/types"
 )
 
-var (
-	VoteThreshold = math.LegacyMustNewDecFromStr("0.4")
-)
+var VoteThreshold = math.LegacyMustNewDecFromStr("0.4")
 
 type IntegrationTestSuite struct {
 	suite.Suite

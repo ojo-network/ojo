@@ -40,7 +40,6 @@ func (o *Orchestrator) ExecCommand(cmd []string) error {
 		OutputStream: &outBuf,
 		ErrorStream:  &errBuf,
 	})
-
 	if err != nil {
 		return fmt.Errorf("exec command failed; stdout: %s, stderr: %s", outBuf.String(), errBuf.String())
 	}
