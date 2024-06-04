@@ -20,8 +20,8 @@ import (
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 	"github.com/cosmos/ibc-go/v8/modules/core/exported"
+	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 
 	oraclekeeper "github.com/ojo-network/ojo/x/oracle/keeper"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
@@ -62,7 +62,7 @@ func (app *App) registerUpgrade0_1_4(_ upgradetypes.Plan) {
 	)
 }
 
-//nolint: all
+// nolint: all
 func (app *App) registerUpgrade0_2_0(upgradeInfo upgradetypes.Plan) {
 	const planName = "v0.2.0"
 
