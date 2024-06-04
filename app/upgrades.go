@@ -21,6 +21,7 @@ import (
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
+	"github.com/cosmos/ibc-go/v8/modules/core/exported"
 
 	oraclekeeper "github.com/ojo-network/ojo/x/oracle/keeper"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
@@ -207,6 +208,11 @@ func (app *App) registerUpgrade0_4_0(upgradeInfo upgradetypes.Plan) {
 		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			sdkCtx := sdk.UnwrapSDKContext(ctx)
 			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
+
+			// explicitly update the IBC 02-client params, adding the localhost client type
+			params := app.IBCKeeper.ClientKeeper.GetParams(sdkCtx)
+			params.AllowedClients = append(params.AllowedClients, exported.Localhost)
+			app.IBCKeeper.ClientKeeper.SetParams(sdkCtx, params)
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)
