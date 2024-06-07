@@ -20,7 +20,7 @@ import (
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/cosmos/ibc-go/v8/modules/core/exported"
+	ibcclienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
 	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 
 	oraclekeeper "github.com/ojo-network/ojo/x/oracle/keeper"
@@ -62,7 +62,7 @@ func (app *App) registerUpgrade0_1_4(_ upgradetypes.Plan) {
 	)
 }
 
-//nolint: all
+// nolint: all
 func (app *App) registerUpgrade0_2_0(upgradeInfo upgradetypes.Plan) {
 	const planName = "v0.2.0"
 
@@ -209,10 +209,8 @@ func (app *App) registerUpgrade0_4_0(upgradeInfo upgradetypes.Plan) {
 			sdkCtx := sdk.UnwrapSDKContext(ctx)
 			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
 
-			// explicitly update the IBC 02-client params, adding the localhost client type
-			params := app.IBCKeeper.ClientKeeper.GetParams(sdkCtx)
-			params.AllowedClients = append(params.AllowedClients, exported.Localhost)
-			app.IBCKeeper.ClientKeeper.SetParams(sdkCtx, params)
+			// explicitly update the IBC 02-client params
+			app.IBCKeeper.ClientKeeper.SetParams(sdkCtx, ibcclienttypes.DefaultParams())
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)
