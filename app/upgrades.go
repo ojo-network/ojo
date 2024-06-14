@@ -20,7 +20,6 @@ import (
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	ibcclienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
 	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 
 	oraclekeeper "github.com/ojo-network/ojo/x/oracle/keeper"
@@ -208,14 +207,6 @@ func (app *App) registerUpgrade0_4_0(upgradeInfo upgradetypes.Plan) {
 		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			sdkCtx := sdk.UnwrapSDKContext(ctx)
 			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
-
-			// explicitly update the IBC 02-client params
-			params := ibcclienttypes.DefaultParams()
-			sdkCtx.Logger().Info("Setting default IBC client parameters", "params", params)
-			app.IBCKeeper.ClientKeeper.SetParams(sdkCtx, params)
-
-			storedParams := app.IBCKeeper.ClientKeeper.GetParams(sdkCtx)
-			sdkCtx.Logger().Info("IBC client parameters set", "storedParams", storedParams)
 
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
