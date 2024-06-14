@@ -465,10 +465,6 @@ func New(
 		scopedIBCKeeper,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
-	// Explicitly update IBC client parameters during initialization
-	ctx := app.NewUncachedContext(true, tmproto.Header{})
-	defaultParams := ibcclienttypes.DefaultParams()
-	app.IBCKeeper.ClientKeeper.SetParams(ctx, defaultParams)
 
 	// Create Transfer Keepers
 	ibcTransferKeeper := ibctransferkeeper.NewKeeper(
@@ -777,6 +773,11 @@ func New(
 
 	app.ScopedIBCKeeper = scopedIBCKeeper
 	app.ScopedTransferKeeper = scopedTransferKeeper
+
+	// Explicitly update IBC client parameters during initialization
+	ctx := app.NewUncachedContext(true, tmproto.Header{})
+	defaultParams := ibcclienttypes.DefaultParams()
+	app.IBCKeeper.ClientKeeper.SetParams(ctx, defaultParams)
 
 	return app
 }
