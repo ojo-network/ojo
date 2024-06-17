@@ -208,6 +208,18 @@ func (app *App) registerUpgrade0_4_0(upgradeInfo upgradetypes.Plan) {
 			sdkCtx := sdk.UnwrapSDKContext(ctx)
 			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
 
+			// enable vote extensions after upgrade
+			consensusParams := sdkCtx.ConsensusParams()
+			consensusParams.Abci.VoteExtensionsEnableHeight = plan.Height
+			msg := consensustypes.MsgUpdateParams{
+				Authority: authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+				Block:     consensusParams.Block,
+				Evidence:  consensusParams.Evidence,
+				Validator: consensusParams.Validator,
+				Abci:      consensusParams.Abci,
+			}
+			app.ConsensusParamsKeeper.UpdateParams(ctx, &msg)
+
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)
