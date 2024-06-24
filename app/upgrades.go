@@ -2,10 +2,12 @@ package app
 
 import (
 	"context"
+	"fmt"
 
 	storetypes "cosmossdk.io/store/types"
 	circuittypes "cosmossdk.io/x/circuit/types"
 	upgradetypes "cosmossdk.io/x/upgrade/types"
+	tenderminttypes "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
@@ -209,16 +211,29 @@ func (app *App) registerUpgrade0_4_0(upgradeInfo upgradetypes.Plan) {
 			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
 
 			// enable vote extensions after upgrade
-			consensusParams := sdkCtx.ConsensusParams()
-			consensusParams.Abci.VoteExtensionsEnableHeight = plan.Height
-			msg := consensustypes.MsgUpdateParams{
-				Authority: authtypes.NewModuleAddress(govtypes.ModuleName).String(),
-				Block:     consensusParams.Block,
-				Evidence:  consensusParams.Evidence,
-				Validator: consensusParams.Validator,
-				Abci:      consensusParams.Abci,
+			consesnusKeeper := app.ConsensusParamsKeeper
+			currentParams, err := consesnusKeeper.Params(ctx, &consensustypes.QueryParamsRequest{})
+			if err != nil || currentParams == nil || currentParams.Params == nil {
+				panic(fmt.Sprintf("failed to retrieve existing consensus params in upgrade handler: %s", err))
 			}
-			app.ConsensusParamsKeeper.UpdateParams(ctx, &msg)
+			currentParams.Params.Abci = &tenderminttypes.ABCIParams{
+				VoteExtensionsEnableHeight: sdkCtx.BlockHeight() + int64(4), // enable vote extensions 4 blocks after upgrade
+			}
+			_, err = consesnusKeeper.UpdateParams(ctx, &consensustypes.MsgUpdateParams{
+				Authority: consesnusKeeper.GetAuthority(),
+				Block:     currentParams.Params.Block,
+				Evidence:  currentParams.Params.Evidence,
+				Validator: currentParams.Params.Validator,
+				Abci:      currentParams.Params.Abci,
+			})
+			if err != nil {
+				panic(fmt.Sprintf("failed to update consensus params : %s", err))
+			}
+			sdkCtx.Logger().Info(
+				"Successfully set VoteExtensionsEnableHeight",
+				"consensus_params",
+				currentParams.Params.String(),
+			)
 
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
