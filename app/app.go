@@ -758,13 +758,14 @@ func New(
 	app.MountTransientStores(tkeys)
 	app.MountMemoryStores(memKeys)
 
+	// initialize BaseApp
+	app.SetInitChainer(app.InitChainer)
+
 	// Explicitly update IBC client parameters during initialization
 	ctx := app.NewUncachedContext(true, tmproto.Header{})
 	defaultParams := ibcclienttypes.DefaultParams()
 	app.IBCKeeper.ClientKeeper.SetParams(ctx, defaultParams)
 
-	// initialize BaseApp
-	app.SetInitChainer(app.InitChainer)
 	app.SetPreBlocker(preBlockHandler.PreBlocker())
 	app.SetPreBlocker(app.PreBlocker)
 	app.SetBeginBlocker(app.BeginBlocker)
