@@ -730,11 +730,6 @@ func New(
 	app.StateSimulationManager = module.NewSimulationManagerFromAppModules(app.mm.Modules, overrideModules)
 	app.StateSimulationManager.RegisterStoreDecoders()
 
-	// Explicitly update IBC client parameters during initialization
-	ctx := app.NewUncachedContext(true, tmproto.Header{})
-	defaultParams := ibcclienttypes.DefaultParams()
-	app.IBCKeeper.ClientKeeper.SetParams(ctx, defaultParams)
-
 	proposalHandler := oracleabci.NewProposalHandler(
 		app.Logger(),
 		app.OracleKeeper,
@@ -779,6 +774,11 @@ func New(
 
 	app.ScopedIBCKeeper = scopedIBCKeeper
 	app.ScopedTransferKeeper = scopedTransferKeeper
+
+	// Explicitly update IBC client parameters during initialization
+	ctx := app.NewUncachedContext(true, tmproto.Header{})
+	defaultParams := ibcclienttypes.DefaultParams()
+	app.IBCKeeper.ClientKeeper.SetParams(ctx, defaultParams)
 
 	return app
 }
