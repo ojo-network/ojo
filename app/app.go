@@ -742,7 +742,6 @@ func New(
 		app.Logger(),
 		app.OracleKeeper,
 	)
-	app.SetPreBlocker(preBlockHandler.PreBlocker())
 
 	// initialize empty price feeder object to pass reference into vote extension handler
 	app.PriceFeeder = &pricefeeder.PriceFeeder{}
@@ -759,8 +758,15 @@ func New(
 	app.MountTransientStores(tkeys)
 	app.MountMemoryStores(memKeys)
 
+	// Explicitly update IBC client parameters during initialization
+	ctx := app.NewUncachedContext(true, tmproto.Header{})
+	defaultParams := ibcclienttypes.DefaultParams()
+	app.IBCKeeper.ClientKeeper.SetParams(ctx, defaultParams)
+
 	// initialize BaseApp
 	app.SetInitChainer(app.InitChainer)
+	app.SetPreBlocker(preBlockHandler.PreBlocker())
+	app.SetPreBlocker(app.PreBlocker)
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
 	app.setAnteHandler(txConfig)
@@ -773,12 +779,6 @@ func New(
 
 	app.ScopedIBCKeeper = scopedIBCKeeper
 	app.ScopedTransferKeeper = scopedTransferKeeper
-
-	// Explicitly update IBC client parameters during initialization
-	ctx := app.NewUncachedContext(true, tmproto.Header{})
-	defaultParams := ibcclienttypes.DefaultParams()
-	app.IBCKeeper.ClientKeeper.SetParams(ctx, defaultParams)
-	app.SetPreBlocker(app.PreBlocker)
 
 	return app
 }
