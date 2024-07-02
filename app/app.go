@@ -760,14 +760,6 @@ func New(
 
 	// initialize BaseApp
 	app.SetInitChainer(app.InitChainer)
-
-	// Explicitly update IBC client parameters during initialization
-	ctx := app.NewUncachedContext(true, tmproto.Header{})
-	defaultParams := ibcclienttypes.DefaultParams()
-	app.IBCKeeper.ClientKeeper.SetParams(ctx, defaultParams)
-
-	app.SetPreBlocker(preBlockHandler.PreBlocker())
-	app.SetPreBlocker(app.PreBlocker)
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
 	app.setAnteHandler(txConfig)
@@ -780,6 +772,14 @@ func New(
 
 	app.ScopedIBCKeeper = scopedIBCKeeper
 	app.ScopedTransferKeeper = scopedTransferKeeper
+
+	// Explicitly update IBC client parameters during initialization
+	ctx := app.NewUncachedContext(true, tmproto.Header{})
+	defaultParams := ibcclienttypes.DefaultParams()
+	app.IBCKeeper.ClientKeeper.SetParams(ctx, defaultParams)
+
+	app.SetPreBlocker(preBlockHandler.PreBlocker())
+	app.SetPreBlocker(app.PreBlocker)
 
 	return app
 }
