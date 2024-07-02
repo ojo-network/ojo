@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"cosmossdk.io/core/appmodule"
 	"cosmossdk.io/log"
 	cometabci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -36,7 +37,24 @@ func (h *PreBlockHandler) PreBlocker(mm *module.Manager) sdk.PreBlocker {
 			return nil, err
 		}
 
-		res := &sdk.ResponsePreBlock{}
+		// execute preblockers of modules in OrderPreBlockers first.
+		ctx = ctx.WithEventManager(sdk.NewEventManager())
+		paramsChanged := false
+		for _, moduleName := range mm.OrderPreBlockers {
+			if module, ok := mm.Modules[moduleName].(appmodule.HasPreBlocker); ok {
+				rsp, err := module.PreBlock(ctx)
+				if err != nil {
+					return nil, err
+				}
+				if rsp.IsConsensusParamsChanged() {
+					paramsChanged = true
+				}
+			}
+		}
+
+		res := &sdk.ResponsePreBlock{
+			ConsensusParamsChanged: paramsChanged,
+		}
 		if len(req.Txs) == 0 {
 			return res, nil
 		}
@@ -66,6 +84,6 @@ func (h *PreBlockHandler) PreBlocker(mm *module.Manager) sdk.PreBlocker {
 			"vote_extensions_enabled", voteExtensionsEnabled,
 		)
 
-		return mm.PreBlock(ctx)
+		return res, nil
 	}
 }
