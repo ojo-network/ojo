@@ -7,6 +7,7 @@ import (
 	"cosmossdk.io/log"
 	cometabci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/module"
 
 	"github.com/ojo-network/ojo/x/oracle/keeper"
 )
@@ -25,8 +26,9 @@ func NewPreBlockHandler(logger log.Logger, keeper keeper.Keeper) *PreBlockHandle
 
 // PreBlocker is run before finalize block to update the aggregrate exchange rate votes on the oracle module
 // that were verified by the vote etension handler so that the exchange rate votes are available during the
-// entire block execution (from BeginBlock).
-func (h *PreBlockHandler) PreBlocker() sdk.PreBlocker {
+// entire block execution (from BeginBlock). It takes the module manger from app.go to execute the PreBlock
+// methods of the other modules set in SetOrderPreBlockers.
+func (h *PreBlockHandler) PreBlocker(mm *module.Manager) sdk.PreBlocker {
 	return func(ctx sdk.Context, req *cometabci.RequestFinalizeBlock) (*sdk.ResponsePreBlock, error) {
 		if req == nil {
 			err := fmt.Errorf("preblocker received a nil request")
@@ -64,6 +66,6 @@ func (h *PreBlockHandler) PreBlocker() sdk.PreBlocker {
 			"vote_extensions_enabled", voteExtensionsEnabled,
 		)
 
-		return res, nil
+		return mm.PreBlock(ctx)
 	}
 }

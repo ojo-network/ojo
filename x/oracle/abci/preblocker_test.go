@@ -8,6 +8,7 @@ import (
 	cometabci "github.com/cometbft/cometbft/abci/types"
 	cometprototypes "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/module"
 
 	"github.com/ojo-network/ojo/x/oracle/abci"
 	"github.com/ojo-network/ojo/x/oracle/keeper"
@@ -75,7 +76,7 @@ func (s *IntegrationTestSuite) TestPreBlocker() {
 				tc.oracleKeeper,
 			)
 
-			resp, err := h.PreBlocker()(ctx, tc.finalizeBlockRequest)
+			resp, err := h.PreBlocker(module.NewManager())(ctx, tc.finalizeBlockRequest)
 			if tc.expErr {
 				s.Require().Error(err)
 				s.Require().Contains(err.Error(), tc.expErrMsg)

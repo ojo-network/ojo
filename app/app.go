@@ -23,8 +23,8 @@ import (
 	upgradekeeper "cosmossdk.io/x/upgrade/keeper"
 	upgradetypes "cosmossdk.io/x/upgrade/types"
 	abci "github.com/cometbft/cometbft/abci/types"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	tmos "github.com/cometbft/cometbft/libs/os"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -742,6 +742,7 @@ func New(
 		app.Logger(),
 		app.OracleKeeper,
 	)
+	app.SetPreBlocker(preBlockHandler.PreBlocker(app.mm))
 
 	// initialize empty price feeder object to pass reference into vote extension handler
 	app.PriceFeeder = &pricefeeder.PriceFeeder{}
@@ -778,9 +779,6 @@ func New(
 	defaultParams := ibcclienttypes.DefaultParams()
 	app.IBCKeeper.ClientKeeper.SetParams(ctx, defaultParams)
 
-	app.SetPreBlocker(preBlockHandler.PreBlocker())
-	app.SetPreBlocker(app.PreBlocker)
-
 	return app
 }
 
@@ -789,11 +787,6 @@ func (app *App) Name() string { return app.BaseApp.Name() }
 
 // GetBaseApp returns the base app of the application
 func (app App) GetBaseApp() *baseapp.BaseApp { return app.BaseApp }
-
-// PreBlocker application updates every pre block
-func (app *App) PreBlocker(ctx sdk.Context, _ *abci.RequestFinalizeBlock) (*sdk.ResponsePreBlock, error) {
-	return app.mm.PreBlock(ctx)
-}
 
 // BeginBlocker application updates every begin block
 func (app *App) BeginBlocker(ctx sdk.Context) (sdk.BeginBlock, error) {
