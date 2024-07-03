@@ -55,10 +55,10 @@ func (h *PreBlockHandler) PreBlocker(mm *module.Manager) sdk.PreBlocker {
 		res := &sdk.ResponsePreBlock{
 			ConsensusParamsChanged: paramsChanged,
 		}
+
 		if len(req.Txs) == 0 {
 			return res, nil
 		}
-
 		voteExtensionsEnabled := VoteExtensionsEnabled(ctx)
 		if voteExtensionsEnabled {
 			var injectedVoteExtTx AggregateExchangeRateVotes

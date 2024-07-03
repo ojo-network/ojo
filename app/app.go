@@ -742,7 +742,6 @@ func New(
 		app.Logger(),
 		app.OracleKeeper,
 	)
-	app.SetPreBlocker(preBlockHandler.PreBlocker(app.mm))
 
 	// initialize empty price feeder object to pass reference into vote extension handler
 	app.PriceFeeder = &pricefeeder.PriceFeeder{}
@@ -761,6 +760,7 @@ func New(
 
 	// initialize BaseApp
 	app.SetInitChainer(app.InitChainer)
+	app.SetPreBlocker(preBlockHandler.PreBlocker(app.mm))
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
 	app.setAnteHandler(txConfig)
