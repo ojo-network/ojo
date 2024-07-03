@@ -22,6 +22,7 @@ import (
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/cosmos/ibc-go/v8/modules/core/exported"
 	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 
 	oraclekeeper "github.com/ojo-network/ojo/x/oracle/keeper"
@@ -210,17 +211,22 @@ func (app *App) registerUpgrade0_4_0(upgradeInfo upgradetypes.Plan) {
 			sdkCtx := sdk.UnwrapSDKContext(ctx)
 			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
 
+			// explicitly update the IBC 02-client params, adding the localhost client type
+			params := app.IBCKeeper.ClientKeeper.GetParams(sdkCtx)
+			params.AllowedClients = append(params.AllowedClients, exported.Localhost)
+			app.IBCKeeper.ClientKeeper.SetParams(sdkCtx, params)
+
 			// enable vote extensions after upgrade
-			consesnusKeeper := app.ConsensusParamsKeeper
-			currentParams, err := consesnusKeeper.Params(ctx, &consensustypes.QueryParamsRequest{})
+			consensusParamsKeeper := app.ConsensusParamsKeeper
+			currentParams, err := consensusParamsKeeper.Params(ctx, &consensustypes.QueryParamsRequest{})
 			if err != nil || currentParams == nil || currentParams.Params == nil {
 				panic(fmt.Sprintf("failed to retrieve existing consensus params in upgrade handler: %s", err))
 			}
 			currentParams.Params.Abci = &tenderminttypes.ABCIParams{
 				VoteExtensionsEnableHeight: sdkCtx.BlockHeight() + int64(4), // enable vote extensions 4 blocks after upgrade
 			}
-			_, err = consesnusKeeper.UpdateParams(ctx, &consensustypes.MsgUpdateParams{
-				Authority: consesnusKeeper.GetAuthority(),
+			_, err = consensusParamsKeeper.UpdateParams(ctx, &consensustypes.MsgUpdateParams{
+				Authority: consensusParamsKeeper.GetAuthority(),
 				Block:     currentParams.Params.Block,
 				Evidence:  currentParams.Params.Evidence,
 				Validator: currentParams.Params.Validator,
