@@ -24,7 +24,6 @@ import (
 	upgradetypes "cosmossdk.io/x/upgrade/types"
 	abci "github.com/cometbft/cometbft/abci/types"
 	tmos "github.com/cometbft/cometbft/libs/os"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -769,11 +768,6 @@ func New(
 
 	app.ScopedIBCKeeper = scopedIBCKeeper
 	app.ScopedTransferKeeper = scopedTransferKeeper
-
-	// Explicitly update IBC client parameters during initialization
-	ctx := app.NewUncachedContext(true, tmproto.Header{})
-	defaultParams := ibcclienttypes.DefaultParams()
-	app.IBCKeeper.ClientKeeper.SetParams(ctx, defaultParams)
 
 	return app
 }

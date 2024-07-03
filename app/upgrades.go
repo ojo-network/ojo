@@ -235,6 +235,10 @@ func (app *App) registerUpgrade0_4_0(upgradeInfo upgradetypes.Plan) {
 				currentParams.Params.String(),
 			)
 
+			// update vote period to 1 block
+			oracleKeeper := app.OracleKeeper
+			oracleKeeper.SetVotePeriod(sdkCtx, 1)
+
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)
