@@ -738,11 +738,6 @@ func New(
 	app.SetPrepareProposal(proposalHandler.PrepareProposalHandler())
 	app.SetProcessProposal(proposalHandler.ProcessProposalHandler())
 
-	preBlockHandler := oracleabci.NewPreBlockHandler(
-		app.Logger(),
-		app.OracleKeeper,
-	)
-
 	// initialize empty price feeder object to pass reference into vote extension handler
 	app.PriceFeeder = &pricefeeder.PriceFeeder{}
 	voteExtensionsHandler := oracleabci.NewVoteExtensionHandler(
@@ -760,7 +755,7 @@ func New(
 
 	// initialize BaseApp
 	app.SetInitChainer(app.InitChainer)
-	app.SetPreBlocker(preBlockHandler.PreBlocker(app.mm))
+	app.SetPreBlocker(app.PreBlocker)
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
 	app.setAnteHandler(txConfig)
@@ -773,6 +768,8 @@ func New(
 
 	app.ScopedIBCKeeper = scopedIBCKeeper
 	app.ScopedTransferKeeper = scopedTransferKeeper
+
+	app.Logger().Info("DEBUG", "HERE")
 
 	// Explicitly update IBC client parameters during initialization
 	ctx := app.NewUncachedContext(true, tmproto.Header{})
