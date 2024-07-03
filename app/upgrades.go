@@ -22,7 +22,6 @@ import (
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	ibcclienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
 	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 
 	oraclekeeper "github.com/ojo-network/ojo/x/oracle/keeper"
@@ -235,15 +234,6 @@ func (app *App) registerUpgrade0_4_0(upgradeInfo upgradetypes.Plan) {
 				"consensus_params",
 				currentParams.Params.String(),
 			)
-
-			// Ensure IBC module parameters are registered
-			ibcClientKeeper := app.IBCKeeper.ClientKeeper
-			ibcParams := ibcClientKeeper.GetParams(sdkCtx)
-			if ibcParams.AllowedClients == nil {
-				ibcClientKeeper.SetParams(sdkCtx, ibcclienttypes.DefaultParams())
-			}
-
-			sdkCtx.Logger().Info("IBC parameters set", "params", ibcParams)
 
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
