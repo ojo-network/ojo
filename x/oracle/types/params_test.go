@@ -271,6 +271,7 @@ func TestParamsEqual(t *testing.T) {
 	// slash window not a multiple of vote period
 	p7 := DefaultParams()
 	p7.SlashWindow = 7
+	p7.VotePeriod = 2
 	err = p7.Validate()
 	require.Error(t, err)
 
