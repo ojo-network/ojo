@@ -12,8 +12,8 @@ import (
 
 // PreBlocker is run before finalize block to update the aggregrate exchange rate votes on the oracle module
 // that were verified by the vote etension handler so that the exchange rate votes are available during the
-// entire block execution (from BeginBlock). It takes the module manger from app.go to execute the PreBlock
-// methods of the other modules set in SetOrderPreBlockers.
+// entire block execution (from BeginBlock). It will execute the preblockers of the other modules set in
+// SetOrderPreBlockers as well.
 func (app *App) PreBlocker(ctx sdk.Context, req *cometabci.RequestFinalizeBlock) (*sdk.ResponsePreBlock, error) {
 	if req == nil {
 		err := fmt.Errorf("preblocker received a nil request")
