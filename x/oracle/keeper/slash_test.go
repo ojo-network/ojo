@@ -118,6 +118,13 @@ func (s *IntegrationTestSuite) TestPossibleWinsPerSlashWindow() {
 			mandatoryList:              types.DenomList{atomDenom},
 			possibleWinsPerSlashWindow: 5,
 		},
+		{
+			name:                       "vote period is 1",
+			votePeriod:                 1,
+			slashWindow:                10,
+			mandatoryList:              types.DenomList{atomDenom},
+			possibleWinsPerSlashWindow: 10,
+		},
 	}
 
 	for _, tc := range testCases {

@@ -2,10 +2,12 @@ package app
 
 import (
 	"context"
+	"fmt"
 
 	storetypes "cosmossdk.io/store/types"
 	circuittypes "cosmossdk.io/x/circuit/types"
 	upgradetypes "cosmossdk.io/x/upgrade/types"
+	tenderminttypes "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
@@ -20,7 +22,6 @@ import (
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/cosmos/ibc-go/v8/modules/core/exported"
 	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 
 	oraclekeeper "github.com/ojo-network/ojo/x/oracle/keeper"
@@ -209,10 +210,35 @@ func (app *App) registerUpgrade0_4_0(upgradeInfo upgradetypes.Plan) {
 			sdkCtx := sdk.UnwrapSDKContext(ctx)
 			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
 
-			// explicitly update the IBC 02-client params, adding the localhost client type
-			params := app.IBCKeeper.ClientKeeper.GetParams(sdkCtx)
-			params.AllowedClients = append(params.AllowedClients, exported.Localhost)
-			app.IBCKeeper.ClientKeeper.SetParams(sdkCtx, params)
+			// enable vote extensions after upgrade
+			consensusParamsKeeper := app.ConsensusParamsKeeper
+			currentParams, err := consensusParamsKeeper.Params(ctx, &consensustypes.QueryParamsRequest{})
+			if err != nil || currentParams == nil || currentParams.Params == nil {
+				panic(fmt.Sprintf("failed to retrieve existing consensus params in upgrade handler: %s", err))
+			}
+			currentParams.Params.Abci = &tenderminttypes.ABCIParams{
+				VoteExtensionsEnableHeight: sdkCtx.BlockHeight() + int64(4), // enable vote extensions 4 blocks after upgrade
+			}
+			_, err = consensusParamsKeeper.UpdateParams(ctx, &consensustypes.MsgUpdateParams{
+				Authority: consensusParamsKeeper.GetAuthority(),
+				Block:     currentParams.Params.Block,
+				Evidence:  currentParams.Params.Evidence,
+				Validator: currentParams.Params.Validator,
+				Abci:      currentParams.Params.Abci,
+			})
+			if err != nil {
+				panic(fmt.Sprintf("failed to update consensus params : %s", err))
+			}
+			sdkCtx.Logger().Info(
+				"Successfully set VoteExtensionsEnableHeight",
+				"consensus_params",
+				currentParams.Params.String(),
+			)
+
+			// update vote period to 1 block
+			oracleKeeper := app.OracleKeeper
+			oracleKeeper.SetVotePeriod(sdkCtx, 1)
+
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)

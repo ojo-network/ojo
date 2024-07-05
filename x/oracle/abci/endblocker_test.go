@@ -223,9 +223,9 @@ func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 	s.Require().NoError(err)
 	currRewards3, err := app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr3)
 	s.Require().NoError(err)
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 142), currRewards1.Rewards[0])
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 142), currRewards2.Rewards[0])
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 142), currRewards3.Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 141), currRewards1.Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 141), currRewards2.Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 141), currRewards3.Rewards[0])
 
 	// update prevotes' block
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
@@ -282,9 +282,9 @@ func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 	s.Require().NoError(err)
 	currRewards3, err = app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr3)
 	s.Require().NoError(err)
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 284), currRewards1.Rewards[0])
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 275), currRewards2.Rewards[0])
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 284), currRewards3.Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 235), currRewards1.Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 232), currRewards2.Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 235), currRewards3.Rewards[0])
 
 	// update prevotes' block
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
@@ -314,9 +314,9 @@ func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 	s.Require().NoError(err)
 	currRewards3, err = app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr3)
 	s.Require().NoError(err)
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 426), currRewards1.Rewards[0])
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 408), currRewards2.Rewards[0])
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 426), currRewards3.Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 329), currRewards1.Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 320), currRewards2.Rewards[0])
+	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 329), currRewards3.Rewards[0])
 }
 
 var exchangeRates = map[string][]math.LegacyDec{
