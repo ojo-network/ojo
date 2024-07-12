@@ -162,7 +162,13 @@ func (msg MsgDelegateFeedConsent) ValidateBasic() error {
 }
 
 // NewLegacyMsgUpdateParams will creates a new LegacyMsgUpdateParams instance
-func NewLegacyMsgUpdateParams(authority, title, description string, keys []string, changes Params) *MsgLegacyGovUpdateParams {
+func NewLegacyMsgUpdateParams(
+	authority string,
+	title string,
+	description string,
+	keys []string,
+	changes Params,
+) *MsgLegacyGovUpdateParams {
 	return &MsgLegacyGovUpdateParams{
 		Title:       title,
 		Description: description,
