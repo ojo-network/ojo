@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	proposalTypeLegacyMsgGovUpdateParams                = LegacyMsgGovUpdateParams{}.String()
+	proposalTypeMsgLegacyGovUpdateParams                = MsgLegacyGovUpdateParams{}.String()
 	proposalTypeMsgGovUpdateParams                      = MsgGovUpdateParams{}.String()
 	proposalTypeMsgGovCancelUpdateParams                = MsgGovCancelUpdateParamPlan{}.String()
 	proposalTypeMsgGovAddDenoms                         = MsgGovAddDenoms{}.String()
@@ -14,7 +14,7 @@ var (
 )
 
 func init() {
-	gov.RegisterProposalType(proposalTypeLegacyMsgGovUpdateParams)
+	gov.RegisterProposalType(proposalTypeMsgLegacyGovUpdateParams)
 	gov.RegisterProposalType(proposalTypeMsgGovUpdateParams)
 	gov.RegisterProposalType(proposalTypeMsgGovCancelUpdateParams)
 	gov.RegisterProposalType(proposalTypeMsgGovAddDenoms)
@@ -23,20 +23,20 @@ func init() {
 }
 
 // Implements Proposal Interface
-var _ gov.Content = &LegacyMsgGovUpdateParams{}
+var _ gov.Content = &MsgLegacyGovUpdateParams{}
 
 // GetTitle returns the title of a community pool spend proposal.
-func (msg *LegacyMsgGovUpdateParams) GetTitle() string { return msg.Title }
+func (msg *MsgLegacyGovUpdateParams) GetTitle() string { return msg.Title }
 
 // GetDescription returns the description of a community pool spend proposal.
-func (msg *LegacyMsgGovUpdateParams) GetDescription() string { return msg.Description }
+func (msg *MsgLegacyGovUpdateParams) GetDescription() string { return msg.Description }
 
 // GetDescription returns the routing key of a community pool spend proposal.
-func (msg *LegacyMsgGovUpdateParams) ProposalRoute() string { return RouterKey }
+func (msg *MsgLegacyGovUpdateParams) ProposalRoute() string { return RouterKey }
 
 // ProposalType returns the type of a community pool spend proposal.
-func (msg *LegacyMsgGovUpdateParams) ProposalType() string {
-	return proposalTypeLegacyMsgGovUpdateParams
+func (msg *MsgLegacyGovUpdateParams) ProposalType() string {
+	return proposalTypeMsgLegacyGovUpdateParams
 }
 
 // Implements Proposal Interface

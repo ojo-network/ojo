@@ -16,7 +16,7 @@ var (
 	_ sdk.Msg = &MsgDelegateFeedConsent{}
 	_ sdk.Msg = &MsgAggregateExchangeRatePrevote{}
 	_ sdk.Msg = &MsgAggregateExchangeRateVote{}
-	_ sdk.Msg = &LegacyMsgGovUpdateParams{}
+	_ sdk.Msg = &MsgLegacyGovUpdateParams{}
 	_ sdk.Msg = &MsgGovUpdateParams{}
 	_ sdk.Msg = &MsgGovCancelUpdateParamPlan{}
 )
@@ -162,8 +162,8 @@ func (msg MsgDelegateFeedConsent) ValidateBasic() error {
 }
 
 // NewLegacyMsgUpdateParams will creates a new LegacyMsgUpdateParams instance
-func NewLegacyMsgUpdateParams(authority, title, description string, keys []string, changes Params) *LegacyMsgGovUpdateParams {
-	return &LegacyMsgGovUpdateParams{
+func NewLegacyMsgUpdateParams(authority, title, description string, keys []string, changes Params) *MsgLegacyGovUpdateParams {
+	return &MsgLegacyGovUpdateParams{
 		Title:       title,
 		Description: description,
 		Authority:   authority,
@@ -173,23 +173,23 @@ func NewLegacyMsgUpdateParams(authority, title, description string, keys []strin
 }
 
 // Type implements Msg interface
-func (msg LegacyMsgGovUpdateParams) Type() string { return sdk.MsgTypeURL(&msg) }
+func (msg MsgLegacyGovUpdateParams) Type() string { return sdk.MsgTypeURL(&msg) }
 
 // String implements the Stringer interface.
-func (msg LegacyMsgGovUpdateParams) String() string {
+func (msg MsgLegacyGovUpdateParams) String() string {
 	out, _ := yaml.Marshal(msg)
 	return string(out)
 }
 
 // GetSigners implements Msg
-func (msg LegacyMsgGovUpdateParams) GetSigners() []sdk.AccAddress {
+func (msg MsgLegacyGovUpdateParams) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
 }
 
 // ValidateBasic implements Msg and validates params for each param key
 // specified in the proposal. If one param is invalid, the whole proposal
 // will fail to go through.
-func (msg LegacyMsgGovUpdateParams) ValidateBasic() error {
+func (msg MsgLegacyGovUpdateParams) ValidateBasic() error {
 	if err := checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority); err != nil {
 		return err
 	}

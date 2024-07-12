@@ -146,8 +146,8 @@ func (ms msgServer) DelegateFeedConsent(
 
 func (ms msgServer) LegacyGovUpdateParams(
 	goCtx context.Context,
-	msg *types.LegacyMsgGovUpdateParams,
-) (*types.LegacyMsgGovUpdateParamsResponse, error) {
+	msg *types.MsgLegacyGovUpdateParams,
+) (*types.MsgLegacyGovUpdateParamsResponse, error) {
 	if msg.Authority != ms.authority {
 		err := errors.Wrapf(
 			types.ErrNoGovAuthority,
@@ -246,7 +246,7 @@ func (ms msgServer) LegacyGovUpdateParams(
 		}
 	}
 
-	return &types.LegacyMsgGovUpdateParamsResponse{}, nil
+	return &types.MsgLegacyGovUpdateParamsResponse{}, nil
 }
 
 func (ms msgServer) GovUpdateParams(

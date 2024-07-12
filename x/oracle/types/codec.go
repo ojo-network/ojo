@@ -33,7 +33,7 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgAggregateExchangeRatePrevote{}, "ojo/oracle/MsgAggregateExchangeRatePrevote", nil)
 	cdc.RegisterConcrete(&MsgAggregateExchangeRateVote{}, "ojo/oracle/MsgAggregateExchangeRateVote", nil)
 	cdc.RegisterConcrete(&MsgDelegateFeedConsent{}, "ojo/oracle/MsgDelegateFeedConsent", nil)
-	cdc.RegisterConcrete(&LegacyMsgGovUpdateParams{}, "ojo/oracle/LegacyMsgGovUpdateParams", nil)
+	cdc.RegisterConcrete(&MsgLegacyGovUpdateParams{}, "ojo/oracle/MsgLegacyGovUpdateParams", nil)
 	cdc.RegisterConcrete(&MsgGovUpdateParams{}, "ojo/oracle/MsgGovUpdateParams", nil)
 	cdc.RegisterConcrete(&MsgGovAddDenoms{}, "ojo/oracle/MsgGovAddDenoms", nil)
 	cdc.RegisterConcrete(&MsgGovRemoveCurrencyPairProviders{}, "ojo/oracle/MsgGovRemoveCurrencyPairProviders", nil)
@@ -50,7 +50,7 @@ func RegisterInterfaces(registry codectypes.InterfaceRegistry) {
 		&MsgDelegateFeedConsent{},
 		&MsgAggregateExchangeRatePrevote{},
 		&MsgAggregateExchangeRateVote{},
-		&LegacyMsgGovUpdateParams{},
+		&MsgLegacyGovUpdateParams{},
 		&MsgGovUpdateParams{},
 		&MsgGovAddDenoms{},
 		&MsgGovRemoveCurrencyPairProviders{},
@@ -59,7 +59,7 @@ func RegisterInterfaces(registry codectypes.InterfaceRegistry) {
 
 	registry.RegisterImplementations(
 		(*govtypes.Content)(nil),
-		&LegacyMsgGovUpdateParams{},
+		&MsgLegacyGovUpdateParams{},
 		&MsgGovUpdateParams{},
 		&MsgGovAddDenoms{},
 		&MsgGovRemoveCurrencyPairProviders{},

@@ -27,8 +27,8 @@ service Msg {
       returns (MsgDelegateFeedConsentResponse);
 
   // LegacyGovUpdateParams defines the legacy message that updates the oracle parameters.
-  rpc LegacyGovUpdateParams(LegacyMsgGovUpdateParams)
-      returns (LegacyMsgGovUpdateParamsResponse);
+  rpc LegacyGovUpdateParams(MsgLegacyGovUpdateParams)
+      returns (MsgLegacyGovUpdateParamsResponse);
 
   // GovUpdateParams updates the oracle parameters.
   rpc GovUpdateParams(MsgGovUpdateParams)
@@ -105,8 +105,8 @@ message MsgDelegateFeedConsent {
 // type.
 message MsgDelegateFeedConsentResponse {}
 
-// LegacyMsgGovUpdateParams defines the Msg/LegacyMsgGovUpdateParams request type.
-message LegacyMsgGovUpdateParams {
+// MsgLegacyGovUpdateParams defines the Msg/MsgLegacyGovUpdateParams request type.
+message MsgLegacyGovUpdateParams {
 	option (gogoproto.equal)            = true;
 	option (gogoproto.goproto_getters)  = false;
 	option (gogoproto.goproto_stringer) = false;
@@ -120,8 +120,8 @@ message LegacyMsgGovUpdateParams {
 	Params changes      = 5 [ (gogoproto.nullable) = false ];
 }
 
-// LegacyMsgGovUpdateParams defines the Msg/LegacyMsgGovUpdateParams response type.
-message LegacyMsgGovUpdateParamsResponse {}
+// MsgLegacyGovUpdateParams defines the Msg/MsgLegacyGovUpdateParams response type.
+message MsgLegacyGovUpdateParamsResponse {}
 
 // MsgGovUpdateParams defines the Msg/GovUpdateParams request type.
 message MsgGovUpdateParams {
