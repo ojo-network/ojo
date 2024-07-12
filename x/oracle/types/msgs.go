@@ -1,12 +1,8 @@
 package types
 
 import (
-<<<<<<< HEAD
-=======
 	"fmt"
 
-	"cosmossdk.io/math"
->>>>>>> 71d54a4 (fix: Implement LegacyGovUpdateParams for querying legacy proposals (#476))
 	"github.com/cometbft/cometbft/crypto/tmhash"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
