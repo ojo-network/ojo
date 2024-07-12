@@ -5,6 +5,7 @@ import (
 )
 
 var (
+	proposalTypeMsgLegacyGovUpdateParams                = MsgLegacyGovUpdateParams{}.String()
 	proposalTypeMsgGovUpdateParams                      = MsgGovUpdateParams{}.String()
 	proposalTypeMsgGovCancelUpdateParams                = MsgGovCancelUpdateParamPlan{}.String()
 	proposalTypeMsgGovAddDenoms                         = MsgGovAddDenoms{}.String()
@@ -13,11 +14,29 @@ var (
 )
 
 func init() {
+	gov.RegisterProposalType(proposalTypeMsgLegacyGovUpdateParams)
 	gov.RegisterProposalType(proposalTypeMsgGovUpdateParams)
 	gov.RegisterProposalType(proposalTypeMsgGovCancelUpdateParams)
 	gov.RegisterProposalType(proposalTypeMsgGovAddDenoms)
 	gov.RegisterProposalType(proposalTypeMsgGovRemoveCurrencyPairProviders)
 	gov.RegisterProposalType(proposalTypeMsgGovRemoveCurrencyDeviationThresholds)
+}
+
+// Implements Proposal Interface
+var _ gov.Content = &MsgLegacyGovUpdateParams{}
+
+// GetTitle returns the title of a community pool spend proposal.
+func (msg *MsgLegacyGovUpdateParams) GetTitle() string { return msg.Title }
+
+// GetDescription returns the description of a community pool spend proposal.
+func (msg *MsgLegacyGovUpdateParams) GetDescription() string { return msg.Description }
+
+// GetDescription returns the routing key of a community pool spend proposal.
+func (msg *MsgLegacyGovUpdateParams) ProposalRoute() string { return RouterKey }
+
+// ProposalType returns the type of a community pool spend proposal.
+func (msg *MsgLegacyGovUpdateParams) ProposalType() string {
+	return proposalTypeMsgLegacyGovUpdateParams
 }
 
 // Implements Proposal Interface
