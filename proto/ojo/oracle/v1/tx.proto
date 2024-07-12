@@ -26,6 +26,10 @@ service Msg {
   rpc DelegateFeedConsent(MsgDelegateFeedConsent)
       returns (MsgDelegateFeedConsentResponse);
 
+  // LegacyGovUpdateParams defines the legacy message that updates the oracle parameters.
+  rpc LegacyGovUpdateParams(LegacyMsgGovUpdateParams)
+      returns (LegacyMsgGovUpdateParamsResponse);
+
   // GovUpdateParams updates the oracle parameters.
   rpc GovUpdateParams(MsgGovUpdateParams)
       returns (MsgGovUpdateParamsResponse);
@@ -101,6 +105,24 @@ message MsgDelegateFeedConsent {
 // type.
 message MsgDelegateFeedConsentResponse {}
 
+// LegacyMsgGovUpdateParams defines the Msg/LegacyMsgGovUpdateParams request type.
+message LegacyMsgGovUpdateParams {
+	option (gogoproto.equal)            = true;
+	option (gogoproto.goproto_getters)  = false;
+	option (gogoproto.goproto_stringer) = false;
+	option (cosmos.msg.v1.signer)       = "authority";
+
+	// authority is the address of the governance account.
+	string authority    = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+	string title        = 2;
+	string description  = 3;
+	repeated string keys = 4;
+	Params changes      = 5 [ (gogoproto.nullable) = false ];
+}
+
+// LegacyMsgGovUpdateParams defines the Msg/LegacyMsgGovUpdateParams response type.
+message LegacyMsgGovUpdateParamsResponse {}
+
 // MsgGovUpdateParams defines the Msg/GovUpdateParams request type.
 message MsgGovUpdateParams {
   option (gogoproto.equal)            = true;
@@ -123,7 +145,6 @@ message MsgGovUpdateParams {
 
 // MsgGovUpdateParamsResponse defines the Msg/GovUpdateParams response type.
 message MsgGovUpdateParamsResponse {}
-
 
 // MsgGovAddDenoms defines the Msg/GovAddDenoms request type.
 message MsgGovAddDenoms {
