@@ -38,6 +38,11 @@ func (app App) RegisterUpgradeHandlers() {
 	app.registerUpgrade0_3_0Rc8(upgradeInfo)
 	app.registerUpgrade0_3_1Rc1(upgradeInfo)
 	app.registerUpgrade0_3_1Rc2(upgradeInfo)
+<<<<<<< HEAD
+=======
+	app.registerUpgrade0_3_1(upgradeInfo)
+	app.registerUpgrade0_4_0(upgradeInfo)
+>>>>>>> 71d54a4 (fix: Implement LegacyGovUpdateParams for querying legacy proposals (#476))
 }
 
 // performs upgrade from v0.1.3 to v0.1.4
@@ -183,6 +188,68 @@ func (app *App) registerUpgrade0_3_1Rc2(_ upgradetypes.Plan) {
 	)
 }
 
+<<<<<<< HEAD
+=======
+func (app *App) registerUpgrade0_3_1(_ upgradetypes.Plan) {
+	const planName = "v0.3.1"
+	app.UpgradeKeeper.SetUpgradeHandler(planName,
+		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			sdkCtx := sdk.UnwrapSDKContext(ctx)
+			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		},
+	)
+}
+
+func (app *App) registerUpgrade0_4_0(upgradeInfo upgradetypes.Plan) {
+	const planName = "v0.4.0"
+	app.UpgradeKeeper.SetUpgradeHandler(planName,
+		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			sdkCtx := sdk.UnwrapSDKContext(ctx)
+			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
+
+			// enable vote extensions after upgrade
+			consensusParamsKeeper := app.ConsensusParamsKeeper
+			currentParams, err := consensusParamsKeeper.Params(ctx, &consensustypes.QueryParamsRequest{})
+			if err != nil || currentParams == nil || currentParams.Params == nil {
+				panic(fmt.Sprintf("failed to retrieve existing consensus params in upgrade handler: %s", err))
+			}
+			currentParams.Params.Abci = &tenderminttypes.ABCIParams{
+				VoteExtensionsEnableHeight: sdkCtx.BlockHeight() + int64(4), // enable vote extensions 4 blocks after upgrade
+			}
+			_, err = consensusParamsKeeper.UpdateParams(ctx, &consensustypes.MsgUpdateParams{
+				Authority: consensusParamsKeeper.GetAuthority(),
+				Block:     currentParams.Params.Block,
+				Evidence:  currentParams.Params.Evidence,
+				Validator: currentParams.Params.Validator,
+				Abci:      currentParams.Params.Abci,
+			})
+			if err != nil {
+				panic(fmt.Sprintf("failed to update consensus params : %s", err))
+			}
+			sdkCtx.Logger().Info(
+				"Successfully set VoteExtensionsEnableHeight",
+				"consensus_params",
+				currentParams.Params.String(),
+			)
+
+			// update vote period to 1 block
+			oracleKeeper := app.OracleKeeper
+			oracleKeeper.SetVotePeriod(sdkCtx, 1)
+
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		},
+	)
+
+	// REF: https://github.com/cosmos/cosmos-sdk/blob/a32186608aab0bd436049377ddb34f90006fcbf7/simapp/upgrades.go
+	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
+		Added: []string{
+			circuittypes.ModuleName,
+		},
+	})
+}
+
+>>>>>>> 71d54a4 (fix: Implement LegacyGovUpdateParams for querying legacy proposals (#476))
 // helper function to check if the store loader should be upgraded
 func (app *App) storeUpgrade(planName string, ui upgradetypes.Plan, stores storetypes.StoreUpgrades) {
 	if ui.Name == planName && !app.UpgradeKeeper.IsSkipHeight(ui.Height) {
