@@ -214,7 +214,10 @@ func (app *App) registerUpgrade0_3_1(_ upgradetypes.Plan) {
 
 			// migrate old proposals
 			govMigrator := govkeeper.NewMigrator(&app.GovKeeper, app.GetSubspace(govtypes.ModuleName))
-			govMigrator.Migrate2to3(sdkCtx)
+			err := govMigrator.Migrate2to3(sdkCtx)
+			if err != nil {
+				panic(fmt.Sprintf("failed to migrate governance module"))
+			}
 
 			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
