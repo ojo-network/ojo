@@ -189,22 +189,15 @@ func (app *App) registerUpgrade0_3_1(_ upgradetypes.Plan) {
 	const planName = "v0.3.1"
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
-<<<<<<< HEAD
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			ctx.Logger().Info("Upgrade handler execution", "name", planName)
-=======
-		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			sdkCtx := sdk.UnwrapSDKContext(ctx)
-
 			// migrate old proposals
 			govMigrator := govkeeper.NewMigrator(&app.GovKeeper, app.GetSubspace(govtypes.ModuleName))
-			err := govMigrator.Migrate2to3(sdkCtx)
+			err := govMigrator.Migrate2to3(ctx)
 			if err != nil {
 				panic("failed to migrate governance module")
 			}
 
-			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
->>>>>>> 2965d45 (fix: Add gov proposal migration in v0.3.1 upgrade handler (#478))
+			ctx.Logger().Info("Upgrade handler execution", "name", planName)
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)
