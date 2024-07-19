@@ -4,6 +4,9 @@ import (
 	"fmt"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
+	"github.com/cosmos/cosmos-sdk/codec"
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
+	"github.com/cosmos/cosmos-sdk/store/prefix"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
@@ -12,9 +15,12 @@ import (
 	consensustypes "github.com/cosmos/cosmos-sdk/x/consensus/types"
 	crisistypes "github.com/cosmos/cosmos-sdk/x/crisis/types"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
-	govkeeper "github.com/cosmos/cosmos-sdk/x/gov/keeper"
+	v1 "github.com/cosmos/cosmos-sdk/x/gov/migrations/v1"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
+	v1types "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
+	"github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
+	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
@@ -58,7 +64,7 @@ func (app *App) registerUpgrade0_1_4(_ upgradetypes.Plan) {
 	)
 }
 
-// nolint: all
+//nolint: all
 func (app *App) registerUpgrade0_2_0(upgradeInfo upgradetypes.Plan) {
 	const planName = "v0.2.0"
 
@@ -205,8 +211,7 @@ func (app *App) registerUpgrade0_3_2(_ upgradetypes.Plan) {
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			// migrate old proposals
-			govMigrator := govkeeper.NewMigrator(&app.GovKeeper, app.GetSubspace(govtypes.ModuleName))
-			err := govMigrator.Migrate2to3(ctx)
+			err := MigrateStore(ctx, app.keys[govtypes.StoreKey], app.appCodec)
 			if err != nil {
 				panic(fmt.Sprintf("failed to migrate governance module: %s", err))
 			}
@@ -224,4 +229,108 @@ func (app *App) storeUpgrade(planName string, ui upgradetypes.Plan, stores store
 		app.SetStoreLoader(
 			upgradetypes.UpgradeStoreLoader(ui.Height, &stores))
 	}
+}
+
+func MigrateStore(ctx sdk.Context, storeKey storetypes.StoreKey, cdc codec.BinaryCodec) error {
+	store := ctx.KVStore(storeKey)
+	if err := migrateVotes(store, cdc); err != nil {
+		return err
+	}
+	return migrateProposals(store, cdc)
+}
+
+// migrateProposals migrates all legacy proposals into MsgExecLegacyContent
+// proposals.
+func migrateProposals(store sdk.KVStore, cdc codec.BinaryCodec) error {
+	propStore := prefix.NewStore(store, v1.ProposalsKeyPrefix)
+
+	iter := propStore.Iterator(nil, nil)
+	defer iter.Close()
+
+	for ; iter.Valid(); iter.Next() {
+		var oldProp govv1beta1.Proposal
+		err := cdc.Unmarshal(iter.Value(), &oldProp)
+		// if able to unmarshal into old proposal, convert it to new proposal type
+		if err != nil && oldProp.GetContent() != nil {
+			newProp, err := convertToNewProposal(oldProp)
+			if err != nil {
+				return err
+			}
+			bz, err := cdc.Marshal(&newProp)
+			if err != nil {
+				return err
+			}
+			// Set new value on store.
+			propStore.Set(iter.Key(), bz)
+		}
+	}
+
+	return nil
+}
+
+// migrateVotes migrates all v1beta1 weighted votes (with sdk.Dec as weight)
+// to v1 weighted votes (with string as weight)
+func migrateVotes(store sdk.KVStore, cdc codec.BinaryCodec) error {
+	votesStore := prefix.NewStore(store, v1.VotesKeyPrefix)
+
+	iter := votesStore.Iterator(nil, nil)
+	defer iter.Close()
+
+	for ; iter.Valid(); iter.Next() {
+		var oldVote govv1beta1.Vote
+		err := cdc.Unmarshal(iter.Value(), &oldVote)
+		// if able to unmarshal into old vote, convert it to new vote type
+		if err != nil {
+			newVote := govv1.Vote{
+				ProposalId: oldVote.ProposalId,
+				Voter:      oldVote.Voter,
+			}
+			newOptions := make([]*govv1.WeightedVoteOption, len(oldVote.Options))
+			for i, o := range oldVote.Options {
+				newOptions[i] = &govv1.WeightedVoteOption{
+					Option: govv1.VoteOption(o.Option),
+					Weight: o.Weight.String(), // Convert to decimal string
+				}
+			}
+			newVote.Options = newOptions
+			bz, err := cdc.Marshal(&newVote)
+			if err != nil {
+				return err
+			}
+
+			// Set new value on store.
+			votesStore.Set(iter.Key(), bz)
+		}
+	}
+
+	return nil
+}
+
+func convertToNewProposal(oldProp v1beta1.Proposal) (v1types.Proposal, error) {
+	msg, err := v1types.NewLegacyContent(oldProp.GetContent(), authtypes.NewModuleAddress(govtypes.ModuleName).String())
+	if err != nil {
+		return v1types.Proposal{}, err
+	}
+	msgAny, err := codectypes.NewAnyWithValue(msg)
+	if err != nil {
+		return v1types.Proposal{}, err
+	}
+	return v1types.Proposal{
+		Id:       oldProp.ProposalId,
+		Messages: []*codectypes.Any{msgAny},
+		Status:   v1types.ProposalStatus(oldProp.Status),
+		FinalTallyResult: &v1types.TallyResult{
+			YesCount:        oldProp.FinalTallyResult.Yes.String(),
+			NoCount:         oldProp.FinalTallyResult.No.String(),
+			AbstainCount:    oldProp.FinalTallyResult.Abstain.String(),
+			NoWithVetoCount: oldProp.FinalTallyResult.NoWithVeto.String(),
+		},
+		SubmitTime:      &oldProp.SubmitTime,
+		DepositEndTime:  &oldProp.DepositEndTime,
+		TotalDeposit:    oldProp.TotalDeposit,
+		VotingStartTime: &oldProp.VotingStartTime,
+		VotingEndTime:   &oldProp.VotingEndTime,
+		Title:           oldProp.GetContent().GetTitle(),
+		Summary:         oldProp.GetContent().GetDescription(),
+	}, nil
 }
