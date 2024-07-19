@@ -45,6 +45,7 @@ func (app App) RegisterUpgradeHandlers() {
 	app.registerUpgrade0_3_1Rc1(upgradeInfo)
 	app.registerUpgrade0_3_1Rc2(upgradeInfo)
 	app.registerUpgrade0_3_1(upgradeInfo)
+	app.registerUpgrade0_3_2(upgradeInfo)
 	app.registerUpgrade0_4_0(upgradeInfo)
 }
 
@@ -207,6 +208,18 @@ func (app *App) registerUpgrade0_3_1Rc2(_ upgradetypes.Plan) {
 
 func (app *App) registerUpgrade0_3_1(_ upgradetypes.Plan) {
 	const planName = "v0.3.1"
+
+	app.UpgradeKeeper.SetUpgradeHandler(planName,
+		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			sdkCtx := sdk.UnwrapSDKContext(ctx)
+			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		},
+	)
+}
+
+func (app *App) registerUpgrade0_3_2(_ upgradetypes.Plan) {
+	const planName = "v0.3.2"
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
