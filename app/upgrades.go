@@ -1,6 +1,8 @@
 package app
 
 import (
+	"fmt"
+
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -56,7 +58,7 @@ func (app *App) registerUpgrade0_1_4(_ upgradetypes.Plan) {
 	)
 }
 
-//nolint: all
+// nolint: all
 func (app *App) registerUpgrade0_2_0(upgradeInfo upgradetypes.Plan) {
 	const planName = "v0.2.0"
 
@@ -206,7 +208,7 @@ func (app *App) registerUpgrade0_3_2(_ upgradetypes.Plan) {
 			govMigrator := govkeeper.NewMigrator(&app.GovKeeper, app.GetSubspace(govtypes.ModuleName))
 			err := govMigrator.Migrate2to3(ctx)
 			if err != nil {
-				panic("failed to migrate governance module")
+				panic(fmt.Sprintf("failed to migrate governance module: %s", err))
 			}
 
 			ctx.Logger().Info("Upgrade handler execution", "name", planName)
