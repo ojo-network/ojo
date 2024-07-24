@@ -5,7 +5,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
-	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -19,8 +18,6 @@ import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	v1types "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
-	"github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
-	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
@@ -233,9 +230,7 @@ func (app *App) storeUpgrade(planName string, ui upgradetypes.Plan, stores store
 
 func MigrateStore(ctx sdk.Context, storeKey storetypes.StoreKey, cdc codec.BinaryCodec) error {
 	store := ctx.KVStore(storeKey)
-	if err := migrateVotes(store, cdc); err != nil {
-		return err
-	}
+
 	return migrateProposals(store, cdc)
 }
 
@@ -248,11 +243,11 @@ func migrateProposals(store sdk.KVStore, cdc codec.BinaryCodec) error {
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
-		var oldProp govv1beta1.Proposal
-		err := cdc.Unmarshal(iter.Value(), &oldProp)
+		var prop v1types.Proposal
+		err := cdc.Unmarshal(iter.Value(), &prop)
 		// if able to unmarshal into old proposal, convert it to new proposal type
-		if err != nil && oldProp.GetContent() != nil {
-			newProp, err := convertToNewProposal(oldProp)
+		if err != nil {
+			newProp, err := convert(prop, cdc)
 			if err != nil {
 				return err
 			}
@@ -268,69 +263,33 @@ func migrateProposals(store sdk.KVStore, cdc codec.BinaryCodec) error {
 	return nil
 }
 
-// migrateVotes migrates all v1beta1 weighted votes (with sdk.Dec as weight)
-// to v1 weighted votes (with string as weight)
-func migrateVotes(store sdk.KVStore, cdc codec.BinaryCodec) error {
-	votesStore := prefix.NewStore(store, v1.VotesKeyPrefix)
+func convert(prop v1types.Proposal, cdc codec.BinaryCodec) (v1types.Proposal, error) {
+	msgs := prop.Messages
 
-	iter := votesStore.Iterator(nil, nil)
-	defer iter.Close()
-
-	for ; iter.Valid(); iter.Next() {
-		var oldVote govv1beta1.Vote
-		err := cdc.Unmarshal(iter.Value(), &oldVote)
-		// if able to unmarshal into old vote, convert it to new vote type
+	for _, msg := range msgs {
+		var oldUpdateParamMsg oracletypes.MsgLegacyGovUpdateParams
+		err := cdc.Unmarshal(msg.GetValue(), &oldUpdateParamMsg)
 		if err != nil {
-			newVote := govv1.Vote{
-				ProposalId: oldVote.ProposalId,
-				Voter:      oldVote.Voter,
-			}
-			newOptions := make([]*govv1.WeightedVoteOption, len(oldVote.Options))
-			for i, o := range oldVote.Options {
-				newOptions[i] = &govv1.WeightedVoteOption{
-					Option: govv1.VoteOption(o.Option),
-					Weight: o.Weight.String(), // Convert to decimal string
-				}
-			}
-			newVote.Options = newOptions
-			bz, err := cdc.Marshal(&newVote)
-			if err != nil {
-				return err
-			}
+			return v1types.Proposal{}, err
+		}
 
-			// Set new value on store.
-			votesStore.Set(iter.Key(), bz)
+		newUpdateParamMsg := oracletypes.MsgGovUpdateParams{
+			Authority: oldUpdateParamMsg.Authority,
+			Title: oldUpdateParamMsg.Title,
+			Description: oldUpdateParamMsg.Description,
+			Plan: oracletypes.ParamUpdatePlan{
+				Keys: oldUpdateParamMsg.Keys,
+				Height: 0,
+				Changes: oldUpdateParamMsg.Changes,
+			},
+		}
+
+		msg.Value, err = newUpdateParamMsg.Marshal()
+		if err != nil {
+			return v1types.Proposal{}, err
 		}
 	}
 
-	return nil
-}
-
-func convertToNewProposal(oldProp v1beta1.Proposal) (v1types.Proposal, error) {
-	msg, err := v1types.NewLegacyContent(oldProp.GetContent(), authtypes.NewModuleAddress(govtypes.ModuleName).String())
-	if err != nil {
-		return v1types.Proposal{}, err
-	}
-	msgAny, err := codectypes.NewAnyWithValue(msg)
-	if err != nil {
-		return v1types.Proposal{}, err
-	}
-	return v1types.Proposal{
-		Id:       oldProp.ProposalId,
-		Messages: []*codectypes.Any{msgAny},
-		Status:   v1types.ProposalStatus(oldProp.Status),
-		FinalTallyResult: &v1types.TallyResult{
-			YesCount:        oldProp.FinalTallyResult.Yes.String(),
-			NoCount:         oldProp.FinalTallyResult.No.String(),
-			AbstainCount:    oldProp.FinalTallyResult.Abstain.String(),
-			NoWithVetoCount: oldProp.FinalTallyResult.NoWithVeto.String(),
-		},
-		SubmitTime:      &oldProp.SubmitTime,
-		DepositEndTime:  &oldProp.DepositEndTime,
-		TotalDeposit:    oldProp.TotalDeposit,
-		VotingStartTime: &oldProp.VotingStartTime,
-		VotingEndTime:   &oldProp.VotingEndTime,
-		Title:           oldProp.GetContent().GetTitle(),
-		Summary:         oldProp.GetContent().GetDescription(),
-	}, nil
+	prop.Messages = msgs
+	return prop, nil
 }
