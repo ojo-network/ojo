@@ -1,8 +1,6 @@
 package app
 
 import (
-	"fmt"
-
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
@@ -208,9 +206,9 @@ func (app *App) registerUpgrade0_3_2(_ upgradetypes.Plan) {
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			// migrate old proposals
-			err := MigrateStore(ctx, app.keys[govtypes.StoreKey], app.appCodec)
+			err := migrateProposals(ctx, app.keys[govtypes.StoreKey], app.appCodec)
 			if err != nil {
-				panic(fmt.Sprintf("failed to migrate governance module: %s", err))
+				ctx.Logger().Error("failed to migrate governance proposals", err)
 			}
 
 			ctx.Logger().Info("Upgrade handler execution", "name", planName)
@@ -228,15 +226,9 @@ func (app *App) storeUpgrade(planName string, ui upgradetypes.Plan, stores store
 	}
 }
 
-func MigrateStore(ctx sdk.Context, storeKey storetypes.StoreKey, cdc codec.BinaryCodec) error {
+// migrateProposals migrates all legacy MsgUpgateGovParam proposals into non legacy param update versions.
+func migrateProposals(ctx sdk.Context, storeKey storetypes.StoreKey, cdc codec.BinaryCodec) error {
 	store := ctx.KVStore(storeKey)
-
-	return migrateProposals(store, cdc)
-}
-
-// migrateProposals migrates all legacy proposals into MsgExecLegacyContent
-// proposals.
-func migrateProposals(store sdk.KVStore, cdc codec.BinaryCodec) error {
 	propStore := prefix.NewStore(store, v1.ProposalsKeyPrefix)
 
 	iter := propStore.Iterator(nil, nil)
@@ -245,48 +237,48 @@ func migrateProposals(store sdk.KVStore, cdc codec.BinaryCodec) error {
 	for ; iter.Valid(); iter.Next() {
 		var prop v1types.Proposal
 		err := cdc.Unmarshal(iter.Value(), &prop)
-		// if able to unmarshal into old proposal, convert it to new proposal type
 		if err != nil {
-			newProp, err := convert(prop, cdc)
-			if err != nil {
-				return err
-			}
-			bz, err := cdc.Marshal(&newProp)
-			if err != nil {
-				return err
-			}
-			// Set new value on store.
-			propStore.Set(iter.Key(), bz)
+			return err
 		}
+		newProp, err := convertProposal(prop, cdc)
+		if err != nil {
+			return err
+		}
+		bz, err := cdc.Marshal(&newProp)
+		if err != nil {
+			return err
+		}
+		// Set new value on store.
+		propStore.Set(iter.Key(), bz)
 	}
 
 	return nil
 }
 
-func convert(prop v1types.Proposal, cdc codec.BinaryCodec) (v1types.Proposal, error) {
+func convertProposal(prop v1types.Proposal, cdc codec.BinaryCodec) (v1types.Proposal, error) {
 	msgs := prop.Messages
 
 	for _, msg := range msgs {
 		var oldUpdateParamMsg oracletypes.MsgLegacyGovUpdateParams
 		err := cdc.Unmarshal(msg.GetValue(), &oldUpdateParamMsg)
-		if err != nil {
-			return v1types.Proposal{}, err
-		}
 
-		newUpdateParamMsg := oracletypes.MsgGovUpdateParams{
-			Authority: oldUpdateParamMsg.Authority,
-			Title: oldUpdateParamMsg.Title,
-			Description: oldUpdateParamMsg.Description,
-			Plan: oracletypes.ParamUpdatePlan{
-				Keys: oldUpdateParamMsg.Keys,
-				Height: 0,
-				Changes: oldUpdateParamMsg.Changes,
-			},
-		}
-
-		msg.Value, err = newUpdateParamMsg.Marshal()
+		// if able to unmarshal into MsgLegacyGovUpdateParams, update to non legacy version
 		if err != nil {
-			return v1types.Proposal{}, err
+			newUpdateParamMsg := oracletypes.MsgGovUpdateParams{
+				Authority: oldUpdateParamMsg.Authority,
+				Title: oldUpdateParamMsg.Title,
+				Description: oldUpdateParamMsg.Description,
+				Plan: oracletypes.ParamUpdatePlan{
+					Keys: oldUpdateParamMsg.Keys,
+					Height: 0, // placeholder value for height
+					Changes: oldUpdateParamMsg.Changes,
+				},
+			}
+
+			msg.Value, err = newUpdateParamMsg.Marshal()
+			if err != nil {
+				return v1types.Proposal{}, err
+			}
 		}
 	}
 
