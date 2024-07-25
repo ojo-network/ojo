@@ -12,7 +12,7 @@ import (
 	consensustypes "github.com/cosmos/cosmos-sdk/x/consensus/types"
 	crisistypes "github.com/cosmos/cosmos-sdk/x/crisis/types"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
-	v1 "github.com/cosmos/cosmos-sdk/x/gov/migrations/v1"
+	v1migrations "github.com/cosmos/cosmos-sdk/x/gov/migrations/v1"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	v1types "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
@@ -229,7 +229,7 @@ func (app *App) storeUpgrade(planName string, ui upgradetypes.Plan, stores store
 // migrateProposals migrates all legacy MsgUpgateGovParam proposals into non legacy param update versions.
 func migrateProposals(ctx sdk.Context, storeKey storetypes.StoreKey, cdc codec.BinaryCodec) error {
 	store := ctx.KVStore(storeKey)
-	propStore := prefix.NewStore(store, v1.ProposalsKeyPrefix)
+	propStore := prefix.NewStore(store, v1migrations.ProposalsKeyPrefix)
 
 	iter := propStore.Iterator(nil, nil)
 	defer iter.Close()
