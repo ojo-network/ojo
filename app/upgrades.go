@@ -260,24 +260,24 @@ func convertProposal(prop govv1.Proposal, cdc codec.BinaryCodec) (govv1.Proposal
 	for _, msg := range msgs {
 		var oldUpdateParamMsg oracletypes.MsgLegacyGovUpdateParams
 		err := cdc.Unmarshal(msg.GetValue(), &oldUpdateParamMsg)
-
-		// if able to unmarshal into MsgLegacyGovUpdateParams, update to non legacy version
 		if err != nil {
-			newUpdateParamMsg := oracletypes.MsgGovUpdateParams{
-				Authority:   oldUpdateParamMsg.Authority,
-				Title:       oldUpdateParamMsg.Title,
-				Description: oldUpdateParamMsg.Description,
-				Plan: oracletypes.ParamUpdatePlan{
-					Keys:    oldUpdateParamMsg.Keys,
-					Height:  0, // placeholder value for height
-					Changes: oldUpdateParamMsg.Changes,
-				},
-			}
+			return govv1.Proposal{}, err
+		}
 
-			msg.Value, err = newUpdateParamMsg.Marshal()
-			if err != nil {
-				return govv1.Proposal{}, err
-			}
+		newUpdateParamMsg := oracletypes.MsgGovUpdateParams{
+			Authority:   oldUpdateParamMsg.Authority,
+			Title:       oldUpdateParamMsg.Title,
+			Description: oldUpdateParamMsg.Description,
+			Plan: oracletypes.ParamUpdatePlan{
+				Keys:    oldUpdateParamMsg.Keys,
+				Height:  0, // placeholder value for height
+				Changes: oldUpdateParamMsg.Changes,
+			},
+		}
+
+		msg.Value, err = newUpdateParamMsg.Marshal()
+		if err != nil {
+			return govv1.Proposal{}, err
 		}
 	}
 
