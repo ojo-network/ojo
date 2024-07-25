@@ -15,7 +15,6 @@ import (
 	v1migrations "github.com/cosmos/cosmos-sdk/x/gov/migrations/v1"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
-	v1types "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
@@ -235,7 +234,7 @@ func migrateProposals(ctx sdk.Context, storeKey storetypes.StoreKey, cdc codec.B
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
-		var prop v1types.Proposal
+		var prop govv1.Proposal
 		err := cdc.Unmarshal(iter.Value(), &prop)
 		// if error unmarshaling prop, convert to non legacy prop
 		if err != nil {
@@ -255,7 +254,7 @@ func migrateProposals(ctx sdk.Context, storeKey storetypes.StoreKey, cdc codec.B
 	return nil
 }
 
-func convertProposal(prop v1types.Proposal, cdc codec.BinaryCodec) (v1types.Proposal, error) {
+func convertProposal(prop govv1.Proposal, cdc codec.BinaryCodec) (govv1.Proposal, error) {
 	msgs := prop.Messages
 
 	for _, msg := range msgs {
@@ -277,7 +276,7 @@ func convertProposal(prop v1types.Proposal, cdc codec.BinaryCodec) (v1types.Prop
 
 			msg.Value, err = newUpdateParamMsg.Marshal()
 			if err != nil {
-				return v1types.Proposal{}, err
+				return govv1.Proposal{}, err
 			}
 		}
 	}
