@@ -208,7 +208,7 @@ func (app *App) registerUpgrade0_3_2(_ upgradetypes.Plan) {
 			// migrate old proposals
 			err := migrateProposals(ctx, app.keys[govtypes.StoreKey], app.appCodec)
 			if err != nil {
-				ctx.Logger().Error("failed to migrate governance proposals", err)
+				ctx.Logger().Error("failed to migrate governance proposals", "err", err)
 			}
 
 			ctx.Logger().Info("Upgrade handler execution", "name", planName)
@@ -237,19 +237,19 @@ func migrateProposals(ctx sdk.Context, storeKey storetypes.StoreKey, cdc codec.B
 	for ; iter.Valid(); iter.Next() {
 		var prop v1types.Proposal
 		err := cdc.Unmarshal(iter.Value(), &prop)
+		// if error unmarshaling prop, convert to non legacy prop
 		if err != nil {
-			return err
+			newProp, err := convertProposal(prop, cdc)
+			if err != nil {
+				return err
+			}
+			bz, err := cdc.Marshal(&newProp)
+			if err != nil {
+				return err
+			}
+			// Set new value on store.
+			propStore.Set(iter.Key(), bz)
 		}
-		newProp, err := convertProposal(prop, cdc)
-		if err != nil {
-			return err
-		}
-		bz, err := cdc.Marshal(&newProp)
-		if err != nil {
-			return err
-		}
-		// Set new value on store.
-		propStore.Set(iter.Key(), bz)
 	}
 
 	return nil
@@ -265,12 +265,12 @@ func convertProposal(prop v1types.Proposal, cdc codec.BinaryCodec) (v1types.Prop
 		// if able to unmarshal into MsgLegacyGovUpdateParams, update to non legacy version
 		if err != nil {
 			newUpdateParamMsg := oracletypes.MsgGovUpdateParams{
-				Authority: oldUpdateParamMsg.Authority,
-				Title: oldUpdateParamMsg.Title,
+				Authority:   oldUpdateParamMsg.Authority,
+				Title:       oldUpdateParamMsg.Title,
 				Description: oldUpdateParamMsg.Description,
 				Plan: oracletypes.ParamUpdatePlan{
-					Keys: oldUpdateParamMsg.Keys,
-					Height: 0, // placeholder value for height
+					Keys:    oldUpdateParamMsg.Keys,
+					Height:  0, // placeholder value for height
 					Changes: oldUpdateParamMsg.Changes,
 				},
 			}
