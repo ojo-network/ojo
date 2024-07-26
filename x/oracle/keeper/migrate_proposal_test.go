@@ -42,11 +42,13 @@ func (s *IntegrationTestSuite) TestMigrateProposal() {
 	s.app.GovKeeper.SetProposal(ctx, prop)
 
 	// try to retreive proposal and fail
-	_, err = s.app.GovKeeper.Proposals.Get(ctx, prop.Id)
-	s.Require().Error(err)
+	s.Require().Panics(func() {
+		s.app.GovKeeper.GetProposal(ctx, prop.Id)
+	})
 
 	// succesfully retreive proposal after migration
 	err = keeper.MigrateProposals(ctx, storeKey, cdc)
-	_, err = s.app.GovKeeper.Proposals.Get(ctx, prop.Id)
-	s.Require().NoError(err)
+	s.Require().NotPanics(func() {
+		s.app.GovKeeper.GetProposal(ctx, prop.Id)
+	})
 }

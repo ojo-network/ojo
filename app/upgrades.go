@@ -39,11 +39,7 @@ func (app App) RegisterUpgradeHandlers() {
 	app.registerUpgrade0_3_1Rc1(upgradeInfo)
 	app.registerUpgrade0_3_1Rc2(upgradeInfo)
 	app.registerUpgrade0_3_1(upgradeInfo)
-<<<<<<< HEAD
-=======
 	app.registerUpgrade0_3_2(upgradeInfo)
-	app.registerUpgrade0_4_0(upgradeInfo)
->>>>>>> faac055 (chore: v0.3.2 upgrade handler (#481))
 }
 
 // performs upgrade from v0.1.3 to v0.1.4
@@ -193,15 +189,8 @@ func (app *App) registerUpgrade0_3_1(_ upgradetypes.Plan) {
 	const planName = "v0.3.1"
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
-<<<<<<< HEAD
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			// migrate old proposals
-			govMigrator := govkeeper.NewMigrator(&app.GovKeeper, app.GetSubspace(govtypes.ModuleName))
-			err := govMigrator.Migrate2to3(ctx)
-=======
-		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			sdkCtx := sdk.UnwrapSDKContext(ctx)
-			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
+			ctx.Logger().Info("Upgrade handler execution", "name", planName)
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)
@@ -211,14 +200,11 @@ func (app *App) registerUpgrade0_3_2(_ upgradetypes.Plan) {
 	const planName = "v0.3.2"
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
-		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			sdkCtx := sdk.UnwrapSDKContext(ctx)
-
+		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			// migrate old proposals
-			err := oraclekeeper.MigrateProposals(sdkCtx, app.keys[govtypes.StoreKey], app.appCodec)
->>>>>>> faac055 (chore: v0.3.2 upgrade handler (#481))
+			err := oraclekeeper.MigrateProposals(ctx, app.keys[govtypes.StoreKey], app.appCodec)
 			if err != nil {
-				sdkCtx.Logger().Error("failed to migrate governance proposals", "err", err)
+				ctx.Logger().Error("failed to migrate governance proposals", "err", err)
 			}
 
 			ctx.Logger().Info("Upgrade handler execution", "name", planName)
