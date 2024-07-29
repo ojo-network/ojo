@@ -44,8 +44,7 @@ const (
 	ojoGrpcPort       = "9090"
 	ojoMaxStartupTime = 40 // seconds
 
-	// TODO: update original pf instance with sdk 0.47
-	priceFeederContainerRepo  = "ghcr.io/ojo-network/price-feeder-ojo-47"
+	priceFeederContainerRepo  = "ghcr.io/ojo-network/price-feeder-ojo-v0.1.11"
 	priceFeederServerPort     = "7171/tcp"
 	priceFeederMaxStartupTime = 20 // seconds
 
@@ -427,7 +426,7 @@ func (o *Orchestrator) runPriceFeeder(t *testing.T) {
 				fmt.Sprintf("RPC_GRPC_ENDPOINT=%s", grpcEndpoint),
 				fmt.Sprintf("RPC_TMRPC_ENDPOINT=%s", tmrpcEndpoint),
 			},
-			Cmd: []string{"--skip-provider-check", "--log-level=debug"},
+			Cmd: []string{"--skip-provider-check", "--config-currency-providers", "--log-level=debug"},
 		},
 		noRestart,
 	)

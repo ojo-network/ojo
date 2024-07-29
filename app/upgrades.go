@@ -10,7 +10,6 @@ import (
 	consensustypes "github.com/cosmos/cosmos-sdk/x/consensus/types"
 	crisistypes "github.com/cosmos/cosmos-sdk/x/crisis/types"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
-	govkeeper "github.com/cosmos/cosmos-sdk/x/gov/keeper"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
@@ -40,6 +39,7 @@ func (app App) RegisterUpgradeHandlers() {
 	app.registerUpgrade0_3_1Rc1(upgradeInfo)
 	app.registerUpgrade0_3_1Rc2(upgradeInfo)
 	app.registerUpgrade0_3_1(upgradeInfo)
+	app.registerUpgrade0_3_2(upgradeInfo)
 }
 
 // performs upgrade from v0.1.3 to v0.1.4
@@ -190,11 +190,21 @@ func (app *App) registerUpgrade0_3_1(_ upgradetypes.Plan) {
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			ctx.Logger().Info("Upgrade handler execution", "name", planName)
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		},
+	)
+}
+
+func (app *App) registerUpgrade0_3_2(_ upgradetypes.Plan) {
+	const planName = "v0.3.2"
+
+	app.UpgradeKeeper.SetUpgradeHandler(planName,
+		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			// migrate old proposals
-			govMigrator := govkeeper.NewMigrator(&app.GovKeeper, app.GetSubspace(govtypes.ModuleName))
-			err := govMigrator.Migrate2to3(ctx)
+			err := oraclekeeper.MigrateProposals(ctx, app.keys[govtypes.StoreKey], app.appCodec)
 			if err != nil {
-				panic("failed to migrate governance module")
+				ctx.Logger().Error("failed to migrate governance proposals", "err", err)
 			}
 
 			ctx.Logger().Info("Upgrade handler execution", "name", planName)
