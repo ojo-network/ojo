@@ -8,7 +8,6 @@ import (
 	cometabci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/ojo-network/ojo/pricefeeder"
 	"github.com/ojo-network/ojo/x/oracle/keeper"
 	"github.com/ojo-network/ojo/x/oracle/types"
 	"github.com/ojo-network/price-feeder/oracle"
@@ -23,19 +22,16 @@ type OracleVoteExtension struct {
 type VoteExtensionHandler struct {
 	logger       log.Logger
 	oracleKeeper keeper.Keeper
-	priceFeeder  *pricefeeder.PriceFeeder
 }
 
 // NewVoteExtensionHandler returns a new VoteExtensionHandler.
 func NewVoteExtensionHandler(
 	logger log.Logger,
 	oracleKeeper keeper.Keeper,
-	priceFeeder *pricefeeder.PriceFeeder,
 ) *VoteExtensionHandler {
 	return &VoteExtensionHandler{
 		logger:       logger,
 		oracleKeeper: oracleKeeper,
-		priceFeeder:  priceFeeder,
 	}
 }
 
@@ -63,12 +59,12 @@ func (h *VoteExtensionHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 		}
 
 		// Get prices from Oracle Keeper's pricefeeder and generate vote msg
-		if h.priceFeeder.Oracle == nil {
+		if h.oracleKeeper.PriceFeeder.Oracle == nil {
 			err := fmt.Errorf("price feeder oracle not set")
 			h.logger.Error(err.Error())
 			return nil, err
 		}
-		prices := h.priceFeeder.Oracle.GetPrices()
+		prices := h.oracleKeeper.PriceFeeder.Oracle.GetPrices()
 		exchangeRatesStr := oracle.GenerateExchangeRatesString(prices)
 
 		// Parse as DecCoins

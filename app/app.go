@@ -121,7 +121,6 @@ import (
 	airdropkeeper "github.com/ojo-network/ojo/x/airdrop/keeper"
 	airdroptypes "github.com/ojo-network/ojo/x/airdrop/types"
 
-	"github.com/ojo-network/ojo/pricefeeder"
 	oracleabci "github.com/ojo-network/ojo/x/oracle/abci"
 
 	customante "github.com/ojo-network/ojo/ante"
@@ -221,8 +220,6 @@ type App struct {
 
 	// module configurator
 	configurator module.Configurator
-
-	PriceFeeder *pricefeeder.PriceFeeder
 }
 
 // New returns a reference to an initialized blockchain app
@@ -738,12 +735,9 @@ func New(
 	app.SetPrepareProposal(proposalHandler.PrepareProposalHandler())
 	app.SetProcessProposal(proposalHandler.ProcessProposalHandler())
 
-	// initialize empty price feeder object to pass reference into vote extension handler
-	app.PriceFeeder = &pricefeeder.PriceFeeder{}
 	voteExtensionsHandler := oracleabci.NewVoteExtensionHandler(
 		app.Logger(),
 		app.OracleKeeper,
-		app.PriceFeeder,
 	)
 	app.SetExtendVoteHandler(voteExtensionsHandler.ExtendVoteHandler())
 	app.SetVerifyVoteExtensionHandler(voteExtensionsHandler.VerifyVoteExtensionHandler())

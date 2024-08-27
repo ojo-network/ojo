@@ -31,6 +31,16 @@ func EndBlocker(ctx context.Context, k keeper.Keeper) error {
 
 	params := k.GetParams(sdkCtx)
 
+	// Start price feeder if it hasn't been started.
+	if k.PriceFeeder.Oracle == nil {
+		go func() {
+			err := k.PriceFeeder.Start(sdkCtx.BlockHeight(), params)
+			if err != nil {
+				sdkCtx.Logger().Error("Error starting Oracle Keeper price feeder", "err", err)
+			}
+		}()
+	}
+
 	// Set all current active validators into the ValidatorRewardSet at
 	// the beginning of a new Slash Window.
 	if k.IsPeriodLastBlock(sdkCtx, params.SlashWindow+1) {
@@ -40,6 +50,17 @@ func EndBlocker(ctx context.Context, k keeper.Keeper) error {
 	}
 
 	if k.IsPeriodLastBlock(sdkCtx, params.VotePeriod) {
+		if k.PriceFeeder.Oracle != nil {
+			// Update price feeder oracle with latest params.
+			k.PriceFeeder.Oracle.ParamCache.UpdateParamCache(sdkCtx.BlockHeight(), k.GetParams(sdkCtx), nil)
+
+			// Execute price feeder oracle tick.
+			if err := k.PriceFeeder.Oracle.TickClientless(ctx); err != nil {
+				return err
+			}
+		}
+
+		// Update oracle module with prices.
 		if err := CalcPrices(sdkCtx, params, k); err != nil {
 			return err
 		}

@@ -12,9 +12,9 @@ import (
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
+	"github.com/ojo-network/ojo/pricefeeder"
 	"github.com/ojo-network/ojo/util/metrics"
 	"github.com/ojo-network/ojo/x/oracle/types"
-	"github.com/ojo-network/price-feeder/oracle"
 )
 
 var ten = math.LegacyMustNewDecFromStr("10")
@@ -30,7 +30,7 @@ type Keeper struct {
 	distrKeeper   types.DistributionKeeper
 	StakingKeeper types.StakingKeeper
 
-	PriceFeederOracle *oracle.Oracle
+	PriceFeeder *pricefeeder.PriceFeeder
 
 	distrName        string
 	telemetryEnabled bool
@@ -70,6 +70,7 @@ func NewKeeper(
 		bankKeeper:       bankKeeper,
 		distrKeeper:      distrKeeper,
 		StakingKeeper:    stakingKeeper,
+		PriceFeeder:      &pricefeeder.PriceFeeder{},
 		distrName:        distrName,
 		telemetryEnabled: telemetryEnabled,
 		authority:        authority,

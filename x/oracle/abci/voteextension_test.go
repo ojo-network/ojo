@@ -37,7 +37,7 @@ func (s *IntegrationTestSuite) TestExtendVoteHandler() {
 			name:         "price feeder oracle not set",
 			logger:       log.NewNopLogger(),
 			oracleKeeper: app.OracleKeeper,
-			priceFeeder:  app.PriceFeeder,
+			priceFeeder:  &pricefeeder.PriceFeeder{},
 			extendVoteRequest: &cometabci.RequestExtendVote{
 				Height: ctx.BlockHeight(),
 			},
@@ -58,10 +58,10 @@ func (s *IntegrationTestSuite) TestExtendVoteHandler() {
 
 	for _, tc := range testCases {
 		s.Run(tc.name, func() {
+			tc.oracleKeeper.PriceFeeder = tc.priceFeeder
 			h := abci.NewVoteExtensionHandler(
 				tc.logger,
 				tc.oracleKeeper,
-				tc.priceFeeder,
 			)
 
 			resp, err := h.ExtendVoteHandler()(ctx, tc.extendVoteRequest)
@@ -139,10 +139,10 @@ func (s *IntegrationTestSuite) TestVerifyVoteExtensionHandler() {
 
 	for _, tc := range testCases {
 		s.Run(tc.name, func() {
+			tc.oracleKeeper.PriceFeeder = tc.priceFeeder
 			h := abci.NewVoteExtensionHandler(
 				tc.logger,
 				tc.oracleKeeper,
-				tc.priceFeeder,
 			)
 
 			resp, err := h.VerifyVoteExtensionHandler()(ctx, tc.verifyVoteRequest)

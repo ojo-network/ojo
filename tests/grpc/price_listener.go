@@ -44,7 +44,6 @@ func listenForPrices(
 	if err != nil {
 		return nil, err
 	}
-
 	exchangeRates, err := ojoClient.QueryClient.QueryExchangeRates()
 	if err != nil {
 		return nil, err

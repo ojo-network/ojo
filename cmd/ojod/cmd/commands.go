@@ -4,7 +4,6 @@ import (
 	"errors"
 	"io"
 	"os"
-	"time"
 
 	"cosmossdk.io/log"
 	"cosmossdk.io/tools/confix/cmd"
@@ -32,7 +31,6 @@ import (
 
 	app "github.com/ojo-network/ojo/app"
 	"github.com/ojo-network/ojo/pricefeeder"
-	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
 
 // initCometBFTConfig helps to override default CometBFT Config values.
@@ -71,10 +69,8 @@ func initAppConfig() (string, interface{}) {
 			QueryGasLimit: 300000,
 		},
 		PriceFeeder: pricefeeder.AppConfig{
-			ConfigPath:     "",
-			ChainConfig:    true,
-			LogLevel:       "info",
-			OracleTickTime: time.Second * 5,
+			ConfigPath: "",
+			LogLevel:   "info",
 		},
 	}
 
@@ -131,17 +127,7 @@ func initRootCmd(
 
 	// add price feeder flags
 	rootCmd.PersistentFlags().String(pricefeeder.FlagConfigPath, "", "Path to price feeder config file")
-	rootCmd.PersistentFlags().Bool(
-		pricefeeder.FlagChainConfig,
-		true,
-		"Specifies whether the currency pair providers and currency deviation threshold values should",
-	)
 	rootCmd.PersistentFlags().String(pricefeeder.FlagLogLevel, "", "Log level of price feeder process")
-	rootCmd.PersistentFlags().Duration(
-		pricefeeder.FlagOracleTickTime,
-		time.Second*5,
-		"Time interval that the price feeder's oracle process waits before fetching for new prices",
-	)
 }
 
 // genesisCommand builds genesis-related `simd genesis` command. Users may
@@ -226,20 +212,12 @@ func newApp(
 		baseappOptions...,
 	)
 
-	// start price feeder
+	// load app config into oracle keeper price feeder
 	appConfig, err := pricefeeder.ReadConfigFromAppOpts(appOpts)
 	if err != nil {
 		panic(err)
 	}
-
-	var oracleGenState oracletypes.GenesisState
-	app.AppCodec().MustUnmarshalJSON(app.DefaultGenesis()[oracletypes.ModuleName], &oracleGenState)
-	go func() {
-		err := app.PriceFeeder.Start(oracleGenState.Params, appConfig)
-		if err != nil {
-			panic(err)
-		}
-	}()
+	app.OracleKeeper.PriceFeeder.AppConfig = appConfig
 
 	return app
 }
