@@ -1,7 +1,5 @@
 run:
   tests: false
-  skip-dirs:
-    - tests/simulation
 
   govet:
     # Enable analyzers by name (in addition to default).
@@ -19,9 +17,9 @@ linters:
     # - wsl
     - asciicheck
     - bodyclose
+    - copyloopvar
     - dogsled
     - errcheck
-    - exportloopref
     - goconst
     - gocritic
     - gofmt
@@ -62,6 +60,8 @@ issues:
     - text: "SA1019: \"github.com/cosmos/ibc-go/v8/modules/core/02-client/types\" is deprecated"
       linters:
         - staticcheck
+  exclude-dirs:
+    - test/simulation
   max-same-issues: 50
 
 linters-settings:
