@@ -52,7 +52,11 @@ func (ms msgServer) AggregateExchangeRatePrevote(
 		return nil, types.ErrInvalidHash.Wrap(err.Error())
 	}
 
-	aggregatePrevote := types.NewAggregateExchangeRatePrevote(voteHash, valAddr, ojoutils.SafeInt64ToUint64(ctx.BlockHeight()))
+	aggregatePrevote := types.NewAggregateExchangeRatePrevote(
+		voteHash,
+		valAddr,
+		ojoutils.SafeInt64ToUint64(ctx.BlockHeight()),
+	)
 	ms.SetAggregateExchangeRatePrevote(ctx, valAddr, aggregatePrevote)
 
 	return &types.MsgAggregateExchangeRatePrevoteResponse{}, nil
@@ -81,8 +85,10 @@ func (ms msgServer) AggregateExchangeRateVote(
 		return nil, types.ErrNoAggregatePrevote.Wrap(msg.Validator)
 	}
 
-	// Check a msg is submitted proper period
-	if (ojoutils.SafeInt64ToUint64(ctx.BlockHeight())/params.VotePeriod)-(aggregatePrevote.SubmitBlock/params.VotePeriod) != 1 {
+	// Check if the message is submitted in the proper period
+	currentPeriod := ojoutils.SafeInt64ToUint64(ctx.BlockHeight()) / params.VotePeriod
+	prevotePeriod := aggregatePrevote.SubmitBlock / params.VotePeriod
+	if currentPeriod-prevotePeriod != 1 {
 		return nil, types.ErrRevealPeriodMissMatch
 	}
 
