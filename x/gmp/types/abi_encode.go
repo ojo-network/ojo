@@ -7,6 +7,7 @@ import (
 	"cosmossdk.io/math"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ojo-network/ojo/util"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
 
@@ -141,7 +142,7 @@ func NewMedianData(medians oracletypes.PriceStamps, deviations oracletypes.Price
 	}
 
 	for i, median := range medians {
-		medianData.BlockNums = append(medianData.BlockNums, big.NewInt(int64(median.BlockNum)))
+		medianData.BlockNums = append(medianData.BlockNums, big.NewInt(util.SafeUint64ToInt64(median.BlockNum)))
 		medianData.Medians = append(medianData.Medians, decToInt(median.ExchangeRate.Amount))
 		medianData.Deviations = append(medianData.Deviations, decToInt(deviations[i].ExchangeRate.Amount))
 	}

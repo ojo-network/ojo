@@ -5,6 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/ojo-network/ojo/util"
 	"github.com/ojo-network/ojo/x/airdrop/keeper"
 	"github.com/ojo-network/ojo/x/airdrop/types"
 )
@@ -33,7 +34,7 @@ func createOriginAccounts(ctx sdk.Context, k keeper.Keeper) {
 }
 
 func distributeUnclaimedAirdrops(ctx sdk.Context, k keeper.Keeper) error {
-	if ctx.BlockHeight() < int64(k.GetParams(ctx).ExpiryBlock) {
+	if ctx.BlockHeight() < util.SafeUint64ToInt64(k.GetParams(ctx).ExpiryBlock) {
 		return nil
 	}
 

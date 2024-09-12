@@ -2,6 +2,7 @@ package keeper
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/ojo-network/ojo/util"
 	"github.com/ojo-network/ojo/util/metrics"
 )
 
@@ -9,7 +10,7 @@ import (
 // outside pruning period determined by the stamp period multiplied by the maximum stamps.
 func (k *Keeper) PruneAllPrices(ctx sdk.Context) {
 	params := k.GetParams(ctx)
-	blockHeight := uint64(ctx.BlockHeight())
+	blockHeight := util.SafeInt64ToUint64(ctx.BlockHeight())
 
 	if k.IsPeriodLastBlock(ctx, params.HistoricStampPeriod) {
 		pruneHistoricPeriod := params.HistoricStampPeriod * params.MaximumPriceStamps
@@ -29,7 +30,7 @@ func (k *Keeper) PruneAllPrices(ctx sdk.Context) {
 
 // IsPeriodLastBlock returns true if we are at the last block of the period
 func (k *Keeper) IsPeriodLastBlock(ctx sdk.Context, blocksPerPeriod uint64) bool {
-	return (uint64(ctx.BlockHeight())+1)%blocksPerPeriod == 0
+	return (util.SafeInt64ToUint64(ctx.BlockHeight())+1)%blocksPerPeriod == 0
 }
 
 // RecordEndBlockMetrics records miss counter and price metrics at the end of the block
