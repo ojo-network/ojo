@@ -17,6 +17,7 @@ import (
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/ojo-network/ojo/app/ibctransfer"
+	"github.com/ojo-network/ojo/util"
 	"github.com/ojo-network/ojo/x/gmp/types"
 )
 
@@ -74,7 +75,7 @@ func (k Keeper) RelayPrice(
 		msg.Relayer,
 		params.GmpAddress,
 		clienttypes.ZeroHeight(),
-		uint64(ctx.BlockTime().Add(time.Duration(params.GmpTimeout)*time.Hour).UnixNano()),
+		util.SafeInt64ToUint64(ctx.BlockTime().Add(time.Duration(params.GmpTimeout)*time.Hour).UnixNano()),
 		string(bz),
 	)
 	_, err = k.IBCKeeper.Transfer(ctx, transferMsg)
@@ -172,7 +173,7 @@ func (k Keeper) BuildGmpRequest(
 		msg.Relayer,
 		params.GmpAddress,
 		clienttypes.ZeroHeight(),
-		uint64(ctx.BlockTime().Add(time.Duration(params.GmpTimeout)*time.Hour).UnixNano()),
+		util.SafeInt64ToUint64(ctx.BlockTime().Add(time.Duration(params.GmpTimeout)*time.Hour).UnixNano()),
 		string(bz),
 	)
 	return transferMsg, nil

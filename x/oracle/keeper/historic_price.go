@@ -6,10 +6,9 @@ import (
 	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/ojo-network/ojo/util"
 	"github.com/ojo-network/ojo/util/decmath"
 	"github.com/ojo-network/ojo/x/oracle/types"
-
-	"github.com/ojo-network/ojo/util"
 )
 
 const denomErr = "denom: "
@@ -58,7 +57,7 @@ func (k Keeper) CalcAndSetHistoricMedian(
 		return errors.Wrap(err, denomErr+denom)
 	}
 
-	block := uint64(ctx.BlockHeight())
+	block := util.SafeInt64ToUint64(ctx.BlockHeight())
 	k.SetHistoricMedian(ctx, denom, block, median)
 
 	return k.calcAndSetHistoricMedianDeviation(ctx, denom, median, historicPrices)
@@ -82,8 +81,8 @@ func (k Keeper) HistoricMedianDeviation(
 	denom string,
 ) (*types.PriceStamp, error) {
 	store := ctx.KVStore(k.storeKey)
-	blockDiff := uint64(ctx.BlockHeight())%k.MedianStampPeriod(ctx) + 1
-	blockNum := uint64(ctx.BlockHeight()) - blockDiff
+	blockDiff := util.SafeInt64ToUint64(ctx.BlockHeight())%k.MedianStampPeriod(ctx) + 1
+	blockNum := util.SafeInt64ToUint64(ctx.BlockHeight()) - blockDiff
 	bz := store.Get(types.KeyMedianDeviation(denom, blockNum))
 	if bz == nil {
 		return &types.PriceStamp{}, types.ErrNoMedianDeviation.Wrap(denomErr + denom)
@@ -137,7 +136,7 @@ func (k Keeper) calcAndSetHistoricMedianDeviation(
 		return errors.Wrap(err, denomErr+denom)
 	}
 
-	block := uint64(ctx.BlockHeight())
+	block := util.SafeInt64ToUint64(ctx.BlockHeight())
 	k.SetHistoricMedianDeviation(ctx, denom, block, medianDeviation)
 	return nil
 }
@@ -170,7 +169,7 @@ func (k Keeper) MedianOfHistoricMedians(
 		return math.LegacyZeroDec(), 0, errors.Wrap(err, denomErr+denom)
 	}
 
-	return median, uint32(len(medians)), nil
+	return median, util.SafeIntToUint32(len(medians)), nil
 }
 
 // AverageOfHistoricMedians calculates and returns the average of the last stampNum
@@ -190,7 +189,7 @@ func (k Keeper) AverageOfHistoricMedians(
 		return math.LegacyZeroDec(), 0, errors.Wrap(err, denomErr+denom)
 	}
 
-	return average, uint32(len(medians)), nil
+	return average, util.SafeIntToUint32(len(medians)), nil
 }
 
 // MaxOfHistoricMedians calculates and returns the maximum value of the last stampNum
@@ -210,7 +209,7 @@ func (k Keeper) MaxOfHistoricMedians(
 		return math.LegacyZeroDec(), 0, errors.Wrap(err, denomErr+denom)
 	}
 
-	return max, uint32(len(medians)), nil
+	return max, util.SafeIntToUint32(len(medians)), nil
 }
 
 // MinOfHistoricMedians calculates and returns the minimum value of the last stampNum
@@ -230,7 +229,7 @@ func (k Keeper) MinOfHistoricMedians(
 		return math.LegacyZeroDec(), 0, errors.Wrap(err, denomErr+denom)
 	}
 
-	return min, uint32(len(medians)), nil
+	return min, util.SafeIntToUint32(len(medians)), nil
 }
 
 // historicPrices returns all the historic prices of a given denom.
@@ -336,7 +335,7 @@ func (k Keeper) AddHistoricPrice(
 	denom string,
 	exchangeRate math.LegacyDec,
 ) {
-	block := uint64(ctx.BlockHeight())
+	block := util.SafeInt64ToUint64(ctx.BlockHeight())
 	k.SetHistoricPrice(ctx, denom, block, exchangeRate)
 }
 

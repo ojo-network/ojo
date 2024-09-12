@@ -16,6 +16,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	appparams "github.com/ojo-network/ojo/app/params"
+	"github.com/ojo-network/ojo/util"
 	ojosim "github.com/ojo-network/ojo/util/sim"
 	"github.com/ojo-network/ojo/x/oracle/keeper"
 	"github.com/ojo-network/ojo/x/oracle/types"
@@ -179,7 +180,7 @@ func SimulateMsgAggregateExchangeRateVote(
 		}
 
 		params := k.GetParams(ctx)
-		if (uint64(ctx.BlockHeight())/params.VotePeriod)-(prevote.SubmitBlock/params.VotePeriod) != 1 {
+		if (util.SafeInt64ToUint64(ctx.BlockHeight())/params.VotePeriod)-(prevote.SubmitBlock/params.VotePeriod) != 1 {
 			return noop("reveal period of submitted vote does not match with registered prevote"), nil, nil
 		}
 

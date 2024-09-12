@@ -4,6 +4,7 @@ import (
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/ojo-network/ojo/util"
 	"github.com/ojo-network/ojo/x/oracle/types"
 )
 
@@ -24,7 +25,7 @@ func (k Keeper) SlashAndResetMissCounters(ctx sdk.Context) {
 	)
 
 	k.IterateMissCounters(ctx, func(operator sdk.ValAddress, missCounter uint64) bool {
-		validVotes := math.NewInt(possibleWinsPerSlashWindow - int64(missCounter))
+		validVotes := math.NewInt(possibleWinsPerSlashWindow - util.SafeUint64ToInt64(missCounter))
 		validVoteRate := math.LegacyNewDecFromInt(validVotes).QuoInt64(possibleWinsPerSlashWindow)
 
 		// Slash and jail the validator if their valid vote rate is smaller than the
@@ -63,8 +64,8 @@ func (k Keeper) SlashAndResetMissCounters(ctx sdk.Context) {
 // that a validator can have per asset multiplied by the number of vote
 // periods in the slash window
 func (k Keeper) PossibleWinsPerSlashWindow(ctx sdk.Context) int64 {
-	slashWindow := int64(k.SlashWindow(ctx))
-	votePeriod := int64(k.VotePeriod(ctx))
+	slashWindow := util.SafeUint64ToInt64(k.SlashWindow(ctx))
+	votePeriod := util.SafeUint64ToInt64(k.VotePeriod(ctx))
 
 	votePeriodsPerWindow := math.LegacyNewDec(slashWindow).QuoInt64(votePeriod).TruncateInt64()
 	numberOfAssets := int64(len(k.GetParams(ctx).MandatoryList))

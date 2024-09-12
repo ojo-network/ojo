@@ -3,6 +3,7 @@ package keeper
 import (
 	"sort"
 
+	"github.com/ojo-network/ojo/util"
 	"github.com/ojo-network/ojo/x/oracle/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -48,7 +49,7 @@ func (k Keeper) ClearBallots(ctx sdk.Context, votePeriod uint64) {
 	k.IterateAggregateExchangeRatePrevotes(
 		ctx,
 		func(voterAddr sdk.ValAddress, aggPrevote types.AggregateExchangeRatePrevote) bool {
-			if ctx.BlockHeight() > int64(aggPrevote.SubmitBlock+votePeriod) {
+			if util.SafeInt64ToUint64(ctx.BlockHeight()) > aggPrevote.SubmitBlock+votePeriod {
 				k.DeleteAggregateExchangeRatePrevote(ctx, voterAddr)
 			}
 

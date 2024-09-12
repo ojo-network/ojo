@@ -140,7 +140,7 @@ func (k Keeper) VerifyDelegationRequirement(
 		totalShares = totalShares.Add(delegation.Shares)
 	}
 
-	totalRequired := k.GetParams(ctx).DelegationRequirement.MulInt64(int64(aa.OriginAmount))
+	totalRequired := k.GetParams(ctx).DelegationRequirement.MulInt(math.NewIntFromUint64(aa.OriginAmount))
 
 	if totalShares.LT(totalRequired) {
 		return types.ErrInsufficientDelegation
@@ -150,7 +150,7 @@ func (k Keeper) VerifyDelegationRequirement(
 
 // SetClaimAmount calculates and sets the claim amount for the airdrop account
 func (k Keeper) SetClaimAmount(ctx sdk.Context, aa *types.AirdropAccount) {
-	claimAmount := k.GetParams(ctx).AirdropFactor.MulInt64(int64(aa.OriginAmount))
+	claimAmount := k.GetParams(ctx).AirdropFactor.MulInt(math.NewIntFromUint64(aa.OriginAmount))
 	aa.ClaimAmount = claimAmount.TruncateInt().Uint64()
 }
 

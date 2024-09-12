@@ -8,6 +8,7 @@ import (
 	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/types/simulation"
+	"github.com/ojo-network/ojo/util"
 	"github.com/ojo-network/ojo/x/airdrop/types"
 )
 
@@ -21,7 +22,7 @@ const (
 
 // GenParams returns a randomized uint64 in the range of [1, 10000]
 func GenExpiryBlock(r *rand.Rand) uint64 {
-	return uint64(1 + r.Intn(10000))
+	return util.SafeIntToUint64(1 + r.Intn(10000))
 }
 
 // GenDelegationRequirement returns a randomized math.LegacyDec in the range of [0.0, 1.0]

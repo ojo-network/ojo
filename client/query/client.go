@@ -31,7 +31,7 @@ func NewClient(grpcEndpoint string) (*Client, error) {
 }
 
 func (c *Client) dialGrpcConn() (err error) {
-	c.grpcConn, err = grpc.Dial(
+	c.grpcConn, err = grpc.NewClient(
 		c.grpcEndpoint,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithContextDialer(dialerFunc),

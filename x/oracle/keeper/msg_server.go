@@ -52,7 +52,7 @@ func (ms msgServer) AggregateExchangeRatePrevote(
 		return nil, types.ErrInvalidHash.Wrap(err.Error())
 	}
 
-	aggregatePrevote := types.NewAggregateExchangeRatePrevote(voteHash, valAddr, uint64(ctx.BlockHeight()))
+	aggregatePrevote := types.NewAggregateExchangeRatePrevote(voteHash, valAddr, ojoutils.SafeInt64ToUint64(ctx.BlockHeight()))
 	ms.SetAggregateExchangeRatePrevote(ctx, valAddr, aggregatePrevote)
 
 	return &types.MsgAggregateExchangeRatePrevoteResponse{}, nil
@@ -82,7 +82,7 @@ func (ms msgServer) AggregateExchangeRateVote(
 	}
 
 	// Check a msg is submitted proper period
-	if (uint64(ctx.BlockHeight())/params.VotePeriod)-(aggregatePrevote.SubmitBlock/params.VotePeriod) != 1 {
+	if (ojoutils.SafeInt64ToUint64(ctx.BlockHeight())/params.VotePeriod)-(aggregatePrevote.SubmitBlock/params.VotePeriod) != 1 {
 		return nil, types.ErrRevealPeriodMissMatch
 	}
 
@@ -472,7 +472,7 @@ func (ms msgServer) GovCancelUpdateParamPlan(
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	err := ms.ClearParamUpdatePlan(ctx, uint64(msg.Height))
+	err := ms.ClearParamUpdatePlan(ctx, ojoutils.SafeInt64ToUint64(msg.Height))
 	if err != nil {
 		return nil, err
 	}
