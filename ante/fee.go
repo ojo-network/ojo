@@ -7,6 +7,7 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	appparams "github.com/ojo-network/ojo/app/params"
+	"github.com/ojo-network/ojo/util"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
 
@@ -57,7 +58,7 @@ func checkFees(minGasPrices sdk.DecCoins, fees sdk.Coins, gasLimit uint64) error
 	// Determine the required fees by multiplying each required minimum gas
 	// price by the gas limit, where fee = ceil(minGasPrice * gasLimit).
 	// Zero fees are removed.
-	glDec := math.LegacyNewDec(int64(gasLimit))
+	glDec := math.LegacyNewDec(util.SafeUint64ToInt64(gasLimit))
 	for _, gp := range minGasPrices {
 		if gasLimit == 0 || gp.IsZero() {
 			continue

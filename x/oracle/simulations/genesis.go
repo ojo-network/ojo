@@ -8,6 +8,7 @@ import (
 	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/types/module"
 
+	"github.com/ojo-network/ojo/util"
 	"github.com/ojo-network/ojo/x/oracle/types"
 )
 
@@ -28,7 +29,7 @@ const (
 
 // GenVotePeriod produces a randomized VotePeriod in the range of [5, 100]
 func GenVotePeriod(r *rand.Rand) uint64 {
-	return uint64(5 + r.Intn(100))
+	return util.SafeIntToUint64(5 + r.Intn(100))
 }
 
 // GenVoteThreshold produces a randomized VoteThreshold in the range of [0.34, 0.67]
@@ -43,7 +44,7 @@ func GenRewardBand(r *rand.Rand) math.LegacyDec {
 
 // GenRewardDistributionWindow produces a randomized RewardDistributionWindow in the range of [100, 100000]
 func GenRewardDistributionWindow(r *rand.Rand) uint64 {
-	return uint64(100 + r.Intn(100000))
+	return util.SafeIntToUint64(100 + r.Intn(100000))
 }
 
 // GenSlashFraction produces a randomized SlashFraction in the range of [0.000, 0.100]
@@ -53,7 +54,7 @@ func GenSlashFraction(r *rand.Rand) math.LegacyDec {
 
 // GenSlashWindow produces a randomized SlashWindow in the range of [100, 100000]
 func GenSlashWindow(r *rand.Rand) uint64 {
-	return uint64(100 + r.Intn(100000))
+	return util.SafeIntToUint64(100 + r.Intn(100000))
 }
 
 // GenMinValidPerWindow produces a randomized MinValidPerWindow in the range of [0, 0.500]
@@ -63,22 +64,22 @@ func GenMinValidPerWindow(r *rand.Rand) math.LegacyDec {
 
 // GenHistoricStampPeriod produces a randomized HistoricStampPeriod in the range of [100, 1000]
 func GenHistoricStampPeriod(r *rand.Rand) uint64 {
-	return uint64(100 + r.Intn(1000))
+	return util.SafeIntToUint64(100 + r.Intn(1000))
 }
 
 // GenMedianStampPeriod produces a randomized MedianStampPeriod in the range of [100, 1000]
 func GenMedianStampPeriod(r *rand.Rand) uint64 {
-	return uint64(10001 + r.Intn(100000))
+	return util.SafeIntToUint64(10001 + r.Intn(100000))
 }
 
 // GenMaximumPriceStamps produces a randomized MaximumPriceStamps in the range of [10, 100]
 func GenMaximumPriceStamps(r *rand.Rand) uint64 {
-	return uint64(11 + r.Intn(100))
+	return util.SafeIntToUint64(11 + r.Intn(100))
 }
 
 // GenMaximumMedianStamps produces a randomized MaximumMedianStamps in the range of [10, 100]
 func GenMaximumMedianStamps(r *rand.Rand) uint64 {
-	return uint64(11 + r.Intn(100))
+	return util.SafeIntToUint64(11 + r.Intn(100))
 }
 
 // RandomizedGenState generates a random GenesisState for oracle

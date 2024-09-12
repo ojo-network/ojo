@@ -8,6 +8,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"github.com/ojo-network/ojo/util"
 	"github.com/ojo-network/ojo/x/oracle/types"
 )
 
@@ -150,7 +151,7 @@ func (q querier) SlashWindow(
 	params := q.GetParams(ctx)
 
 	return &types.QuerySlashWindowResponse{
-		WindowProgress: (uint64(ctx.BlockHeight()) % params.SlashWindow) /
+		WindowProgress: (util.SafeInt64ToUint64(ctx.BlockHeight()) % params.SlashWindow) /
 			params.VotePeriod,
 	}, nil
 }
@@ -270,8 +271,8 @@ func (q querier) Medians(
 			return nil, status.Error(codes.InvalidArgument, "parameter NumStamps must be greater than 0")
 		}
 
-		if req.NumStamps > uint32(q.MaximumMedianStamps(ctx)) {
-			req.NumStamps = uint32(q.MaximumMedianStamps(ctx))
+		if req.NumStamps > util.SafeUint64ToUint32(q.MaximumMedianStamps(ctx)) {
+			req.NumStamps = util.SafeUint64ToUint32(q.MaximumMedianStamps(ctx))
 		}
 
 		medians = q.HistoricMedians(ctx, req.Denom, uint64(req.NumStamps))

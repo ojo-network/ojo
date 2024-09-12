@@ -65,8 +65,6 @@ func (s *IntegrationTestSuite) TestRelayGmp() {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
-
 		s.Run(tc.name, func() {
 			clientCtx := val.ClientCtx
 

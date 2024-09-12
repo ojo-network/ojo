@@ -10,6 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 
 	appparams "github.com/ojo-network/ojo/app/params"
+	"github.com/ojo-network/ojo/util"
 	"github.com/ojo-network/ojo/util/coin"
 )
 
@@ -29,10 +30,10 @@ func GenAndDeliver(bk bankkeeper.Keeper, o simulation.OperationInput, gasLimit s
 	}
 
 	fees := coin.NewDecBld(appparams.ProtocolMinGasPrice).
-		Scale(int64(gasLimit)).ToCoins()
+		Scale(util.SafeUint64ToInt64(gasLimit)).ToCoins()
 	if _, hasNeg = spendable.SafeSub(fees...); hasNeg {
 		fund := coin.NewDecBld(appparams.ProtocolMinGasPrice).
-			Scale(int64(gasLimit * 1000)).ToCoins()
+			Scale(util.SafeUint64ToInt64(gasLimit * 1000)).ToCoins()
 		err := banktestutil.FundAccount(o.Context, bk, o.SimAccount.Address, fund)
 		if err != nil {
 			return simtypes.NewOperationMsg(o.Msg, false, o.ModuleName), nil,

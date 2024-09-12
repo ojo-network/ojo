@@ -8,6 +8,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/ojo-network/ojo/util"
 	"github.com/ojo-network/ojo/x/oracle/keeper"
 	"github.com/ojo-network/ojo/x/oracle/types"
 )
@@ -163,7 +164,7 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 	voteTargetsLen := len(params.MandatoryList)
 	claimSlice, rewardSlice := types.ClaimMapToSlices(validatorClaimMap, validatorRewardSet.ValidatorSet)
 	for _, claim := range claimSlice {
-		misses := uint64(voteTargetsLen - int(claim.MandatoryWinCount))
+		misses := util.SafeIntToUint64(voteTargetsLen - int(claim.MandatoryWinCount))
 		if misses == 0 {
 			continue
 		}
@@ -175,8 +176,8 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 	// Distribute rewards to ballot winners
 	k.RewardBallotWinners(
 		ctx,
-		int64(params.VotePeriod),
-		int64(params.RewardDistributionWindow),
+		util.SafeUint64ToInt64(params.VotePeriod),
+		util.SafeUint64ToInt64(params.RewardDistributionWindow),
 		voteTargetDenoms,
 		rewardSlice,
 	)

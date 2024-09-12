@@ -4,6 +4,7 @@ import (
 	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/ojo-network/ojo/util"
 	"github.com/ojo-network/ojo/x/oracle/types"
 )
 
@@ -19,7 +20,7 @@ func (k Keeper) ScheduleParamUpdatePlan(ctx sdk.Context, plan types.ParamUpdateP
 	store := ctx.KVStore(k.storeKey)
 
 	bz := k.cdc.MustMarshal(&plan)
-	store.Set(types.KeyParamUpdatePlan(uint64(plan.Height)), bz)
+	store.Set(types.KeyParamUpdatePlan(util.SafeInt64ToUint64(plan.Height)), bz)
 
 	return nil
 }
@@ -189,5 +190,5 @@ func (k Keeper) ExecuteParamUpdatePlan(ctx sdk.Context, plan types.ParamUpdatePl
 	ctx.EventManager().EmitEvent(event)
 
 	// clear plan from store after executing it
-	return k.ClearParamUpdatePlan(ctx, uint64(plan.Height))
+	return k.ClearParamUpdatePlan(ctx, util.SafeInt64ToUint64(plan.Height))
 }
