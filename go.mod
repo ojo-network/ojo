@@ -47,7 +47,7 @@ require (
 	golang.org/x/sync v0.8.0
 	golang.org/x/tools v0.24.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20240725223205-93522f1f2a9f
-	google.golang.org/grpc v1.64.1
+	google.golang.org/grpc v1.66.2
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.3.0
 	google.golang.org/protobuf v1.34.2
 	gopkg.in/yaml.v3 v3.0.1
@@ -195,7 +195,7 @@ require (
 	github.com/gofrs/flock v0.12.1 // indirect
 	github.com/gofrs/uuid/v5 v5.1.0 // indirect
 	github.com/gogo/googleapis v1.4.1 // indirect
-	github.com/golang/glog v1.2.0 // indirect
+	github.com/golang/glog v1.2.1 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/snappy v0.0.5-0.20220116011046-fa5810519dcb // indirect
