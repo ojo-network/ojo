@@ -26,18 +26,19 @@ import (
 )
 
 type PriceFeeder struct {
-	Oracle *oracle.Oracle
+	Oracle    *oracle.Oracle
+	AppConfig AppConfig
 }
 
-func (pf *PriceFeeder) Start(oracleParams types.Params, appConfig AppConfig) error {
+func (pf *PriceFeeder) Start(currentBlockHeight int64, oracleParams types.Params) error {
 	logWriter := zerolog.ConsoleWriter{Out: os.Stderr}
-	logLevel, err := zerolog.ParseLevel(appConfig.LogLevel)
+	logLevel, err := zerolog.ParseLevel(pf.AppConfig.LogLevel)
 	if err != nil {
 		return err
 	}
 	logger := zerolog.New(logWriter).Level(logLevel).With().Timestamp().Logger()
 
-	cfg, err := config.LoadConfigFromFlags(appConfig.ConfigPath, "")
+	cfg, err := config.LoadConfigFromFlags(pf.AppConfig.ConfigPath, "")
 	if err != nil {
 		return err
 	}
@@ -53,19 +54,10 @@ func (pf *PriceFeeder) Start(oracleParams types.Params, appConfig AppConfig) err
 		return fmt.Errorf("failed to parse provider timeout: %w", err)
 	}
 
-	providers := cfg.ProviderPairs()
-	deviations, err := cfg.DeviationsMap()
+	providers := oracle.CreatePairProvidersFromCurrencyPairProvidersList(oracleParams.CurrencyPairProviders)
+	deviations, err := oracle.CreateDeviationsFromCurrencyDeviationThresholdList(oracleParams.CurrencyDeviationThresholds)
 	if err != nil {
 		return err
-	}
-
-	// overwite providers and deviations with on chain values if specified
-	if appConfig.ChainConfig {
-		providers = oracle.CreatePairProvidersFromCurrencyPairProvidersList(oracleParams.CurrencyPairProviders)
-		deviations, err = oracle.CreateDeviationsFromCurrencyDeviationThresholdList(oracleParams.CurrencyDeviationThresholds)
-		if err != nil {
-			return err
-		}
 	}
 
 	pf.Oracle = oracle.New(
@@ -75,7 +67,7 @@ func (pf *PriceFeeder) Start(oracleParams types.Params, appConfig AppConfig) err
 		providerTimeout,
 		deviations,
 		cfg.ProviderEndpointsMap(),
-		appConfig.ChainConfig,
+		true,
 	)
 
 	telemetryCfg := telemetry.Config{}
@@ -91,10 +83,6 @@ func (pf *PriceFeeder) Start(oracleParams types.Params, appConfig AppConfig) err
 	g.Go(func() error {
 		// start the process that observes and publishes exchange prices
 		return startPriceFeeder(ctx, logger, cfg, pf.Oracle, metrics)
-	})
-	g.Go(func() error {
-		// start the process that calculates oracle prices
-		return startPriceOracle(ctx, logger, pf.Oracle, oracleParams, appConfig.OracleTickTime)
 	})
 
 	// Block main process until all spawned goroutines have gracefully exited and
@@ -169,35 +157,6 @@ func startPriceFeeder(
 
 		case err := <-srvErrCh:
 			logger.Error().Err(err).Msg("failed to start price-feeder server")
-			return err
-		}
-	}
-}
-
-// startPriceOracle sets oracle prices fetched from price providers every tick sleep.
-func startPriceOracle(
-	ctx context.Context,
-	logger zerolog.Logger,
-	oracle *oracle.Oracle,
-	oracleParams types.Params,
-	tickSleep time.Duration,
-) error {
-	srvErrCh := make(chan error, 1)
-
-	go func() {
-		logger.Info().Msg("starting price-feeder oracle...")
-		srvErrCh <- oracle.StartClientless(ctx, oracleParams, tickSleep)
-	}()
-
-	for {
-		select {
-		case <-ctx.Done():
-			logger.Info().Msg("shutting down price-feeder oracle...")
-			return nil
-
-		case err := <-srvErrCh:
-			logger.Err(err).Msg("error starting the price-feeder oracle")
-			oracle.Stop()
 			return err
 		}
 	}

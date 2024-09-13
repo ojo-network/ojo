@@ -18,7 +18,7 @@ var (
 		{BaseDenom: "ibc/6", SymbolDenom: "BNB", Exponent: 18},
 		{BaseDenom: "ibc/7", SymbolDenom: "stATOM", Exponent: 6},
 		{BaseDenom: "ibc/8", SymbolDenom: "stOSMO", Exponent: 6},
-		{BaseDenom: "ibc/9", SymbolDenom: "OSMO", Exponent: 6},
+		{BaseDenom: "ibc/9", SymbolDenom: "USDT", Exponent: 6},
 		{BaseDenom: "ibc/10", SymbolDenom: "IST", Exponent: 6},
 	}
 
@@ -26,7 +26,7 @@ var (
 		{BaseDenom: "ibc/1", SymbolDenom: "ATOM", Exponent: 6},
 		{BaseDenom: "ibc/4", SymbolDenom: "ETH", Exponent: 18},
 		{BaseDenom: "ibc/5", SymbolDenom: "BTC", Exponent: 8},
-		{BaseDenom: "ibc/9", SymbolDenom: "OSMO", Exponent: 6},
+		{BaseDenom: "ibc/9", SymbolDenom: "USDT", Exponent: 6},
 	}
 
 	oracleRewardBands = []oracletypes.RewardBand{
@@ -39,7 +39,7 @@ var (
 		{SymbolDenom: "BNB", RewardBand: math.LegacyMustNewDecFromStr("1.0")},
 		{SymbolDenom: "stATOM", RewardBand: math.LegacyMustNewDecFromStr("1.0")},
 		{SymbolDenom: "stOSMO", RewardBand: math.LegacyMustNewDecFromStr("1.0")},
-		{SymbolDenom: "OSMO", RewardBand: math.LegacyMustNewDecFromStr("1.0")},
+		{SymbolDenom: "USDT", RewardBand: math.LegacyMustNewDecFromStr("1.0")},
 		{SymbolDenom: "IST", RewardBand: math.LegacyMustNewDecFromStr("1.0")},
 	}
 )
