@@ -62,7 +62,7 @@ func (h *VoteExtensionHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 		if h.oracleKeeper.PriceFeeder.Oracle == nil {
 			err := fmt.Errorf("price feeder oracle not set")
 			h.logger.Error(err.Error())
-			return nil, err
+			return &cometabci.ResponseExtendVote{VoteExtension: []byte{}}, err
 		}
 		prices := h.oracleKeeper.PriceFeeder.Oracle.GetPrices()
 		exchangeRatesStr := oracle.GenerateExchangeRatesString(prices)
@@ -75,7 +75,7 @@ func (h *VoteExtensionHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 				"height", req.Height,
 				err.Error(),
 			)
-			return nil, err
+			return &cometabci.ResponseExtendVote{VoteExtension: []byte{}}, err
 		}
 
 		// Filter out rates which aren't included in the AcceptList.
@@ -99,7 +99,7 @@ func (h *VoteExtensionHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 				"height", req.Height,
 				err.Error(),
 			)
-			return nil, err
+			return &cometabci.ResponseExtendVote{VoteExtension: []byte{}}, err
 		}
 		h.logger.Info(
 			"created vote extension",

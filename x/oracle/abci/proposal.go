@@ -54,7 +54,7 @@ func (h *ProposalHandler) PrepareProposalHandler() sdk.PrepareProposalHandler {
 
 		err := baseapp.ValidateVoteExtensions(ctx, h.stakingKeeper, req.Height, ctx.ChainID(), req.LocalLastCommit)
 		if err != nil {
-			return nil, err
+			return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, err
 		}
 
 		if req.Txs == nil {
@@ -63,7 +63,7 @@ func (h *ProposalHandler) PrepareProposalHandler() sdk.PrepareProposalHandler {
 				"height", req.Height,
 				err.Error(),
 			)
-			return nil, err
+			return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, err
 		}
 
 		proposalTxs := req.Txs
@@ -72,7 +72,7 @@ func (h *ProposalHandler) PrepareProposalHandler() sdk.PrepareProposalHandler {
 		if voteExtensionsEnabled {
 			exchangeRateVotes, err := h.generateExchangeRateVotes(ctx, req.LocalLastCommit)
 			if err != nil {
-				return nil, err
+				return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, err
 			}
 
 			injectedVoteExtTx := AggregateExchangeRateVotes{
@@ -85,7 +85,7 @@ func (h *ProposalHandler) PrepareProposalHandler() sdk.PrepareProposalHandler {
 			bz, err := json.Marshal(injectedVoteExtTx)
 			if err != nil {
 				h.logger.Error("failed to encode injected vote extension tx", "err", err)
-				return nil, oracletypes.ErrEncodeInjVoteExt
+				return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, oracletypes.ErrEncodeInjVoteExt
 			}
 
 			// Inject a placeholder tx into the proposal s.t. validators can decode, verify,
@@ -122,7 +122,7 @@ func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 				"height", req.Height,
 				err.Error(),
 			)
-			return nil, err
+			return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
 		}
 
 		voteExtensionsEnabled := VoteExtensionsEnabled(ctx)
@@ -130,7 +130,7 @@ func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 			var injectedVoteExtTx AggregateExchangeRateVotes
 			if err := json.Unmarshal(req.Txs[0], &injectedVoteExtTx); err != nil {
 				h.logger.Error("failed to decode injected vote extension tx", "err", err)
-				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, nil
+				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
 			}
 			err := baseapp.ValidateVoteExtensions(
 				ctx,
@@ -140,7 +140,7 @@ func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 				injectedVoteExtTx.ExtendedCommitInfo,
 			)
 			if err != nil {
-				return nil, err
+				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
 			}
 
 			// Verify the proposer's oracle exchange rate votes by computing the same
