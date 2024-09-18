@@ -59,31 +59,31 @@ func (h *VoteExtensionHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 		}
 
 		// Get prices from Oracle Keeper's pricefeeder and generate vote msg
+		filteredDecCoins := sdk.DecCoins{}
 		if h.oracleKeeper.PriceFeeder.Oracle == nil {
 			err := fmt.Errorf("price feeder oracle not set")
 			h.logger.Error(err.Error())
-			return &cometabci.ResponseExtendVote{VoteExtension: []byte{}}, err
-		}
-		prices := h.oracleKeeper.PriceFeeder.Oracle.GetPrices()
-		exchangeRatesStr := oracle.GenerateExchangeRatesString(prices)
+		} else {
+			prices := h.oracleKeeper.PriceFeeder.Oracle.GetPrices()
+			exchangeRatesStr := oracle.GenerateExchangeRatesString(prices)
 
-		// Parse as DecCoins
-		exchangeRates, err := types.ParseExchangeRateDecCoins(exchangeRatesStr)
-		if err != nil {
-			err := fmt.Errorf("extend vote handler received invalid exchange rate %w", types.ErrInvalidExchangeRate)
-			h.logger.Error(
-				"height", req.Height,
-				err.Error(),
-			)
-			return &cometabci.ResponseExtendVote{VoteExtension: []byte{}}, err
-		}
+			// Parse as DecCoins
+			exchangeRates, err := types.ParseExchangeRateDecCoins(exchangeRatesStr)
+			if err != nil {
+				err := fmt.Errorf("extend vote handler received invalid exchange rate %w", types.ErrInvalidExchangeRate)
+				h.logger.Error(
+					"height", req.Height,
+					err.Error(),
+				)
+				return &cometabci.ResponseExtendVote{VoteExtension: []byte{}}, err
+			}
 
-		// Filter out rates which aren't included in the AcceptList.
-		acceptList := h.oracleKeeper.AcceptList(ctx)
-		filteredDecCoins := sdk.DecCoins{}
-		for _, decCoin := range exchangeRates {
-			if acceptList.Contains(decCoin.Denom) {
-				filteredDecCoins = append(filteredDecCoins, decCoin)
+			// Filter out rates which aren't included in the AcceptList.
+			acceptList := h.oracleKeeper.AcceptList(ctx)
+			for _, decCoin := range exchangeRates {
+				if acceptList.Contains(decCoin.Denom) {
+					filteredDecCoins = append(filteredDecCoins, decCoin)
+				}
 			}
 		}
 

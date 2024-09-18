@@ -41,8 +41,7 @@ func (s *IntegrationTestSuite) TestExtendVoteHandler() {
 			extendVoteRequest: &cometabci.RequestExtendVote{
 				Height: ctx.BlockHeight(),
 			},
-			expErr:    true,
-			expErrMsg: "price feeder oracle not set",
+			expErr: false,
 		},
 		{
 			name:         "vote extension handled successfully",
