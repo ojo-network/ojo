@@ -124,7 +124,10 @@ func (h *VoteExtensionHandler) VerifyVoteExtensionHandler() sdk.VerifyVoteExtens
 		}
 
 		var voteExt OracleVoteExtension
-		err := json.Unmarshal(req.VoteExtension, &voteExt)
+		var debug interface{}
+		err := json.Unmarshal(req.VoteExtension, &debug)
+		h.logger.Info("DEBUG", debug, "err", err)
+		err = json.Unmarshal(req.VoteExtension, &voteExt)
 		if err != nil {
 			err := fmt.Errorf("verify vote extension handler failed to unmarshal vote extension: %w", err)
 			h.logger.Error(
