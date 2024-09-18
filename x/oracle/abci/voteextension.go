@@ -123,6 +123,15 @@ func (h *VoteExtensionHandler) VerifyVoteExtensionHandler() sdk.VerifyVoteExtens
 			return nil, err
 		}
 
+		if len(req.VoteExtension) == 0 {
+			h.logger.Info(
+				"verify vote extension handler received empty vote extension",
+				"height", req.Height,
+			)
+
+			return &cometabci.ResponseVerifyVoteExtension{Status: cometabci.ResponseVerifyVoteExtension_ACCEPT}, nil
+		}
+
 		var voteExt OracleVoteExtension
 		var debug interface{}
 		err := json.Unmarshal(req.VoteExtension, &debug)
