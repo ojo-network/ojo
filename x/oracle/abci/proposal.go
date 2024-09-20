@@ -64,6 +64,11 @@ func (h *ProposalHandler) PrepareProposalHandler() sdk.PrepareProposalHandler {
 
 		voteExtensionsEnabled := VoteExtensionsEnabled(ctx)
 		if voteExtensionsEnabled {
+			if len(req.Txs) < 1 {
+				h.logger.Error("got process proposal request with no commit info")
+				return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, oracletypes.ErrNoCommitInfo
+			}
+
 			exchangeRateVotes, err := h.generateExchangeRateVotes(ctx, req.LocalLastCommit)
 			if err != nil {
 				return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, err
