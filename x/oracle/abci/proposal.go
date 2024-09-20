@@ -68,8 +68,11 @@ func (h *ProposalHandler) PrepareProposalHandler() sdk.PrepareProposalHandler {
 			if err != nil {
 				return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, err
 			}
-
 			extendedCommitInfoBz, err := req.LocalLastCommit.Marshal()
+			if err != nil {
+				return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, err
+			}
+
 			injectedVoteExtTx := oracletypes.InjectedVoteExtensionTx{
 				ExchangeRateVotes:  exchangeRateVotes,
 				ExtendedCommitInfo: extendedCommitInfoBz,
