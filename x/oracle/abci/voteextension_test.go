@@ -1,7 +1,6 @@
 package abci_test
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"cosmossdk.io/log"
@@ -10,6 +9,7 @@ import (
 	"github.com/ojo-network/ojo/pricefeeder"
 	"github.com/ojo-network/ojo/x/oracle/abci"
 	"github.com/ojo-network/ojo/x/oracle/keeper"
+	"github.com/ojo-network/ojo/x/oracle/types"
 )
 
 func (s *IntegrationTestSuite) TestExtendVoteHandler() {
@@ -41,7 +41,7 @@ func (s *IntegrationTestSuite) TestExtendVoteHandler() {
 			extendVoteRequest: &cometabci.RequestExtendVote{
 				Height: ctx.BlockHeight(),
 			},
-			expErr: false,
+			expErr: true,
 		},
 		{
 			name:         "vote extension handled successfully",
@@ -70,10 +70,9 @@ func (s *IntegrationTestSuite) TestExtendVoteHandler() {
 			} else {
 				s.Require().NoError(err)
 				s.Require().NotNil(resp)
-				s.Require().Greater(len(resp.VoteExtension), 0)
 
-				var voteExt abci.OracleVoteExtension
-				err = json.Unmarshal(resp.VoteExtension, &voteExt)
+				var voteExt types.OracleVoteExtension
+				err = voteExt.Unmarshal(resp.VoteExtension)
 				s.Require().NoError(err)
 				s.Require().Equal(ctx.BlockHeight(), voteExt.Height)
 			}
@@ -85,9 +84,10 @@ func (s *IntegrationTestSuite) TestVerifyVoteExtensionHandler() {
 	app, ctx := s.app, s.ctx
 	pf := MockPriceFeeder()
 
-	voteExtension, err := json.Marshal(&cometabci.RequestExtendVote{
+	voteExtension := cometabci.RequestExtendVote{
 		Height: ctx.BlockHeight(),
-	})
+	}
+	voteExtensionBz, err := voteExtension.Marshal()
 	s.Require().NoError(err)
 
 	testCases := []struct {
@@ -114,7 +114,7 @@ func (s *IntegrationTestSuite) TestVerifyVoteExtensionHandler() {
 			priceFeeder:  pf,
 			verifyVoteRequest: &cometabci.RequestVerifyVoteExtension{
 				Height:        ctx.BlockHeight() + 1,
-				VoteExtension: voteExtension,
+				VoteExtension: voteExtensionBz,
 			},
 			expErr: true,
 			expErrMsg: fmt.Sprintf("verify vote extension handler received vote extension height that doesn't"+
@@ -130,7 +130,7 @@ func (s *IntegrationTestSuite) TestVerifyVoteExtensionHandler() {
 			priceFeeder:  pf,
 			verifyVoteRequest: &cometabci.RequestVerifyVoteExtension{
 				Height:        ctx.BlockHeight(),
-				VoteExtension: voteExtension,
+				VoteExtension: voteExtensionBz,
 			},
 			expErr: false,
 		},

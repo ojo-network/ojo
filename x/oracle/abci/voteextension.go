@@ -1,7 +1,6 @@
 package abci
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"cosmossdk.io/log"
@@ -12,12 +11,6 @@ import (
 	"github.com/ojo-network/ojo/x/oracle/types"
 	"github.com/ojo-network/price-feeder/oracle"
 )
-
-// OracleVoteExtension defines the canonical vote extension structure.
-type OracleVoteExtension struct {
-	Height        int64
-	ExchangeRates sdk.DecCoins
-}
 
 type VoteExtensionHandler struct {
 	logger       log.Logger
@@ -59,40 +52,41 @@ func (h *VoteExtensionHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 		}
 
 		// Get prices from Oracle Keeper's pricefeeder and generate vote msg
-		filteredDecCoins := sdk.DecCoins{}
 		if h.oracleKeeper.PriceFeeder.Oracle == nil {
 			err := fmt.Errorf("price feeder oracle not set")
 			h.logger.Error(err.Error())
-		} else {
-			prices := h.oracleKeeper.PriceFeeder.Oracle.GetPrices()
-			exchangeRatesStr := oracle.GenerateExchangeRatesString(prices)
+			return &cometabci.ResponseExtendVote{VoteExtension: []byte{}}, err
+		}
 
-			// Parse as DecCoins
-			exchangeRates, err := types.ParseExchangeRateDecCoins(exchangeRatesStr)
-			if err != nil {
-				err := fmt.Errorf("extend vote handler received invalid exchange rate %w", types.ErrInvalidExchangeRate)
-				h.logger.Error(
-					"height", req.Height,
-					err.Error(),
-				)
-				return &cometabci.ResponseExtendVote{VoteExtension: []byte{}}, err
-			}
+		prices := h.oracleKeeper.PriceFeeder.Oracle.GetPrices()
+		exchangeRatesStr := oracle.GenerateExchangeRatesString(prices)
 
-			// Filter out rates which aren't included in the AcceptList.
-			acceptList := h.oracleKeeper.AcceptList(ctx)
-			for _, decCoin := range exchangeRates {
-				if acceptList.Contains(decCoin.Denom) {
-					filteredDecCoins = append(filteredDecCoins, decCoin)
-				}
+		// Parse as DecCoins
+		exchangeRates, err := types.ParseExchangeRateDecCoins(exchangeRatesStr)
+		if err != nil {
+			err := fmt.Errorf("extend vote handler received invalid exchange rate %w", types.ErrInvalidExchangeRate)
+			h.logger.Error(
+				"height", req.Height,
+				err.Error(),
+			)
+			return &cometabci.ResponseExtendVote{VoteExtension: []byte{}}, err
+		}
+
+		// Filter out rates which aren't included in the AcceptList.
+		acceptList := h.oracleKeeper.AcceptList(ctx)
+		filteredDecCoins := []sdk.DecCoin{}
+		for _, decCoin := range exchangeRates {
+			if acceptList.Contains(decCoin.Denom) {
+				filteredDecCoins = append(filteredDecCoins, decCoin)
 			}
 		}
 
-		voteExt := OracleVoteExtension{
+		voteExt := types.OracleVoteExtension{
 			Height:        req.Height,
 			ExchangeRates: filteredDecCoins,
 		}
 
-		bz, err := json.Marshal(voteExt)
+		bz, err := voteExt.Marshal()
 		if err != nil {
 			err := fmt.Errorf("failed to marshal vote extension: %w", err)
 			h.logger.Error(
@@ -101,6 +95,7 @@ func (h *VoteExtensionHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 			)
 			return &cometabci.ResponseExtendVote{VoteExtension: []byte{}}, err
 		}
+
 		h.logger.Info(
 			"created vote extension",
 			"height", req.Height,
@@ -132,11 +127,8 @@ func (h *VoteExtensionHandler) VerifyVoteExtensionHandler() sdk.VerifyVoteExtens
 			return &cometabci.ResponseVerifyVoteExtension{Status: cometabci.ResponseVerifyVoteExtension_ACCEPT}, nil
 		}
 
-		var voteExt OracleVoteExtension
-		var debug interface{}
-		err := json.Unmarshal(req.VoteExtension, &debug)
-		h.logger.Info("DEBUG", "debug", debug, "err", err)
-		err = json.Unmarshal(req.VoteExtension, &voteExt)
+		var voteExt types.OracleVoteExtension
+		err := voteExt.Unmarshal(req.VoteExtension)
 		if err != nil {
 			err := fmt.Errorf("verify vote extension handler failed to unmarshal vote extension: %w", err)
 			h.logger.Error(
