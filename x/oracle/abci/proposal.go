@@ -1,7 +1,6 @@
 package abci
 
 import (
-	"encoding/json"
 	"fmt"
 	"sort"
 
@@ -15,11 +14,6 @@ import (
 	oraclekeeper "github.com/ojo-network/ojo/x/oracle/keeper"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
-
-type AggregateExchangeRateVotes struct {
-	ExchangeRateVotes  []oracletypes.AggregateExchangeRateVote
-	ExtendedCommitInfo cometabci.ExtendedCommitInfo
-}
 
 type ProposalHandler struct {
 	logger        log.Logger
@@ -74,15 +68,17 @@ func (h *ProposalHandler) PrepareProposalHandler() sdk.PrepareProposalHandler {
 			if err != nil {
 				return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, err
 			}
-
-			injectedVoteExtTx := AggregateExchangeRateVotes{
-				ExchangeRateVotes:  exchangeRateVotes,
-				ExtendedCommitInfo: req.LocalLastCommit,
+			extendedCommitInfoBz, err := req.LocalLastCommit.Marshal()
+			if err != nil {
+				return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, err
 			}
 
-			// TODO: Switch from stdlib JSON encoding to a more performant mechanism.
-			// REF: https://github.com/ojo-network/ojo/issues/411
-			bz, err := json.Marshal(injectedVoteExtTx)
+			injectedVoteExtTx := oracletypes.InjectedVoteExtensionTx{
+				ExchangeRateVotes:  exchangeRateVotes,
+				ExtendedCommitInfo: extendedCommitInfoBz,
+			}
+
+			bz, err := injectedVoteExtTx.Marshal()
 			if err != nil {
 				h.logger.Error("failed to encode injected vote extension tx", "err", err)
 				return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, oracletypes.ErrEncodeInjVoteExt
@@ -127,17 +123,29 @@ func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 
 		voteExtensionsEnabled := VoteExtensionsEnabled(ctx)
 		if voteExtensionsEnabled {
-			var injectedVoteExtTx AggregateExchangeRateVotes
-			if err := json.Unmarshal(req.Txs[0], &injectedVoteExtTx); err != nil {
+			if len(req.Txs) < 1 {
+				h.logger.Error("got process proposal request with no commit info")
+				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT},
+					oracletypes.ErrNoCommitInfo
+			}
+
+			var injectedVoteExtTx oracletypes.InjectedVoteExtensionTx
+			if err := injectedVoteExtTx.Unmarshal(req.Txs[0]); err != nil {
 				h.logger.Error("failed to decode injected vote extension tx", "err", err)
 				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
 			}
+			var extendedCommitInfo cometabci.ExtendedCommitInfo
+			if err := extendedCommitInfo.Unmarshal(injectedVoteExtTx.ExtendedCommitInfo); err != nil {
+				h.logger.Error("failed to decode injected extended commit info", "err", err)
+				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
+			}
+
 			err := baseapp.ValidateVoteExtensions(
 				ctx,
 				h.stakingKeeper,
 				req.Height,
 				ctx.ChainID(),
-				injectedVoteExtTx.ExtendedCommitInfo,
+				extendedCommitInfo,
 			)
 			if err != nil {
 				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
@@ -145,7 +153,7 @@ func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 
 			// Verify the proposer's oracle exchange rate votes by computing the same
 			// calculation and comparing the results.
-			exchangeRateVotes, err := h.generateExchangeRateVotes(ctx, injectedVoteExtTx.ExtendedCommitInfo)
+			exchangeRateVotes, err := h.generateExchangeRateVotes(ctx, extendedCommitInfo)
 			if err != nil {
 				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
 			}
@@ -173,8 +181,8 @@ func (h *ProposalHandler) generateExchangeRateVotes(
 			continue
 		}
 
-		var voteExt OracleVoteExtension
-		if err := json.Unmarshal(vote.VoteExtension, &voteExt); err != nil {
+		var voteExt oracletypes.OracleVoteExtension
+		if err := voteExt.Unmarshal(vote.VoteExtension); err != nil {
 			h.logger.Error(
 				"failed to decode vote extension",
 				"err", err,

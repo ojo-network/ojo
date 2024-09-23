@@ -1,13 +1,13 @@
 package app
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"cosmossdk.io/core/appmodule"
 	cometabci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ojo-network/ojo/x/oracle/abci"
+	"github.com/ojo-network/ojo/x/oracle/types"
 )
 
 // PreBlocker is run before finalize block to update the aggregrate exchange rate votes on the oracle module
@@ -45,8 +45,8 @@ func (app *App) PreBlocker(ctx sdk.Context, req *cometabci.RequestFinalizeBlock)
 	}
 	voteExtensionsEnabled := abci.VoteExtensionsEnabled(ctx)
 	if voteExtensionsEnabled {
-		var injectedVoteExtTx abci.AggregateExchangeRateVotes
-		if err := json.Unmarshal(req.Txs[0], &injectedVoteExtTx); err != nil {
+		var injectedVoteExtTx types.InjectedVoteExtensionTx
+		if err := injectedVoteExtTx.Unmarshal(req.Txs[0]); err != nil {
 			app.Logger().Error("failed to decode injected vote extension tx", "err", err)
 			return nil, err
 		}
