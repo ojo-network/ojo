@@ -285,16 +285,52 @@ func (app *App) registerUpgrade0_4_0(upgradeInfo upgradetypes.Plan) {
 	})
 }
 
-func (app *App) registerUpgrade0_4_1(_ upgradetypes.Plan) {
+func (app *App) registerUpgrade0_4_1(upgradeInfo upgradetypes.Plan) {
 	const planName = "v0.4.1"
-
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			sdkCtx := sdk.UnwrapSDKContext(ctx)
 			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
+
+			// enable vote extensions after upgrade
+			consensusParamsKeeper := app.ConsensusParamsKeeper
+			currentParams, err := consensusParamsKeeper.Params(ctx, &consensustypes.QueryParamsRequest{})
+			if err != nil || currentParams == nil || currentParams.Params == nil {
+				panic(fmt.Sprintf("failed to retrieve existing consensus params in upgrade handler: %s", err))
+			}
+			currentParams.Params.Abci = &tenderminttypes.ABCIParams{
+				VoteExtensionsEnableHeight: sdkCtx.BlockHeight() + int64(4), // enable vote extensions 4 blocks after upgrade
+			}
+			_, err = consensusParamsKeeper.UpdateParams(ctx, &consensustypes.MsgUpdateParams{
+				Authority: consensusParamsKeeper.GetAuthority(),
+				Block:     currentParams.Params.Block,
+				Evidence:  currentParams.Params.Evidence,
+				Validator: currentParams.Params.Validator,
+				Abci:      currentParams.Params.Abci,
+			})
+			if err != nil {
+				panic(fmt.Sprintf("failed to update consensus params : %s", err))
+			}
+			sdkCtx.Logger().Info(
+				"Successfully set VoteExtensionsEnableHeight",
+				"consensus_params",
+				currentParams.Params.String(),
+			)
+
+			// update vote period to 1 block
+			oracleKeeper := app.OracleKeeper
+			oracleKeeper.SetVotePeriod(sdkCtx, 1)
+
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)
+
+	// REF: https://github.com/cosmos/cosmos-sdk/blob/a32186608aab0bd436049377ddb34f90006fcbf7/simapp/upgrades.go
+	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
+		Added: []string{
+			circuittypes.ModuleName,
+		},
+	})
 }
 
 // helper function to check if the store loader should be upgraded
