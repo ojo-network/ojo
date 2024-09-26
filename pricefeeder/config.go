@@ -15,18 +15,23 @@ config_path = ""
 
 # Log level of price feeder process.
 log_level = "info"
+
+# Enable the price feeder.
+enable = false
 `
 )
 
 const (
-	FlagConfigPath = "pricefeeder.config_path"
-	FlagLogLevel   = "pricefeeder.log_level"
+	FlagConfigPath        = "pricefeeder.config_path"
+	FlagLogLevel          = "pricefeeder.log_level"
+	FlagEnablePriceFeeder = "pricefeeder.enable"
 )
 
 // AppConfig defines the app configuration for the price feeder that must be set in the app.toml file.
 type AppConfig struct {
 	ConfigPath string `mapstructure:"config_path"`
 	LogLevel   string `mapstructure:"log_level"`
+	Enable     bool   `mapstructure:"enable"`
 }
 
 // ValidateBasic performs basic validation of the price feeder app config.
@@ -53,6 +58,12 @@ func ReadConfigFromAppOpts(opts servertypes.AppOptions) (AppConfig, error) {
 
 	if v := opts.Get(FlagLogLevel); v != nil {
 		if cfg.LogLevel, err = cast.ToStringE(v); err != nil {
+			return cfg, err
+		}
+	}
+
+	if v := opts.Get(FlagEnablePriceFeeder); v != nil {
+		if cfg.Enable, err = cast.ToBoolE(v); err != nil {
 			return cfg, err
 		}
 	}
