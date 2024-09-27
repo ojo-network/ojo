@@ -335,6 +335,7 @@ func (o *Orchestrator) runValidators(t *testing.T) {
 			"start",
 			"--pricefeeder.config_path=/root/pricefeeder/price-feeder.example.toml",
 			"--pricefeeder.log_level=info",
+			"--pricefeeder.enabled=true",
 		}
 
 		runOpts := &dockertest.RunOptions{
