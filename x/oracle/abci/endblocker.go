@@ -32,8 +32,8 @@ func EndBlocker(ctx context.Context, k keeper.Keeper) error {
 
 	params := k.GetParams(sdkCtx)
 
-	// Start price feeder if it hasn't been started.
-	if k.PriceFeeder.Oracle == nil {
+	// Start price feeder if it hasn't been started, and it is enabled.
+	if k.PriceFeeder.Oracle == nil && k.PriceFeeder.AppConfig.Enable {
 		go func() {
 			err := k.PriceFeeder.Start(sdkCtx.BlockHeight(), params)
 			if err != nil {
@@ -51,7 +51,7 @@ func EndBlocker(ctx context.Context, k keeper.Keeper) error {
 	}
 
 	if k.IsPeriodLastBlock(sdkCtx, params.VotePeriod) {
-		if k.PriceFeeder.Oracle != nil {
+		if k.PriceFeeder.Oracle != nil && k.PriceFeeder.AppConfig.Enable {
 			// Update price feeder oracle with latest params.
 			k.PriceFeeder.Oracle.ParamCache.UpdateParamCache(sdkCtx.BlockHeight(), k.GetParams(sdkCtx), nil)
 
