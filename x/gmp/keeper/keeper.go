@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"cosmossdk.io/log"
+	"cosmossdk.io/math"
 	"github.com/ethereum/go-ethereum/common"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -16,6 +17,7 @@ import (
 
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/ojo-network/ojo/app/ibctransfer"
 	"github.com/ojo-network/ojo/util"
 	"github.com/ojo-network/ojo/x/gmp/types"
@@ -26,6 +28,7 @@ type Keeper struct {
 	storeKey     storetypes.StoreKey
 	oracleKeeper types.OracleKeeper
 	IBCKeeper    *ibctransfer.Keeper
+	BankKeeper   types.BankKeeper
 	// the address capable of executing a MsgSetParams message. Typically, this
 	// should be the x/gov module account.
 	authority string
@@ -38,6 +41,7 @@ func NewKeeper(
 	oracleKeeper types.OracleKeeper,
 	authority string,
 	ibcKeeper ibctransfer.Keeper,
+	bankKeeper types.BankKeeper,
 ) Keeper {
 	return Keeper{
 		cdc:          cdc,
@@ -45,6 +49,7 @@ func NewKeeper(
 		authority:    authority,
 		oracleKeeper: oracleKeeper,
 		IBCKeeper:    &ibcKeeper,
+		BankKeeper:   bankKeeper,
 	}
 }
 
@@ -177,4 +182,126 @@ func (k Keeper) BuildGmpRequest(
 		string(bz),
 	)
 	return transferMsg, nil
+}
+
+func (k Keeper) SetPayment(
+	ctx sdk.Context,
+	payment types.Payment,
+) {
+	store := ctx.KVStore(k.storeKey)
+
+	bz := k.cdc.MustMarshal(&payment)
+	store.Set(types.PaymentKey(payment.Relayer, payment.Denom), bz)
+}
+
+func (k Keeper) DeletePayment(
+	ctx sdk.Context,
+	payment types.Payment,
+) {
+	store := ctx.KVStore(k.storeKey)
+	store.Delete(types.PaymentKey(payment.Relayer, payment.Denom))
+}
+
+func (k Keeper) GetPayment(
+	ctx sdk.Context,
+	authority string,
+	denom string,
+) (types.MsgCreatePayment, error) {
+	store := ctx.KVStore(k.storeKey)
+
+	bz := store.Get(types.PaymentKey(authority, denom))
+	payment := types.MsgCreatePayment{}
+	k.cdc.MustUnmarshal(bz, &payment)
+	return payment, nil
+}
+
+func (k Keeper) GetAllPayments(
+	ctx sdk.Context,
+) []types.Payment {
+	store := ctx.KVStore(k.storeKey)
+	iterator := storetypes.KVStorePrefixIterator(store, types.PaymentKeyPrefix)
+	defer iterator.Close()
+
+	payments := []types.Payment{}
+	for ; iterator.Valid(); iterator.Next() {
+		payment := types.Payment{}
+		k.cdc.MustUnmarshal(iterator.Value(), &payment)
+		payments = append(payments, payment)
+	}
+	return payments
+}
+
+func (k Keeper) ProcessPayment(
+	goCtx context.Context,
+	payment types.Payment,
+) error {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	k.Logger(ctx).Info("processing payment", "payment", payment)
+	params := k.GetParams(ctx)
+	// get gmp contract address on receiving chain
+	contractAddress := ""
+	for _, contract := range params.ContractRegistry {
+		if payment.DestinationChain == contract.Network {
+			contractAddress = contract.Address
+		}
+	}
+	// if contract address not found, return
+	if contractAddress == "" {
+		k.Logger(ctx).Error("contract address not found for chain", "chain", payment.DestinationChain)
+		return fmt.Errorf("contract address not found for chain %s", payment.DestinationChain)
+	}
+
+	// estimate gas for the axelar relay
+	coins := sdk.Coin{
+		Denom: payment.Token.Denom,
+		// TODO: get gas estimation from vote extensions logic
+		Amount: math.NewInt(2),
+	}
+
+	// if payment.Token.Amount is less than coins.Amount, return funds and delete payment
+	relayerAddr, err := sdk.AccAddressFromBech32(payment.Relayer)
+	if err != nil {
+		k.Logger(ctx).With(err).Error("error getting relayer address")
+		return err
+	}
+	if payment.Token.Amount.LT(coins.Amount) {
+		k.Logger(ctx).With(err).Debug("payment amount is less than gas estimate, returning funds and deleting payment")
+		err := k.BankKeeper.SendCoinsFromModuleToAccount(
+			ctx,
+			types.ModuleName,
+			relayerAddr,
+			sdk.NewCoins(payment.Token),
+		)
+		if err != nil {
+			return err
+		}
+		k.DeletePayment(ctx, payment)
+		return nil
+	}
+
+	msg := types.NewMsgRelay(
+		authtypes.NewModuleAddress(types.ModuleName).String(),
+		payment.DestinationChain,
+		contractAddress,
+		"0x001",
+		coins,
+		[]string{payment.Denom},
+		[]byte(""),
+		[]byte(""),
+		ctx.BlockHeight(),
+	)
+
+	_, err = k.RelayPrice(goCtx, msg)
+	if err != nil {
+		k.Logger(ctx).With(err).Error("error relaying price")
+		return err
+	}
+	k.Logger(ctx).Info("relay price submitted", "MsgRelayPrice", msg)
+
+	// update payment in the store with the amount paid
+	payment.Token.Amount = payment.Token.Amount.Sub(coins.Amount)
+	k.SetPayment(ctx, payment)
+	k.Logger(ctx).Info("payment updated", "payment", payment)
+
+	return nil
 }

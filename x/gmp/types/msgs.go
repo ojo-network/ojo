@@ -102,3 +102,59 @@ func (msg MsgRelayPrice) ValidateBasic() error {
 
 	return nil
 }
+
+func NewMsgCreatePayment(
+	relayer string,
+	destinationChain string,
+	denom string,
+	token sdk.Coin,
+	deviation int64,
+	heartbeat int64,
+) *MsgCreatePayment {
+	return &MsgCreatePayment{
+		Relayer: relayer,
+		Payment: &Payment{
+			Relayer:          relayer,
+			DestinationChain: destinationChain,
+			Denom:            denom,
+			Token:            token,
+			Deviation:        deviation,
+			Heartbeat:        heartbeat,
+		},
+	}
+}
+
+// Type implements LegacyMsg interface
+func (msg MsgCreatePayment) Type() string { return sdk.MsgTypeURL(&msg) }
+
+// GetSigners implements sdk.Msg
+func (msg MsgRelayPrice) MsgCreatePayment() []sdk.AccAddress {
+	return checkers.Signers(msg.Relayer)
+}
+
+// ValidateBasic Implements sdk.Msg
+func (msg MsgCreatePayment) ValidateBasic() error {
+	fmt.Println("MsgCreatePayment ValidateBasic")
+	fmt.Println(msg)
+
+	if len(msg.Relayer) == 0 {
+		return fmt.Errorf("relayer cannot be empty")
+	}
+	if msg.Payment.DestinationChain == "" {
+		return fmt.Errorf("destinationChain cannot be empty")
+	}
+	if msg.Payment.Denom == "" {
+		return fmt.Errorf("denom cannot be empty")
+	}
+	if msg.Payment.Token.IsZero() {
+		return fmt.Errorf("token cannot be zero")
+	}
+	if msg.Payment.Deviation <= 0 {
+		return fmt.Errorf("deviation must be greater than 0")
+	}
+	if msg.Payment.Heartbeat <= 0 {
+		return fmt.Errorf("heartbeat must be greater than 0")
+	}
+
+	return nil
+}

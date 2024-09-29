@@ -428,6 +428,7 @@ func New(
 		app.OracleKeeper,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 		app.TransferKeeper,
+		app.BankKeeper,
 	)
 
 	app.AirdropKeeper = airdropkeeper.NewKeeper(

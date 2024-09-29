@@ -162,7 +162,12 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 func (am AppModule) BeginBlock(_ context.Context) {}
 
 // EndBlock is a no-op for the GMP module.
-func (am AppModule) EndBlock(_ context.Context) ([]abci.ValidatorUpdate, error) {
+func (am AppModule) EndBlock(goCtx context.Context) ([]abci.ValidatorUpdate, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	payments := am.keeper.GetAllPayments(ctx)
+	for _, payment := range payments {
+		am.keeper.ProcessPayment(goCtx, payment)
+	}
 	return []abci.ValidatorUpdate{}, nil
 }
 

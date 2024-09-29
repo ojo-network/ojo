@@ -1,8 +1,6 @@
 module github.com/ojo-network/ojo
 
-go 1.22.1
-
-toolchain go1.22.5
+go 1.23
 
 require (
 	cosmossdk.io/api v0.7.4
