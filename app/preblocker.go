@@ -6,6 +6,7 @@ import (
 	"cosmossdk.io/core/appmodule"
 	cometabci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 	"github.com/ojo-network/ojo/x/oracle/abci"
 	"github.com/ojo-network/ojo/x/oracle/types"
 )
@@ -61,10 +62,19 @@ func (app *App) PreBlocker(ctx sdk.Context, req *cometabci.RequestFinalizeBlock)
 			}
 			app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr, exchangeRateVote)
 		}
+
+		// now process gmp proposal
+		var gmpInjectedVoteExtension gmptypes.InjectedVoteExtensionTx
+		if err := gmpInjectedVoteExtension.Unmarshal(req.Txs[0]); err != nil {
+			app.Logger().Error("failed to decode injected vote extension tx", "err", err)
+			return nil, err
+		}
+		fmt.Println("gmpInjectedVoteExtension", gmpInjectedVoteExtension)
+		// set gas estimate
 	}
 
 	app.Logger().Info(
-		"oracle preblocker executed",
+		"preblocker executed",
 		"vote_extensions_enabled", voteExtensionsEnabled,
 	)
 
