@@ -59,7 +59,6 @@ func (app *App) PreBlocker(ctx sdk.Context, req *cometabci.RequestFinalizeBlock)
 					}
 					app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr, exchangeRateVote)
 				}
-				fmt.Println("this is the median gas estimation", injectedVoteExtTx.MedianGasEstimation)
 			}
 		}
 	}

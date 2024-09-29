@@ -134,9 +134,6 @@ func (msg MsgRelayPrice) MsgCreatePayment() []sdk.AccAddress {
 
 // ValidateBasic Implements sdk.Msg
 func (msg MsgCreatePayment) ValidateBasic() error {
-	fmt.Println("MsgCreatePayment ValidateBasic")
-	fmt.Println(msg)
-
 	if len(msg.Relayer) == 0 {
 		return fmt.Errorf("relayer cannot be empty")
 	}

@@ -197,9 +197,6 @@ func (h *ProposalHandler) generateExchangeRateVotes(
 	ctx sdk.Context,
 	ci cometabci.ExtendedCommitInfo,
 ) (votes []oracletypes.AggregateExchangeRateVote, err error) {
-	fmt.Println("generateExchangeRateVotes called")
-	// this is how many votes we have
-	fmt.Println("this is how many votes we have", len(ci.Votes))
 	for _, vote := range ci.Votes {
 		if vote.BlockIdFlag != cmtproto.BlockIDFlagCommit {
 			continue
