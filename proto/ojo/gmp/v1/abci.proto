@@ -12,18 +12,12 @@ option (gogoproto.goproto_getters_all) = false;
 // module.
 message GmpVoteExtension {
   int64 height = 1;
-  string gas_estimation = 2 [
-    (cosmos_proto.scalar) = "cosmos.Dec",
-    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec"
-  ];
+  int64 gas_estimation = 2;
 }
 
 // InjectedVoteExtensionTx defines the vote extension tx injected by the prepare
 // proposal handler.
 message InjectedVoteExtensionTx {
-  string median_gas_estimation = 1 [
-    (cosmos_proto.scalar) = "cosmos.Dec",
-    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec"
-  ];
+  int64 median_gas_estimation = 1;
   bytes extended_commit_info = 2;
 }

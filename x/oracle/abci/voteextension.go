@@ -7,6 +7,7 @@ import (
 	cometabci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	relayerClient "github.com/ojo-network/ojo-evm/relayer/relayer/client"
 	"github.com/ojo-network/ojo/x/oracle/keeper"
 	"github.com/ojo-network/ojo/x/oracle/types"
 	"github.com/ojo-network/price-feeder/oracle"
@@ -81,9 +82,16 @@ func (h *VoteExtensionHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 			}
 		}
 
+		// get the current gas estimation for each contract
+		gasEstimate, err := relayerClient.EstimateGasFee("Ethereum", "0x0000000000000000000000000000000000000000", "1000000", "1.5")
+		if err != nil {
+			h.logger.Error("error estimating gas fee", "error", err)
+			return &cometabci.ResponseExtendVote{VoteExtension: []byte{}}, err
+		}
 		voteExt := types.OracleVoteExtension{
 			Height:        req.Height,
 			ExchangeRates: filteredDecCoins,
+			GasEstimation: gasEstimate.Int64(),
 		}
 
 		bz, err := voteExt.Marshal()
@@ -100,7 +108,7 @@ func (h *VoteExtensionHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 			"created vote extension",
 			"height", req.Height,
 		)
-
+		fmt.Println("VoteExtensionHandler: VoteExtension created")
 		return &cometabci.ResponseExtendVote{VoteExtension: bz}, nil
 	}
 }

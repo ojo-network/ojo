@@ -73,9 +73,14 @@ func (h *ProposalHandler) PrepareProposalHandler() sdk.PrepareProposalHandler {
 				return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, err
 			}
 
+			medianGasEstimate, err := h.generateMedianGasEstimate(ctx, req.LocalLastCommit)
+			if err != nil {
+				return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, err
+			}
 			injectedVoteExtTx := oracletypes.InjectedVoteExtensionTx{
-				ExchangeRateVotes:  exchangeRateVotes,
-				ExtendedCommitInfo: extendedCommitInfoBz,
+				ExchangeRateVotes:   exchangeRateVotes,
+				ExtendedCommitInfo:  extendedCommitInfoBz,
+				MedianGasEstimation: medianGasEstimate,
 			}
 
 			bz, err := injectedVoteExtTx.Marshal()
@@ -129,11 +134,19 @@ func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 					oracletypes.ErrNoCommitInfo
 			}
 
+			oracleRateFound := false
 			var injectedVoteExtTx oracletypes.InjectedVoteExtensionTx
-			if err := injectedVoteExtTx.Unmarshal(req.Txs[0]); err != nil {
-				h.logger.Error("failed to decode injected vote extension tx", "err", err)
-				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
+			for _, tx := range req.Txs {
+				if err := injectedVoteExtTx.Unmarshal(tx); err == nil {
+					oracleRateFound = true
+					break
+				}
 			}
+			if !(oracleRateFound) {
+				h.logger.Error("failed to decode injected vote extension tx")
+				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, fmt.Errorf("failed to decode injected vote extension tx")
+			}
+
 			var extendedCommitInfo cometabci.ExtendedCommitInfo
 			if err := extendedCommitInfo.Unmarshal(injectedVoteExtTx.ExtendedCommitInfo); err != nil {
 				h.logger.Error("failed to decode injected extended commit info", "err", err)
@@ -160,6 +173,14 @@ func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 			if err := h.verifyExchangeRateVotes(injectedVoteExtTx.ExchangeRateVotes, exchangeRateVotes); err != nil {
 				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
 			}
+			// Verify the proposer's gas estimation by computing the same median.
+			gasEstimateMedian, err := h.generateMedianGasEstimate(ctx, extendedCommitInfo)
+			if err != nil {
+				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
+			}
+			if err := h.verifyMedianGasEstimation(injectedVoteExtTx.MedianGasEstimation, gasEstimateMedian); err != nil {
+				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
+			}
 		}
 
 		h.logger.Info(
@@ -176,6 +197,9 @@ func (h *ProposalHandler) generateExchangeRateVotes(
 	ctx sdk.Context,
 	ci cometabci.ExtendedCommitInfo,
 ) (votes []oracletypes.AggregateExchangeRateVote, err error) {
+	fmt.Println("generateExchangeRateVotes called")
+	// this is how many votes we have
+	fmt.Println("this is how many votes we have", len(ci.Votes))
 	for _, vote := range ci.Votes {
 		if vote.BlockIdFlag != cmtproto.BlockIDFlagCommit {
 			continue
@@ -241,4 +265,83 @@ func (h *ProposalHandler) verifyExchangeRateVotes(
 	}
 
 	return nil
+}
+
+func (h *ProposalHandler) generateMedianGasEstimate(
+	ctx sdk.Context,
+	ci cometabci.ExtendedCommitInfo,
+) (median int64, err error) {
+	gasEstimates := []int64{}
+	for _, vote := range ci.Votes {
+		if vote.BlockIdFlag != cmtproto.BlockIDFlagCommit {
+			continue
+		}
+
+		var voteExt oracletypes.OracleVoteExtension
+		if err := voteExt.Unmarshal(vote.VoteExtension); err != nil {
+			h.logger.Error(
+				"failed to decode vote extension for GMP EXTENSION",
+				"err", err,
+			)
+			continue
+		}
+
+		var valConsAddr sdk.ConsAddress
+		if err := valConsAddr.Unmarshal(vote.Validator.Address); err != nil {
+			h.logger.Error(
+				"failed to unmarshal validator consensus address",
+				"err", err,
+			)
+			return 0, err
+		}
+		val, err := h.stakingKeeper.GetValidatorByConsAddr(ctx, valConsAddr)
+		if err != nil {
+			h.logger.Error(
+				"failed to get consensus validator from staking keeper",
+				"err", err,
+			)
+			return 0, err
+		}
+		_, err = sdk.ValAddressFromBech32(val.OperatorAddress)
+		if err != nil {
+			return 0, err
+		}
+
+		// append median gas estimate to gas estimates
+		gasEstimates = append(gasEstimates, voteExt.GasEstimation)
+	}
+
+	// calculate median of gas estimates
+	return calculateMedian(gasEstimates), nil
+}
+
+func (h *ProposalHandler) verifyMedianGasEstimation(
+	injectedEstimation int64,
+	generatedEstimation int64,
+) error {
+	// if they're not the same, error
+	if injectedEstimation != generatedEstimation {
+		return fmt.Errorf("injected median gas estimation does not match generated median gas estimation")
+	}
+	return nil
+}
+
+func calculateMedian(values []int64) int64 {
+	if len(values) == 0 {
+		return 0
+	}
+
+	// Create a copy of the slice to avoid modifying the original
+	sortedValues := make([]int64, len(values))
+	copy(sortedValues, values)
+
+	// Sort the copy in ascending order
+	sort.Slice(sortedValues, func(i, j int) bool {
+		return sortedValues[i] < sortedValues[j]
+	})
+
+	length := len(sortedValues)
+	mid := length / 2
+
+	return sortedValues[mid]
 }

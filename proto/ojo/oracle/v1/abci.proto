@@ -17,6 +17,7 @@ message OracleVoteExtension {
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins",
     (gogoproto.nullable) = false
   ];
+  int64 gas_estimation = 3;
 }
 
 // InjectedVoteExtensionTx defines the vote extension tx injected by the prepare
@@ -26,4 +27,5 @@ message InjectedVoteExtensionTx {
     (gogoproto.nullable) = false
   ];
   bytes extended_commit_info = 2;
+  int64 median_gas_estimation = 3;
 }

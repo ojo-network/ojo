@@ -6,7 +6,6 @@ import (
 	"cosmossdk.io/core/appmodule"
 	cometabci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 	"github.com/ojo-network/ojo/x/oracle/abci"
 	"github.com/ojo-network/ojo/x/oracle/types"
 )
@@ -46,31 +45,23 @@ func (app *App) PreBlocker(ctx sdk.Context, req *cometabci.RequestFinalizeBlock)
 	}
 	voteExtensionsEnabled := abci.VoteExtensionsEnabled(ctx)
 	if voteExtensionsEnabled {
-		var injectedVoteExtTx types.InjectedVoteExtensionTx
-		if err := injectedVoteExtTx.Unmarshal(req.Txs[0]); err != nil {
-			app.Logger().Error("failed to decode injected vote extension tx", "err", err)
-			return nil, err
-		}
-
-		// set oracle exchange rate votes using the passed in context, which will make
-		// these votes available in the current block.
-		for _, exchangeRateVote := range injectedVoteExtTx.ExchangeRateVotes {
-			valAddr, err := sdk.ValAddressFromBech32(exchangeRateVote.Voter)
-			if err != nil {
-				app.Logger().Error("failed to get voter address", "err", err)
-				continue
+		for _, tx := range req.Txs {
+			var injectedVoteExtTx types.InjectedVoteExtensionTx
+			if err := injectedVoteExtTx.Unmarshal(tx); err != nil {
+				app.Logger().Error("failed to decode injected vote extension tx", "err", err)
+				return nil, err
+			} else { // this is an oracle exchange rate proposal
+				for _, exchangeRateVote := range injectedVoteExtTx.ExchangeRateVotes {
+					valAddr, err := sdk.ValAddressFromBech32(exchangeRateVote.Voter)
+					if err != nil {
+						app.Logger().Error("failed to get voter address", "err", err)
+						continue
+					}
+					app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr, exchangeRateVote)
+				}
+				fmt.Println("this is the median gas estimation", injectedVoteExtTx.MedianGasEstimation)
 			}
-			app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr, exchangeRateVote)
 		}
-
-		// now process gmp proposal
-		var gmpInjectedVoteExtension gmptypes.InjectedVoteExtensionTx
-		if err := gmpInjectedVoteExtension.Unmarshal(req.Txs[0]); err != nil {
-			app.Logger().Error("failed to decode injected vote extension tx", "err", err)
-			return nil, err
-		}
-		fmt.Println("gmpInjectedVoteExtension", gmpInjectedVoteExtension)
-		// set gas estimate
 	}
 
 	app.Logger().Info(
