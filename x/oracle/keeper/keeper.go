@@ -25,10 +25,10 @@ type Keeper struct {
 	storeKey   storetypes.StoreKey
 	paramSpace paramstypes.Subspace
 
-	accountKeeper types.AccountKeeper
-	bankKeeper    types.BankKeeper
-	distrKeeper   types.DistributionKeeper
-	StakingKeeper types.StakingKeeper
+	accountKeeper     types.AccountKeeper
+	bankKeeper        types.BankKeeper
+	distrKeeper       types.DistributionKeeper
+	StakingKeeper     types.StakingKeeper
 	GasEstimateKeeper types.GasEstimateKeeper
 
 	PriceFeeder *pricefeeder.PriceFeeder

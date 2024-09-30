@@ -144,7 +144,10 @@ func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 			}
 			if !(oracleRateFound) {
 				h.logger.Error("failed to decode injected vote extension tx")
-				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, fmt.Errorf("failed to decode injected vote extension tx")
+				return &cometabci.ResponseProcessProposal{
+						Status: cometabci.ResponseProcessProposal_REJECT,
+					},
+					fmt.Errorf("failed to decode injected vote extension tx")
 			}
 
 			var extendedCommitInfo cometabci.ExtendedCommitInfo

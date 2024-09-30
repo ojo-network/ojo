@@ -52,23 +52,22 @@ func (app *App) PreBlocker(ctx sdk.Context, req *cometabci.RequestFinalizeBlock)
 			if err := injectedVoteExtTx.Unmarshal(tx); err != nil {
 				app.Logger().Error("failed to decode injected vote extension tx", "err", err)
 				return nil, err
-			} else {
-				for _, exchangeRateVote := range injectedVoteExtTx.ExchangeRateVotes {
-					valAddr, err := sdk.ValAddressFromBech32(exchangeRateVote.Voter)
-					if err != nil {
-						app.Logger().Error("failed to get voter address", "err", err)
-						continue
-					}
-					app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr, exchangeRateVote)
-				}
-				for _, gasEstimate := range injectedVoteExtTx.GasEstimateMedians {
-					app.GasEstimateKeeper.SetGasEstimate(ctx, gasestimatetypes.GasEstimate{
-						Network:     gasEstimate.Network,
-						GasEstimate: gasEstimate.GasEstimation,
-					})
-				}
-				app.Logger().Info("gas estimates updated", "gasestimates", injectedVoteExtTx.GasEstimateMedians)
 			}
+			for _, exchangeRateVote := range injectedVoteExtTx.ExchangeRateVotes {
+				valAddr, err := sdk.ValAddressFromBech32(exchangeRateVote.Voter)
+				if err != nil {
+					app.Logger().Error("failed to get voter address", "err", err)
+					continue
+				}
+				app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr, exchangeRateVote)
+			}
+			for _, gasEstimate := range injectedVoteExtTx.GasEstimateMedians {
+				app.GasEstimateKeeper.SetGasEstimate(ctx, gasestimatetypes.GasEstimate{
+					Network:     gasEstimate.Network,
+					GasEstimate: gasEstimate.GasEstimation,
+				})
+			}
+			app.Logger().Info("gas estimates updated", "gasestimates", injectedVoteExtTx.GasEstimateMedians)
 		}
 	}
 

@@ -37,5 +37,8 @@ func (p Params) Validate() error {
 	if p.FeeRecipient == "" {
 		return fmt.Errorf("fee recipient can not be empty")
 	}
+	if p.DefaultGasEstimate < 1 {
+		return fmt.Errorf("default gas estimate can not be less than 1")
+	}
 	return nil
 }

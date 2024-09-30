@@ -107,6 +107,7 @@ func (m *InjectedVoteExtensionTx) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_InjectedVoteExtensionTx proto.InternalMessageInfo
 
+// GasEstimate defines a gas estimate for a given network.
 type GasEstimate struct {
 	GasEstimation int64  `protobuf:"varint,1,opt,name=gas_estimation,json=gasEstimation,proto3" json:"gas_estimation,omitempty"`
 	Network       string `protobuf:"bytes,2,opt,name=network,proto3" json:"network,omitempty"`

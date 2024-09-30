@@ -57,9 +57,11 @@ func GetCmdQueryGasEstimate() *cobra.Command {
 		Short: "Query the current gas-estimate for a network",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-
 			res, err := queryClient.GasEstimate(cmd.Context(), &types.GasEstimateRequest{Network: args[0]})
 			return cli.PrintOrErr(res, err, clientCtx)
 		},

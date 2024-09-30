@@ -30,6 +30,7 @@ message InjectedVoteExtensionTx {
   repeated GasEstimate gas_estimate_medians = 3 [(gogoproto.nullable) = false];
 }
 
+// GasEstimate defines a gas estimate for a given network.
 message GasEstimate {
   int64 gas_estimation = 1;
   string network = 2;
