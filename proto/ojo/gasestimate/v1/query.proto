@@ -1,0 +1,39 @@
+syntax = "proto3";
+package ojo.gasestimate.v1;
+
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "ojo/gasestimate/v1/gasestimate.proto";
+
+option go_package = "github.com/ojo-network/ojo/x/gasestimate/types";
+
+// Query defines the gRPC querier service for the gasestimate module
+service Query {
+  // Params queries all parameters.
+  rpc Params(ParamsRequest) returns (ParamsResponse) {
+    option (google.api.http).get = "/ojo/gasestimate/v1/params";
+  }
+  // GasEstimate queries the gas estimate for a given network.
+  rpc GasEstimate(GasEstimateRequest) returns (GasEstimateResponse) {
+    option (google.api.http).get = "/ojo/gasestimate/v1/gasestimate";
+  }
+}
+
+// ParamsRequest is the request type for the Query/Params RPC method.
+message ParamsRequest {}
+
+// ParamsResponse is the response type for the Query/Params RPC method.
+message ParamsResponse {
+  // params defines the parameters of the module.
+  Params params = 1 [(gogoproto.nullable) = false];
+}
+
+// GasEstimateRequest is the request type for the Query/GasEstimate RPC method.
+message GasEstimateRequest {
+  string network = 1;
+}
+
+// GasEstimateResponse is the response type for the Query/GasEstimate RPC method.
+message GasEstimateResponse {
+  int64 gas_estimate = 1;
+}

@@ -9,7 +9,7 @@ import (
 	"github.com/ojo-network/ojo/x/oracle/abci"
 	"github.com/ojo-network/ojo/x/oracle/types"
 
-	gasestimatetypes "github.com/ojo-network/ojo/x/gas_estimate/types"
+	gasestimatetypes "github.com/ojo-network/ojo/x/gasestimate/types"
 )
 
 // PreBlocker is run before finalize block to update the aggregrate exchange rate votes on the oracle module
@@ -67,7 +67,7 @@ func (app *App) PreBlocker(ctx sdk.Context, req *cometabci.RequestFinalizeBlock)
 						GasEstimate: gasEstimate.GasEstimation,
 					})
 				}
-				app.Logger().Info("gas estimates updated", "gas_estimates", injectedVoteExtTx.GasEstimateMedians)
+				app.Logger().Info("gas estimates updated", "gasestimates", injectedVoteExtTx.GasEstimateMedians)
 			}
 		}
 	}

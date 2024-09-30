@@ -7,7 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
-	gasestimatetypes "github.com/ojo-network/ojo/x/gas_estimate/types"
+	gasestimatetypes "github.com/ojo-network/ojo/x/gasestimate/types"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
 

@@ -1,0 +1,12 @@
+syntax = "proto3";
+package ojo.gasestimate.v1;
+
+import "gogoproto/gogo.proto";
+import "ojo/gasestimate/v1/gasestimate.proto";
+
+option go_package = "github.com/ojo-network/ojo/x/gasestimate/types";
+
+// GenesisState represents the genesis state of the gasestimate module.
+message GenesisState {
+  Params params = 1 [ (gogoproto.nullable) = false ];
+}

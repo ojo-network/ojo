@@ -8,7 +8,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	gasestimatetypes "github.com/ojo-network/ojo/x/gas_estimate/types"
+	gasestimatetypes "github.com/ojo-network/ojo/x/gasestimate/types"
 )
 
 // StakingKeeper defines the expected interface contract defined by the x/staking

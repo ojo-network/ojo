@@ -1,4 +1,4 @@
-package gmp
+package gasestimate
 
 import (
 	"context"
@@ -16,9 +16,9 @@ import (
 	"github.com/spf13/cobra"
 
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
-	"github.com/ojo-network/ojo/x/gmp/client/cli"
-	"github.com/ojo-network/ojo/x/gmp/keeper"
-	"github.com/ojo-network/ojo/x/gmp/types"
+	"github.com/ojo-network/ojo/x/gasestimate/client/cli"
+	"github.com/ojo-network/ojo/x/gasestimate/keeper"
+	"github.com/ojo-network/ojo/x/gasestimate/types"
 )
 
 var (
@@ -27,12 +27,12 @@ var (
 	_ module.AppModuleSimulation = AppModule{}
 )
 
-// AppModuleBasic implements the AppModuleBasic interface for the x/gmp module.
+// AppModuleBasic implements the AppModuleBasic interface for the x/gasestimate module.
 type AppModuleBasic struct {
 	cdc codec.Codec
 }
 
-// RegisterLegacyAminoCodec registers the x/gmp module's types with a legacy
+// RegisterLegacyAminoCodec registers the x/gasestimate module's types with a legacy
 // Amino codec.
 func (AppModuleBasic) RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	types.RegisterLegacyAminoCodec(cdc)
@@ -42,7 +42,7 @@ func NewAppModuleBasic(cdc codec.Codec) AppModuleBasic {
 	return AppModuleBasic{cdc: cdc}
 }
 
-// Name returns the x/gmp module's name.
+// Name returns the x/gasestimate module's name.
 func (AppModuleBasic) Name() string {
 	return types.ModuleName
 }
@@ -57,17 +57,17 @@ func (AppModuleBasic) ConsensusVersion() uint64 {
 	return 1
 }
 
-// RegisterInterfaces registers the x/gmp module's interface types.
+// RegisterInterfaces registers the x/gasestimate module's interface types.
 func (AppModuleBasic) RegisterInterfaces(reg cdctypes.InterfaceRegistry) {
 	types.RegisterInterfaces(reg)
 }
 
-// DefaultGenesis returns the x/gmp module's default genesis state.
+// DefaultGenesis returns the x/gasestimate module's default genesis state.
 func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	return cdc.MustMarshalJSON(types.DefaultGenesisState())
 }
 
-// ValidateGenesis performs genesis state validation for the x/gmp module.
+// ValidateGenesis performs genesis state validation for the x/gasestimate module.
 func (AppModuleBasic) ValidateGenesis(
 	cdc codec.JSONCodec,
 	_ client.TxEncodingConfig,
@@ -85,7 +85,7 @@ func (AppModuleBasic) ValidateGenesis(
 // gRPC service.
 func (AppModuleBasic) RegisterRESTRoutes(_ client.Context, _ *mux.Router) {}
 
-// RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the x/gmp
+// RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the x/gasestimate
 // module.
 func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
 	if err := types.RegisterQueryHandlerClient(context.Background(), mux, types.NewQueryClient(clientCtx)); err != nil {
@@ -93,42 +93,39 @@ func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *r
 	}
 }
 
-// GetTxCmd returns the x/gmp module's root tx command.
+// GetTxCmd returns the x/gasestimate module's root tx command.
 func (AppModuleBasic) GetTxCmd() *cobra.Command {
 	return cli.GetTxCmd()
 }
 
-// GetQueryCmd returns the x/gmp module's root query command.
+// GetQueryCmd returns the x/gasestimate module's root query command.
 func (AppModuleBasic) GetQueryCmd() *cobra.Command {
 	return cli.GetQueryCmd()
 }
 
-// AppModule implements the AppModule interface for the x/gmp module.
+// AppModule implements the AppModule interface for the x/gasestimate module.
 type AppModule struct {
 	AppModuleBasic
 
-	keeper       keeper.Keeper
-	oracleKeeper types.OracleKeeper
+	keeper keeper.Keeper
 }
 
 func NewAppModule(
 	cdc codec.Codec,
 	keeper keeper.Keeper,
-	oracleKeeper types.OracleKeeper,
 ) AppModule {
 	return AppModule{
 		AppModuleBasic: NewAppModuleBasic(cdc),
 		keeper:         keeper,
-		oracleKeeper:   oracleKeeper,
 	}
 }
 
-// Name returns the x/gmp module's name.
+// Name returns the x/gasestimate module's name.
 func (am AppModule) Name() string {
 	return am.AppModuleBasic.Name()
 }
 
-// QuerierRoute returns the x/gmp module's query routing key.
+// QuerierRoute returns the x/gasestimate module's query routing key.
 func (AppModule) QuerierRoute() string { return types.QuerierRoute }
 
 // RegisterServices registers gRPC services.
@@ -137,10 +134,10 @@ func (am AppModule) RegisterServices(cfg module.Configurator) {
 	types.RegisterQueryServer(cfg.QueryServer(), keeper.NewQuerier(am.keeper))
 }
 
-// RegisterInvariants registers the x/gmp module's invariants.
+// RegisterInvariants registers the x/gasestimate module's invariants.
 func (am AppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
 
-// InitGenesis performs the x/gmp module's genesis initialization. It returns
+// InitGenesis performs the x/gasestimate module's genesis initialization. It returns
 // no validator updates.
 func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, gs json.RawMessage) []abci.ValidatorUpdate {
 	var genState types.GenesisState
@@ -151,36 +148,18 @@ func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, gs json.Ra
 	return []abci.ValidatorUpdate{}
 }
 
-// ExportGenesis returns the x/gmp module's exported genesis state as raw
+// ExportGenesis returns the x/gasestimate module's exported genesis state as raw
 // JSON bytes.
 func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.RawMessage {
 	genState := ExportGenesis(ctx, am.keeper)
 	return cdc.MustMarshalJSON(genState)
 }
 
-// BeginBlock executes all ABCI BeginBlock logic respective to the x/gmp module.
+// BeginBlock executes all ABCI BeginBlock logic respective to the x/gasestimate module.
 func (am AppModule) BeginBlock(_ context.Context) {}
 
-// EndBlock is a no-op for the GMP module.
+// EndBlock is a no-op for the gasestimate module.
 func (am AppModule) EndBlock(goCtx context.Context) ([]abci.ValidatorUpdate, error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
-	payments := am.keeper.GetAllPayments(ctx)
-	for _, payment := range payments {
-		rate, err := am.oracleKeeper.GetExchangeRate(ctx, payment.Denom)
-		if err != nil {
-			continue
-		}
-		// if the last price has deviated by more than the deviation percentage, trigger an update
-		if payment.LastPrice.Sub(rate).Abs().GT(payment.Deviation) ||
-			payment.LastBlock < ctx.BlockHeight()-payment.Heartbeat {
-			err := am.keeper.ProcessPayment(goCtx, payment)
-			if err != nil {
-				ctx.Logger().Error("failed to process payment", "error", err)
-				continue
-			}
-		}
-
-	}
 	return []abci.ValidatorUpdate{}, nil
 }
 
@@ -192,7 +171,7 @@ func (am AppModule) WeightedOperations(_ module.SimulationState) []simtypes.Weig
 	return []simtypes.WeightedOperation{}
 }
 
-// ProposalContents returns all the gmp content functions used to
+// ProposalContents returns all the gasestimate content functions used to
 // simulate governance proposals.
 func (am AppModule) ProposalContents(_ module.SimulationState) []simtypes.WeightedProposalMsg {
 	return []simtypes.WeightedProposalMsg{}

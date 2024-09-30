@@ -117,9 +117,9 @@ import (
 	gmpkeeper "github.com/ojo-network/ojo/x/gmp/keeper"
 	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 
-	"github.com/ojo-network/ojo/x/gas_estimate"
-	gasestimatekeeper "github.com/ojo-network/ojo/x/gas_estimate/keeper"
-	gasestimatetypes "github.com/ojo-network/ojo/x/gas_estimate/types"
+	"github.com/ojo-network/ojo/x/gasestimate"
+	gasestimatekeeper "github.com/ojo-network/ojo/x/gasestimate/keeper"
+	gasestimatetypes "github.com/ojo-network/ojo/x/gasestimate/types"
 
 	"github.com/ojo-network/ojo/x/airdrop"
 	airdropkeeper "github.com/ojo-network/ojo/x/airdrop/keeper"
@@ -595,7 +595,7 @@ func New(
 		ibctm.NewAppModule(),
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
 		gmp.NewAppModule(appCodec, app.GmpKeeper, app.OracleKeeper),
-		gas_estimate.NewAppModule(appCodec, app.GasEstimateKeeper),
+		gasestimate.NewAppModule(appCodec, app.GasEstimateKeeper),
 		airdrop.NewAppModule(appCodec, app.AirdropKeeper, app.AccountKeeper, app.BankKeeper),
 		consensus.NewAppModule(appCodec, app.ConsensusParamsKeeper),
 	)

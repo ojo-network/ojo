@@ -1,0 +1,30 @@
+syntax = "proto3";
+package ojo.gasestimate.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/ojo-network/ojo/x/gasestimate/types";
+
+option (gogoproto.goproto_getters_all) = false;
+
+// Params defines the parameters for the gasestimate module.
+message Params {
+  // The contracts we'll send gasestimate messages to.
+  repeated Contract contract_registry = 1;
+  // The gas limit for the gasestimate messages. E.x., "1000000"
+  string gas_limit = 2;
+  // The gas adjustment multiplier for the gasestimate messages. E.x., "1.5"
+  string gas_adjustment = 3;
+}
+
+// Contract defines a contract that we
+message Contract {
+  string address = 1;
+  string network = 2;
+}
+
+// GasEstimate is the gas estimate for a given network.
+message GasEstimate {
+  string network = 1;
+  int64 gas_estimate = 2;
+}
