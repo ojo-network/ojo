@@ -166,7 +166,17 @@ func (am AppModule) EndBlock(goCtx context.Context) ([]abci.ValidatorUpdate, err
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	payments := am.keeper.GetAllPayments(ctx)
 	for _, payment := range payments {
-		am.keeper.ProcessPayment(goCtx, payment)
+		rate, err := am.oracleKeeper.GetExchangeRate(ctx, payment.Denom)
+		if err != nil {
+			continue
+		}
+		// if the last price has deviated by more than the deviation percentage, trigger an update
+		if payment.LastPrice.Sub(rate).Abs().GT(payment.Deviation) {
+			am.keeper.ProcessPayment(goCtx, payment)
+		} else if payment.LastBlock < ctx.BlockHeight()-payment.Heartbeat {
+			am.keeper.ProcessPayment(goCtx, payment)
+		}
+
 	}
 	return []abci.ValidatorUpdate{}, nil
 }

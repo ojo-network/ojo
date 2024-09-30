@@ -258,12 +258,10 @@ func (k Keeper) ProcessPayment(
 	gasEstimate, err := k.GasEstimateKeeper.GetGasEstimate(ctx, payment.DestinationChain)
 	if err != nil {
 		k.Logger(ctx).With(err).Error("error getting gas estimate. using default gas estimates")
-		return err
 	} else {
 		gasAmount = math.NewInt(gasEstimate.GasEstimate)
 	}
 
-	// estimate gas for the axelar relay
 	coins := sdk.Coin{
 		Denom:  payment.Token.Denom,
 		Amount: gasAmount,
@@ -275,7 +273,7 @@ func (k Keeper) ProcessPayment(
 		k.Logger(ctx).With(err).Error("error getting relayer address")
 		return err
 	}
-	if payment.Token.Amount.LT(coins.Amount) {
+	if payment.Token.Amount.LTE(coins.Amount) {
 		k.Logger(ctx).With(err).Debug("payment amount is less than gas estimate, returning funds and deleting payment")
 		err := k.BankKeeper.SendCoinsFromModuleToAccount(
 			ctx,
@@ -294,14 +292,13 @@ func (k Keeper) ProcessPayment(
 		authtypes.NewModuleAddress(types.ModuleName).String(),
 		payment.DestinationChain,
 		contractAddress,
-		"0x001",
+		types.EmptyContract,
 		coins,
 		[]string{payment.Denom},
-		[]byte(""),
-		[]byte(""),
+		types.EmptyByteSlice,
+		types.EmptyByteSlice,
 		ctx.BlockHeight(),
 	)
-
 	_, err = k.RelayPrice(goCtx, msg)
 	if err != nil {
 		k.Logger(ctx).With(err).Error("error relaying price")
@@ -311,6 +308,14 @@ func (k Keeper) ProcessPayment(
 
 	// update payment in the store with the amount paid
 	payment.Token.Amount = payment.Token.Amount.Sub(coins.Amount)
+	lastPrice, err := k.oracleKeeper.GetExchangeRate(ctx, payment.Denom)
+	if err != nil {
+		k.Logger(ctx).With(err).Error("error getting exchange rate")
+		return err
+	}
+	payment.LastPrice = lastPrice
+	payment.LastBlock = ctx.BlockHeight()
+
 	k.SetPayment(ctx, payment)
 	k.Logger(ctx).Info("payment updated", "payment", payment)
 

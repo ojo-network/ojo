@@ -3,6 +3,7 @@ package types
 import (
 	fmt "fmt"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ojo-network/ojo/util/checkers"
@@ -108,7 +109,7 @@ func NewMsgCreatePayment(
 	destinationChain string,
 	denom string,
 	token sdk.Coin,
-	deviation int64,
+	deviation math.LegacyDec,
 	heartbeat int64,
 ) *MsgCreatePayment {
 	return &MsgCreatePayment{
@@ -146,8 +147,9 @@ func (msg MsgCreatePayment) ValidateBasic() error {
 	if msg.Payment.Token.IsZero() {
 		return fmt.Errorf("token cannot be zero")
 	}
-	if msg.Payment.Deviation <= 0 {
-		return fmt.Errorf("deviation must be greater than 0")
+	// deviation must be between 0.5 and 50
+	if msg.Payment.Deviation.LT(math.LegacyNewDecWithPrec(5, 1)) || msg.Payment.Deviation.GT(math.LegacyNewDec(50)) {
+		return fmt.Errorf("deviation must be between 0.5 and 50")
 	}
 	if msg.Payment.Heartbeat <= 0 {
 		return fmt.Errorf("heartbeat must be greater than 0")

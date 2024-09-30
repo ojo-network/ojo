@@ -42,8 +42,13 @@ message Payment {
       (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
     ];
 
-    // deviation is how much the price can deviate from the last updated price before triggering an update.
-    int64 deviation = 5;
+    // deviation is a percentage of how much the price can deviate before triggering an update.
+    // 100 = 100%.
+    string deviation = 5 [
+      (gogoproto.moretags) = "yaml:\"deviation\"",
+      (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+      (gogoproto.nullable) = false
+    ];
 
     // heartbeat is how often the price will be updated in Ojo blocks, regardless of whether the price has deviated or not.
     int64 heartbeat = 6;

@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
@@ -216,7 +217,7 @@ func GetCmdCreatePayment() *cobra.Command {
 				return err
 			}
 
-			deviation, err := strconv.ParseInt(args[2], 10, 64)
+			deviation, err := math.LegacyNewDecFromStr(args[2])
 			if err != nil {
 				return err
 			}

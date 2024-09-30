@@ -10,6 +10,8 @@ var (
 	DefaultTimeout      = int64(1)
 	DefaultFeeRecipient = "axelar1zl3rxpp70lmte2xr6c4lgske2fyuj3hupcsvcd"
 	DefaultGasEstimate  = int64(1000000)
+	EmptyByteSlice      = []byte{}
+	EmptyContract       = "0x0000000000000000000000000000000000000000"
 )
 
 func DefaultParams() Params {
