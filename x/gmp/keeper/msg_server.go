@@ -60,9 +60,9 @@ func (ms msgServer) CreatePayment(
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	// make sure the destination chain is valid
-	params := ms.keeper.GetParams(ctx)
+	gasEstimateParams := ms.keeper.GasEstimateKeeper.GetParams(ctx)
 	isValidChain := false
-	for _, chain := range params.ContractRegistry {
+	for _, chain := range gasEstimateParams.ContractRegistry {
 		if chain.Network == msg.Payment.DestinationChain {
 			isValidChain = true
 			break

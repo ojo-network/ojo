@@ -24,11 +24,12 @@ import (
 )
 
 type Keeper struct {
-	cdc          codec.BinaryCodec
-	storeKey     storetypes.StoreKey
-	oracleKeeper types.OracleKeeper
-	IBCKeeper    *ibctransfer.Keeper
-	BankKeeper   types.BankKeeper
+	cdc               codec.BinaryCodec
+	storeKey          storetypes.StoreKey
+	oracleKeeper      types.OracleKeeper
+	IBCKeeper         *ibctransfer.Keeper
+	BankKeeper        types.BankKeeper
+	GasEstimateKeeper types.GasEstimateKeeper
 	// the address capable of executing a MsgSetParams message. Typically, this
 	// should be the x/gov module account.
 	authority string
@@ -42,14 +43,16 @@ func NewKeeper(
 	authority string,
 	ibcKeeper ibctransfer.Keeper,
 	bankKeeper types.BankKeeper,
+	gasEstimateKeeper types.GasEstimateKeeper,
 ) Keeper {
 	return Keeper{
-		cdc:          cdc,
-		storeKey:     storeKey,
-		authority:    authority,
-		oracleKeeper: oracleKeeper,
-		IBCKeeper:    &ibcKeeper,
-		BankKeeper:   bankKeeper,
+		cdc:               cdc,
+		storeKey:          storeKey,
+		authority:         authority,
+		oracleKeeper:      oracleKeeper,
+		IBCKeeper:         &ibcKeeper,
+		BankKeeper:        bankKeeper,
+		GasEstimateKeeper: gasEstimateKeeper,
 	}
 }
 
@@ -237,10 +240,10 @@ func (k Keeper) ProcessPayment(
 ) error {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	k.Logger(ctx).Info("processing payment", "payment", payment)
-	params := k.GetParams(ctx)
+	gasEstimateParams := k.GasEstimateKeeper.GetParams(ctx)
 	// get gmp contract address on receiving chain
 	contractAddress := ""
-	for _, contract := range params.ContractRegistry {
+	for _, contract := range gasEstimateParams.ContractRegistry {
 		if payment.DestinationChain == contract.Network {
 			contractAddress = contract.Address
 		}

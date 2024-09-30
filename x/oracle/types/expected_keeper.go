@@ -8,6 +8,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	gasestimatetypes "github.com/ojo-network/ojo/x/gas_estimate/types"
 )
 
 // StakingKeeper defines the expected interface contract defined by the x/staking
@@ -48,4 +49,8 @@ type BankKeeper interface {
 	SendCoinsFromModuleToModule(ctx context.Context, senderModule, recipientModule string, amt sdk.Coins) error
 	GetDenomMetaData(ctx context.Context, denom string) (banktypes.Metadata, bool)
 	SetDenomMetaData(ctx context.Context, denomMetaData banktypes.Metadata)
+}
+
+type GasEstimateKeeper interface {
+	GetParams(ctx sdk.Context) (params gasestimatetypes.Params)
 }

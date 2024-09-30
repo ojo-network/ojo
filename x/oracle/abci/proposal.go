@@ -73,14 +73,14 @@ func (h *ProposalHandler) PrepareProposalHandler() sdk.PrepareProposalHandler {
 				return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, err
 			}
 
-			medianGasEstimate, err := h.generateMedianGasEstimate(ctx, req.LocalLastCommit)
+			medianGasEstimates, err := h.generateMedianGasEstimates(ctx, req.LocalLastCommit)
 			if err != nil {
 				return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, err
 			}
 			injectedVoteExtTx := oracletypes.InjectedVoteExtensionTx{
-				ExchangeRateVotes:   exchangeRateVotes,
-				ExtendedCommitInfo:  extendedCommitInfoBz,
-				MedianGasEstimation: medianGasEstimate,
+				ExchangeRateVotes:  exchangeRateVotes,
+				ExtendedCommitInfo: extendedCommitInfoBz,
+				GasEstimateMedians: medianGasEstimates,
 			}
 
 			bz, err := injectedVoteExtTx.Marshal()
@@ -174,11 +174,11 @@ func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
 			}
 			// Verify the proposer's gas estimation by computing the same median.
-			gasEstimateMedian, err := h.generateMedianGasEstimate(ctx, extendedCommitInfo)
+			gasEstimateMedians, err := h.generateMedianGasEstimates(ctx, extendedCommitInfo)
 			if err != nil {
 				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
 			}
-			if err := h.verifyMedianGasEstimation(injectedVoteExtTx.MedianGasEstimation, gasEstimateMedian); err != nil {
+			if err := h.verifyMedianGasEstimations(injectedVoteExtTx.GasEstimateMedians, gasEstimateMedians); err != nil {
 				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
 			}
 		}
@@ -264,22 +264,14 @@ func (h *ProposalHandler) verifyExchangeRateVotes(
 	return nil
 }
 
-func (h *ProposalHandler) generateMedianGasEstimate(
+func (h *ProposalHandler) generateMedianGasEstimates(
 	ctx sdk.Context,
 	ci cometabci.ExtendedCommitInfo,
-) (median int64, err error) {
-	gasEstimates := []int64{}
+) ([]oracletypes.GasEstimate, error) {
+	gasEstimates := []oracletypes.GasEstimate{}
+
 	for _, vote := range ci.Votes {
 		if vote.BlockIdFlag != cmtproto.BlockIDFlagCommit {
-			continue
-		}
-
-		var voteExt oracletypes.OracleVoteExtension
-		if err := voteExt.Unmarshal(vote.VoteExtension); err != nil {
-			h.logger.Error(
-				"failed to decode vote extension for GMP EXTENSION",
-				"err", err,
-			)
 			continue
 		}
 
@@ -289,7 +281,7 @@ func (h *ProposalHandler) generateMedianGasEstimate(
 				"failed to unmarshal validator consensus address",
 				"err", err,
 			)
-			return 0, err
+			return gasEstimates, err
 		}
 		val, err := h.stakingKeeper.GetValidatorByConsAddr(ctx, valConsAddr)
 		if err != nil {
@@ -297,48 +289,83 @@ func (h *ProposalHandler) generateMedianGasEstimate(
 				"failed to get consensus validator from staking keeper",
 				"err", err,
 			)
-			return 0, err
+			return gasEstimates, err
 		}
 		_, err = sdk.ValAddressFromBech32(val.OperatorAddress)
 		if err != nil {
-			return 0, err
+			return gasEstimates, err
+		}
+	}
+
+	networks := []string{}
+	// get contracts on registry list
+	params := h.oracleKeeper.GasEstimateKeeper.GetParams(ctx)
+	for _, contract := range params.ContractRegistry {
+		networks = append(networks, contract.Network)
+	}
+
+	for _, network := range networks {
+		networkEstimates := []oracletypes.GasEstimate{}
+
+		for _, vote := range ci.Votes {
+			var voteExt oracletypes.OracleVoteExtension
+			if err := voteExt.Unmarshal(vote.VoteExtension); err != nil {
+				h.logger.Error(
+					"failed to decode vote extension",
+					"err", err,
+				)
+				continue
+			}
+
+			for _, estimate := range voteExt.GasEstimates {
+				if estimate.Network == network {
+					networkEstimates = append(networkEstimates, estimate)
+				}
+			}
 		}
 
-		// append median gas estimate to gas estimates
-		gasEstimates = append(gasEstimates, voteExt.GasEstimation)
+		median := calculateMedian(networkEstimates)
+		gasEstimates = append(gasEstimates, median)
 	}
 
-	// calculate median of gas estimates
-	return calculateMedian(gasEstimates), nil
+	return gasEstimates, nil
 }
 
-func (h *ProposalHandler) verifyMedianGasEstimation(
-	injectedEstimation int64,
-	generatedEstimation int64,
+func (h *ProposalHandler) verifyMedianGasEstimations(
+	injectedEstimates []oracletypes.GasEstimate,
+	generatedEstimates []oracletypes.GasEstimate,
 ) error {
-	// if they're not the same, error
-	if injectedEstimation != generatedEstimation {
-		return fmt.Errorf("injected median gas estimation does not match generated median gas estimation")
+	if len(injectedEstimates) != len(generatedEstimates) {
+		return oracletypes.ErrNonEqualInjVotesLen
 	}
+
+	for i := range injectedEstimates {
+		injectedEstimate := injectedEstimates[i]
+		generatedEstimate := generatedEstimates[i]
+
+		if injectedEstimate.Network != generatedEstimate.Network {
+			return oracletypes.ErrNonEqualInjVotesRates
+		}
+
+		if injectedEstimate.GasEstimation != generatedEstimate.GasEstimation {
+			return oracletypes.ErrNonEqualInjVotesRates
+		}
+	}
+
 	return nil
 }
 
-func calculateMedian(values []int64) int64 {
-	if len(values) == 0 {
-		return 0
-	}
-
-	// Create a copy of the slice to avoid modifying the original
-	sortedValues := make([]int64, len(values))
-	copy(sortedValues, values)
-
-	// Sort the copy in ascending order
-	sort.Slice(sortedValues, func(i, j int) bool {
-		return sortedValues[i] < sortedValues[j]
+func calculateMedian(gasEstimates []oracletypes.GasEstimate) (median oracletypes.GasEstimate) {
+	sort.Slice(gasEstimates, func(i, j int) bool {
+		return gasEstimates[i].GasEstimation < gasEstimates[j].GasEstimation
 	})
 
-	length := len(sortedValues)
-	mid := length / 2
-
-	return sortedValues[mid]
+	mid := len(gasEstimates) / 2
+	if len(gasEstimates)%2 == 0 {
+		return oracletypes.GasEstimate{
+			GasEstimation: gasEstimates[mid-1].GasEstimation + gasEstimates[mid].GasEstimation,
+			Network:       gasEstimates[mid-1].Network,
+		}
+	}
+	return gasEstimates[mid]
 }

@@ -117,6 +117,10 @@ import (
 	gmpkeeper "github.com/ojo-network/ojo/x/gmp/keeper"
 	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 
+	"github.com/ojo-network/ojo/x/gas_estimate"
+	gasestimatekeeper "github.com/ojo-network/ojo/x/gas_estimate/keeper"
+	gasestimatetypes "github.com/ojo-network/ojo/x/gas_estimate/types"
+
 	"github.com/ojo-network/ojo/x/airdrop"
 	airdropkeeper "github.com/ojo-network/ojo/x/airdrop/keeper"
 	airdroptypes "github.com/ojo-network/ojo/x/airdrop/types"
@@ -145,6 +149,7 @@ var (
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		oracletypes.ModuleName:         {authtypes.Minter},
 		gmptypes.ModuleName:            {authtypes.Minter},
+		gasestimatetypes.ModuleName:    {authtypes.Burner},
 		airdroptypes.ModuleName:        {authtypes.Minter},
 	}
 )
@@ -201,6 +206,7 @@ type App struct {
 	GroupKeeper           groupkeeper.Keeper
 	OracleKeeper          oraclekeeper.Keeper
 	GmpKeeper             gmpkeeper.Keeper
+	GasEstimateKeeper     gasestimatekeeper.Keeper
 	AirdropKeeper         airdropkeeper.Keeper
 	ConsensusParamsKeeper consensusparamkeeper.Keeper
 
@@ -264,7 +270,7 @@ func New(
 		govtypes.StoreKey, paramstypes.StoreKey, ibcexported.StoreKey, upgradetypes.StoreKey,
 		feegrant.StoreKey, evidencetypes.StoreKey, ibctransfertypes.StoreKey, capabilitytypes.StoreKey,
 		consensusparamtypes.StoreKey, group.StoreKey, oracletypes.StoreKey, gmptypes.StoreKey,
-		airdroptypes.StoreKey,
+		gasestimatetypes.ModuleName, airdroptypes.StoreKey,
 	)
 	tkeys := storetypes.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := storetypes.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -409,6 +415,12 @@ func New(
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 
+	app.GasEstimateKeeper = gasestimatekeeper.NewKeeper(
+		appCodec,
+		keys[gasestimatetypes.ModuleName],
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
+
 	app.OracleKeeper = oraclekeeper.NewKeeper(
 		appCodec,
 		keys[oracletypes.ModuleName],
@@ -417,6 +429,7 @@ func New(
 		app.BankKeeper,
 		app.DistrKeeper,
 		app.StakingKeeper,
+		app.GasEstimateKeeper,
 		distrtypes.ModuleName,
 		cast.ToBool(appOpts.Get("telemetry.enabled")),
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
@@ -429,6 +442,7 @@ func New(
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 		app.TransferKeeper,
 		app.BankKeeper,
+		app.GasEstimateKeeper,
 	)
 
 	app.AirdropKeeper = airdropkeeper.NewKeeper(
@@ -581,6 +595,7 @@ func New(
 		ibctm.NewAppModule(),
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
 		gmp.NewAppModule(appCodec, app.GmpKeeper, app.OracleKeeper),
+		gas_estimate.NewAppModule(appCodec, app.GasEstimateKeeper),
 		airdrop.NewAppModule(appCodec, app.AirdropKeeper, app.AccountKeeper, app.BankKeeper),
 		consensus.NewAppModule(appCodec, app.ConsensusParamsKeeper),
 	)
@@ -632,6 +647,7 @@ func New(
 		vestingtypes.ModuleName,
 		oracletypes.ModuleName,
 		gmptypes.ModuleName,
+		gasestimatetypes.ModuleName,
 		airdroptypes.ModuleName,
 		consensusparamtypes.ModuleName,
 	)
@@ -658,6 +674,7 @@ func New(
 		vestingtypes.ModuleName,
 		oracletypes.ModuleName,
 		gmptypes.ModuleName,
+		gasestimatetypes.ModuleName,
 		airdroptypes.ModuleName,
 		consensusparamtypes.ModuleName,
 	)
@@ -673,7 +690,8 @@ func New(
 		minttypes.ModuleName, crisistypes.ModuleName, genutiltypes.ModuleName, ibctransfertypes.ModuleName,
 		ibcexported.ModuleName, evidencetypes.ModuleName, authz.ModuleName, feegrant.ModuleName,
 		group.ModuleName, paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
-		oracletypes.ModuleName, gmptypes.ModuleName, airdroptypes.ModuleName, consensusparamtypes.ModuleName,
+		oracletypes.ModuleName, gmptypes.ModuleName, gasestimatetypes.ModuleName,
+		airdroptypes.ModuleName, consensusparamtypes.ModuleName,
 	}
 	app.mm.SetOrderInitGenesis(genesisModuleOrder...)
 	app.mm.SetOrderExportGenesis(genesisModuleOrder...)
@@ -992,6 +1010,7 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(govtypes.ModuleName)
 	paramsKeeper.Subspace(crisistypes.ModuleName)
 	paramsKeeper.Subspace(oracletypes.ModuleName)
+	paramsKeeper.Subspace(gasestimatetypes.ModuleName)
 
 	// register the key tables for legacy param subspaces
 	keyTable := ibcclienttypes.ParamKeyTable()

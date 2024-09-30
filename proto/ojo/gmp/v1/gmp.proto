@@ -21,15 +21,6 @@ message Params {
 
   // The axelar address of the fee recipient.
   string fee_recipient = 4;
-
-  // The contracts we'll send GMP messages to.
-  repeated Contract contract_registry = 5;
-}
-
-// Contract defines a contract that we
-message Contract {
-  string address = 1;
-  string network = 2;
 }
 
 // Payment is a data structure that holds information about a payment that has beenn made.

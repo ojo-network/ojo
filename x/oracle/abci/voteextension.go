@@ -82,16 +82,29 @@ func (h *VoteExtensionHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 			}
 		}
 
-		// get the current gas estimation for each contract
-		gasEstimate, err := relayerClient.EstimateGasFee("Ethereum", "0x0000000000000000000000000000000000000000", "1000000", "1.5")
-		if err != nil {
-			h.logger.Error("error estimating gas fee", "error", err)
-			return &cometabci.ResponseExtendVote{VoteExtension: []byte{}}, err
+		gasEstimates := []types.GasEstimate{}
+		estimateParams := h.oracleKeeper.GasEstimateKeeper.GetParams(ctx)
+		for _, contract := range estimateParams.ContractRegistry {
+			resp, err := relayerClient.EstimateGasFee(
+				contract.Network,
+				contract.Address,
+				estimateParams.GasLimit,
+				estimateParams.GasAdjustment,
+			)
+			if err != nil {
+				h.logger.Error("error estimating gas fee", "error", err)
+				continue
+			}
+			gasEstimates = append(gasEstimates, types.GasEstimate{
+				GasEstimation: resp.Int64(),
+				Network:       contract.Network,
+			})
 		}
+
 		voteExt := types.OracleVoteExtension{
 			Height:        req.Height,
 			ExchangeRates: filteredDecCoins,
-			GasEstimation: gasEstimate.Int64(),
+			GasEstimates:  gasEstimates,
 		}
 
 		bz, err := voteExt.Marshal()
