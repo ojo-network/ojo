@@ -9,14 +9,16 @@ var (
 	DefaultChannel      = "channel-1"
 	DefaultTimeout      = int64(1)
 	DefaultFeeRecipient = "axelar1zl3rxpp70lmte2xr6c4lgske2fyuj3hupcsvcd"
+	DefaultGasEstimate  = int64(1000000)
 )
 
 func DefaultParams() Params {
 	return Params{
-		GmpAddress:   DefaultGMPAddress,
-		GmpChannel:   DefaultChannel,
-		GmpTimeout:   DefaultTimeout,
-		FeeRecipient: DefaultFeeRecipient,
+		GmpAddress:         DefaultGMPAddress,
+		GmpChannel:         DefaultChannel,
+		GmpTimeout:         DefaultTimeout,
+		FeeRecipient:       DefaultFeeRecipient,
+		DefaultGasEstimate: DefaultGasEstimate,
 	}
 }
 

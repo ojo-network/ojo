@@ -254,11 +254,19 @@ func (k Keeper) ProcessPayment(
 		return fmt.Errorf("contract address not found for chain %s", payment.DestinationChain)
 	}
 
+	gasAmount := math.NewInt(k.GetParams(ctx).DefaultGasEstimate)
+	gasEstimate, err := k.GasEstimateKeeper.GetGasEstimate(ctx, payment.DestinationChain)
+	if err != nil {
+		k.Logger(ctx).With(err).Error("error getting gas estimate. using default gas estimates")
+		return err
+	} else {
+		gasAmount = math.NewInt(gasEstimate.GasEstimate)
+	}
+
 	// estimate gas for the axelar relay
 	coins := sdk.Coin{
-		Denom: payment.Token.Denom,
-		// TODO: get gas estimation from vote extensions logic
-		Amount: math.NewInt(2),
+		Denom:  payment.Token.Denom,
+		Amount: gasAmount,
 	}
 
 	// if payment.Token.Amount is less than coins.Amount, return funds and delete payment

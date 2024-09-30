@@ -21,6 +21,8 @@ message Params {
 
   // The axelar address of the fee recipient.
   string fee_recipient = 4;
+
+  int64 default_gas_estimate = 5;
 }
 
 // Payment is a data structure that holds information about a payment that has beenn made.

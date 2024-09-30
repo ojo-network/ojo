@@ -36,4 +36,5 @@ type BankKeeper interface {
 
 type GasEstimateKeeper interface {
 	GetParams(ctx sdk.Context) (params gasestimatetypes.Params)
+	GetGasEstimate(ctx sdk.Context, network string) (gasestimatetypes.GasEstimate, error)
 }
