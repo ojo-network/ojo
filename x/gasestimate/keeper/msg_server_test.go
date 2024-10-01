@@ -9,17 +9,19 @@ import (
 )
 
 var (
-	pubKey    = secp256k1.GenPrivKey().PubKey()
-	addr      = sdk.AccAddress(pubKey.Address())
-	initCoins = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, math.NewInt(1000000000000000000)))
+	pubKey           = secp256k1.GenPrivKey().PubKey()
+	addr             = sdk.AccAddress(pubKey.Address())
+	initCoins        = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, math.NewInt(1000000000000000000)))
+	contractRegistry = []*types.Contract{
+		{
+			Address: "0x5BB3E85f91D08fe92a3D123EE35050b763D6E6A7",
+			Network: "Ethereum",
+		},
+	}
 )
 
 func (s *IntegrationTestSuite) TestMsgServer_SetParams() {
-	gasestimateChannel := "channel-1"
-	gasestimateAddress := "axelar1dv4u5k73pzqrxlzujxg3qp8kvc3pje7jtdvu72npnt5zhq05ejcsn5qme5"
-	timeout := int64(1)
-	feeRecipient := "axelar1zl3rxpp70lmte2xr6c4lgske2fyuj3hupcsvcd"
-	SetParams(s, gasestimateAddress, gasestimateChannel, timeout, feeRecipient)
+	SetParams(s, contractRegistry, "1000000", "1.5")
 
 	params := types.DefaultParams()
 
@@ -29,10 +31,9 @@ func (s *IntegrationTestSuite) TestMsgServer_SetParams() {
 // SetParams sets the gasestimate module params
 func SetParams(
 	s *IntegrationTestSuite,
-	gasestimateAddress string,
-	gasestimateChannel string,
-	gasestimateTimeout int64,
-	feeRecipient string,
+	contractRegistry []*types.Contract,
+	gasLimit string,
+	gasAdjustment string,
 ) {
 	params := types.DefaultParams()
 	authority := s.app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String()
@@ -40,6 +41,8 @@ func SetParams(
 	msg := types.NewMsgSetParams(
 		params.ContractRegistry,
 		authority,
+		gasLimit,
+		gasAdjustment,
 	)
 
 	_, err := s.msgServer.SetParams(s.ctx, msg)

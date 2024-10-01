@@ -20,7 +20,7 @@ var (
 func (s *IntegrationTestSuite) TestMsgServer_SetParams() {
 	gmpChannel := "channel-1"
 	gmpAddress := "axelar1dv4u5k73pzqrxlzujxg3qp8kvc3pje7jtdvu72npnt5zhq05ejcsn5qme5"
-	timeout := int64(1)
+	timeout := int64(1000000)
 	feeRecipient := "axelar1zl3rxpp70lmte2xr6c4lgske2fyuj3hupcsvcd"
 	SetParams(s, gmpAddress, gmpChannel, timeout, feeRecipient)
 
@@ -48,6 +48,7 @@ func SetParams(
 		params.GmpTimeout,
 		params.FeeRecipient,
 		authority,
+		params.DefaultGasEstimate,
 	)
 
 	_, err := s.msgServer.SetParams(s.ctx, msg)

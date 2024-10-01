@@ -11,9 +11,13 @@ var _ sdk.Msg = &MsgSetParams{}
 func NewMsgSetParams(
 	contractRegistry []*Contract,
 	govAddress string,
+	gasLimit string,
+	gasAdjustment string,
 ) *MsgSetParams {
 	params := &Params{
 		ContractRegistry: contractRegistry,
+		GasLimit:         gasLimit,
+		GasAdjustment:    gasAdjustment,
 	}
 	return &MsgSetParams{
 		Params:    params,

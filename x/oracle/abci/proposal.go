@@ -327,7 +327,10 @@ func (h *ProposalHandler) generateMedianGasEstimates(
 			}
 		}
 
-		median := calculateMedian(networkEstimates)
+		median, err := calculateMedian(networkEstimates)
+		if err != nil {
+			return nil, err
+		}
 		gasEstimates = append(gasEstimates, median)
 	}
 
