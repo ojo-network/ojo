@@ -17,7 +17,7 @@ message Params {
   string gas_adjustment = 3;
 }
 
-// Contract defines a contract that we
+// Contract defines a contract at a specific address and network that we send gasestimate messages to.
 message Contract {
   string address = 1;
   string network = 2;
