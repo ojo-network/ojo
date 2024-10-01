@@ -24,6 +24,7 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 
+	gasestimatetypes "github.com/ojo-network/ojo/x/gasestimate/types"
 	oraclekeeper "github.com/ojo-network/ojo/x/oracle/keeper"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
@@ -47,6 +48,7 @@ func (app App) RegisterUpgradeHandlers() {
 	app.registerUpgrade0_3_2(upgradeInfo)
 	app.registerUpgrade0_4_0(upgradeInfo)
 	app.registerUpgrade0_4_1(upgradeInfo)
+	app.registerUpgrade0_5_0(upgradeInfo)
 }
 
 // performs upgrade from v0.1.3 to v0.1.4
@@ -66,7 +68,7 @@ func (app *App) registerUpgrade0_1_4(_ upgradetypes.Plan) {
 	)
 }
 
-//nolint: all
+// nolint: all
 func (app *App) registerUpgrade0_2_0(upgradeInfo upgradetypes.Plan) {
 	const planName = "v0.2.0"
 
@@ -329,6 +331,25 @@ func (app *App) registerUpgrade0_4_1(upgradeInfo upgradetypes.Plan) {
 	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
 		Added: []string{
 			circuittypes.ModuleName,
+		},
+	})
+}
+
+// performs upgrade from v0.4.x to v0.5.0
+func (app *App) registerUpgrade0_5_0(upgradeInfo upgradetypes.Plan) {
+	const planName = "v0.5.0"
+	app.UpgradeKeeper.SetUpgradeHandler(planName,
+		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			sdkCtx := sdk.UnwrapSDKContext(ctx)
+			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		},
+	)
+
+	// REF: https://github.com/cosmos/cosmos-sdk/blob/a32186608aab0bd436049377ddb34f90006fcbf7/simapp/upgrades.go
+	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
+		Added: []string{
+			gasestimatetypes.ModuleName,
 		},
 	})
 }
