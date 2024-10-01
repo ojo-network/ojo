@@ -161,7 +161,7 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 // BeginBlock executes all ABCI BeginBlock logic respective to the x/gmp module.
 func (am AppModule) BeginBlock(_ context.Context) {}
 
-// EndBlock is a no-op for the GMP module.
+// EndBlock will process price update payments during price deviation events.
 func (am AppModule) EndBlock(goCtx context.Context) ([]abci.ValidatorUpdate, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	payments := am.keeper.GetAllPayments(ctx)
