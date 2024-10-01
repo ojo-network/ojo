@@ -357,18 +357,3 @@ func (h *ProposalHandler) verifyMedianGasEstimations(
 
 	return nil
 }
-
-func calculateMedian(gasEstimates []oracletypes.GasEstimate) (median oracletypes.GasEstimate) {
-	sort.Slice(gasEstimates, func(i, j int) bool {
-		return gasEstimates[i].GasEstimation < gasEstimates[j].GasEstimation
-	})
-
-	mid := len(gasEstimates) / 2
-	if len(gasEstimates)%2 == 0 {
-		return oracletypes.GasEstimate{
-			GasEstimation: gasEstimates[mid-1].GasEstimation + gasEstimates[mid].GasEstimation,
-			Network:       gasEstimates[mid-1].Network,
-		}
-	}
-	return gasEstimates[mid]
-}
