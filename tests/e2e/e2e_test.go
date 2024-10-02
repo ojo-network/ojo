@@ -119,3 +119,30 @@ func (s *IntegrationTestSuite) TestClaimAirdrop() {
 
 	s.Require().Equal(airdropAccount.ClaimAmount, amount.Uint64())
 }
+
+func (s *IntegrationTestSuite) TestPaymentTx() {
+	// wait for exchange rates to be populated
+	ratesFound := false
+	for i := 0; i < 10; i++ {
+		rates, err := s.orchestrator.OjoClient.QueryClient.QueryExchangeRates()
+		if err == nil && len(rates) > 0 {
+			ratesFound = true
+			break
+		}
+		time.Sleep(time.Second * 2)
+	}
+	s.Require().True(ratesFound)
+
+	c := s.orchestrator.OjoClient
+	payment, err := c.TxClient.TxCreatePayment()
+	s.Require().NoError(err)
+	s.Require().Equal(payment.Code, uint32(0))
+
+	// sleep to make sure payment is created
+	time.Sleep(time.Second * 6)
+
+	// check to make sure payment was created
+	payments, err := c.QueryClient.QueryPayments()
+	s.Require().NoError(err)
+	s.Require().Equal(len(payments.Payments), 1)
+}

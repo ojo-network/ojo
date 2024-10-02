@@ -168,18 +168,17 @@ func (am AppModule) EndBlock(goCtx context.Context) ([]abci.ValidatorUpdate, err
 	for _, payment := range payments {
 		rate, err := am.oracleKeeper.GetExchangeRate(ctx, payment.Denom)
 		if err != nil {
+			ctx.Logger().Error("failed to get exchange rate while processing payment", "error", err)
 			continue
 		}
 		// if the last price has deviated by more than the deviation percentage, trigger an update
-		if payment.LastPrice.Sub(rate).Abs().GT(payment.Deviation) ||
-			payment.LastBlock < ctx.BlockHeight()-payment.Heartbeat {
+		if payment.TriggerUpdate(rate, ctx) {
 			err := am.keeper.ProcessPayment(goCtx, payment)
 			if err != nil {
 				ctx.Logger().Error("failed to process payment", "error", err)
 				continue
 			}
 		}
-
 	}
 	return []abci.ValidatorUpdate{}, nil
 }
