@@ -38,7 +38,7 @@ require (
 	github.com/ojo-network/ojo-evm/relayer v0.0.0-20240904192312-acda927a5d24
 	github.com/ojo-network/price-feeder v0.2.1-rc1
 	github.com/ory/dockertest/v3 v3.10.0
-	github.com/rs/zerolog v1.32.0
+	github.com/rs/zerolog v1.33.0
 	github.com/spf13/cast v1.6.0
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.18.2
