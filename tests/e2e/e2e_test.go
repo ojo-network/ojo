@@ -1,6 +1,7 @@
 package e2e
 
 import (
+	"context"
 	"time"
 
 	"cosmossdk.io/math"
@@ -145,4 +146,19 @@ func (s *IntegrationTestSuite) TestPaymentTx() {
 	payments, err := c.QueryClient.QueryPayments()
 	s.Require().NoError(err)
 	s.Require().Equal(len(payments.Payments), 1)
+}
+
+// GasEstimate waits 20 seconds for a gas estimate to be populated
+func (s *IntegrationTestSuite) TestGasEstimate() {
+	gasEstimateFound := false
+	for i := 0; i < 10; i++ {
+		c := s.orchestrator.OjoClient
+		gasEstimate, err := c.QueryClient.GetGasEstimate(context.Background(), "Arbitrum")
+		if err == nil && gasEstimate > 0 {
+			gasEstimateFound = true
+			break
+		}
+		time.Sleep(time.Second * 2)
+	}
+	s.Require().True(gasEstimateFound)
 }
