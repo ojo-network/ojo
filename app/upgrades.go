@@ -342,6 +342,10 @@ func (app *App) registerUpgrade0_5_0(upgradeInfo upgradetypes.Plan) {
 		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			sdkCtx := sdk.UnwrapSDKContext(ctx)
 			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
+
+			// Add this line to set the initial version for the new module
+			fromVM[gasestimatetypes.ModuleName] = 1
+
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)
