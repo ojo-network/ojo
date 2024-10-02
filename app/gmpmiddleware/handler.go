@@ -8,9 +8,12 @@ import (
 	"github.com/ojo-network/ojo/x/gmp/types"
 )
 
+// default values for new payments coming from axelar
 const (
 	blocksPerDay = 14400
 )
+
+var defaultDeviation = math.LegacyMustNewDecFromStr("1.0")
 
 type GmpKeeper interface {
 	GetParams(ctx sdk.Context) (params types.Params)
@@ -62,11 +65,6 @@ func (h GmpHandler) HandleGeneralMessage(
 	}
 	ctx.Logger().Info("HandleGeneralMessage GMP Decoder", "msg", msg)
 	denoms := msg.GetDenoms()
-
-	defaultDeviation, err := math.LegacyNewDecFromStr("1")
-	if err != nil {
-		return err
-	}
 
 	tx := &types.MsgCreatePayment{
 		Relayer: h.relayer,
