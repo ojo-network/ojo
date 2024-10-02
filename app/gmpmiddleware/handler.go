@@ -3,16 +3,24 @@ package gmpmiddleware
 import (
 	"context"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ojo-network/ojo/x/gmp/types"
 )
 
+// default values for new payments coming from axelar
+const (
+	blocksPerDay = 14400
+)
+
+var defaultDeviation = math.LegacyMustNewDecFromStr("1.0")
+
 type GmpKeeper interface {
-	RelayPrice(
-		goCtx context.Context,
-		msg *types.MsgRelayPrice,
-	) (*types.MsgRelayPriceResponse, error)
 	GetParams(ctx sdk.Context) (params types.Params)
+	CreatePayment(
+		goCtx context.Context,
+		msg *types.MsgCreatePayment,
+	) (*types.MsgCreatePaymentResponse, error)
 }
 
 type GmpHandler struct {
@@ -56,22 +64,24 @@ func (h GmpHandler) HandleGeneralMessage(
 		return err
 	}
 	ctx.Logger().Info("HandleGeneralMessage GMP Decoder", "msg", msg)
-	tx := &types.MsgRelayPrice{
-		Relayer:               h.relayer,
-		DestinationChain:      srcChain,
-		ClientContractAddress: msg.ContractAddress.Hex(),
-		OjoContractAddress:    srcAddress,
-		Denoms:                msg.GetDenoms(),
-		CommandSelector:       msg.CommandSelector[:],
-		CommandParams:         msg.CommandParams,
-		Timestamp:             msg.Timestamp.Int64(),
-		Token:                 coin,
+	denoms := msg.GetDenoms()
+
+	tx := &types.MsgCreatePayment{
+		Relayer: h.relayer,
+		Payment: &types.Payment{
+			Relayer:          h.relayer,
+			DestinationChain: srcChain,
+			Denom:            denoms[0],
+			Token:            coin,
+			Deviation:        defaultDeviation,
+			Heartbeat:        blocksPerDay,
+		},
 	}
 	err = tx.ValidateBasic()
 	if err != nil {
 		return err
 	}
 	ctx.Logger().Info("HandleGeneralMessage GMP Decoder", "tx", tx)
-	_, err = h.gmp.RelayPrice(ctx, tx)
+	_, err = h.gmp.CreatePayment(ctx, tx)
 	return err
 }
