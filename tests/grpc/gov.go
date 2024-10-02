@@ -12,7 +12,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const extraWaitTime = 3 * time.Second // at least one full block
+const extraWaitTime = 5 * time.Second // at least one full block
 
 // VerifyProposalPassed returns a non-nil error if the proposal did not pass
 func VerifyProposalPassed(ojoClient *client.OjoClient, proposalID uint64) error {

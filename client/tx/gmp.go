@@ -17,7 +17,7 @@ func (c *Client) TxCreatePayment() (*sdk.TxResponse, error) {
 		fromAddr.String(),
 		"Arbitrum",
 		"BTC",
-		sdk.NewCoin("uojo", math.NewInt(10_000_000_000)),
+		sdk.NewCoin("uojo", math.NewInt(1_000_000_000)),
 		math.LegacyOneDec(),
 		100,
 	)
