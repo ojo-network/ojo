@@ -25,10 +25,11 @@ type Keeper struct {
 	storeKey   storetypes.StoreKey
 	paramSpace paramstypes.Subspace
 
-	accountKeeper types.AccountKeeper
-	bankKeeper    types.BankKeeper
-	distrKeeper   types.DistributionKeeper
-	StakingKeeper types.StakingKeeper
+	accountKeeper     types.AccountKeeper
+	bankKeeper        types.BankKeeper
+	distrKeeper       types.DistributionKeeper
+	StakingKeeper     types.StakingKeeper
+	GasEstimateKeeper types.GasEstimateKeeper
 
 	PriceFeeder *pricefeeder.PriceFeeder
 
@@ -48,6 +49,7 @@ func NewKeeper(
 	bankKeeper types.BankKeeper,
 	distrKeeper types.DistributionKeeper,
 	stakingKeeper types.StakingKeeper,
+	gasEstimateKeeper types.GasEstimateKeeper,
 	distrName string,
 	telemetryEnabled bool,
 	authority string,
@@ -63,17 +65,18 @@ func NewKeeper(
 	}
 
 	return Keeper{
-		cdc:              cdc,
-		storeKey:         storeKey,
-		paramSpace:       paramspace,
-		accountKeeper:    accountKeeper,
-		bankKeeper:       bankKeeper,
-		distrKeeper:      distrKeeper,
-		StakingKeeper:    stakingKeeper,
-		PriceFeeder:      &pricefeeder.PriceFeeder{},
-		distrName:        distrName,
-		telemetryEnabled: telemetryEnabled,
-		authority:        authority,
+		cdc:               cdc,
+		storeKey:          storeKey,
+		paramSpace:        paramspace,
+		accountKeeper:     accountKeeper,
+		bankKeeper:        bankKeeper,
+		distrKeeper:       distrKeeper,
+		StakingKeeper:     stakingKeeper,
+		GasEstimateKeeper: gasEstimateKeeper,
+		PriceFeeder:       &pricefeeder.PriceFeeder{},
+		distrName:         distrName,
+		telemetryEnabled:  telemetryEnabled,
+		authority:         authority,
 	}
 }
 

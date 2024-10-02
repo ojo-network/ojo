@@ -3,6 +3,7 @@ package types
 import (
 	fmt "fmt"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ojo-network/ojo/util/checkers"
@@ -16,12 +17,14 @@ func NewMsgSetParams(
 	gmpTimeout int64,
 	feeRecipient string,
 	govAddress string,
+	defaultGasEstimate int64,
 ) *MsgSetParams {
 	params := &Params{
-		GmpAddress:   gmpAddress,
-		GmpChannel:   gmpChannel,
-		GmpTimeout:   gmpTimeout,
-		FeeRecipient: feeRecipient,
+		GmpAddress:         gmpAddress,
+		GmpChannel:         gmpChannel,
+		GmpTimeout:         gmpTimeout,
+		FeeRecipient:       feeRecipient,
+		DefaultGasEstimate: defaultGasEstimate,
 	}
 	return &MsgSetParams{
 		Params:    params,
@@ -98,6 +101,60 @@ func (msg MsgRelayPrice) ValidateBasic() error {
 		if len(denom) > 32 {
 			return fmt.Errorf("denom %s is too long", denom)
 		}
+	}
+
+	return nil
+}
+
+func NewMsgCreatePayment(
+	relayer string,
+	destinationChain string,
+	denom string,
+	token sdk.Coin,
+	deviation math.LegacyDec,
+	heartbeat int64,
+) *MsgCreatePayment {
+	return &MsgCreatePayment{
+		Relayer: relayer,
+		Payment: &Payment{
+			Relayer:          relayer,
+			DestinationChain: destinationChain,
+			Denom:            denom,
+			Token:            token,
+			Deviation:        deviation,
+			Heartbeat:        heartbeat,
+		},
+	}
+}
+
+// Type implements LegacyMsg interface
+func (msg MsgCreatePayment) Type() string { return sdk.MsgTypeURL(&msg) }
+
+// GetSigners implements sdk.Msg
+func (msg MsgRelayPrice) MsgCreatePayment() []sdk.AccAddress {
+	return checkers.Signers(msg.Relayer)
+}
+
+// ValidateBasic Implements sdk.Msg
+func (msg MsgCreatePayment) ValidateBasic() error {
+	if len(msg.Relayer) == 0 {
+		return fmt.Errorf("relayer cannot be empty")
+	}
+	if msg.Payment.DestinationChain == "" {
+		return fmt.Errorf("destinationChain cannot be empty")
+	}
+	if msg.Payment.Denom == "" {
+		return fmt.Errorf("denom cannot be empty")
+	}
+	if msg.Payment.Token.IsZero() {
+		return fmt.Errorf("token cannot be zero")
+	}
+	// deviation must be between 0.5 and 50
+	if msg.Payment.Deviation.LT(math.LegacyNewDecWithPrec(5, 1)) || msg.Payment.Deviation.GT(math.LegacyNewDec(50)) {
+		return fmt.Errorf("deviation must be between 0.5 and 50")
+	}
+	if msg.Payment.Heartbeat <= 0 {
+		return fmt.Errorf("heartbeat must be greater than 0")
 	}
 
 	return nil

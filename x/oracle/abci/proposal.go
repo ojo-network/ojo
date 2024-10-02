@@ -73,9 +73,14 @@ func (h *ProposalHandler) PrepareProposalHandler() sdk.PrepareProposalHandler {
 				return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, err
 			}
 
+			medianGasEstimates, err := h.generateMedianGasEstimates(ctx, req.LocalLastCommit)
+			if err != nil {
+				return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, err
+			}
 			injectedVoteExtTx := oracletypes.InjectedVoteExtensionTx{
 				ExchangeRateVotes:  exchangeRateVotes,
 				ExtendedCommitInfo: extendedCommitInfoBz,
+				GasEstimateMedians: medianGasEstimates,
 			}
 
 			bz, err := injectedVoteExtTx.Marshal()
@@ -129,11 +134,22 @@ func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 					oracletypes.ErrNoCommitInfo
 			}
 
+			oracleRateFound := false
 			var injectedVoteExtTx oracletypes.InjectedVoteExtensionTx
-			if err := injectedVoteExtTx.Unmarshal(req.Txs[0]); err != nil {
-				h.logger.Error("failed to decode injected vote extension tx", "err", err)
-				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
+			for _, tx := range req.Txs {
+				if err := injectedVoteExtTx.Unmarshal(tx); err == nil {
+					oracleRateFound = true
+					break
+				}
 			}
+			if !(oracleRateFound) {
+				h.logger.Error("failed to decode injected vote extension tx")
+				return &cometabci.ResponseProcessProposal{
+						Status: cometabci.ResponseProcessProposal_REJECT,
+					},
+					fmt.Errorf("failed to decode injected vote extension tx")
+			}
+
 			var extendedCommitInfo cometabci.ExtendedCommitInfo
 			if err := extendedCommitInfo.Unmarshal(injectedVoteExtTx.ExtendedCommitInfo); err != nil {
 				h.logger.Error("failed to decode injected extended commit info", "err", err)
@@ -158,6 +174,14 @@ func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
 			}
 			if err := h.verifyExchangeRateVotes(injectedVoteExtTx.ExchangeRateVotes, exchangeRateVotes); err != nil {
+				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
+			}
+			// Verify the proposer's gas estimation by computing the same median.
+			gasEstimateMedians, err := h.generateMedianGasEstimates(ctx, extendedCommitInfo)
+			if err != nil {
+				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
+			}
+			if err := h.verifyMedianGasEstimations(injectedVoteExtTx.GasEstimateMedians, gasEstimateMedians); err != nil {
 				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
 			}
 		}
@@ -236,6 +260,100 @@ func (h *ProposalHandler) verifyExchangeRateVotes(
 		generatedVote := generatedVotes[i]
 
 		if injectedVote.Voter != generatedVote.Voter || !injectedVote.ExchangeRates.Equal(generatedVote.ExchangeRates) {
+			return oracletypes.ErrNonEqualInjVotesRates
+		}
+	}
+
+	return nil
+}
+
+func (h *ProposalHandler) generateMedianGasEstimates(
+	ctx sdk.Context,
+	ci cometabci.ExtendedCommitInfo,
+) ([]oracletypes.GasEstimate, error) {
+	gasEstimates := []oracletypes.GasEstimate{}
+
+	for _, vote := range ci.Votes {
+		if vote.BlockIdFlag != cmtproto.BlockIDFlagCommit {
+			continue
+		}
+
+		var valConsAddr sdk.ConsAddress
+		if err := valConsAddr.Unmarshal(vote.Validator.Address); err != nil {
+			h.logger.Error(
+				"failed to unmarshal validator consensus address",
+				"err", err,
+			)
+			return gasEstimates, err
+		}
+		val, err := h.stakingKeeper.GetValidatorByConsAddr(ctx, valConsAddr)
+		if err != nil {
+			h.logger.Error(
+				"failed to get consensus validator from staking keeper",
+				"err", err,
+			)
+			return gasEstimates, err
+		}
+		_, err = sdk.ValAddressFromBech32(val.OperatorAddress)
+		if err != nil {
+			return gasEstimates, err
+		}
+	}
+
+	networks := []string{}
+	// get contracts on registry list
+	params := h.oracleKeeper.GasEstimateKeeper.GetParams(ctx)
+	for _, contract := range params.ContractRegistry {
+		networks = append(networks, contract.Network)
+	}
+
+	for _, network := range networks {
+		networkEstimates := []oracletypes.GasEstimate{}
+
+		for _, vote := range ci.Votes {
+			var voteExt oracletypes.OracleVoteExtension
+			if err := voteExt.Unmarshal(vote.VoteExtension); err != nil {
+				h.logger.Error(
+					"failed to decode vote extension",
+					"err", err,
+				)
+				continue
+			}
+
+			for _, estimate := range voteExt.GasEstimates {
+				if estimate.Network == network {
+					networkEstimates = append(networkEstimates, estimate)
+				}
+			}
+		}
+
+		median, err := calculateMedian(networkEstimates)
+		if err != nil {
+			continue
+		}
+		gasEstimates = append(gasEstimates, median)
+	}
+
+	return gasEstimates, nil
+}
+
+func (h *ProposalHandler) verifyMedianGasEstimations(
+	injectedEstimates []oracletypes.GasEstimate,
+	generatedEstimates []oracletypes.GasEstimate,
+) error {
+	if len(injectedEstimates) != len(generatedEstimates) {
+		return oracletypes.ErrNonEqualInjVotesLen
+	}
+
+	for i := range injectedEstimates {
+		injectedEstimate := injectedEstimates[i]
+		generatedEstimate := generatedEstimates[i]
+
+		if injectedEstimate.Network != generatedEstimate.Network {
+			return oracletypes.ErrNonEqualInjVotesRates
+		}
+
+		if injectedEstimate.GasEstimation != generatedEstimate.GasEstimation {
 			return oracletypes.ErrNonEqualInjVotesRates
 		}
 	}

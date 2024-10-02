@@ -30,3 +30,12 @@ func (q querier) Params(
 	params := q.GetParams(ctx)
 	return &types.ParamsResponse{Params: params}, nil
 }
+
+func (q querier) AllPayments(
+	goCtx context.Context,
+	_ *types.AllPaymentsRequest,
+) (*types.AllPaymentsResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	payments := q.Keeper.GetAllPayments(ctx)
+	return &types.AllPaymentsResponse{Payments: payments}, nil
+}

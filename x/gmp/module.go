@@ -161,8 +161,25 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 // BeginBlock executes all ABCI BeginBlock logic respective to the x/gmp module.
 func (am AppModule) BeginBlock(_ context.Context) {}
 
-// EndBlock is a no-op for the GMP module.
-func (am AppModule) EndBlock(_ context.Context) ([]abci.ValidatorUpdate, error) {
+// EndBlock will process price update payments during price deviation events.
+func (am AppModule) EndBlock(goCtx context.Context) ([]abci.ValidatorUpdate, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	payments := am.keeper.GetAllPayments(ctx)
+	for _, payment := range payments {
+		rate, err := am.oracleKeeper.GetExchangeRate(ctx, payment.Denom)
+		if err != nil {
+			ctx.Logger().Error("failed to get exchange rate while processing payment", "error", err)
+			continue
+		}
+		// if the last price has deviated by more than the deviation percentage, trigger an update
+		if payment.TriggerUpdate(rate, ctx) {
+			err := am.keeper.ProcessPayment(goCtx, payment)
+			if err != nil {
+				ctx.Logger().Error("failed to process payment", "error", err)
+				continue
+			}
+		}
+	}
 	return []abci.ValidatorUpdate{}, nil
 }
 

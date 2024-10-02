@@ -2,6 +2,7 @@ syntax = "proto3";
 package ojo.gmp.v1;
 
 import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/ojo-network/ojo/x/gmp/types";
 
@@ -20,4 +21,45 @@ message Params {
 
   // The axelar address of the fee recipient.
   string fee_recipient = 4;
+
+  int64 default_gas_estimate = 5;
+}
+
+// Payment is a data structure that holds information about a payment that has beenn made.
+message Payment {
+
+    // relayer is the address that signs the message.
+    string relayer = 1;
+    // destination_chain defines the chain which this will be relayed to.
+    string destination_chain = 2;
+
+    // denom defines the price feed denom to be relayed to the contract
+    string denom = 3;
+
+    // token determines the IBC token that will be used for payment to Axelar.
+    cosmos.base.v1beta1.Coin token = 4 [
+      (gogoproto.nullable) = false,
+      (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+    ];
+
+    // deviation is a percentage of how much the price can deviate before triggering an update.
+    // 100 = 100%.
+    string deviation = 5 [
+      (gogoproto.moretags) = "yaml:\"deviation\"",
+      (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+      (gogoproto.nullable) = false
+    ];
+
+    // heartbeat is how often the price will be updated in Ojo blocks, regardless of whether the price has deviated or not.
+    int64 heartbeat = 6;
+
+    // last_price is the last price that was sent to the smart contract..
+    string last_price = 7 [
+      (gogoproto.moretags) = "yaml:\"last_price\"",
+      (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+      (gogoproto.nullable) = false
+    ];
+
+    // last_block is the last Ojo block at which the price was pushed.
+    int64 last_block = 8;
 }

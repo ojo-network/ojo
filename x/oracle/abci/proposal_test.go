@@ -21,6 +21,17 @@ import (
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
 
+var testGasEstimates = []oracletypes.GasEstimate{
+	{
+		GasEstimation: 300,
+		Network:       "Ethereum",
+	},
+	{
+		GasEstimation: 100,
+		Network:       "Arbitrum",
+	},
+}
+
 func (s *IntegrationTestSuite) TestPrepareProposalHandler() {
 	app, ctx, keys := s.app, s.ctx, s.keys
 
@@ -172,6 +183,7 @@ func (s *IntegrationTestSuite) TestProcessProposalHandler() {
 	injectedVoteExtTx := oracletypes.InjectedVoteExtensionTx{
 		ExchangeRateVotes:  exchangeRateVotes,
 		ExtendedCommitInfo: localCommitInfoBz,
+		GasEstimateMedians: testGasEstimates,
 	}
 	bz, err := injectedVoteExtTx.Marshal()
 	s.Require().NoError(err)
@@ -242,7 +254,7 @@ func (s *IntegrationTestSuite) TestProcessProposalHandler() {
 				Txs:    txsConflicting,
 			},
 			expErr:    true,
-			expErrMsg: "injected exhange rate votes and generated exchange votes are not equal",
+			expErrMsg: "injected exchange rate votes and generated exchange votes are not equal",
 		},
 	}
 
@@ -308,6 +320,7 @@ func buildLocalCommitInfo(
 	voteExt := oracletypes.OracleVoteExtension{
 		ExchangeRates: exchangeRates,
 		Height:        ctx.BlockHeight(),
+		GasEstimates:  testGasEstimates,
 	}
 	bz, err := voteExt.Marshal()
 	if err != nil {

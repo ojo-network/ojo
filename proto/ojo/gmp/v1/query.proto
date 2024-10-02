@@ -13,6 +13,11 @@ service Query {
   rpc Params(ParamsRequest) returns (ParamsResponse) {
     option (google.api.http).get = "/ojo/gmp/v1/params";
   }
+
+  // AllPayments queries all payments.
+  rpc AllPayments(AllPaymentsRequest) returns (AllPaymentsResponse) {
+    option (google.api.http).get = "/ojo/gmp/v1/all_payments";
+  }
 }
 
 // ParamsRequest is the request type for the Query/Params RPC method.
@@ -22,4 +27,12 @@ message ParamsRequest {}
 message ParamsResponse {
   // params defines the parameters of the module.
   Params params = 1 [(gogoproto.nullable) = false];
+}
+
+// AllPaymentsRequest is the request type for the Query/AllPayments RPC method.
+message AllPaymentsRequest {}
+
+// AllPaymentsResponse is the response type for the Query/AllPayments RPC method.
+message AllPaymentsResponse {
+  repeated Payment payments = 1 [(gogoproto.nullable) = false];
 }

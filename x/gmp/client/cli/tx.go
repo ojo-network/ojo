@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
@@ -27,6 +28,7 @@ func GetTxCmd() *cobra.Command {
 	cmd.AddCommand(
 		GetCmdRelay(),
 		GetCmdRelayWithContractCall(),
+		GetCmdCreatePayment(),
 	)
 
 	return cmd
@@ -189,6 +191,62 @@ func GetCmdRelayWithContractCall() *cobra.Command {
 				commandSelector, // command-selector
 				commandParams,   // command-params
 				timestamp,       // timestamp
+			)
+			err = msg.ValidateBasic()
+			if err != nil {
+				return err
+			}
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+
+	return cmd
+}
+
+func GetCmdCreatePayment() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "create-payment [destination-chain] [denom] [deviation] [heartbeat] [token]",
+		Args:  cobra.ExactArgs(5),
+		Short: "Create a payment to relay price data",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			deviation, err := math.LegacyNewDecFromStr(args[2])
+			if err != nil {
+				return err
+			}
+			heartbeat, err := strconv.ParseInt(args[3], 10, 64)
+			if err != nil {
+				return err
+			}
+
+			tokens := sdk.Coin{}
+			// normalize the coin denom
+			if args[4] != "" {
+				coin, err := sdk.ParseCoinNormalized(args[4])
+				if err != nil {
+					return err
+				}
+				if !strings.HasPrefix(coin.Denom, "ibc/") {
+					denomTrace := ibctransfertypes.ParseDenomTrace(coin.Denom)
+					coin.Denom = denomTrace.IBCDenom()
+				}
+				tokens = coin
+			}
+
+			msg := types.NewMsgCreatePayment(
+				clientCtx.GetFromAddress().String(),
+				args[0],
+				args[1],
+				tokens,
+				deviation,
+				heartbeat,
 			)
 			err = msg.ValidateBasic()
 			if err != nil {
