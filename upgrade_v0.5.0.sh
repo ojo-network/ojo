@@ -4,8 +4,8 @@
 CHAIN_ID="ojo"
 ALICE_KEY="alice"
 UPGRADE_NAME="v0.5.0"
-UPGRADE_HEIGHT=100  # Adjust this to an appropriate block height
-VOTING_PERIOD="10s"  # This matches the voting period set in your genesis
+UPGRADE_HEIGHT=30  # Adjust this to an appropriate block height
+VOTING_PERIOD="20s"
 BINARY="ojod"
 
 # Ensure the binary is in the PATH
