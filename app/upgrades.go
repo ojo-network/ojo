@@ -342,6 +342,10 @@ func (app *App) registerUpgrade0_5_0(upgradeInfo upgradetypes.Plan) {
 		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			sdkCtx := sdk.UnwrapSDKContext(ctx)
 			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
+
+			params := app.GmpKeeper.GetParams(sdkCtx)
+			params.DefaultGasEstimate = gmptypes.DefaultParams().DefaultGasEstimate
+			app.GmpKeeper.SetParams(sdkCtx, params)
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)
