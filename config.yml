@@ -30,6 +30,13 @@ faucet:
   port: 4500
 genesis:
   app_state:
+    gov:
+      params:
+        min_deposit:
+          - amount: "100"
+            denom: "uojo"
+        voting_period: "10s"
+        expedited_voting_period: "1s"
     staking:
       params:
         bond_denom: uojo
@@ -37,10 +44,10 @@ genesis:
     params:
         abci:
           vote_extensions_enable_height: "2"
-  chain_id: ojo-testnet
 validators:
 - name: alice
   bonded: 33500000000000uojo
   app:
     pricefeeder:
       config_path: "./pricefeeder/price-feeder.example.toml"
+      enable: true
