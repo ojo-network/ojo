@@ -68,7 +68,7 @@ func (app *App) registerUpgrade0_1_4(_ upgradetypes.Plan) {
 	)
 }
 
-// nolint: all
+//nolint: all
 func (app *App) registerUpgrade0_2_0(upgradeInfo upgradetypes.Plan) {
 	const planName = "v0.2.0"
 
@@ -343,8 +343,6 @@ func (app *App) registerUpgrade0_5_0(upgradeInfo upgradetypes.Plan) {
 			sdkCtx := sdk.UnwrapSDKContext(ctx)
 			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
 
-			// Add this line to set the initial version for the new module
-			fromVM[gasestimatetypes.ModuleName] = 1
 			params := app.GmpKeeper.GetParams(sdkCtx)
 			params.DefaultGasEstimate = gmptypes.DefaultParams().DefaultGasEstimate
 			app.GmpKeeper.SetParams(sdkCtx, params)
