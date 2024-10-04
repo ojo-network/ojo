@@ -359,7 +359,7 @@ func (app *App) registerUpgrade0_5_0(upgradeInfo upgradetypes.Plan) {
 	})
 }
 
-func (app *App) registerUpgrade0_5_1(upgradeInfo upgradetypes.Plan) {
+func (app *App) registerUpgrade0_5_1(_ upgradetypes.Plan) {
 	const planName = "v0.5.1"
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
