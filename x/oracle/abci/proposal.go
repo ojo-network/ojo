@@ -111,6 +111,7 @@ func (h *ProposalHandler) PrepareProposalHandler() sdk.PrepareProposalHandler {
 // step MUST be deterministic.
 func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 	return func(ctx sdk.Context, req *cometabci.RequestProcessProposal) (*cometabci.ResponseProcessProposal, error) {
+		h.logger.Info("begin ProcessProposalHandler")
 		if req == nil {
 			err := fmt.Errorf("process proposal received a nil request")
 			h.logger.Error(err.Error())
@@ -125,6 +126,8 @@ func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 			)
 			return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
 		}
+
+		h.logger.Info("after the first block")
 
 		voteExtensionsEnabled := VoteExtensionsEnabled(ctx)
 		if voteExtensionsEnabled {
@@ -164,6 +167,7 @@ func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 				extendedCommitInfo,
 			)
 			if err != nil {
+				h.logger.Error("failed to validate vote extensions", "err", err)
 				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
 			}
 
@@ -171,17 +175,29 @@ func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 			// calculation and comparing the results.
 			exchangeRateVotes, err := h.generateExchangeRateVotes(ctx, extendedCommitInfo)
 			if err != nil {
+				h.logger.Error("failed to generate exchange rate votes", "err", err)
+				fmt.Println("injected: ", injectedVoteExtTx.ExchangeRateVotes)
+				fmt.Println("computed: ", exchangeRateVotes)
 				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
 			}
 			if err := h.verifyExchangeRateVotes(injectedVoteExtTx.ExchangeRateVotes, exchangeRateVotes); err != nil {
+				h.logger.Error("failed to verify exchange rate votes", "err", err)
+				fmt.Println("injected: ", injectedVoteExtTx.ExchangeRateVotes)
+				fmt.Println("computed: ", exchangeRateVotes)
 				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
 			}
 			// Verify the proposer's gas estimation by computing the same median.
 			gasEstimateMedians, err := h.generateMedianGasEstimates(ctx, extendedCommitInfo)
 			if err != nil {
+				h.logger.Error("failed to generate median gas estimates", "err", err)
+				fmt.Println("injected: ", injectedVoteExtTx.GasEstimateMedians)
+				fmt.Println("computed: ", gasEstimateMedians)
 				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
 			}
 			if err := h.verifyMedianGasEstimations(injectedVoteExtTx.GasEstimateMedians, gasEstimateMedians); err != nil {
+				h.logger.Error("failed to verify median gas estimations", "err", err)
+				fmt.Println("injected: ", injectedVoteExtTx.GasEstimateMedians)
+				fmt.Println("computed: ", gasEstimateMedians)
 				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
 			}
 		}
@@ -191,6 +207,8 @@ func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 			"txs", len(req.Txs),
 			"vote_extensions_enabled", voteExtensionsEnabled,
 		)
+
+		h.logger.Info("end ProcessProposalHandler")
 
 		return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_ACCEPT}, nil
 	}
