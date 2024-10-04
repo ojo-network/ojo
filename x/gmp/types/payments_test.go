@@ -52,6 +52,19 @@ func TestPayment_TriggerUpdate(t *testing.T) {
 			ctx:  sdk.Context{}.WithBlockHeight(102),
 			want: true,
 		},
+
+		{
+			name: "should not trigger update - deviation within threshol",
+			payment: Payment{
+				LastPrice: math.LegacyMustNewDecFromStr("200"),
+				Deviation: math.LegacyMustNewDecFromStr("1"),
+				Heartbeat: 100,
+				LastBlock: 100,
+			},
+			rate: math.LegacyMustNewDecFromStr("202"),
+			ctx:  sdk.Context{}.WithBlockHeight(101),
+			want: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
