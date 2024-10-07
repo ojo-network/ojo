@@ -49,6 +49,7 @@ func (app App) RegisterUpgradeHandlers() {
 	app.registerUpgrade0_4_0(upgradeInfo)
 	app.registerUpgrade0_4_1(upgradeInfo)
 	app.registerUpgrade0_5_0(upgradeInfo)
+	app.registerUpgrade0_5_1(upgradeInfo)
 }
 
 // performs upgrade from v0.1.3 to v0.1.4
@@ -356,6 +357,21 @@ func (app *App) registerUpgrade0_5_0(upgradeInfo upgradetypes.Plan) {
 			gasestimatetypes.ModuleName,
 		},
 	})
+}
+
+func (app *App) registerUpgrade0_5_1(_ upgradetypes.Plan) {
+	const planName = "v0.5.1"
+	app.UpgradeKeeper.SetUpgradeHandler(planName,
+		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			sdkCtx := sdk.UnwrapSDKContext(ctx)
+			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
+
+			params := app.GasEstimateKeeper.GetParams(sdkCtx)
+			params.GasAdjustment = "0.35"
+			app.GasEstimateKeeper.SetParams(sdkCtx, params)
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		},
+	)
 }
 
 // helper function to check if the store loader should be upgraded
