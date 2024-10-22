@@ -83,13 +83,13 @@ func GetCmdRelay() *cobra.Command {
 
 			msg := types.NewMsgRelay(
 				clientCtx.GetFromAddress().String(),
-				args[0],                // destination-chain e.g. "Ethereum"
-				args[1],                // ojo-contract-address e.g. "0x001"
-				"",                     // customer-contract-address e.g. "0x002"
-				tokens,                 // amount
-				denoms,                 // denoms
-				commandSelector,        // command-selector
-				commandParams,          // command-params
+				args[0],         // destination-chain e.g. "Ethereum"
+				args[1],         // ojo-contract-address e.g. "0x001"
+				"",              // customer-contract-address e.g. "0x002"
+				tokens,          // amount
+				denoms,          // denoms
+				commandSelector, // command-selector
+				commandParams,   // command-params
 				0,
 			)
 			err = msg.ValidateBasic()
@@ -165,13 +165,13 @@ func GetCmdRelayWithContractCall() *cobra.Command {
 
 			msg := types.NewMsgRelay(
 				clientCtx.GetFromAddress().String(),
-				args[0],                // destination-chain e.g. "Ethereum"
-				args[1],                // ojo-contract-address e.g. "0x001"
-				args[2],                // customer-contract-address e.g. "0x002"
-				tokens,                 // amount
-				denoms,                 // denoms
-				commandSelector,        // command-selector
-				commandParams,          // command-params
+				args[0],         // destination-chain e.g. "Ethereum"
+				args[1],         // ojo-contract-address e.g. "0x001"
+				args[2],         // customer-contract-address e.g. "0x002"
+				tokens,          // amount
+				denoms,          // denoms
+				commandSelector, // command-selector
+				commandParams,   // command-params
 				0,
 			)
 			err = msg.ValidateBasic()
