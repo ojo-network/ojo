@@ -36,7 +36,7 @@ func GetTxCmd() *cobra.Command {
 
 func GetCmdRelay() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   `relay [destination-chain] [ojo-contract-address] [timestamp] [denoms] [amount]`,
+		Use:   `relay [destination-chain] [ojo-contract-address] [denoms] [amount]`,
 		Args:  cobra.ExactArgs(5),
 		Short: "Relay oracle data via Axelar GMP",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -45,6 +45,8 @@ func GetCmdRelay() *cobra.Command {
 				return err
 			}
 
+			ctx := sdk.UnwrapSDKContext(cmd.Context())
+
 			if args[0] == "" {
 				return fmt.Errorf("destination-chain cannot be empty")
 			}
@@ -52,9 +54,6 @@ func GetCmdRelay() *cobra.Command {
 				return fmt.Errorf("ojo-contract-address cannot be empty")
 			}
 			if args[2] == "" {
-				return fmt.Errorf("timestamp cannot be empty")
-			}
-			if args[3] == "" {
 				return fmt.Errorf("denoms cannot be empty")
 			}
 
@@ -73,13 +72,7 @@ func GetCmdRelay() *cobra.Command {
 			}
 
 			// convert denoms to string array
-			denoms := strings.Split(args[3], ",")
-
-			// convert timestamp string to int64
-			timestamp, err := strconv.ParseInt(args[2], 10, 64)
-			if err != nil {
-				return err
-			}
+			denoms := strings.Split(args[2], ",")
 
 			commandSelector, err := base64.StdEncoding.DecodeString("")
 			if err != nil {
@@ -92,14 +85,14 @@ func GetCmdRelay() *cobra.Command {
 
 			msg := types.NewMsgRelay(
 				clientCtx.GetFromAddress().String(),
-				args[0],         // destination-chain e.g. "Ethereum"
-				args[1],         // ojo-contract-address e.g. "0x001"
-				"",              // customer-contract-address e.g. "0x002"
-				tokens,          // amount
-				denoms,          // denoms
-				commandSelector, // command-selector
-				commandParams,   // command-params
-				timestamp,       // timestamp
+				args[0],                // destination-chain e.g. "Ethereum"
+				args[1],                // ojo-contract-address e.g. "0x001"
+				"",                     // customer-contract-address e.g. "0x002"
+				tokens,                 // amount
+				denoms,                 // denoms
+				commandSelector,        // command-selector
+				commandParams,          // command-params
+				ctx.BlockTime().Unix(), // timestamp
 			)
 			err = msg.ValidateBasic()
 			if err != nil {
@@ -118,7 +111,7 @@ func GetCmdRelay() *cobra.Command {
 func GetCmdRelayWithContractCall() *cobra.Command {
 	cmd := &cobra.Command{
 		Use: `relay-with-contract-call [destination-chain] [ojo-contract-address] [client-contract-address] ` +
-			`[command-selector] [command-params] [timestamp] [denoms] [amount]`,
+			`[command-selector] [command-params] [denoms] [amount]`,
 		Args:  cobra.ExactArgs(8),
 		Short: "Relay oracle data via Axelar GMP and call contract method with oracle data",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -126,6 +119,8 @@ func GetCmdRelayWithContractCall() *cobra.Command {
 			if err != nil {
 				return err
 			}
+
+			ctx := sdk.UnwrapSDKContext(cmd.Context())
 
 			if args[0] == "" {
 				return fmt.Errorf("destination-chain cannot be empty")
@@ -143,9 +138,6 @@ func GetCmdRelayWithContractCall() *cobra.Command {
 				return fmt.Errorf("command-params cannot be empty")
 			}
 			if args[5] == "" {
-				return fmt.Errorf("timestamp cannot be empty")
-			}
-			if args[6] == "" {
 				return fmt.Errorf("denoms cannot be empty")
 			}
 
@@ -164,13 +156,7 @@ func GetCmdRelayWithContractCall() *cobra.Command {
 			}
 
 			// convert denoms to string array
-			denoms := strings.Split(args[6], ",")
-
-			// convert timestamp string to int64
-			timestamp, err := strconv.ParseInt(args[5], 10, 64)
-			if err != nil {
-				return err
-			}
+			denoms := strings.Split(args[5], ",")
 
 			commandSelector, err := base64.StdEncoding.DecodeString(args[3])
 			if err != nil {
@@ -183,14 +169,14 @@ func GetCmdRelayWithContractCall() *cobra.Command {
 
 			msg := types.NewMsgRelay(
 				clientCtx.GetFromAddress().String(),
-				args[0],         // destination-chain e.g. "Ethereum"
-				args[1],         // ojo-contract-address e.g. "0x001"
-				args[2],         // customer-contract-address e.g. "0x002"
-				tokens,          // amount
-				denoms,          // denoms
-				commandSelector, // command-selector
-				commandParams,   // command-params
-				timestamp,       // timestamp
+				args[0],                // destination-chain e.g. "Ethereum"
+				args[1],                // ojo-contract-address e.g. "0x001"
+				args[2],                // customer-contract-address e.g. "0x002"
+				tokens,                 // amount
+				denoms,                 // denoms
+				commandSelector,        // command-selector
+				commandParams,          // command-params
+				ctx.BlockTime().Unix(), // timestamp
 			)
 			err = msg.ValidateBasic()
 			if err != nil {
