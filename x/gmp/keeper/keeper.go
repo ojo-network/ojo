@@ -299,7 +299,7 @@ func (k Keeper) ProcessPayment(
 		[]string{payment.Denom},
 		types.EmptyByteSlice,
 		types.EmptyByteSlice,
-		time.Now().Unix(),
+		ctx.BlockTime().Unix(),
 	)
 	_, err = k.RelayPrice(goCtx, msg)
 	if err != nil {
