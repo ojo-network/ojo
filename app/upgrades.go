@@ -50,7 +50,6 @@ func (app App) RegisterUpgradeHandlers() {
 	app.registerUpgrade0_4_1(upgradeInfo)
 	app.registerUpgrade0_5_0(upgradeInfo)
 	app.registerUpgrade0_5_1(upgradeInfo)
-	app.registerUpgrade0_5_2(upgradeInfo)
 }
 
 // performs upgrade from v0.1.3 to v0.1.4
@@ -370,37 +369,6 @@ func (app *App) registerUpgrade0_5_1(_ upgradetypes.Plan) {
 			params := app.GasEstimateKeeper.GetParams(sdkCtx)
 			params.GasAdjustment = "0.35"
 			app.GasEstimateKeeper.SetParams(sdkCtx, params)
-			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
-		},
-	)
-}
-
-func (app *App) registerUpgrade0_5_2(_ upgradetypes.Plan) {
-	const planName = "v0.5.2"
-	app.UpgradeKeeper.SetUpgradeHandler(planName,
-		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			sdkCtx := sdk.UnwrapSDKContext(ctx)
-			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
-
-			// delete all payments in the store before upgrade
-			payments := app.GmpKeeper.GetAllPayments(sdkCtx)
-			for _, payment := range payments {
-				sdkCtx.Logger().Info("returning funds and deleting payment")
-				relayerAddr, err := sdk.AccAddressFromBech32(payment.Relayer)
-				if err != nil {
-					sdkCtx.Logger().Error("error getting relayer address", "error", err)
-				}
-				err = app.BankKeeper.SendCoinsFromModuleToAccount(
-					ctx,
-					gmptypes.ModuleName,
-					relayerAddr,
-					sdk.NewCoins(payment.Token),
-				)
-				if err != nil {
-					sdkCtx.Logger().Error("error sending coins to relayer", "error", err)
-				}
-				app.GmpKeeper.DeletePayment(sdkCtx, payment)
-			}
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)
