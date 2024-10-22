@@ -45,8 +45,6 @@ func GetCmdRelay() *cobra.Command {
 				return err
 			}
 
-			ctx := sdk.UnwrapSDKContext(cmd.Context())
-
 			if args[0] == "" {
 				return fmt.Errorf("destination-chain cannot be empty")
 			}
@@ -92,7 +90,7 @@ func GetCmdRelay() *cobra.Command {
 				denoms,                 // denoms
 				commandSelector,        // command-selector
 				commandParams,          // command-params
-				ctx.BlockTime().Unix(), // timestamp
+				0,
 			)
 			err = msg.ValidateBasic()
 			if err != nil {
@@ -119,8 +117,6 @@ func GetCmdRelayWithContractCall() *cobra.Command {
 			if err != nil {
 				return err
 			}
-
-			ctx := sdk.UnwrapSDKContext(cmd.Context())
 
 			if args[0] == "" {
 				return fmt.Errorf("destination-chain cannot be empty")
@@ -176,7 +172,7 @@ func GetCmdRelayWithContractCall() *cobra.Command {
 				denoms,                 // denoms
 				commandSelector,        // command-selector
 				commandParams,          // command-params
-				ctx.BlockTime().Unix(), // timestamp
+				0,
 			)
 			err = msg.ValidateBasic()
 			if err != nil {
