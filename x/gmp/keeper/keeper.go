@@ -73,6 +73,9 @@ func (k Keeper) RelayPrice(
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	params := k.GetParams(ctx)
 
+	// set the timestamp to the current block time
+	msg.Timestamp = ctx.BlockTime().Unix()
+
 	bz, err := msg.Marshal()
 	if err != nil {
 		return nil, err
@@ -299,7 +302,7 @@ func (k Keeper) ProcessPayment(
 		[]string{payment.Denom},
 		types.EmptyByteSlice,
 		types.EmptyByteSlice,
-		ctx.BlockHeight(),
+		0,
 	)
 	_, err = k.RelayPrice(goCtx, msg)
 	if err != nil {
