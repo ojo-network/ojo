@@ -385,6 +385,20 @@ func (app *App) registerUpgrade0_5_2(_ upgradetypes.Plan) {
 			// delete all payments in the store before upgrade
 			payments := app.GmpKeeper.GetAllPayments(sdkCtx)
 			for _, payment := range payments {
+				sdkCtx.Logger().Info("returning funds and deleting payment")
+				relayerAddr, err := sdk.AccAddressFromBech32(payment.Relayer)
+				if err != nil {
+					sdkCtx.Logger().Error("error getting relayer address", "error", err)
+				}
+				err = app.BankKeeper.SendCoinsFromModuleToAccount(
+					ctx,
+					gmptypes.ModuleName,
+					relayerAddr,
+					sdk.NewCoins(payment.Token),
+				)
+				if err != nil {
+					sdkCtx.Logger().Error("error sending coins to relayer", "error", err)
+				}
 				app.GmpKeeper.DeletePayment(sdkCtx, payment)
 			}
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
