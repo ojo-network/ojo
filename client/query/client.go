@@ -31,6 +31,7 @@ func NewClient(grpcEndpoint string) (*Client, error) {
 }
 
 func (c *Client) dialGrpcConn() (err error) {
+	//nolint: all
 	c.grpcConn, err = grpc.Dial(
 		c.grpcEndpoint,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),

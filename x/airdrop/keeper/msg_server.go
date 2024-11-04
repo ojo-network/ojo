@@ -7,6 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	"github.com/ojo-network/ojo/util"
 	"github.com/ojo-network/ojo/x/airdrop/types"
 )
 
@@ -62,7 +63,7 @@ func (ms msgServer) ClaimAirdrop(
 	airdropAccount.ClaimAddress = msg.ToAddress
 
 	// Check if past expiry block
-	if ctx.BlockHeight() > int64(ms.keeper.GetParams(ctx).ExpiryBlock) {
+	if util.SafeInt64ToUint64(ctx.BlockHeight()) > ms.keeper.GetParams(ctx).ExpiryBlock {
 		err = types.ErrAirdropExpired
 		return nil, err
 	}

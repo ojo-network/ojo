@@ -45,7 +45,7 @@ $ make install
 Example command structure for running a node with a price feeder config file located at `./price-feeder.example.config` (See [price-feeder](https://github.com/ojo-network/price-feeder) repo for more information on configuring an Ojo price feeder)
 
 ```shell
-$ ojod start --pricefeeder.config_path=./price-feeder.example.config --pricefeeder.log_level="INFO" --pricefeeder.chain_config=TRUE --pricefeeder.oracle_tick_time=5s
+$ ojod start --pricefeeder.config_path=./price-feeder.example.config --pricefeeder.log_level="INFO"
 ```
 
 ## Networks

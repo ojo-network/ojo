@@ -2,10 +2,12 @@ package app
 
 import (
 	"context"
+	"fmt"
 
 	storetypes "cosmossdk.io/store/types"
 	circuittypes "cosmossdk.io/x/circuit/types"
 	upgradetypes "cosmossdk.io/x/upgrade/types"
+	tenderminttypes "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
@@ -20,9 +22,9 @@ import (
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/cosmos/ibc-go/v8/modules/core/exported"
 	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 
+	gasestimatetypes "github.com/ojo-network/ojo/x/gasestimate/types"
 	oraclekeeper "github.com/ojo-network/ojo/x/oracle/keeper"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
@@ -42,7 +44,12 @@ func (app App) RegisterUpgradeHandlers() {
 	app.registerUpgrade0_3_0Rc8(upgradeInfo)
 	app.registerUpgrade0_3_1Rc1(upgradeInfo)
 	app.registerUpgrade0_3_1Rc2(upgradeInfo)
+	app.registerUpgrade0_3_1(upgradeInfo)
+	app.registerUpgrade0_3_2(upgradeInfo)
 	app.registerUpgrade0_4_0(upgradeInfo)
+	app.registerUpgrade0_4_1(upgradeInfo)
+	app.registerUpgrade0_5_0(upgradeInfo)
+	app.registerUpgrade0_5_1(upgradeInfo)
 }
 
 // performs upgrade from v0.1.3 to v0.1.4
@@ -202,6 +209,37 @@ func (app *App) registerUpgrade0_3_1Rc2(_ upgradetypes.Plan) {
 	)
 }
 
+func (app *App) registerUpgrade0_3_1(_ upgradetypes.Plan) {
+	const planName = "v0.3.1"
+
+	app.UpgradeKeeper.SetUpgradeHandler(planName,
+		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			sdkCtx := sdk.UnwrapSDKContext(ctx)
+			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		},
+	)
+}
+
+func (app *App) registerUpgrade0_3_2(_ upgradetypes.Plan) {
+	const planName = "v0.3.2"
+
+	app.UpgradeKeeper.SetUpgradeHandler(planName,
+		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+			// migrate old proposals
+			err := oraclekeeper.MigrateProposals(sdkCtx, app.keys[govtypes.StoreKey], app.appCodec)
+			if err != nil {
+				sdkCtx.Logger().Error("failed to migrate governance proposals", "err", err)
+			}
+
+			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		},
+	)
+}
+
 func (app *App) registerUpgrade0_4_0(upgradeInfo upgradetypes.Plan) {
 	const planName = "v0.4.0"
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
@@ -209,10 +247,35 @@ func (app *App) registerUpgrade0_4_0(upgradeInfo upgradetypes.Plan) {
 			sdkCtx := sdk.UnwrapSDKContext(ctx)
 			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
 
-			// explicitly update the IBC 02-client params, adding the localhost client type
-			params := app.IBCKeeper.ClientKeeper.GetParams(sdkCtx)
-			params.AllowedClients = append(params.AllowedClients, exported.Localhost)
-			app.IBCKeeper.ClientKeeper.SetParams(sdkCtx, params)
+			// enable vote extensions after upgrade
+			consensusParamsKeeper := app.ConsensusParamsKeeper
+			currentParams, err := consensusParamsKeeper.Params(ctx, &consensustypes.QueryParamsRequest{})
+			if err != nil || currentParams == nil || currentParams.Params == nil {
+				panic(fmt.Sprintf("failed to retrieve existing consensus params in upgrade handler: %s", err))
+			}
+			currentParams.Params.Abci = &tenderminttypes.ABCIParams{
+				VoteExtensionsEnableHeight: sdkCtx.BlockHeight() + int64(4), // enable vote extensions 4 blocks after upgrade
+			}
+			_, err = consensusParamsKeeper.UpdateParams(ctx, &consensustypes.MsgUpdateParams{
+				Authority: consensusParamsKeeper.GetAuthority(),
+				Block:     currentParams.Params.Block,
+				Evidence:  currentParams.Params.Evidence,
+				Validator: currentParams.Params.Validator,
+				Abci:      currentParams.Params.Abci,
+			})
+			if err != nil {
+				panic(fmt.Sprintf("failed to update consensus params : %s", err))
+			}
+			sdkCtx.Logger().Info(
+				"Successfully set VoteExtensionsEnableHeight",
+				"consensus_params",
+				currentParams.Params.String(),
+			)
+
+			// update vote period to 1 block
+			oracleKeeper := app.OracleKeeper
+			oracleKeeper.SetVotePeriod(sdkCtx, 1)
+
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)
@@ -223,6 +286,92 @@ func (app *App) registerUpgrade0_4_0(upgradeInfo upgradetypes.Plan) {
 			circuittypes.ModuleName,
 		},
 	})
+}
+
+func (app *App) registerUpgrade0_4_1(upgradeInfo upgradetypes.Plan) {
+	const planName = "v0.4.1"
+	app.UpgradeKeeper.SetUpgradeHandler(planName,
+		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			sdkCtx := sdk.UnwrapSDKContext(ctx)
+			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
+
+			// enable vote extensions after upgrade
+			consensusParamsKeeper := app.ConsensusParamsKeeper
+			currentParams, err := consensusParamsKeeper.Params(ctx, &consensustypes.QueryParamsRequest{})
+			if err != nil || currentParams == nil || currentParams.Params == nil {
+				panic(fmt.Sprintf("failed to retrieve existing consensus params in upgrade handler: %s", err))
+			}
+			currentParams.Params.Abci = &tenderminttypes.ABCIParams{
+				VoteExtensionsEnableHeight: sdkCtx.BlockHeight() + int64(4), // enable vote extensions 4 blocks after upgrade
+			}
+			_, err = consensusParamsKeeper.UpdateParams(ctx, &consensustypes.MsgUpdateParams{
+				Authority: consensusParamsKeeper.GetAuthority(),
+				Block:     currentParams.Params.Block,
+				Evidence:  currentParams.Params.Evidence,
+				Validator: currentParams.Params.Validator,
+				Abci:      currentParams.Params.Abci,
+			})
+			if err != nil {
+				panic(fmt.Sprintf("failed to update consensus params : %s", err))
+			}
+			sdkCtx.Logger().Info(
+				"Successfully set VoteExtensionsEnableHeight",
+				"consensus_params",
+				currentParams.Params.String(),
+			)
+
+			// update vote period to 1 block
+			oracleKeeper := app.OracleKeeper
+			oracleKeeper.SetVotePeriod(sdkCtx, 1)
+
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		},
+	)
+
+	// REF: https://github.com/cosmos/cosmos-sdk/blob/a32186608aab0bd436049377ddb34f90006fcbf7/simapp/upgrades.go
+	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
+		Added: []string{
+			circuittypes.ModuleName,
+		},
+	})
+}
+
+// performs upgrade from v0.4.x to v0.5.0
+func (app *App) registerUpgrade0_5_0(upgradeInfo upgradetypes.Plan) {
+	const planName = "v0.5.0"
+	app.UpgradeKeeper.SetUpgradeHandler(planName,
+		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			sdkCtx := sdk.UnwrapSDKContext(ctx)
+			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
+
+			params := app.GmpKeeper.GetParams(sdkCtx)
+			params.DefaultGasEstimate = gmptypes.DefaultParams().DefaultGasEstimate
+			app.GmpKeeper.SetParams(sdkCtx, params)
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		},
+	)
+
+	// REF: https://github.com/cosmos/cosmos-sdk/blob/a32186608aab0bd436049377ddb34f90006fcbf7/simapp/upgrades.go
+	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
+		Added: []string{
+			gasestimatetypes.ModuleName,
+		},
+	})
+}
+
+func (app *App) registerUpgrade0_5_1(_ upgradetypes.Plan) {
+	const planName = "v0.5.1"
+	app.UpgradeKeeper.SetUpgradeHandler(planName,
+		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			sdkCtx := sdk.UnwrapSDKContext(ctx)
+			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
+
+			params := app.GasEstimateKeeper.GetParams(sdkCtx)
+			params.GasAdjustment = "0.35"
+			app.GasEstimateKeeper.SetParams(sdkCtx, params)
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		},
+	)
 }
 
 // helper function to check if the store loader should be upgraded

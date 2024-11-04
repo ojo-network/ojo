@@ -28,7 +28,7 @@ jobs:
         if: env.GIT_DIFF
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21.1'
+          go-version: '1.23'
           cache: true
         env:
           GOOS: ${{ matrix.targetos }}

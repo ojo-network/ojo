@@ -1,7 +1,11 @@
 package abci
 
 import (
+	"fmt"
+	"sort"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
 
 // VoteExtensionsEnabled determines if vote extensions are enabled for the current block.
@@ -20,4 +24,23 @@ func VoteExtensionsEnabled(ctx sdk.Context) bool {
 	}
 
 	return cp.Abci.VoteExtensionsEnableHeight < ctx.BlockHeight()
+}
+
+func calculateMedian(gasEstimates []oracletypes.GasEstimate) (median oracletypes.GasEstimate, err error) {
+	if len(gasEstimates) == 0 {
+		return oracletypes.GasEstimate{}, fmt.Errorf("cannot calculate median of empty slice")
+	}
+
+	sort.Slice(gasEstimates, func(i, j int) bool {
+		return gasEstimates[i].GasEstimation < gasEstimates[j].GasEstimation
+	})
+
+	mid := len(gasEstimates) / 2
+	if len(gasEstimates)%2 == 0 {
+		return oracletypes.GasEstimate{
+			GasEstimation: (gasEstimates[mid-1].GasEstimation + gasEstimates[mid].GasEstimation) / 2,
+			Network:       gasEstimates[mid-1].Network, // or gasEstimates[mid].Network, choose consistently
+		}, nil
+	}
+	return gasEstimates[mid], nil
 }

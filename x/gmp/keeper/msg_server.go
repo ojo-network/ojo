@@ -51,3 +51,10 @@ func (ms msgServer) RelayPrice(
 ) (*types.MsgRelayPriceResponse, error) {
 	return ms.keeper.RelayPrice(goCtx, msg)
 }
+
+func (ms msgServer) CreatePayment(
+	goCtx context.Context,
+	msg *types.MsgCreatePayment,
+) (*types.MsgCreatePaymentResponse, error) {
+	return ms.keeper.CreatePayment(goCtx, msg)
+}

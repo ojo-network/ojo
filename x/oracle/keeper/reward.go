@@ -6,6 +6,7 @@ import (
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/ojo-network/ojo/util"
 	"github.com/ojo-network/ojo/util/decmath"
 	"github.com/ojo-network/ojo/util/genmap"
 	"github.com/ojo-network/ojo/util/reward"
@@ -34,7 +35,7 @@ func (k Keeper) smallestMissCountInBallot(ctx sdk.Context, ballotWinners []types
 		}
 	}
 
-	return int64(missCount)
+	return util.SafeUint64ToInt64(missCount)
 }
 
 // RewardBallotWinners is executed at the end of every voting period, where we
@@ -79,8 +80,8 @@ func (k Keeper) RewardBallotWinners(
 			continue
 		}
 
-		missCount := int64(k.GetMissCounter(ctx, winner.Recipient))
-		maxMissCount := int64(len(voteTargets) * (int(k.SlashWindow(ctx) / k.VotePeriod(ctx))))
+		missCount := util.SafeUint64ToInt64(k.GetMissCounter(ctx, winner.Recipient))
+		maxMissCount := int64(len(voteTargets)) * (util.SafeUint64ToInt64((k.SlashWindow(ctx) / k.VotePeriod(ctx))))
 		rewardFactor := reward.CalculateRewardFactor(
 			missCount,
 			maxMissCount,

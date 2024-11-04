@@ -8,6 +8,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/ojo-network/ojo/util"
 	"github.com/ojo-network/ojo/x/oracle/keeper"
 	"github.com/ojo-network/ojo/x/oracle/types"
 )
@@ -31,6 +32,16 @@ func EndBlocker(ctx context.Context, k keeper.Keeper) error {
 
 	params := k.GetParams(sdkCtx)
 
+	// Start price feeder if it hasn't been started, and it is enabled.
+	if k.PriceFeeder.Oracle == nil && k.PriceFeeder.AppConfig.Enable {
+		go func() {
+			err := k.PriceFeeder.Start(sdkCtx.BlockHeight(), params)
+			if err != nil {
+				sdkCtx.Logger().Error("Error starting Oracle Keeper price feeder", "err", err)
+			}
+		}()
+	}
+
 	// Set all current active validators into the ValidatorRewardSet at
 	// the beginning of a new Slash Window.
 	if k.IsPeriodLastBlock(sdkCtx, params.SlashWindow+1) {
@@ -40,6 +51,17 @@ func EndBlocker(ctx context.Context, k keeper.Keeper) error {
 	}
 
 	if k.IsPeriodLastBlock(sdkCtx, params.VotePeriod) {
+		if k.PriceFeeder.Oracle != nil && k.PriceFeeder.AppConfig.Enable {
+			// Update price feeder oracle with latest params.
+			k.PriceFeeder.Oracle.ParamCache.UpdateParamCache(sdkCtx.BlockHeight(), k.GetParams(sdkCtx), nil)
+
+			// Execute price feeder oracle tick.
+			if err := k.PriceFeeder.Oracle.TickClientless(ctx); err != nil {
+				sdkCtx.Logger().Error("Error in Oracle Keeper price feeder clientless tick", "err", err)
+			}
+		}
+
+		// Update oracle module with prices.
 		if err := CalcPrices(sdkCtx, params, k); err != nil {
 			return err
 		}
@@ -142,7 +164,7 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 	voteTargetsLen := len(params.MandatoryList)
 	claimSlice, rewardSlice := types.ClaimMapToSlices(validatorClaimMap, validatorRewardSet.ValidatorSet)
 	for _, claim := range claimSlice {
-		misses := uint64(voteTargetsLen - int(claim.MandatoryWinCount))
+		misses := util.SafeIntToUint64(voteTargetsLen - int(claim.MandatoryWinCount))
 		if misses == 0 {
 			continue
 		}
@@ -154,8 +176,8 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 	// Distribute rewards to ballot winners
 	k.RewardBallotWinners(
 		ctx,
-		int64(params.VotePeriod),
-		int64(params.RewardDistributionWindow),
+		util.SafeUint64ToInt64(params.VotePeriod),
+		util.SafeUint64ToInt64(params.RewardDistributionWindow),
 		voteTargetDenoms,
 		rewardSlice,
 	)

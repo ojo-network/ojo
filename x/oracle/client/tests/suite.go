@@ -90,8 +90,6 @@ func (s *IntegrationTestSuite) TestDelegateFeedConsent() {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
-
 		s.Run(tc.name, func() {
 			clientCtx := val.ClientCtx
 
@@ -147,8 +145,6 @@ func (s *IntegrationTestSuite) TestQueryFeedDelegate() {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
-
 		s.Run(tc.name, func() {
 			tc.args = append(tc.args, fmt.Sprintf("--%s=json", cmtcli.OutputFlag))
 			out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryFeederDelegation(), tc.args)
@@ -218,8 +214,6 @@ func (s *IntegrationTestSuite) TestQueryExchangeRate() {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
-
 		s.Run(tc.name, func() {
 			out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryExchangeRate(), tc.args)
 			if tc.expectErr {

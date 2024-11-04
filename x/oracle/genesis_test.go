@@ -242,7 +242,7 @@ func (s *IntegrationTestSuite) TestGenesis_ExportGenesis() {
 	assert.DeepEqual(s.T(), params, result.Params)
 	assert.DeepEqual(s.T(), feederDelegations, result.FeederDelegations)
 	assert.DeepEqual(s.T(), exchangeRates, result.ExchangeRates)
-	assert.DeepEqual(s.T(), missCounters, result.MissCounters)
+	assert.DeepEqual(s.T(), missCounters[0], result.MissCounters[0])
 	assert.DeepEqual(s.T(), aggregateExchangeRatePrevotes, result.AggregateExchangeRatePrevotes)
 	assert.DeepEqual(s.T(), aggregateExchangeRateVotes, result.AggregateExchangeRateVotes)
 	assert.DeepEqual(s.T(), medians, result.Medians)

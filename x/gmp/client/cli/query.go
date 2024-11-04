@@ -21,6 +21,7 @@ func GetQueryCmd() *cobra.Command {
 
 	cmd.AddCommand(
 		GetCmdQueryParams(),
+		GetCmdQueryAllPayments(),
 	)
 
 	return cmd
@@ -41,6 +42,28 @@ func GetCmdQueryParams() *cobra.Command {
 			queryClient := types.NewQueryClient(clientCtx)
 
 			res, err := queryClient.Params(cmd.Context(), &types.ParamsRequest{})
+			return cli.PrintOrErr(res, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+func GetCmdQueryAllPayments() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "all-payments",
+		Args:  cobra.NoArgs,
+		Short: "Query all payments",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			res, err := queryClient.AllPayments(cmd.Context(), &types.AllPaymentsRequest{})
 			return cli.PrintOrErr(res, err, clientCtx)
 		},
 	}

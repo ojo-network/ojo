@@ -1,0 +1,37 @@
+syntax = "proto3";
+package ojo.oracle.v1;
+
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "ojo/oracle/v1/oracle.proto";
+
+option go_package = "github.com/ojo-network/ojo/x/oracle/types";
+
+option (gogoproto.goproto_getters_all) = false;
+
+// OracleVoteExtension defines the vote extension structure used by the oracle
+// module.
+message OracleVoteExtension {
+  int64 height = 1;
+  repeated cosmos.base.v1beta1.DecCoin exchange_rates = 2 [
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins",
+    (gogoproto.nullable) = false
+  ];
+  repeated GasEstimate gas_estimates = 3 [(gogoproto.nullable) = false];
+}
+
+// InjectedVoteExtensionTx defines the vote extension tx injected by the prepare
+// proposal handler.
+message InjectedVoteExtensionTx {
+  repeated AggregateExchangeRateVote exchange_rate_votes = 1[
+    (gogoproto.nullable) = false
+  ];
+  bytes extended_commit_info = 2;
+  repeated GasEstimate gas_estimate_medians = 3 [(gogoproto.nullable) = false];
+}
+
+// GasEstimate defines a gas estimate for a given network.
+message GasEstimate {
+  int64 gas_estimation = 1;
+  string network = 2;
+}

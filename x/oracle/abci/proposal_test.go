@@ -2,7 +2,6 @@ package abci_test
 
 import (
 	"bytes"
-	"encoding/json"
 	"sort"
 
 	"cosmossdk.io/core/header"
@@ -21,6 +20,17 @@ import (
 	oraclekeeper "github.com/ojo-network/ojo/x/oracle/keeper"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
+
+var testGasEstimates = []oracletypes.GasEstimate{
+	{
+		GasEstimation: 300,
+		Network:       "Ethereum",
+	},
+	{
+		GasEstimation: 100,
+		Network:       "Arbitrum",
+	},
+}
 
 func (s *IntegrationTestSuite) TestPrepareProposalHandler() {
 	app, ctx, keys := s.app, s.ctx, s.keys
@@ -106,8 +116,8 @@ func (s *IntegrationTestSuite) TestPrepareProposalHandler() {
 				s.Require().NoError(err)
 				s.Require().NotNil(resp)
 
-				var injectedVoteExtTx abci.AggregateExchangeRateVotes
-				err = json.Unmarshal(resp.Txs[0], &injectedVoteExtTx)
+				var injectedVoteExtTx oracletypes.InjectedVoteExtensionTx
+				err = injectedVoteExtTx.Unmarshal(resp.Txs[0])
 				s.Require().NoError(err)
 
 				sort.Slice(valKeys[:], func(i, j int) bool {
@@ -168,21 +178,26 @@ func (s *IntegrationTestSuite) TestProcessProposalHandler() {
 			Voter:         valKeys[1].ValAddress.String(),
 		},
 	}
-	injectedVoteExtTx := abci.AggregateExchangeRateVotes{
+	localCommitInfoBz, err := localCommitInfo.Marshal()
+	s.Require().NoError(err)
+	injectedVoteExtTx := oracletypes.InjectedVoteExtensionTx{
 		ExchangeRateVotes:  exchangeRateVotes,
-		ExtendedCommitInfo: localCommitInfo,
+		ExtendedCommitInfo: localCommitInfoBz,
+		GasEstimateMedians: testGasEstimates,
 	}
-	bz, err := json.Marshal(injectedVoteExtTx)
+	bz, err := injectedVoteExtTx.Marshal()
 	s.Require().NoError(err)
 	var txs [][]byte
 	txs = append(txs, bz)
 
 	// create tx with conflicting local commit info
-	injectedVoteExtTxConflicting := abci.AggregateExchangeRateVotes{
+	localCommitInfoConflictingBz, err := localCommitInfoConflicting.Marshal()
+	s.Require().NoError(err)
+	injectedVoteExtTxConflicting := oracletypes.InjectedVoteExtensionTx{
 		ExchangeRateVotes:  exchangeRateVotes,
-		ExtendedCommitInfo: localCommitInfoConflicting,
+		ExtendedCommitInfo: localCommitInfoConflictingBz,
 	}
-	bz, err = json.Marshal(injectedVoteExtTxConflicting)
+	bz, err = injectedVoteExtTxConflicting.Marshal()
 	s.Require().NoError(err)
 	var txsConflicting [][]byte
 	txsConflicting = append(txsConflicting, bz)
@@ -239,7 +254,7 @@ func (s *IntegrationTestSuite) TestProcessProposalHandler() {
 				Txs:    txsConflicting,
 			},
 			expErr:    true,
-			expErrMsg: "injected exhange rate votes and generated exchange votes are not equal",
+			expErrMsg: "injected exchange rate votes and generated exchange votes are not equal",
 		},
 	}
 
@@ -302,11 +317,12 @@ func buildLocalCommitInfo(
 	valKeys [2]integration.TestValidatorKey,
 	chainID string,
 ) (cometabci.ExtendedCommitInfo, error) {
-	voteExt := abci.OracleVoteExtension{
+	voteExt := oracletypes.OracleVoteExtension{
 		ExchangeRates: exchangeRates,
 		Height:        ctx.BlockHeight(),
+		GasEstimates:  testGasEstimates,
 	}
-	bz, err := json.Marshal(voteExt)
+	bz, err := voteExt.Marshal()
 	if err != nil {
 		return cometabci.ExtendedCommitInfo{}, err
 	}

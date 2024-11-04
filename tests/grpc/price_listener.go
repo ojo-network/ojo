@@ -28,7 +28,7 @@ func listenForPrices(
 	// Record each historic stamp when the chain should be recording them
 	for i := 0; i < int(params.MedianStampPeriod); i++ {
 		height := <-chainHeight.HeightChanged
-		if isPeriodFirstBlock(height, params.HistoricStampPeriod) {
+		if isPeriodFirstBlock(height+1, params.HistoricStampPeriod) {
 			exchangeRates, err := ojoClient.QueryClient.QueryExchangeRates()
 			log.Info().Msgf("block %d stamp: %+v", height, exchangeRates)
 			if err != nil {
@@ -44,7 +44,6 @@ func listenForPrices(
 	if err != nil {
 		return nil, err
 	}
-
 	exchangeRates, err := ojoClient.QueryClient.QueryExchangeRates()
 	if err != nil {
 		return nil, err

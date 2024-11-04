@@ -334,9 +334,8 @@ func (o *Orchestrator) runValidators(t *testing.T) {
 		priceFeederConfigArgs := []string{
 			"start",
 			"--pricefeeder.config_path=/root/pricefeeder/price-feeder.example.toml",
-			"--pricefeeder.chain_config=false",
 			"--pricefeeder.log_level=info",
-			"--pricefeeder.oracle_tick_time=5s",
+			"--pricefeeder.enable=true",
 		}
 
 		runOpts := &dockertest.RunOptions{

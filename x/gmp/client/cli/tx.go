@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
@@ -27,6 +28,7 @@ func GetTxCmd() *cobra.Command {
 	cmd.AddCommand(
 		GetCmdRelay(),
 		GetCmdRelayWithContractCall(),
+		GetCmdCreatePayment(),
 	)
 
 	return cmd
@@ -34,7 +36,7 @@ func GetTxCmd() *cobra.Command {
 
 func GetCmdRelay() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   `relay [destination-chain] [ojo-contract-address] [timestamp] [denoms] [amount]`,
+		Use:   `relay [destination-chain] [ojo-contract-address] [denoms] [amount]`,
 		Args:  cobra.ExactArgs(5),
 		Short: "Relay oracle data via Axelar GMP",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -50,9 +52,6 @@ func GetCmdRelay() *cobra.Command {
 				return fmt.Errorf("ojo-contract-address cannot be empty")
 			}
 			if args[2] == "" {
-				return fmt.Errorf("timestamp cannot be empty")
-			}
-			if args[3] == "" {
 				return fmt.Errorf("denoms cannot be empty")
 			}
 
@@ -71,13 +70,7 @@ func GetCmdRelay() *cobra.Command {
 			}
 
 			// convert denoms to string array
-			denoms := strings.Split(args[3], ",")
-
-			// convert timestamp string to int64
-			timestamp, err := strconv.ParseInt(args[2], 10, 64)
-			if err != nil {
-				return err
-			}
+			denoms := strings.Split(args[2], ",")
 
 			commandSelector, err := base64.StdEncoding.DecodeString("")
 			if err != nil {
@@ -97,7 +90,7 @@ func GetCmdRelay() *cobra.Command {
 				denoms,          // denoms
 				commandSelector, // command-selector
 				commandParams,   // command-params
-				timestamp,       // timestamp
+				0,
 			)
 			err = msg.ValidateBasic()
 			if err != nil {
@@ -116,7 +109,7 @@ func GetCmdRelay() *cobra.Command {
 func GetCmdRelayWithContractCall() *cobra.Command {
 	cmd := &cobra.Command{
 		Use: `relay-with-contract-call [destination-chain] [ojo-contract-address] [client-contract-address] ` +
-			`[command-selector] [command-params] [timestamp] [denoms] [amount]`,
+			`[command-selector] [command-params] [denoms] [amount]`,
 		Args:  cobra.ExactArgs(8),
 		Short: "Relay oracle data via Axelar GMP and call contract method with oracle data",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -141,9 +134,6 @@ func GetCmdRelayWithContractCall() *cobra.Command {
 				return fmt.Errorf("command-params cannot be empty")
 			}
 			if args[5] == "" {
-				return fmt.Errorf("timestamp cannot be empty")
-			}
-			if args[6] == "" {
 				return fmt.Errorf("denoms cannot be empty")
 			}
 
@@ -162,13 +152,7 @@ func GetCmdRelayWithContractCall() *cobra.Command {
 			}
 
 			// convert denoms to string array
-			denoms := strings.Split(args[6], ",")
-
-			// convert timestamp string to int64
-			timestamp, err := strconv.ParseInt(args[5], 10, 64)
-			if err != nil {
-				return err
-			}
+			denoms := strings.Split(args[5], ",")
 
 			commandSelector, err := base64.StdEncoding.DecodeString(args[3])
 			if err != nil {
@@ -188,7 +172,63 @@ func GetCmdRelayWithContractCall() *cobra.Command {
 				denoms,          // denoms
 				commandSelector, // command-selector
 				commandParams,   // command-params
-				timestamp,       // timestamp
+				0,
+			)
+			err = msg.ValidateBasic()
+			if err != nil {
+				return err
+			}
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+
+	return cmd
+}
+
+func GetCmdCreatePayment() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "create-payment [destination-chain] [denom] [deviation] [heartbeat] [token]",
+		Args:  cobra.ExactArgs(5),
+		Short: "Create a payment to relay price data",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			deviation, err := math.LegacyNewDecFromStr(args[2])
+			if err != nil {
+				return err
+			}
+			heartbeat, err := strconv.ParseInt(args[3], 10, 64)
+			if err != nil {
+				return err
+			}
+
+			tokens := sdk.Coin{}
+			// normalize the coin denom
+			if args[4] != "" {
+				coin, err := sdk.ParseCoinNormalized(args[4])
+				if err != nil {
+					return err
+				}
+				if !strings.HasPrefix(coin.Denom, "ibc/") {
+					denomTrace := ibctransfertypes.ParseDenomTrace(coin.Denom)
+					coin.Denom = denomTrace.IBCDenom()
+				}
+				tokens = coin
+			}
+
+			msg := types.NewMsgCreatePayment(
+				clientCtx.GetFromAddress().String(),
+				args[0],
+				args[1],
+				tokens,
+				deviation,
+				heartbeat,
 			)
 			err = msg.ValidateBasic()
 			if err != nil {

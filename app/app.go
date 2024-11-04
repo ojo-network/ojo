@@ -97,6 +97,8 @@ import (
 	ibctransferkeeper "github.com/cosmos/ibc-go/v8/modules/apps/transfer/keeper"
 	ibctransfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 	ibc "github.com/cosmos/ibc-go/v8/modules/core"
+	ibcclienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
+	ibcconnectiontypes "github.com/cosmos/ibc-go/v8/modules/core/03-connection/types"
 	ibcporttypes "github.com/cosmos/ibc-go/v8/modules/core/05-port/types"
 	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
 	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
@@ -115,11 +117,14 @@ import (
 	gmpkeeper "github.com/ojo-network/ojo/x/gmp/keeper"
 	gmptypes "github.com/ojo-network/ojo/x/gmp/types"
 
+	"github.com/ojo-network/ojo/x/gasestimate"
+	gasestimatekeeper "github.com/ojo-network/ojo/x/gasestimate/keeper"
+	gasestimatetypes "github.com/ojo-network/ojo/x/gasestimate/types"
+
 	"github.com/ojo-network/ojo/x/airdrop"
 	airdropkeeper "github.com/ojo-network/ojo/x/airdrop/keeper"
 	airdroptypes "github.com/ojo-network/ojo/x/airdrop/types"
 
-	"github.com/ojo-network/ojo/pricefeeder"
 	oracleabci "github.com/ojo-network/ojo/x/oracle/abci"
 
 	customante "github.com/ojo-network/ojo/ante"
@@ -144,6 +149,7 @@ var (
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		oracletypes.ModuleName:         {authtypes.Minter},
 		gmptypes.ModuleName:            {authtypes.Minter},
+		gasestimatetypes.ModuleName:    {authtypes.Burner},
 		airdroptypes.ModuleName:        {authtypes.Minter},
 	}
 )
@@ -200,6 +206,7 @@ type App struct {
 	GroupKeeper           groupkeeper.Keeper
 	OracleKeeper          oraclekeeper.Keeper
 	GmpKeeper             gmpkeeper.Keeper
+	GasEstimateKeeper     gasestimatekeeper.Keeper
 	AirdropKeeper         airdropkeeper.Keeper
 	ConsensusParamsKeeper consensusparamkeeper.Keeper
 
@@ -219,8 +226,6 @@ type App struct {
 
 	// module configurator
 	configurator module.Configurator
-
-	PriceFeeder *pricefeeder.PriceFeeder
 }
 
 // New returns a reference to an initialized blockchain app
@@ -265,7 +270,7 @@ func New(
 		govtypes.StoreKey, paramstypes.StoreKey, ibcexported.StoreKey, upgradetypes.StoreKey,
 		feegrant.StoreKey, evidencetypes.StoreKey, ibctransfertypes.StoreKey, capabilitytypes.StoreKey,
 		consensusparamtypes.StoreKey, group.StoreKey, oracletypes.StoreKey, gmptypes.StoreKey,
-		airdroptypes.StoreKey,
+		gasestimatetypes.ModuleName, airdroptypes.StoreKey,
 	)
 	tkeys := storetypes.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := storetypes.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -410,6 +415,12 @@ func New(
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 
+	app.GasEstimateKeeper = gasestimatekeeper.NewKeeper(
+		appCodec,
+		keys[gasestimatetypes.ModuleName],
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
+
 	app.OracleKeeper = oraclekeeper.NewKeeper(
 		appCodec,
 		keys[oracletypes.ModuleName],
@@ -418,6 +429,7 @@ func New(
 		app.BankKeeper,
 		app.DistrKeeper,
 		app.StakingKeeper,
+		app.GasEstimateKeeper,
 		distrtypes.ModuleName,
 		cast.ToBool(appOpts.Get("telemetry.enabled")),
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
@@ -429,6 +441,8 @@ func New(
 		app.OracleKeeper,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 		app.TransferKeeper,
+		app.BankKeeper,
+		app.GasEstimateKeeper,
 	)
 
 	app.AirdropKeeper = airdropkeeper.NewKeeper(
@@ -581,6 +595,7 @@ func New(
 		ibctm.NewAppModule(),
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
 		gmp.NewAppModule(appCodec, app.GmpKeeper, app.OracleKeeper),
+		gasestimate.NewAppModule(appCodec, app.GasEstimateKeeper),
 		airdrop.NewAppModule(appCodec, app.AirdropKeeper, app.AccountKeeper, app.BankKeeper),
 		consensus.NewAppModule(appCodec, app.ConsensusParamsKeeper),
 	)
@@ -632,6 +647,7 @@ func New(
 		vestingtypes.ModuleName,
 		oracletypes.ModuleName,
 		gmptypes.ModuleName,
+		gasestimatetypes.ModuleName,
 		airdroptypes.ModuleName,
 		consensusparamtypes.ModuleName,
 	)
@@ -658,6 +674,7 @@ func New(
 		vestingtypes.ModuleName,
 		oracletypes.ModuleName,
 		gmptypes.ModuleName,
+		gasestimatetypes.ModuleName,
 		airdroptypes.ModuleName,
 		consensusparamtypes.ModuleName,
 	)
@@ -673,7 +690,8 @@ func New(
 		minttypes.ModuleName, crisistypes.ModuleName, genutiltypes.ModuleName, ibctransfertypes.ModuleName,
 		ibcexported.ModuleName, evidencetypes.ModuleName, authz.ModuleName, feegrant.ModuleName,
 		group.ModuleName, paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
-		oracletypes.ModuleName, gmptypes.ModuleName, airdroptypes.ModuleName, consensusparamtypes.ModuleName,
+		oracletypes.ModuleName, gmptypes.ModuleName, gasestimatetypes.ModuleName,
+		airdroptypes.ModuleName, consensusparamtypes.ModuleName,
 	}
 	app.mm.SetOrderInitGenesis(genesisModuleOrder...)
 	app.mm.SetOrderExportGenesis(genesisModuleOrder...)
@@ -736,18 +754,9 @@ func New(
 	app.SetPrepareProposal(proposalHandler.PrepareProposalHandler())
 	app.SetProcessProposal(proposalHandler.ProcessProposalHandler())
 
-	preBlockHandler := oracleabci.NewPreBlockHandler(
-		app.Logger(),
-		app.OracleKeeper,
-	)
-	app.SetPreBlocker(preBlockHandler.PreBlocker())
-
-	// initialize empty price feeder object to pass reference into vote extension handler
-	app.PriceFeeder = &pricefeeder.PriceFeeder{}
 	voteExtensionsHandler := oracleabci.NewVoteExtensionHandler(
 		app.Logger(),
 		app.OracleKeeper,
-		app.PriceFeeder,
 	)
 	app.SetExtendVoteHandler(voteExtensionsHandler.ExtendVoteHandler())
 	app.SetVerifyVoteExtensionHandler(voteExtensionsHandler.VerifyVoteExtensionHandler())
@@ -759,6 +768,7 @@ func New(
 
 	// initialize BaseApp
 	app.SetInitChainer(app.InitChainer)
+	app.SetPreBlocker(app.PreBlocker)
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
 	app.setAnteHandler(txConfig)
@@ -780,11 +790,6 @@ func (app *App) Name() string { return app.BaseApp.Name() }
 
 // GetBaseApp returns the base app of the application
 func (app App) GetBaseApp() *baseapp.BaseApp { return app.BaseApp }
-
-// PreBlocker application updates every pre block
-func (app *App) PreBlocker(ctx sdk.Context, _ *abci.RequestFinalizeBlock) (*sdk.ResponsePreBlock, error) {
-	return app.mm.PreBlock(ctx)
-}
 
 // BeginBlocker application updates every begin block
 func (app *App) BeginBlocker(ctx sdk.Context) (sdk.BeginBlock, error) {
@@ -1004,9 +1009,14 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(slashingtypes.ModuleName)
 	paramsKeeper.Subspace(govtypes.ModuleName)
 	paramsKeeper.Subspace(crisistypes.ModuleName)
-	paramsKeeper.Subspace(ibctransfertypes.ModuleName)
-	paramsKeeper.Subspace(ibcexported.ModuleName)
 	paramsKeeper.Subspace(oracletypes.ModuleName)
+	paramsKeeper.Subspace(gasestimatetypes.ModuleName)
+
+	// register the key tables for legacy param subspaces
+	keyTable := ibcclienttypes.ParamKeyTable()
+	keyTable.RegisterParamSet(&ibcconnectiontypes.Params{})
+	paramsKeeper.Subspace(ibcexported.ModuleName).WithKeyTable(keyTable)
+	paramsKeeper.Subspace(ibctransfertypes.ModuleName).WithKeyTable(ibctransfertypes.ParamKeyTable())
 
 	return paramsKeeper
 }
