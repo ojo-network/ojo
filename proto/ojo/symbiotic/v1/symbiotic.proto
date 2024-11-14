@@ -1,0 +1,14 @@
+syntax = "proto3";
+package ojo.symbiotic.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/ojo-network/ojo/x/symbiotic/types";
+
+option (gogoproto.goproto_getters_all) = false;
+
+// Params defines the parameters for the symbiotic module.
+message Params {
+    // address of the ojo middleware contract
+    string middleware_address = 1;
+}

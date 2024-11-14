@@ -1,0 +1,12 @@
+syntax = "proto3";
+package ojo.symbiotic.v1;
+
+import "gogoproto/gogo.proto";
+import "ojo/symbiotic/v1/symbiotic.proto";
+
+option go_package = "github.com/ojo-network/ojo/x/symbiotic/types";
+
+// GenesisState represents the genesis state of the symbiotic module.
+message GenesisState {
+  Params params = 1 [ (gogoproto.nullable) = false ];
+}

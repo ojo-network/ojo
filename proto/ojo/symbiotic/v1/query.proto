@@ -1,0 +1,25 @@
+syntax = "proto3";
+package ojo.symbiotic.v1;
+
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "ojo/symbiotic/v1/symbiotic.proto";
+
+option go_package = "github.com/ojo-network/ojo/x/symbiotic/types";
+
+// Query defines the gRPC querier service for the symbiotic module
+service Query {
+  // Params queries all parameters.
+  rpc Params(ParamsRequest) returns (ParamsResponse) {
+    option (google.api.http).get = "/ojo/symbiotic/v1/params";
+  }
+}
+
+// ParamsRequest is the request type for the Query/Params RPC method.
+message ParamsRequest {}
+
+// ParamsResponse is the response type for the Query/Params RPC method.
+message ParamsResponse {
+  // params defines the parameters of the module.
+  Params params = 1 [(gogoproto.nullable) = false];
+}
