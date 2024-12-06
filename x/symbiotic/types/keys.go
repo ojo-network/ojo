@@ -1,5 +1,9 @@
 package types
 
+import (
+	"github.com/ojo-network/ojo/util"
+)
+
 const (
 	// ModuleName is the name of the symbiotic module
 	ModuleName = "symbiotic"
@@ -16,6 +20,17 @@ const (
 
 // KVStore key prefixes
 var (
-	ParamsKey        = []byte{0x01}
-	PaymentKeyPrefix = []byte{0x02}
+	ParamsKey              = []byte{0x01}
+	CachedBlockHashPrefix  = []byte{0x02}
+	CachedHeaderInfoPrefix = []byte{0x03}
 )
+
+// CachedBlockHashKey returns the store key for a CachedBlockHash
+func CachedBlockHashKey(blockHeight uint64) (key []byte) {
+	return util.ConcatBytes(0, CachedBlockHashPrefix, util.UintWithNullPrefix(blockHeight))
+}
+
+// CachedHeaderInfoKey returns the store key for a CachedHeaderInfo
+func CachedHeaderInfoKey(blockHeight uint64) (key []byte) {
+	return util.ConcatBytes(0, CachedHeaderInfoPrefix, util.UintWithNullPrefix(blockHeight))
+}

@@ -11,4 +11,14 @@ option (gogoproto.goproto_getters_all) = false;
 message Params {
     // address of the ojo middleware contract
     string middleware_address = 1;
+    // block period for syncing with the symbiotic network on Ethereum
+    int64 symbiotic_sync_period = 2;
+}
+
+// Cached block hash and height of block hash from the chain the ojo middleware is on.
+message CachedBlockHash {
+    // Block hash of cached block on chain.
+    string block_hash = 1;
+    // Block height of block hash.
+    int64 height = 2;
 }
