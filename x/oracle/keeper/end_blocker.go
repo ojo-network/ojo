@@ -12,13 +12,13 @@ func (k *Keeper) PruneAllPrices(ctx sdk.Context) {
 	params := k.GetParams(ctx)
 	blockHeight := util.SafeInt64ToUint64(ctx.BlockHeight())
 
-	if k.IsPeriodLastBlock(ctx, params.HistoricStampPeriod) {
+	if util.IsPeriodLastBlock(ctx, params.HistoricStampPeriod) {
 		pruneHistoricPeriod := params.HistoricStampPeriod * params.MaximumPriceStamps
 		if pruneHistoricPeriod < blockHeight {
 			k.PruneHistoricPricesBeforeBlock(ctx, blockHeight-pruneHistoricPeriod)
 		}
 
-		if k.IsPeriodLastBlock(ctx, params.MedianStampPeriod) {
+		if util.IsPeriodLastBlock(ctx, params.MedianStampPeriod) {
 			pruneMedianPeriod := params.MedianStampPeriod * params.MaximumMedianStamps
 			if pruneMedianPeriod < blockHeight {
 				k.PruneMediansBeforeBlock(ctx, blockHeight-pruneMedianPeriod)
@@ -26,11 +26,6 @@ func (k *Keeper) PruneAllPrices(ctx sdk.Context) {
 			}
 		}
 	}
-}
-
-// IsPeriodLastBlock returns true if we are at the last block of the period
-func (k *Keeper) IsPeriodLastBlock(ctx sdk.Context, blocksPerPeriod uint64) bool {
-	return (util.SafeInt64ToUint64(ctx.BlockHeight())+1)%blocksPerPeriod == 0
 }
 
 // RecordEndBlockMetrics records miss counter and price metrics at the end of the block

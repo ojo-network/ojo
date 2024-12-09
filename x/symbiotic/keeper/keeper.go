@@ -73,18 +73,42 @@ func (k Keeper) GetCachedBlockHash(
 	return cachedBlockHash, nil
 }
 
+func (k Keeper) IterateAllCachedBlockHashes(
+	ctx sdk.Context,
+	handler func(types.CachedBlockHash) bool,
+) {
+	store := ctx.KVStore(k.storeKey)
+	iter := storetypes.KVStorePrefixIterator(store, types.CachedBlockHashPrefix)
+	defer iter.Close()
+
+	for ; iter.Valid(); iter.Next() {
+		cachedBlockHash := types.CachedBlockHash{}
+		k.cdc.MustUnmarshal(iter.Value(), &cachedBlockHash)
+		if handler(cachedBlockHash) {
+			break
+		}
+	}
+}
+
 func (k Keeper) GetAllCachedBlockHashes(
 	ctx sdk.Context,
 ) []types.CachedBlockHash {
-	store := ctx.KVStore(k.storeKey)
-	iterator := storetypes.KVStorePrefixIterator(store, types.CachedBlockHashPrefix)
-	defer iterator.Close()
-
 	cachedBlockHashes := []types.CachedBlockHash{}
-	for ; iterator.Valid(); iterator.Next() {
-		cachedBlockHash := types.CachedBlockHash{}
-		k.cdc.MustUnmarshal(iterator.Value(), &cachedBlockHash)
+	k.IterateAllCachedBlockHashes(ctx, func(cachedBlockHash types.CachedBlockHash) (stop bool) {
 		cachedBlockHashes = append(cachedBlockHashes, cachedBlockHash)
-	}
+		return false
+	})
 	return cachedBlockHashes
+}
+
+func (k Keeper) PruneBlockHashesBeforeBlock(
+	ctx sdk.Context,
+	blockNum uint64,
+) {
+	k.IterateAllCachedBlockHashes(ctx, func(cachedBlockHash types.CachedBlockHash) (stop bool) {
+		if cachedBlockHash.Height <= int64(blockNum) {
+			k.DeleteCachedBlockHash(ctx, cachedBlockHash)
+		}
+		return false
+	})
 }

@@ -13,6 +13,8 @@ message Params {
     string middleware_address = 1;
     // block period for syncing with the symbiotic network on Ethereum
     int64 symbiotic_sync_period = 2;
+    // maximum amount of cached block hashes in the store
+    uint64 maximum_cached_block_hashes = 3;
 }
 
 // Cached block hash and height of block hash from the chain the ojo middleware is on.
