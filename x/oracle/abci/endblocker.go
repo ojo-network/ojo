@@ -44,13 +44,13 @@ func EndBlocker(ctx context.Context, k keeper.Keeper) error {
 
 	// Set all current active validators into the ValidatorRewardSet at
 	// the beginning of a new Slash Window.
-	if k.IsPeriodLastBlock(sdkCtx, params.SlashWindow+1) {
+	if util.IsPeriodLastBlock(sdkCtx, params.SlashWindow+1) {
 		if err := k.SetValidatorRewardSet(sdkCtx); err != nil {
 			return err
 		}
 	}
 
-	if k.IsPeriodLastBlock(sdkCtx, params.VotePeriod) {
+	if util.IsPeriodLastBlock(sdkCtx, params.VotePeriod) {
 		if k.PriceFeeder.Oracle != nil && k.PriceFeeder.AppConfig.Enable {
 			// Update price feeder oracle with latest params.
 			k.PriceFeeder.Oracle.ParamCache.UpdateParamCache(sdkCtx.BlockHeight(), k.GetParams(sdkCtx), nil)
@@ -69,7 +69,7 @@ func EndBlocker(ctx context.Context, k keeper.Keeper) error {
 
 	// Slash oracle providers who missed voting over the threshold and reset
 	// miss counters of all validators at the last block of slash window.
-	if k.IsPeriodLastBlock(sdkCtx, params.SlashWindow) {
+	if util.IsPeriodLastBlock(sdkCtx, params.SlashWindow) {
 		k.SlashAndResetMissCounters(sdkCtx)
 	}
 	k.PruneAllPrices(sdkCtx)
@@ -145,12 +145,12 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 			return err
 		}
 
-		if k.IsPeriodLastBlock(ctx, params.HistoricStampPeriod) {
+		if util.IsPeriodLastBlock(ctx, params.HistoricStampPeriod) {
 			k.AddHistoricPrice(ctx, ballotDenom.Denom, exchangeRate)
 		}
 
 		// Calculate and stamp median/median deviation if median stamp period has passed
-		if k.IsPeriodLastBlock(ctx, params.MedianStampPeriod) {
+		if util.IsPeriodLastBlock(ctx, params.MedianStampPeriod) {
 			if err = k.CalcAndSetHistoricMedian(ctx, ballotDenom.Denom); err != nil {
 				return err
 			}
