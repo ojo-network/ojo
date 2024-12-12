@@ -77,10 +77,15 @@ func (h *ProposalHandler) PrepareProposalHandler() sdk.PrepareProposalHandler {
 			if err != nil {
 				return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, err
 			}
+			blockHashVotes, err := h.generateBlockHashVotes(ctx, req.LocalLastCommit)
+			if err != nil {
+				return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, err
+			}
 			injectedVoteExtTx := oracletypes.InjectedVoteExtensionTx{
 				ExchangeRateVotes:  exchangeRateVotes,
 				ExtendedCommitInfo: extendedCommitInfoBz,
 				GasEstimateMedians: medianGasEstimates,
+				BlockHashVotes:     blockHashVotes,
 			}
 
 			bz, err := injectedVoteExtTx.Marshal()
@@ -182,6 +187,14 @@ func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
 			}
 			if err := h.verifyMedianGasEstimations(injectedVoteExtTx.GasEstimateMedians, gasEstimateMedians); err != nil {
+				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
+			}
+			// Verify proposer's block hash votes by computing the same ballot.
+			blockHashVotes, err := h.generateBlockHashVotes(ctx, extendedCommitInfo)
+			if err != nil {
+				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
+			}
+			if err := h.verifyBlockHashVotes(injectedVoteExtTx.BlockHashVotes, blockHashVotes); err != nil {
 				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
 			}
 		}
@@ -355,6 +368,80 @@ func (h *ProposalHandler) verifyMedianGasEstimations(
 
 		if injectedEstimate.GasEstimation != generatedEstimate.GasEstimation {
 			return oracletypes.ErrNonEqualInjVotesRates
+		}
+	}
+
+	return nil
+}
+
+func (h *ProposalHandler) generateBlockHashVotes(
+	ctx sdk.Context,
+	ci cometabci.ExtendedCommitInfo,
+) (blockHashVotes []oracletypes.BlockHashVote, err error) {
+	for _, vote := range ci.Votes {
+		if vote.BlockIdFlag != cmtproto.BlockIDFlagCommit {
+			continue
+		}
+
+		var voteExt oracletypes.OracleVoteExtension
+		if err := voteExt.Unmarshal(vote.VoteExtension); err != nil {
+			h.logger.Error(
+				"failed to decode vote extension",
+				"err", err,
+			)
+			return nil, err
+		}
+
+		var valConsAddr sdk.ConsAddress
+		if err := valConsAddr.Unmarshal(vote.Validator.Address); err != nil {
+			h.logger.Error(
+				"failed to unmarshal validator consensus address",
+				"err", err,
+			)
+			return nil, err
+		}
+		val, err := h.stakingKeeper.GetValidatorByConsAddr(ctx, valConsAddr)
+		if err != nil {
+			h.logger.Error(
+				"failed to get consensus validator from staking keeper",
+				"err", err,
+			)
+			return nil, err
+		}
+		valAddr, err := sdk.ValAddressFromBech32(val.OperatorAddress)
+		if err != nil {
+			return nil, err
+		}
+
+		blockHashVote := oracletypes.BlockHashVote{
+			BlockHash: voteExt.BlockHash,
+			Voter:     valAddr.String(),
+		}
+		blockHashVotes = append(blockHashVotes, blockHashVote)
+	}
+
+	// sort votes so they are verified in the same order in ProcessProposalHandler
+	sort.Slice(blockHashVotes, func(i, j int) bool {
+		return blockHashVotes[i].Voter < blockHashVotes[j].Voter
+	})
+
+	return blockHashVotes, nil
+}
+
+func (h *ProposalHandler) verifyBlockHashVotes(
+	injectedVotes []oracletypes.BlockHashVote,
+	generatedVotes []oracletypes.BlockHashVote,
+) error {
+	if len(injectedVotes) != len(generatedVotes) {
+		return oracletypes.ErrNonEqualInjVotesLen
+	}
+
+	for i := range injectedVotes {
+		injectedVote := injectedVotes[i]
+		generatedVote := generatedVotes[i]
+
+		if injectedVote.Voter != generatedVote.Voter || injectedVote.BlockHash != generatedVote.BlockHash {
+			return oracletypes.ErrNonEqualInjVotesBlockHash
 		}
 	}
 

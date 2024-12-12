@@ -119,7 +119,7 @@ const (
 	]`
 )
 
-func (k *Keeper) SymbioticUpdateValidatorsPower(ctx context.Context) error {
+func (k Keeper) SymbioticUpdateValidatorsPower(ctx context.Context) error {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	params := k.GetParams(sdkCtx)
 
@@ -184,7 +184,7 @@ func (k *Keeper) SymbioticUpdateValidatorsPower(ctx context.Context) error {
 	return nil
 }
 
-func (k *Keeper) GetFinalizedBlockHash(ctx context.Context) (string, error) {
+func (k Keeper) GetFinalizedBlockHash(ctx context.Context) (string, error) {
 	var err error
 	var block Block
 
@@ -223,7 +223,7 @@ func (k *Keeper) GetFinalizedBlockHash(ctx context.Context) (string, error) {
 	return block.Data.Message.Body.ExecutionPayload.BlockHash, nil
 }
 
-func (k *Keeper) GetBlockByHash(ctx context.Context, blockHash string) (*types.Block, error) {
+func (k Keeper) GetBlockByHash(ctx context.Context, blockHash string) (*types.Block, error) {
 	var block *types.Block
 	client, err := ethclient.Dial(k.apiUrls.GetEthApiUrl())
 	if err != nil {
@@ -248,7 +248,7 @@ func (k *Keeper) GetBlockByHash(ctx context.Context, blockHash string) (*types.B
 	return block, nil
 }
 
-func (k *Keeper) GetBlockByNumber(ctx context.Context, number *big.Int) (*types.Block, error) {
+func (k Keeper) GetBlockByNumber(ctx context.Context, number *big.Int) (*types.Block, error) {
 	var block *types.Block
 	client, err := ethclient.Dial(k.apiUrls.GetEthApiUrl())
 	if err != nil {

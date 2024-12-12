@@ -9,6 +9,7 @@ import (
 
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
+	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 	"github.com/ojo-network/ojo/x/symbiotic/types"
 )
 
@@ -28,6 +29,7 @@ type Keeper struct {
 func NewKeeper(
 	cdc codec.BinaryCodec,
 	storeKey storetypes.StoreKey,
+	stakingKeeper types.StakingKeeper,
 	authority string,
 ) Keeper {
 	return Keeper{
@@ -111,4 +113,36 @@ func (k Keeper) PruneBlockHashesBeforeBlock(
 		}
 		return false
 	})
+}
+
+func (k Keeper) TallyBlockHashVotes(
+	ctx sdk.Context,
+	blockHashVotes []oracletypes.BlockHashVote,
+) string {
+	votePower := make(map[string]int64)
+	powerReduction := k.StakingKeeper.PowerReduction(ctx)
+
+	for _, vote := range blockHashVotes {
+		voterAddr := sdk.ValAddress(vote.Voter)
+
+		validator, err := k.StakingKeeper.GetValidator(ctx, voterAddr)
+		if err != nil {
+			continue
+		}
+
+		power := validator.GetConsensusPower(powerReduction)
+		votePower[vote.BlockHash] += power
+	}
+
+	var maxHash string
+	var maxPower int64
+
+	for hash, power := range votePower {
+		if power > maxPower {
+			maxPower = power
+			maxHash = hash
+		}
+	}
+
+	return maxHash
 }

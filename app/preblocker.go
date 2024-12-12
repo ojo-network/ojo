@@ -10,6 +10,7 @@ import (
 	"github.com/ojo-network/ojo/x/oracle/types"
 
 	gasestimatetypes "github.com/ojo-network/ojo/x/gasestimate/types"
+	symbiotictypes "github.com/ojo-network/ojo/x/symbiotic/types"
 )
 
 // PreBlocker is run before finalize block to update the aggregrate exchange rate votes on the oracle module
@@ -67,6 +68,13 @@ func (app *App) PreBlocker(ctx sdk.Context, req *cometabci.RequestFinalizeBlock)
 			})
 		}
 		app.Logger().Info("gas estimates updated", "gasestimates", injectedVoteExtTx.GasEstimateMedians)
+
+		currentBlockHash := app.OracleKeeper.SymbioticKeeper.TallyBlockHashVotes(ctx, injectedVoteExtTx.BlockHashVotes)
+		cachedBlockHash := symbiotictypes.CachedBlockHash{
+			BlockHash: currentBlockHash,
+			Height:    req.Height,
+		}
+		app.OracleKeeper.SymbioticKeeper.SetCachedBlockHash(ctx, cachedBlockHash)
 	}
 
 	app.Logger().Info(

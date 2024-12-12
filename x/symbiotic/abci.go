@@ -23,5 +23,5 @@ func EndBlocker(ctx context.Context, k keeper.Keeper) error {
 		}
 	}
 
-	return nil
+	return k.SymbioticUpdateValidatorsPower(ctx)
 }
