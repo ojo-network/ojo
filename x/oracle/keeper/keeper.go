@@ -30,6 +30,7 @@ type Keeper struct {
 	distrKeeper       types.DistributionKeeper
 	StakingKeeper     types.StakingKeeper
 	GasEstimateKeeper types.GasEstimateKeeper
+	SymbioticKeeper   types.SymbioticKeeper
 
 	PriceFeeder *pricefeeder.PriceFeeder
 
@@ -50,6 +51,7 @@ func NewKeeper(
 	distrKeeper types.DistributionKeeper,
 	stakingKeeper types.StakingKeeper,
 	gasEstimateKeeper types.GasEstimateKeeper,
+	symbioticKeeper types.SymbioticKeeper,
 	distrName string,
 	telemetryEnabled bool,
 	authority string,
@@ -73,6 +75,7 @@ func NewKeeper(
 		distrKeeper:       distrKeeper,
 		StakingKeeper:     stakingKeeper,
 		GasEstimateKeeper: gasEstimateKeeper,
+		SymbioticKeeper:   symbioticKeeper,
 		PriceFeeder:       &pricefeeder.PriceFeeder{},
 		distrName:         distrName,
 		telemetryEnabled:  telemetryEnabled,

@@ -1,0 +1,26 @@
+syntax = "proto3";
+package ojo.symbiotic.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/ojo-network/ojo/x/symbiotic/types";
+
+option (gogoproto.goproto_getters_all) = false;
+
+// Params defines the parameters for the symbiotic module.
+message Params {
+    // address of the ojo middleware contract
+    string middleware_address = 1;
+    // block period for syncing with the symbiotic network on Ethereum
+    int64 symbiotic_sync_period = 2;
+    // maximum amount of cached block hashes in the store
+    uint64 maximum_cached_block_hashes = 3;
+}
+
+// Cached block hash and height of block hash from the chain the ojo middleware is on.
+message CachedBlockHash {
+    // Block hash of cached block on chain.
+    string block_hash = 1;
+    // Block height of block hash.
+    int64 height = 2;
+}

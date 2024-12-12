@@ -9,6 +9,7 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	gasestimatetypes "github.com/ojo-network/ojo/x/gasestimate/types"
+	symbiotictypes "github.com/ojo-network/ojo/x/symbiotic/types"
 )
 
 // StakingKeeper defines the expected interface contract defined by the x/staking
@@ -53,4 +54,11 @@ type BankKeeper interface {
 
 type GasEstimateKeeper interface {
 	GetParams(ctx sdk.Context) (params gasestimatetypes.Params)
+}
+
+type SymbioticKeeper interface {
+	SetCachedBlockHash(ctx sdk.Context, cachedBlockHash symbiotictypes.CachedBlockHash)
+	GetParams(ctx sdk.Context) (params symbiotictypes.Params)
+	GetFinalizedBlockHash(ctx context.Context) (string, error)
+	TallyBlockHashVotes(ctx sdk.Context, blockHashVotes []BlockHashVote) string
 }

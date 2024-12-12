@@ -121,6 +121,9 @@ import (
 	gasestimatekeeper "github.com/ojo-network/ojo/x/gasestimate/keeper"
 	gasestimatetypes "github.com/ojo-network/ojo/x/gasestimate/types"
 
+	symbiotickeeper "github.com/ojo-network/ojo/x/symbiotic/keeper"
+	symbiotictypes "github.com/ojo-network/ojo/x/symbiotic/types"
+
 	"github.com/ojo-network/ojo/x/airdrop"
 	airdropkeeper "github.com/ojo-network/ojo/x/airdrop/keeper"
 	airdroptypes "github.com/ojo-network/ojo/x/airdrop/types"
@@ -150,6 +153,7 @@ var (
 		oracletypes.ModuleName:         {authtypes.Minter},
 		gmptypes.ModuleName:            {authtypes.Minter},
 		gasestimatetypes.ModuleName:    {authtypes.Burner},
+		symbiotictypes.ModuleName:      {authtypes.Minter},
 		airdroptypes.ModuleName:        {authtypes.Minter},
 	}
 )
@@ -208,6 +212,7 @@ type App struct {
 	GmpKeeper             gmpkeeper.Keeper
 	GasEstimateKeeper     gasestimatekeeper.Keeper
 	AirdropKeeper         airdropkeeper.Keeper
+	SymbioticKeeper       symbiotickeeper.Keeper
 	ConsensusParamsKeeper consensusparamkeeper.Keeper
 
 	// make scoped keepers public for test purposes
@@ -270,7 +275,7 @@ func New(
 		govtypes.StoreKey, paramstypes.StoreKey, ibcexported.StoreKey, upgradetypes.StoreKey,
 		feegrant.StoreKey, evidencetypes.StoreKey, ibctransfertypes.StoreKey, capabilitytypes.StoreKey,
 		consensusparamtypes.StoreKey, group.StoreKey, oracletypes.StoreKey, gmptypes.StoreKey,
-		gasestimatetypes.ModuleName, airdroptypes.StoreKey,
+		gasestimatetypes.ModuleName, airdroptypes.StoreKey, symbiotictypes.StoreKey,
 	)
 	tkeys := storetypes.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := storetypes.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -421,6 +426,13 @@ func New(
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 
+	app.SymbioticKeeper = symbiotickeeper.NewKeeper(
+		appCodec,
+		keys[symbiotictypes.ModuleName],
+		app.StakingKeeper,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
+
 	app.OracleKeeper = oraclekeeper.NewKeeper(
 		appCodec,
 		keys[oracletypes.ModuleName],
@@ -430,6 +442,7 @@ func New(
 		app.DistrKeeper,
 		app.StakingKeeper,
 		app.GasEstimateKeeper,
+		app.SymbioticKeeper,
 		distrtypes.ModuleName,
 		cast.ToBool(appOpts.Get("telemetry.enabled")),
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),

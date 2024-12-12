@@ -101,10 +101,22 @@ func (h *VoteExtensionHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 			})
 		}
 
+		var blockHash string
+		symbioticParams := h.oracleKeeper.SymbioticKeeper.GetParams(ctx)
+		if req.Height%symbioticParams.SymbioticSyncPeriod == 0 {
+			blockHash, err = h.oracleKeeper.SymbioticKeeper.GetFinalizedBlockHash(ctx)
+			h.logger.Error(
+				"height", req.Height,
+				err.Error(),
+			)
+			return &cometabci.ResponseExtendVote{VoteExtension: []byte{}}, err
+		}
+
 		voteExt := types.OracleVoteExtension{
 			Height:        req.Height,
 			ExchangeRates: filteredDecCoins,
 			GasEstimates:  gasEstimates,
+			BlockHash:     blockHash,
 		}
 
 		bz, err := voteExt.Marshal()
