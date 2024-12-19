@@ -30,3 +30,13 @@ func (q querier) Params(
 	params := q.GetParams(ctx)
 	return &types.ParamsResponse{Params: params}, nil
 }
+
+// Cached Block Hashes currently in the store.
+func (q querier) CachedBlockHashes(
+	goCtx context.Context,
+	_ *types.CachedBlockHashesRequest,
+) (*types.CachedBlockHashesResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	cachedBlockHashes := q.GetAllCachedBlockHashes(ctx)
+	return &types.CachedBlockHashesResponse{CachedBlockHashes: cachedBlockHashes}, nil
+}

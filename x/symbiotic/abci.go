@@ -23,5 +23,9 @@ func EndBlocker(ctx context.Context, k keeper.Keeper) error {
 		}
 	}
 
-	return k.SymbioticUpdateValidatorsPower(ctx)
+	if err := k.SymbioticUpdateValidatorsPower(ctx); err != nil {
+		k.Logger(sdkCtx).With(err).Error("Symbiotic val update error")
+	}
+
+	return nil
 }

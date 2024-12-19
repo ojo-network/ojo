@@ -13,6 +13,10 @@ service Query {
   rpc Params(ParamsRequest) returns (ParamsResponse) {
     option (google.api.http).get = "/ojo/symbiotic/v1/params";
   }
+  // CachedBlockHashes queries all cached block hashes.
+  rpc CachedBlockHashes(CachedBlockHashesRequest) returns (CachedBlockHashesResponse) {
+    option (google.api.http).get = "/ojo/symbiotic/v1/cachedblockhashes";
+  }
 }
 
 // ParamsRequest is the request type for the Query/Params RPC method.
@@ -22,4 +26,12 @@ message ParamsRequest {}
 message ParamsResponse {
   // params defines the parameters of the module.
   Params params = 1 [(gogoproto.nullable) = false];
+}
+
+// CachedBlockHashesRequest is the request type for the Query/CachedBlockHashes RPC method.
+message CachedBlockHashesRequest {}
+
+// CachedBlockHashesResponse is the response type for the Query/CachedBlockHashes RPC method.
+message CachedBlockHashesResponse {
+  repeated CachedBlockHash cached_block_hashes = 1 [(gogoproto.nullable) = false];
 }

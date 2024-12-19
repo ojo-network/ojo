@@ -21,6 +21,7 @@ import (
 	"github.com/ojo-network/ojo/util"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	symbiotictypes "github.com/ojo-network/ojo/x/symbiotic/types"
 )
 
@@ -167,7 +168,7 @@ func (k Keeper) SymbioticUpdateValidatorsPower(ctx context.Context) error {
 	for _, v := range validators {
 		val, err := k.StakingKeeper.GetValidatorByConsAddr(ctx, v.ConsAddr[:20])
 		if err != nil {
-			if errors.Is(err, symbiotictypes.ErrNoValidatorFound) {
+			if errors.Is(err, stakingtypes.ErrNoValidatorFound) {
 				continue
 			}
 			return err

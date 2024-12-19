@@ -33,10 +33,11 @@ func NewKeeper(
 	authority string,
 ) Keeper {
 	return Keeper{
-		cdc:       cdc,
-		storeKey:  storeKey,
-		apiUrls:   types.NewApiUrls(),
-		authority: authority,
+		cdc:           cdc,
+		storeKey:      storeKey,
+		apiUrls:       types.NewApiUrls(),
+		StakingKeeper: stakingKeeper,
+		authority:     authority,
 	}
 }
 

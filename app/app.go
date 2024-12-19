@@ -121,6 +121,7 @@ import (
 	gasestimatekeeper "github.com/ojo-network/ojo/x/gasestimate/keeper"
 	gasestimatetypes "github.com/ojo-network/ojo/x/gasestimate/types"
 
+	"github.com/ojo-network/ojo/x/symbiotic"
 	symbiotickeeper "github.com/ojo-network/ojo/x/symbiotic/keeper"
 	symbiotictypes "github.com/ojo-network/ojo/x/symbiotic/types"
 
@@ -609,6 +610,7 @@ func New(
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
 		gmp.NewAppModule(appCodec, app.GmpKeeper, app.OracleKeeper),
 		gasestimate.NewAppModule(appCodec, app.GasEstimateKeeper),
+		symbiotic.NewAppModule(appCodec, app.SymbioticKeeper),
 		airdrop.NewAppModule(appCodec, app.AirdropKeeper, app.AccountKeeper, app.BankKeeper),
 		consensus.NewAppModule(appCodec, app.ConsensusParamsKeeper),
 	)
@@ -645,6 +647,7 @@ func New(
 		distrtypes.ModuleName,
 		slashingtypes.ModuleName,
 		evidencetypes.ModuleName,
+		symbiotictypes.ModuleName,
 		stakingtypes.ModuleName,
 		authtypes.ModuleName,
 		banktypes.ModuleName,
@@ -668,6 +671,7 @@ func New(
 	app.mm.SetOrderEndBlockers(
 		crisistypes.ModuleName,
 		govtypes.ModuleName,
+		symbiotictypes.ModuleName,
 		stakingtypes.ModuleName,
 		ibctransfertypes.ModuleName,
 		ibcexported.ModuleName,
@@ -698,12 +702,12 @@ func New(
 	// so that other modules that want to create or claim capabilities afterwards in InitChain
 	// can do so safely.
 	genesisModuleOrder := []string{
-		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName,
-		distrtypes.ModuleName, stakingtypes.ModuleName, slashingtypes.ModuleName, govtypes.ModuleName,
-		minttypes.ModuleName, crisistypes.ModuleName, genutiltypes.ModuleName, ibctransfertypes.ModuleName,
-		ibcexported.ModuleName, evidencetypes.ModuleName, authz.ModuleName, feegrant.ModuleName,
-		group.ModuleName, paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
-		oracletypes.ModuleName, gmptypes.ModuleName, gasestimatetypes.ModuleName,
+		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName,
+		symbiotictypes.ModuleName, stakingtypes.ModuleName, slashingtypes.ModuleName,
+		govtypes.ModuleName, minttypes.ModuleName, crisistypes.ModuleName, genutiltypes.ModuleName,
+		ibctransfertypes.ModuleName, ibcexported.ModuleName, evidencetypes.ModuleName, authz.ModuleName,
+		feegrant.ModuleName, group.ModuleName, paramstypes.ModuleName, upgradetypes.ModuleName,
+		vestingtypes.ModuleName, oracletypes.ModuleName, gmptypes.ModuleName, gasestimatetypes.ModuleName,
 		airdroptypes.ModuleName, consensusparamtypes.ModuleName,
 	}
 	app.mm.SetOrderInitGenesis(genesisModuleOrder...)
@@ -1024,6 +1028,7 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(crisistypes.ModuleName)
 	paramsKeeper.Subspace(oracletypes.ModuleName)
 	paramsKeeper.Subspace(gasestimatetypes.ModuleName)
+	paramsKeeper.Subspace(symbiotictypes.ModuleName)
 
 	// register the key tables for legacy param subspaces
 	keyTable := ibcclienttypes.ParamKeyTable()

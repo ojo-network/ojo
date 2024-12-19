@@ -6,7 +6,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/ojo-network/ojo/util/cli"
-	"github.com/ojo-network/ojo/x/gmp/types"
+	"github.com/ojo-network/ojo/x/symbiotic/types"
 	"github.com/spf13/cobra"
 )
 
@@ -21,6 +21,7 @@ func GetQueryCmd() *cobra.Command {
 
 	cmd.AddCommand(
 		GetCmdQueryParams(),
+		GetCmdQueryCachedBlockHashes(),
 	)
 
 	return cmd
@@ -41,6 +42,29 @@ func GetCmdQueryParams() *cobra.Command {
 			queryClient := types.NewQueryClient(clientCtx)
 
 			res, err := queryClient.Params(cmd.Context(), &types.ParamsRequest{})
+			return cli.PrintOrErr(res, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+// GetCmdQueryParams implements the query cached block hashes command.
+func GetCmdQueryCachedBlockHashes() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "cached block hashes",
+		Args:  cobra.NoArgs,
+		Short: "Query the current cached block hashes",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			res, err := queryClient.CachedBlockHashes(cmd.Context(), &types.CachedBlockHashesRequest{})
 			return cli.PrintOrErr(res, err, clientCtx)
 		},
 	}
