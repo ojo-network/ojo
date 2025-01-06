@@ -180,6 +180,28 @@ func (k Keeper) SetMaximumMedianStamps(ctx sdk.Context, maximumMedianStamps uint
 	k.paramSpace.Set(ctx, types.KeyMaximumMedianStamps, maximumMedianStamps)
 }
 
+// PriceExpiryTime returns the expiry in unix time for elys prices.
+func (k Keeper) PriceExpiryTime(ctx sdk.Context) (res uint64) {
+	k.paramSpace.Get(ctx, types.KeyPriceExpiryTime, &res)
+	return
+}
+
+// SetPriceExpiryTime updates the expiry in unix time for elys prices.
+func (k Keeper) SetPriceExpiryTime(ctx sdk.Context, priceExpiryTime uint64) {
+	k.paramSpace.Set(ctx, types.KeyPriceExpiryTime, priceExpiryTime)
+}
+
+// LifeTimeInBlocks returns the life time of an elys price in blocks.
+func (k Keeper) LifeTimeInBlocks(ctx sdk.Context) (res uint64) {
+	k.paramSpace.Get(ctx, types.KeyLifeTimeInBlocks, &res)
+	return
+}
+
+// SetLifeTimeInBlocks updates the life time of an elys price in blocks.
+func (k Keeper) SetLifeTimeInBlocks(ctx sdk.Context, lifeTimeInBlocks uint64) {
+	k.paramSpace.Set(ctx, types.KeyLifeTimeInBlocks, lifeTimeInBlocks)
+}
+
 // CurrencyPairProviders returns the current Currency Pair Providers the price feeder
 // will query when starting up.
 func (k Keeper) CurrencyPairProviders(ctx sdk.Context) (res types.CurrencyPairProvidersList) {

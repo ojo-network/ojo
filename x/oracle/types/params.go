@@ -34,6 +34,8 @@ var (
 	KeyMaximumMedianStamps         = []byte("MaximumMedianStamps")
 	KeyCurrencyPairProviders       = []byte("CurrencyPairProviders")
 	KeyCurrencyDeviationThresholds = []byte("CurrencyDeviationThresholds")
+	KeyPriceExpiryTime             = []byte("PriceExpiryTime")
+	KeyLifeTimeInBlocks            = []byte("LifeTimeInBlocks")
 )
 
 // Default parameter values
@@ -45,6 +47,8 @@ const (
 	DefaultMaximumPriceStamps       = 60                  // retain for 3 hours
 	DefaultMedianStampPeriod        = BlocksPerHour * 3   // window for 3 hours
 	DefaultMaximumMedianStamps      = 24                  // retain for 3 days
+	DefaultPriceExpiryTime          = 86400               // retain for 1 day
+	DefaultLifeTimeInBlocks         = 1                   // retain for 1 block
 )
 
 // Default parameter values
@@ -267,6 +271,8 @@ func DefaultParams() Params {
 		RewardBands:                 DefaultRewardBands(),
 		CurrencyPairProviders:       DefaultCurrencyPairProviders,
 		CurrencyDeviationThresholds: DefaultCurrencyDeviationThresholds,
+		PriceExpiryTime:             DefaultPriceExpiryTime,
+		LifeTimeInBlocks:            DefaultLifeTimeInBlocks,
 	}
 }
 
@@ -343,6 +349,16 @@ func (p *Params) ParamSetPairs() paramstypes.ParamSetPairs {
 			KeyMaximumMedianStamps,
 			&p.MaximumMedianStamps,
 			validateMaximumMedianStamps,
+		),
+		paramstypes.NewParamSetPair(
+			KeyPriceExpiryTime,
+			&p.PriceExpiryTime,
+			validatePriceExpiryTime,
+		),
+		paramstypes.NewParamSetPair(
+			KeyLifeTimeInBlocks,
+			&p.LifeTimeInBlocks,
+			validateLifeTimeInBlocks,
 		),
 		paramstypes.NewParamSetPair(
 			KeyCurrencyPairProviders,
@@ -616,6 +632,32 @@ func validateMaximumMedianStamps(i interface{}) error {
 
 	if v < 1 {
 		return ErrInvalidParamValue.Wrap("oracle parameter MaximumMedianStamps must be > 0")
+	}
+
+	return nil
+}
+
+func validatePriceExpiryTime(i interface{}) error {
+	v, ok := i.(uint64)
+	if !ok {
+		return ErrInvalidParamValue.Wrapf("invalid parameter type: %T", i)
+	}
+
+	if v < 1 {
+		return ErrInvalidParamValue.Wrap("oracle parameter PriceExpiryTime must be > 0")
+	}
+
+	return nil
+}
+
+func validateLifeTimeInBlocks(i interface{}) error {
+	v, ok := i.(uint64)
+	if !ok {
+		return ErrInvalidParamValue.Wrapf("invalid parameter type: %T", i)
+	}
+
+	if v < 1 {
+		return ErrInvalidParamValue.Wrap("oracle parameter LifeTimeInBlocks must be > 0")
 	}
 
 	return nil

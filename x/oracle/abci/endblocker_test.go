@@ -1,10 +1,13 @@
 package abci_test
 
 import (
+	"time"
+
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/ojo-network/ojo/app/params"
+	"github.com/ojo-network/ojo/util"
 	"github.com/ojo-network/ojo/util/decmath"
 	"github.com/ojo-network/ojo/x/oracle/abci"
 	"github.com/ojo-network/ojo/x/oracle/types"
@@ -26,7 +29,11 @@ func createVotes(hash string, val sdk.ValAddress, rates sdk.DecCoins, blockHeigh
 func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	app, ctx := s.app, s.ctx
 	valAddr1, valAddr2, valAddr3 := s.keys[0].ValAddress, s.keys[1].ValAddress, s.keys[2].ValAddress
+	currTime := time.Now()
+	timeDiff := time.Second * 5
 	ctx = ctx.WithBlockHeight(0)
+	ctx = ctx.WithBlockTime(currTime)
+	currTime = currTime.Add(timeDiff)
 	preVoteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx) / 2)
 	voteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx)/2 + 1)
 
@@ -71,6 +78,8 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
+	ctx = ctx.WithBlockTime(currTime)
+	currTime = currTime.Add(timeDiff)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
@@ -81,12 +90,21 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 		rate, err := app.OracleKeeper.GetExchangeRate(ctx, denom.SymbolDenom)
 		s.Require().NoError(err)
 		s.Require().Equal(math.LegacyMustNewDecFromStr("1.0"), rate)
+
+		elysPrice, found := app.OracleKeeper.GetLatestPriceFromAnySource(ctx, denom.SymbolDenom)
+		s.Require().True(found)
+		s.Require().Equal(elysPrice.Asset, denom.SymbolDenom)
+		s.Require().Equal(elysPrice.Price, rate)
+		s.Require().Equal(elysPrice.BlockHeight, util.SafeInt64ToUint64(ctx.BlockHeight()))
+		s.Require().Equal(elysPrice.Timestamp, util.SafeInt64ToUint64(ctx.BlockTime().Unix()))
 	}
 
 	// Test: only val2 votes (has 39% vote power).
 	// Total voting power per denom must be bigger or equal than 40% (see SetupTest).
 	// So if only val2 votes, we won't have any prices next block.
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
+	ctx = ctx.WithBlockTime(currTime)
+	currTime = currTime.Add(timeDiff)
 	h = uint64(ctx.BlockHeight())
 	val2PreVotes.SubmitBlock = h
 
@@ -94,6 +112,8 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
+	ctx = ctx.WithBlockTime(currTime)
+	currTime = currTime.Add(timeDiff)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
 	abci.EndBlocker(ctx, app.OracleKeeper)
 
@@ -106,6 +126,8 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	// Test: val2 and val3 votes.
 	// now we will have 40% of the power, so now we should have prices
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
+	ctx = ctx.WithBlockTime(currTime)
+	currTime = currTime.Add(timeDiff)
 	h = uint64(ctx.BlockHeight())
 	val2PreVotes.SubmitBlock = h
 	val3PreVotes.SubmitBlock = h
@@ -115,6 +137,8 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
+	ctx = ctx.WithBlockTime(currTime)
+	currTime = currTime.Add(timeDiff)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
 	abci.EndBlocker(ctx, app.OracleKeeper)
@@ -123,11 +147,20 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 		rate, err := app.OracleKeeper.GetExchangeRate(ctx, denom.SymbolDenom)
 		s.Require().NoError(err)
 		s.Require().Equal(math.LegacyMustNewDecFromStr("0.5"), rate)
+
+		elysPrice, found := app.OracleKeeper.GetLatestPriceFromAnySource(ctx, denom.SymbolDenom)
+		s.Require().True(found)
+		s.Require().Equal(elysPrice.Asset, denom.SymbolDenom)
+		s.Require().Equal(elysPrice.Price, rate)
+		s.Require().Equal(elysPrice.BlockHeight, util.SafeInt64ToUint64(ctx.BlockHeight()))
+		s.Require().Equal(elysPrice.Timestamp, util.SafeInt64ToUint64(ctx.BlockTime().Unix()))
 	}
 
 	// Test: val1 and val2 vote again
 	// umee has 69.9% power, and atom has 30%, so we should have price for umee, but not for atom
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
+	ctx = ctx.WithBlockTime(currTime)
+	currTime = currTime.Add(timeDiff)
 	h = uint64(ctx.BlockHeight())
 	val1PreVotes.SubmitBlock = h
 	val2PreVotes.SubmitBlock = h
@@ -144,6 +177,8 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
+	ctx = ctx.WithBlockTime(currTime)
+	currTime = currTime.Add(timeDiff)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
 	abci.EndBlocker(ctx, app.OracleKeeper)
@@ -151,6 +186,14 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	rate, err := app.OracleKeeper.GetExchangeRate(ctx, "ojo")
 	s.Require().NoError(err)
 	s.Require().Equal(math.LegacyMustNewDecFromStr("1.0"), rate)
+
+	elysPrice, found := app.OracleKeeper.GetLatestPriceFromAnySource(ctx, "ojo")
+	s.Require().True(found)
+	s.Require().Equal(elysPrice.Asset, "ojo")
+	s.Require().Equal(elysPrice.Price, rate)
+	s.Require().Equal(elysPrice.BlockHeight, util.SafeInt64ToUint64(ctx.BlockHeight()))
+	s.Require().Equal(elysPrice.Timestamp, util.SafeInt64ToUint64(ctx.BlockTime().Unix()))
+
 	rate, err = app.OracleKeeper.GetExchangeRate(ctx, "atom")
 	s.Require().ErrorIs(err, types.ErrUnknownDenom.Wrap("atom"))
 	s.Require().Equal(math.LegacyZeroDec(), rate)

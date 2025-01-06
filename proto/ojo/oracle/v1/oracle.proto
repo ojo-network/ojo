@@ -74,6 +74,10 @@ message Params {
     (gogoproto.castrepeated) = "CurrencyDeviationThresholdList",
     (gogoproto.nullable) = false
   ];
+  // Price expiry in unix time for elys prices
+  uint64 price_expiry_time = 16;
+  // Lifetime of an elys price in blocks
+  uint64 life_time_in_blocks = 17;
 }
 
 // Denom - the object to hold configurations of each denom

@@ -1,0 +1,36 @@
+syntax = "proto3";
+package ojo.oracle.v1;
+
+import "gogoproto/gogo.proto";
+import "cosmos_proto/cosmos.proto";
+
+option go_package = "github.com/ojo-network/ojo/x/oracle/types";
+
+option (gogoproto.goproto_getters_all) = false;
+
+message AssetInfo {
+    string denom = 1;
+    string display = 2;
+    string band_ticker = 3;
+    string elys_ticker = 4;
+    uint64 decimal = 5;
+}
+
+message Price {
+    string asset = 1;
+    string price = 2 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+    string source = 3;
+    string provider = 4;
+    uint64 timestamp = 5;
+    uint64 block_height = 6;
+}
+
+
+message PriceFeeder {
+    string feeder = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+    bool is_active = 2;
+}

@@ -35,6 +35,9 @@ var (
 	KeyPrefixHistoricPrice                = []byte{0x08} // prefix for each key to a historic price
 	KeyPrefixValidatorRewardSet           = []byte{0x09} // prefix for each key to a validator reward set
 	KeyPrefixParamUpdatePlan              = []byte{0x10} // prefix for each key to a param update plan
+	KeyPrefixPrice                        = []byte{0x11} // prefix for each key to a price
+	KeyPrefixPriceFeeder                  = []byte{0x12} // prefix for each key to a price feeder
+	KeyPrefixAssetInfo                    = []byte{0x13} // prefic for each key to a asset info
 )
 
 // GetExchangeRateKey - stored by *denom*
@@ -91,6 +94,31 @@ func KeyValidatorRewardSet() (key []byte) {
 // KeyParamUpdatePlan - stored by *planHeight*
 func KeyParamUpdatePlan(planHeight uint64) (key []byte) {
 	return util.ConcatBytes(0, KeyPrefixParamUpdatePlan, util.UintWithNullPrefix(planHeight))
+}
+
+// KeyPrice - stored by *asset, source, and timestamp*
+func KeyPrice(asset string, source string, timestamp uint64) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixPrice, []byte(asset), []byte(source), util.UintWithNullPrefix(timestamp))
+}
+
+// KeyPriceAsset - stored by *asset*
+func KeyPriceAsset(asset string) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixPrice, []byte(asset))
+}
+
+// KeyPriceAssetAndSource - stored by *asset and source*
+func KeyPriceAssetAndSource(asset string, source string) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixPrice, []byte(asset), []byte(source))
+}
+
+// KeyAssetInfo - stored by *asset*
+func KeyAssetInfo(asset string) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixAssetInfo, []byte(asset))
+}
+
+// KeyPriceFeeder - stored by *address*
+func KeyPriceFeeder(address string) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixPriceFeeder, []byte(address))
 }
 
 // ParseDenomAndBlockFromKey returns the denom and block contained in the *key*

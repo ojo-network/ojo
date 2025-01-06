@@ -73,6 +73,18 @@ func EndBlocker(ctx context.Context, k keeper.Keeper) error {
 		k.SlashAndResetMissCounters(sdkCtx)
 	}
 	k.PruneAllPrices(sdkCtx)
+
+	// Prune expired elys prices
+	for _, price := range k.GetAllPrice(sdkCtx) {
+		if price.Timestamp+params.PriceExpiryTime < util.SafeInt64ToUint64(sdkCtx.BlockTime().Unix()) {
+			k.RemovePrice(sdkCtx, price.Asset, price.Source, price.Timestamp)
+		}
+
+		if price.BlockHeight+params.LifeTimeInBlocks < uint64(sdkCtx.BlockHeight()) {
+			k.RemovePrice(sdkCtx, price.Asset, price.Source, price.Timestamp)
+		}
+	}
+
 	return nil
 }
 
@@ -144,6 +156,17 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 		if err = k.SetExchangeRateWithEvent(ctx, ballotDenom.Denom, exchangeRate); err != nil {
 			return err
 		}
+
+		// Set elys price
+		elysPrice := types.Price{
+			Asset:       ballotDenom.Denom,
+			Price:       exchangeRate,
+			Source:      "ojo",
+			Provider:    "automation",
+			Timestamp:   util.SafeInt64ToUint64(ctx.BlockTime().Unix()),
+			BlockHeight: util.SafeInt64ToUint64(ctx.BlockHeight()),
+		}
+		k.SetPrice(ctx, elysPrice)
 
 		if k.IsPeriodLastBlock(ctx, params.HistoricStampPeriod) {
 			k.AddHistoricPrice(ctx, ballotDenom.Denom, exchangeRate)
