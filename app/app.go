@@ -429,7 +429,6 @@ func New(
 		app.BankKeeper,
 		app.DistrKeeper,
 		app.StakingKeeper,
-		app.GasEstimateKeeper,
 		distrtypes.ModuleName,
 		cast.ToBool(appOpts.Get("telemetry.enabled")),
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
