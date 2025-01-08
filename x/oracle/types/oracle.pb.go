@@ -56,9 +56,9 @@ type Params struct {
 	// Currency Deviation Thresholds defines the deviation thresholds
 	// for each base currency the price feeder uses upon start up.
 	CurrencyDeviationThresholds CurrencyDeviationThresholdList `protobuf:"bytes,15,rep,name=currency_deviation_thresholds,json=currencyDeviationThresholds,proto3,castrepeated=CurrencyDeviationThresholdList" json:"currency_deviation_thresholds" yaml:"currency_deviation_thresholds"`
-	// Price expiry of in unix time for elys prices
+	// Price expiry in unix time for elys prices
 	PriceExpiryTime uint64 `protobuf:"varint,16,opt,name=price_expiry_time,json=priceExpiryTime,proto3" json:"price_expiry_time,omitempty"`
-	// Lifetime of elys price in blocks
+	// Lifetime of an elys price in blocks
 	LifeTimeInBlocks uint64 `protobuf:"varint,17,opt,name=life_time_in_blocks,json=lifeTimeInBlocks,proto3" json:"life_time_in_blocks,omitempty"`
 }
 

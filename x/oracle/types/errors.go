@@ -38,4 +38,6 @@ var (
 	ErrNonEqualInjVotesLen   = errors.Register(ModuleName, 28, "number of exchange rate votes in vote extension and extended commit info are not equal") //nolint: lll
 	ErrNonEqualInjVotesRates = errors.Register(ModuleName, 29, "injected exchange rate votes and generated exchange votes are not equal")                //nolint: lll
 	ErrNoCommitInfo          = errors.Register(ModuleName, 30, "no commit info in process proposal request")
+	ErrNotAPriceFeeder       = errors.Register(ModuleName, 31, "not a price feeder")
+	ErrPriceFeederNotActive  = errors.Register(ModuleName, 32, "price feeder is not active")
 )
