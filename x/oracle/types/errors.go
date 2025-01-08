@@ -40,4 +40,5 @@ var (
 	ErrNoCommitInfo          = errors.Register(ModuleName, 30, "no commit info in process proposal request")
 	ErrNotAPriceFeeder       = errors.Register(ModuleName, 31, "not a price feeder")
 	ErrPriceFeederNotActive  = errors.Register(ModuleName, 32, "price feeder is not active")
+	ErrAssetWasCreated       = errors.Register(ModuleName, 33, "asset already exists")
 )
