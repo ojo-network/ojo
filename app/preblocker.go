@@ -8,8 +8,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ojo-network/ojo/x/oracle/abci"
 	"github.com/ojo-network/ojo/x/oracle/types"
-
-	gasestimatetypes "github.com/ojo-network/ojo/x/gasestimate/types"
 )
 
 // PreBlocker is run before finalize block to update the aggregrate exchange rate votes on the oracle module
@@ -60,13 +58,6 @@ func (app *App) PreBlocker(ctx sdk.Context, req *cometabci.RequestFinalizeBlock)
 			}
 			app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr, exchangeRateVote)
 		}
-		for _, gasEstimate := range injectedVoteExtTx.GasEstimateMedians {
-			app.GasEstimateKeeper.SetGasEstimate(ctx, gasestimatetypes.GasEstimate{
-				Network:     gasEstimate.Network,
-				GasEstimate: gasEstimate.GasEstimation,
-			})
-		}
-		app.Logger().Info("gas estimates updated", "gasestimates", injectedVoteExtTx.GasEstimateMedians)
 	}
 
 	app.Logger().Info(

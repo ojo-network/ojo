@@ -17,7 +17,6 @@ message OracleVoteExtension {
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins",
     (gogoproto.nullable) = false
   ];
-  repeated GasEstimate gas_estimates = 3 [(gogoproto.nullable) = false];
 }
 
 // InjectedVoteExtensionTx defines the vote extension tx injected by the prepare
@@ -27,11 +26,4 @@ message InjectedVoteExtensionTx {
     (gogoproto.nullable) = false
   ];
   bytes extended_commit_info = 2;
-  repeated GasEstimate gas_estimate_medians = 3 [(gogoproto.nullable) = false];
-}
-
-// GasEstimate defines a gas estimate for a given network.
-message GasEstimate {
-  int64 gas_estimation = 1;
-  string network = 2;
 }
