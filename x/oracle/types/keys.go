@@ -11,7 +11,7 @@ import (
 
 const (
 	// ModuleName is the name of the oracle module
-	ModuleName = "oracle"
+	ModuleName = "ojooracle"
 
 	// StoreKey is the string store representation
 	StoreKey = ModuleName
