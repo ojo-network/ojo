@@ -4,6 +4,7 @@ package ojo.oracle.v1;
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "ojo/oracle/v1/oracle.proto";
+import "ojo/oracle/v1/elys.proto";
 import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/ojo-network/ojo/x/oracle/types";
@@ -96,6 +97,18 @@ service Query {
       returns (QueryValidatorRewardSetResponse) {
     option (google.api.http).get =
         "/ojo/oracle/v1/valdiators/validator_reward_set";
+  }
+
+  // Queries a Price by asset.
+  rpc Price(QueryGetPriceRequest)
+      returns (QueryGetPriceResponse) {
+    option (google.api.http).get = "/elys-network/elys/oracle/price/{asset}";
+  }
+
+  // Queries a list of Price items.
+  rpc PriceAll(QueryAllPriceRequest)
+      returns (QueryAllPriceResponse) {
+    option (google.api.http).get = "/elys-network/elys/oracle/prices";
   }
 }
 
@@ -290,4 +303,20 @@ message QueryValidatorRewardSet {}
 // QueryValidatorRewardSetResponse is the response type for the Query/ValidatorRewardSet RPC method.
 message QueryValidatorRewardSetResponse {
   ValidatorRewardSet validators = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryGetPriceRequest {
+  string asset = 1;
+  string source = 2;
+  uint64 timestamp = 3;
+}
+
+message QueryGetPriceResponse {
+  Price price = 1 [ (gogoproto.nullable) = false ];
+}
+
+message QueryAllPriceRequest {}
+
+message QueryAllPriceResponse {
+  repeated Price price = 1 [ (gogoproto.nullable) = false ];
 }

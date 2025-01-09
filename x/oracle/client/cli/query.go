@@ -32,6 +32,8 @@ func GetQueryCmd() *cobra.Command {
 		GetCmdQueryFeederDelegation(),
 		GetCmdQueryMissCounter(),
 		GetCmdQuerySlashWindow(),
+		GetCmdListPrice(),
+		CmdShowPrice(),
 	)
 
 	return cmd
@@ -275,5 +277,59 @@ func GetCmdQuerySlashWindow() *cobra.Command {
 	}
 
 	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+func GetCmdListPrice() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "list-price",
+		Short: "list all price",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+			queryClient := types.NewQueryClient(clientCtx)
+
+			res, err := queryClient.PriceAll(cmd.Context(), &types.QueryAllPriceRequest{})
+			return cli.PrintOrErr(res, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+func CmdShowPrice() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "show-price [asset] [source] [timestamp]",
+		Short: "shows a price",
+		Args:  cobra.ExactArgs(3),
+		RunE: func(cmd *cobra.Command, args []string) (err error) {
+			clientCtx := client.GetClientContextFromCmd(cmd)
+
+			timestamp, err := cmd.Flags().GetUint64(args[2])
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+			params := &types.QueryGetPriceRequest{
+				Asset:     args[0],
+				Source:    args[1],
+				Timestamp: timestamp,
+			}
+
+			res, err := queryClient.Price(cmd.Context(), params)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
 	return cmd
 }
