@@ -19,6 +19,7 @@ const (
 
 // Parameter keys
 var (
+	KeyParams                      = []byte("Params")
 	KeyVotePeriod                  = []byte("VotePeriod")
 	KeyVoteThreshold               = []byte("VoteThreshold")
 	KeyRewardBands                 = []byte("RewardBands")

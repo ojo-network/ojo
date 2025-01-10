@@ -3,20 +3,21 @@ package keeper
 import (
 	"cosmossdk.io/math"
 	storetypes "cosmossdk.io/store/types"
+	"github.com/cosmos/cosmos-sdk/runtime"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ojo-network/ojo/x/oracle/types"
 )
 
 // SetPrice set a specific price in the store from its index
 func (k Keeper) SetPrice(ctx sdk.Context, price types.Price) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	bz := k.cdc.MustMarshal(&price)
 	store.Set(types.KeyPrice(price.Asset, price.Source, price.Timestamp), bz)
 }
 
 // GetPrice returns a price from its index
 func (k Keeper) GetPrice(ctx sdk.Context, asset, source string, timestamp uint64) (val types.Price, found bool) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 
 	bz := store.Get(types.KeyPrice(asset, source, timestamp))
 	if bz == nil {
@@ -28,7 +29,7 @@ func (k Keeper) GetPrice(ctx sdk.Context, asset, source string, timestamp uint64
 }
 
 func (k Keeper) GetLatestPriceFromAssetAndSource(ctx sdk.Context, asset, source string) (val types.Price, found bool) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	iterator := storetypes.KVStoreReversePrefixIterator(store, types.KeyPriceAssetAndSource(asset, source))
 	defer iterator.Close()
 
@@ -42,7 +43,7 @@ func (k Keeper) GetLatestPriceFromAssetAndSource(ctx sdk.Context, asset, source 
 }
 
 func (k Keeper) GetLatestPriceFromAnySource(ctx sdk.Context, asset string) (val types.Price, found bool) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	iterator := storetypes.KVStoreReversePrefixIterator(store, types.KeyPriceAsset(asset))
 	defer iterator.Close()
 
@@ -57,13 +58,13 @@ func (k Keeper) GetLatestPriceFromAnySource(ctx sdk.Context, asset string) (val 
 
 // RemovePrice removes a price from the store
 func (k Keeper) RemovePrice(ctx sdk.Context, asset, source string, timestamp uint64) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	store.Delete(types.KeyPrice(asset, source, timestamp))
 }
 
 // GetAllPrice returns all price
 func (k Keeper) GetAllPrice(ctx sdk.Context) (list []types.Price) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	iterator := storetypes.KVStorePrefixIterator(store, types.KeyPrefixPrice)
 
 	defer iterator.Close()
@@ -103,14 +104,14 @@ func (k Keeper) GetAssetPriceFromDenom(ctx sdk.Context, denom string) math.Legac
 
 // SetAssetInfo set a specific assetInfo in the store from its index
 func (k Keeper) SetAssetInfo(ctx sdk.Context, assetInfo types.AssetInfo) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	bz := k.cdc.MustMarshal(&assetInfo)
 	store.Set(types.KeyAssetInfo(assetInfo.Denom), bz)
 }
 
 // GetAssetInfo returns a assetInfo from its index
 func (k Keeper) GetAssetInfo(ctx sdk.Context, denom string) (val types.AssetInfo, found bool) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	bz := store.Get(types.KeyAssetInfo(denom))
 	if bz == nil {
 		return val, false
@@ -122,13 +123,13 @@ func (k Keeper) GetAssetInfo(ctx sdk.Context, denom string) (val types.AssetInfo
 
 // RemoveAssetInfo removes a assetInfo from the store
 func (k Keeper) RemoveAssetInfo(ctx sdk.Context, denom string) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	store.Delete(types.KeyAssetInfo(denom))
 }
 
 // GetAllAssetInfo returns all assetInfo
 func (k Keeper) GetAllAssetInfo(ctx sdk.Context) (list []types.AssetInfo) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	iterator := storetypes.KVStorePrefixIterator(store, []byte{})
 
 	defer iterator.Close()
@@ -144,7 +145,7 @@ func (k Keeper) GetAllAssetInfo(ctx sdk.Context) (list []types.AssetInfo) {
 
 // SetPriceFeeder set a specific priceFeeder in the store from its index
 func (k Keeper) SetPriceFeeder(ctx sdk.Context, priceFeeder types.PriceFeeder) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	key := types.KeyPriceFeeder(priceFeeder.Feeder)
 	bz := k.cdc.MustMarshal(&priceFeeder)
 	store.Set(key, bz)
@@ -152,7 +153,7 @@ func (k Keeper) SetPriceFeeder(ctx sdk.Context, priceFeeder types.PriceFeeder) {
 
 // GetPriceFeeder returns a priceFeeder from its index
 func (k Keeper) GetPriceFeeder(ctx sdk.Context, feeder sdk.AccAddress) (val types.PriceFeeder, found bool) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	key := types.KeyPriceFeeder(feeder.String())
 
 	bz := store.Get(key)
@@ -166,7 +167,7 @@ func (k Keeper) GetPriceFeeder(ctx sdk.Context, feeder sdk.AccAddress) (val type
 
 // RemovePriceFeeder removes a priceFeeder from the store
 func (k Keeper) RemovePriceFeeder(ctx sdk.Context, feeder sdk.AccAddress) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	key := types.KeyPriceFeeder(feeder.String())
 	store.Delete(key)
 }

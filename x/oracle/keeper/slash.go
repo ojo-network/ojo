@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"cosmossdk.io/math"
+	"github.com/cosmos/cosmos-sdk/runtime"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ojo-network/ojo/util"
@@ -88,7 +89,7 @@ func (k Keeper) SetValidatorRewardSet(ctx sdk.Context) error {
 		validatorRewardSet.ValidatorSet = append(validatorRewardSet.ValidatorSet, addr)
 	}
 
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	bz := k.cdc.MustMarshal(&validatorRewardSet)
 	store.Set(types.KeyValidatorRewardSet(), bz)
 	return nil
@@ -96,7 +97,7 @@ func (k Keeper) SetValidatorRewardSet(ctx sdk.Context) error {
 
 // CurrentValidatorRewardSet returns the latest ValidatorRewardSet in the store.
 func (k Keeper) GetValidatorRewardSet(ctx sdk.Context) types.ValidatorRewardSet {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 
 	bz := store.Get(types.KeyValidatorRewardSet())
 	if bz == nil {

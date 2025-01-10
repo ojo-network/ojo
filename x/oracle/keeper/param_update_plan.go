@@ -2,6 +2,7 @@ package keeper
 
 import (
 	storetypes "cosmossdk.io/store/types"
+	"github.com/cosmos/cosmos-sdk/runtime"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ojo-network/ojo/util"
@@ -17,7 +18,7 @@ func (k Keeper) ScheduleParamUpdatePlan(ctx sdk.Context, plan types.ParamUpdateP
 		return err
 	}
 
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 
 	bz := k.cdc.MustMarshal(&plan)
 	store.Set(types.KeyParamUpdatePlan(util.SafeInt64ToUint64(plan.Height)), bz)
@@ -32,7 +33,7 @@ func (k Keeper) ClearParamUpdatePlan(ctx sdk.Context, planHeight uint64) error {
 		return types.ErrInvalidRequest.Wrapf("No param update plan found at block height %d", planHeight)
 	}
 
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	store.Delete(types.KeyParamUpdatePlan(planHeight))
 	return nil
 }
@@ -40,7 +41,7 @@ func (k Keeper) ClearParamUpdatePlan(ctx sdk.Context, planHeight uint64) error {
 // haveParamUpdatePlan will return whether a param update plan exists and the specified
 // plan height.
 func (k Keeper) haveParamUpdatePlan(ctx sdk.Context, planHeight uint64) bool {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	bz := store.Get(types.KeyParamUpdatePlan(planHeight))
 	return bz != nil
 }
@@ -60,7 +61,7 @@ func (k Keeper) IterateParamUpdatePlans(
 	ctx sdk.Context,
 	handler func(types.ParamUpdatePlan) bool,
 ) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 
 	iter := storetypes.KVStorePrefixIterator(store, types.KeyPrefixParamUpdatePlan)
 	defer iter.Close()

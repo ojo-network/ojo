@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"strings"
 
+	"cosmossdk.io/core/store"
 	"cosmossdk.io/log"
 	"cosmossdk.io/math"
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/runtime"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
 	"github.com/ojo-network/ojo/pricefeeder"
@@ -21,9 +22,8 @@ var ten = math.LegacyMustNewDecFromStr("10")
 
 // Keeper of the oracle store
 type Keeper struct {
-	cdc        codec.BinaryCodec
-	storeKey   storetypes.StoreKey
-	paramSpace paramstypes.Subspace
+	cdc          codec.BinaryCodec
+	storeService store.KVStoreService
 
 	accountKeeper types.AccountKeeper
 	bankKeeper    types.BankKeeper
@@ -42,8 +42,7 @@ type Keeper struct {
 // NewKeeper constructs a new keeper for oracle
 func NewKeeper(
 	cdc codec.BinaryCodec,
-	storeKey storetypes.StoreKey,
-	paramspace paramstypes.Subspace,
+	storeService store.KVStoreService,
 	accountKeeper types.AccountKeeper,
 	bankKeeper types.BankKeeper,
 	distrKeeper types.DistributionKeeper,
@@ -57,15 +56,9 @@ func NewKeeper(
 		panic(fmt.Sprintf("%s module account has not been set", types.ModuleName))
 	}
 
-	// set KeyTable if it has not already been set
-	if !paramspace.HasKeyTable() {
-		paramspace = paramspace.WithKeyTable(types.ParamKeyTable())
-	}
-
 	return Keeper{
 		cdc:              cdc,
-		storeKey:         storeKey,
-		paramSpace:       paramspace,
+		storeService:     storeService,
 		accountKeeper:    accountKeeper,
 		bankKeeper:       bankKeeper,
 		distrKeeper:      distrKeeper,
@@ -85,7 +78,7 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 // GetExchangeRate gets the consensus exchange rate of USD denominated in the
 // denom asset from the store.
 func (k Keeper) GetExchangeRate(ctx sdk.Context, symbol string) (math.LegacyDec, error) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	symbol = strings.ToUpper(symbol)
 	b := store.Get(types.GetExchangeRateKey(symbol))
 	if b == nil {
@@ -128,7 +121,7 @@ func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (math.LegacyD
 // SetExchangeRate sets the consensus exchange rate of USD denominated in the
 // denom asset to the store.
 func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, exchangeRate math.LegacyDec) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: exchangeRate})
 	denom = strings.ToUpper(denom)
 	store.Set(types.GetExchangeRateKey(denom), bz)
@@ -146,7 +139,7 @@ func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, exchange
 
 // IterateExchangeRates iterates over USD rates in the store.
 func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, math.LegacyDec) bool) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 
 	iter := storetypes.KVStorePrefixIterator(store, types.KeyPrefixExchangeRate)
 	defer iter.Close()
@@ -164,7 +157,7 @@ func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, math.
 }
 
 func (k Keeper) ClearExchangeRates(ctx sdk.Context) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	iter := storetypes.KVStorePrefixIterator(store, types.KeyPrefixExchangeRate)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
@@ -184,7 +177,7 @@ func (k Keeper) GetFeederDelegation(ctx sdk.Context, vAddr sdk.ValAddress) (sdk.
 		return nil, stakingtypes.ErrNoValidatorFound.Wrapf("validator %s is not in active set", vAddr)
 	}
 
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	bz := store.Get(types.GetFeederDelegationKey(vAddr))
 	if bz == nil {
 		// no delegation, so validator itself must provide price feed
@@ -196,7 +189,7 @@ func (k Keeper) GetFeederDelegation(ctx sdk.Context, vAddr sdk.ValAddress) (sdk.
 // SetFeederDelegation sets the account address to which the validator operator
 // delegated oracle vote rights.
 func (k Keeper) SetFeederDelegation(ctx sdk.Context, operator sdk.ValAddress, delegatedFeeder sdk.AccAddress) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	store.Set(types.GetFeederDelegationKey(operator), delegatedFeeder.Bytes())
 }
 
@@ -205,7 +198,7 @@ type IterateFeederDelegationHandler func(delegator sdk.ValAddress, delegate sdk.
 // IterateFeederDelegations iterates over the feed delegates and performs a
 // callback function.
 func (k Keeper) IterateFeederDelegations(ctx sdk.Context, handler IterateFeederDelegationHandler) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 
 	iter := storetypes.KVStorePrefixIterator(store, types.KeyPrefixFeederDelegation)
 	defer iter.Close()
@@ -225,7 +218,7 @@ func (k Keeper) GetAggregateExchangeRatePrevote(
 	ctx sdk.Context,
 	voter sdk.ValAddress,
 ) (types.AggregateExchangeRatePrevote, error) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 
 	bz := store.Get(types.GetAggregateExchangeRatePrevoteKey(voter))
 	if bz == nil {
@@ -243,7 +236,7 @@ func (k Keeper) HasAggregateExchangeRatePrevote(
 	ctx sdk.Context,
 	voter sdk.ValAddress,
 ) bool {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	return store.Has(types.GetAggregateExchangeRatePrevoteKey(voter))
 }
 
@@ -253,7 +246,7 @@ func (k Keeper) SetAggregateExchangeRatePrevote(
 	voter sdk.ValAddress,
 	prevote types.AggregateExchangeRatePrevote,
 ) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 
 	bz := k.cdc.MustMarshal(&prevote)
 	store.Set(types.GetAggregateExchangeRatePrevoteKey(voter), bz)
@@ -261,7 +254,7 @@ func (k Keeper) SetAggregateExchangeRatePrevote(
 
 // DeleteAggregateExchangeRatePrevote deletes an oracle prevote from the store.
 func (k Keeper) DeleteAggregateExchangeRatePrevote(ctx sdk.Context, voter sdk.ValAddress) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	store.Delete(types.GetAggregateExchangeRatePrevoteKey(voter))
 }
 
@@ -270,7 +263,7 @@ func (k Keeper) IterateAggregateExchangeRatePrevotes(
 	ctx sdk.Context,
 	handler func(sdk.ValAddress, types.AggregateExchangeRatePrevote) bool,
 ) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 
 	iter := storetypes.KVStorePrefixIterator(store, types.KeyPrefixAggregateExchangeRatePrevote)
 	defer iter.Close()
@@ -292,7 +285,7 @@ func (k Keeper) GetAggregateExchangeRateVote(
 	ctx sdk.Context,
 	voter sdk.ValAddress,
 ) (types.AggregateExchangeRateVote, error) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 
 	bz := store.Get(types.GetAggregateExchangeRateVoteKey(voter))
 	if bz == nil {
@@ -311,7 +304,7 @@ func (k Keeper) SetAggregateExchangeRateVote(
 	voter sdk.ValAddress,
 	vote types.AggregateExchangeRateVote,
 ) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 
 	bz := k.cdc.MustMarshal(&vote)
 	store.Set(types.GetAggregateExchangeRateVoteKey(voter), bz)
@@ -319,7 +312,7 @@ func (k Keeper) SetAggregateExchangeRateVote(
 
 // DeleteAggregateExchangeRateVote deletes an oracle prevote from the store.
 func (k Keeper) DeleteAggregateExchangeRateVote(ctx sdk.Context, voter sdk.ValAddress) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	store.Delete(types.GetAggregateExchangeRateVoteKey(voter))
 }
 
@@ -333,7 +326,7 @@ func (k Keeper) IterateAggregateExchangeRateVotes(
 	ctx sdk.Context,
 	handler IterateExchangeRateVote,
 ) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 
 	iter := storetypes.KVStorePrefixIterator(store, types.KeyPrefixAggregateExchangeRateVote)
 	defer iter.Close()
