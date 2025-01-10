@@ -13,6 +13,8 @@ option (gogoproto.goproto_getters_all) = false;
 
 // Msg defines the oracle Msg service.
 service Msg {
+  option (cosmos.msg.v1.service) = true;
+  
   // AggregateExchangeRatePrevote defines a method for submitting an aggregate
   // exchange rate prevote.
   rpc AggregateExchangeRatePrevote(MsgAggregateExchangeRatePrevote)
