@@ -82,6 +82,21 @@ var (
 			SymbolDenom: EthereumSymbol,
 			Exponent:    EthereumExponent,
 		},
+		{
+			BaseDenom:   AKTDenom,
+			SymbolDenom: AKTSymbol,
+			Exponent:    AKTExponent,
+		},
+		{
+			BaseDenom:   TIADenom,
+			SymbolDenom: TIASymbol,
+			Exponent:    TIAExponent,
+		},
+		{
+			BaseDenom:   AXLDenom,
+			SymbolDenom: AXLSymbol,
+			Exponent:    AXLExponent,
+		},
 	}
 	DefaultMandatoryList = DenomList{
 		{
@@ -103,6 +118,21 @@ var (
 			BaseDenom:   EthereumDenom,
 			SymbolDenom: EthereumSymbol,
 			Exponent:    EthereumExponent,
+		},
+		{
+			BaseDenom:   AKTDenom,
+			SymbolDenom: AKTSymbol,
+			Exponent:    AKTExponent,
+		},
+		{
+			BaseDenom:   TIADenom,
+			SymbolDenom: TIASymbol,
+			Exponent:    TIAExponent,
+		},
+		{
+			BaseDenom:   AXLDenom,
+			SymbolDenom: AXLSymbol,
+			Exponent:    AXLExponent,
 		},
 	}
 	DefaultSlashFraction     = math.LegacyNewDecWithPrec(1, 4) // 0.01%
@@ -135,13 +165,25 @@ var (
 			},
 		},
 		CurrencyPairProviders{
+			BaseDenom:  USDCSymbol,
+			QuoteDenom: USDSymbol,
+			Providers: []string{
+				"kraken",
+			},
+		},
+		CurrencyPairProviders{
 			BaseDenom:  AtomSymbol,
 			QuoteDenom: USDTSymbol,
 			Providers: []string{
+				"binance",
 				"okx",
 				"bitget",
 				"gate",
 			},
+			BaseProxyDenom:          AtomSymbol,
+			QuoteProxyDenom:         USDCSymbol,
+			ExternLiquidityProvider: "binance",
+			PoolId:                  1,
 		},
 		CurrencyPairProviders{
 			BaseDenom:  BitcoinSymbol,
@@ -174,6 +216,39 @@ var (
 				"bitget",
 			},
 		},
+		CurrencyPairProviders{
+			BaseDenom:  AKTSymbol,
+			QuoteDenom: USDTSymbol,
+			Providers: []string{
+				"gate",
+			},
+			BaseProxyDenom:          AKTSymbol,
+			QuoteProxyDenom:         USDCSymbol,
+			ExternLiquidityProvider: "gate",
+			PoolId:                  3,
+		},
+		CurrencyPairProviders{
+			BaseDenom:  TIASymbol,
+			QuoteDenom: USDTSymbol,
+			Providers: []string{
+				"binance",
+				"gate",
+				"crypto",
+			},
+			BaseProxyDenom:          TIASymbol,
+			QuoteProxyDenom:         USDCSymbol,
+			ExternLiquidityProvider: "binance",
+			PoolId:                  2,
+		},
+		CurrencyPairProviders{
+			BaseDenom:  AXLSymbol,
+			QuoteDenom: USDTSymbol,
+			Providers: []string{
+				"binance",
+			},
+			BaseProxyDenom:  AXLSymbol,
+			QuoteProxyDenom: USDCSymbol,
+		},
 	}
 
 	DefaultCurrencyDeviationThresholds = CurrencyDeviationThresholdList{
@@ -195,6 +270,18 @@ var (
 		},
 		CurrencyDeviationThreshold{
 			BaseDenom: EthereumSymbol,
+			Threshold: "2",
+		},
+		CurrencyDeviationThreshold{
+			BaseDenom: AKTSymbol,
+			Threshold: "2",
+		},
+		CurrencyDeviationThreshold{
+			BaseDenom: TIASymbol,
+			Threshold: "2",
+		},
+		CurrencyDeviationThreshold{
+			BaseDenom: AXLSymbol,
 			Threshold: "2",
 		},
 	}
@@ -226,6 +313,18 @@ func DefaultRewardBands() RewardBandList {
 		},
 		{
 			SymbolDenom: EthereumSymbol,
+			RewardBand:  defaultRewardBand,
+		},
+		{
+			SymbolDenom: AKTSymbol,
+			RewardBand:  defaultRewardBand,
+		},
+		{
+			SymbolDenom: TIASymbol,
+			RewardBand:  defaultRewardBand,
+		},
+		{
+			SymbolDenom: AXLSymbol,
 			RewardBand:  defaultRewardBand,
 		},
 	}

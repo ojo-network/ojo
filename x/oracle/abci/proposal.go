@@ -68,6 +68,10 @@ func (h *ProposalHandler) PrepareProposalHandler() sdk.PrepareProposalHandler {
 			if err != nil {
 				return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, err
 			}
+			externalLiquidty, err := h.generateExternalLiquidity(ctx, req.LocalLastCommit)
+			if err != nil {
+				return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, err
+			}
 			extendedCommitInfoBz, err := req.LocalLastCommit.Marshal()
 			if err != nil {
 				return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, err
@@ -75,6 +79,7 @@ func (h *ProposalHandler) PrepareProposalHandler() sdk.PrepareProposalHandler {
 
 			injectedVoteExtTx := oracletypes.InjectedVoteExtensionTx{
 				ExchangeRateVotes:  exchangeRateVotes,
+				ExternalLiquidity:  externalLiquidty,
 				ExtendedCommitInfo: extendedCommitInfoBz,
 			}
 
@@ -171,6 +176,15 @@ func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 			if err := h.verifyExchangeRateVotes(injectedVoteExtTx.ExchangeRateVotes, exchangeRateVotes); err != nil {
 				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
 			}
+
+			// Verify the proposer's external liquidity by computing the same.
+			externalLiquidity, err := h.generateExternalLiquidity(ctx, extendedCommitInfo)
+			if err != nil {
+				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
+			}
+			if err := h.verifyExternalLiquidity(injectedVoteExtTx.ExternalLiquidity, externalLiquidity); err != nil {
+				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
+			}
 		}
 
 		h.logger.Info(
@@ -247,6 +261,77 @@ func (h *ProposalHandler) verifyExchangeRateVotes(
 		generatedVote := generatedVotes[i]
 
 		if injectedVote.Voter != generatedVote.Voter || !injectedVote.ExchangeRates.Equal(generatedVote.ExchangeRates) {
+			return oracletypes.ErrNonEqualInjVotesRates
+		}
+	}
+
+	return nil
+}
+
+func (h *ProposalHandler) generateExternalLiquidity(
+	ctx sdk.Context,
+	ci cometabci.ExtendedCommitInfo,
+) (externalLiquidityList []oracletypes.ExternalLiquidity, err error) {
+	for _, vote := range ci.Votes {
+		if vote.BlockIdFlag != cmtproto.BlockIDFlagCommit {
+			continue
+		}
+
+		var voteExt oracletypes.OracleVoteExtension
+		if err := voteExt.Unmarshal(vote.VoteExtension); err != nil {
+			h.logger.Error(
+				"failed to decode vote extension",
+				"err", err,
+			)
+			return nil, err
+		}
+
+		var valConsAddr sdk.ConsAddress
+		if err := valConsAddr.Unmarshal(vote.Validator.Address); err != nil {
+			h.logger.Error(
+				"failed to unmarshal validator consensus address",
+				"err", err,
+			)
+			return nil, err
+		}
+		val, err := h.stakingKeeper.GetValidatorByConsAddr(ctx, valConsAddr)
+		if err != nil {
+			h.logger.Error(
+				"failed to get consensus validator from staking keeper",
+				"err", err,
+			)
+			return nil, err
+		}
+		_, err = sdk.ValAddressFromBech32(val.OperatorAddress)
+		if err != nil {
+			return nil, err
+		}
+
+		externalLiquidityList = append(externalLiquidityList, voteExt.ExternalLiquidity...)
+	}
+
+	return externalLiquidityList, nil
+}
+
+func (h *ProposalHandler) verifyExternalLiquidity(
+	injectedExternalLiquidityList []oracletypes.ExternalLiquidity,
+	generatedExternalLiquidityList []oracletypes.ExternalLiquidity,
+) error {
+	if len(injectedExternalLiquidityList) != len(generatedExternalLiquidityList) {
+		return oracletypes.ErrNonEqualInjVotesLen
+	}
+
+	for i := range injectedExternalLiquidityList {
+		injectedExternalLiquidity := injectedExternalLiquidityList[i]
+		generatedExternalLiquidity := generatedExternalLiquidityList[i]
+
+		if injectedExternalLiquidity.PoolId != generatedExternalLiquidity.PoolId {
+			return oracletypes.ErrNonEqualInjVotesRates
+		}
+
+		if len(injectedExternalLiquidity.AmountDepthInfo) != len(generatedExternalLiquidity.AmountDepthInfo) ||
+			injectedExternalLiquidity.AmountDepthInfo[0] != generatedExternalLiquidity.AmountDepthInfo[0] ||
+			injectedExternalLiquidity.AmountDepthInfo[1] != generatedExternalLiquidity.AmountDepthInfo[1] {
 			return oracletypes.ErrNonEqualInjVotesRates
 		}
 	}

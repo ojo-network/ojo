@@ -81,9 +81,32 @@ func (h *VoteExtensionHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 			}
 		}
 
+		externalLiquidityMsg := []types.ExternalLiquidity{}
+		externalLiquidity := h.oracleKeeper.PriceFeeder.Oracle.GetExternalLiquidity()
+
+		for _, el := range externalLiquidity {
+			amountDepthInfo := []types.AssetAmountDepth{
+				{
+					Asset:  el.BaseAsset,
+					Amount: el.BaseAmount,
+					Depth:  el.BaseDepth,
+				},
+				{
+					Asset:  el.QuoteAsset,
+					Amount: el.QuoteAmount,
+					Depth:  el.QuoteDepth,
+				},
+			}
+			externalLiquidityMsg = append(externalLiquidityMsg, types.ExternalLiquidity{
+				PoolId:          el.PoolId,
+				AmountDepthInfo: amountDepthInfo,
+			})
+		}
+
 		voteExt := types.OracleVoteExtension{
-			Height:        req.Height,
-			ExchangeRates: filteredDecCoins,
+			Height:            req.Height,
+			ExchangeRates:     filteredDecCoins,
+			ExternalLiquidity: externalLiquidityMsg,
 		}
 
 		bz, err := voteExt.Marshal()
