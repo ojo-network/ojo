@@ -55,6 +55,21 @@ func EndBlocker(ctx context.Context, k keeper.Keeper) error {
 			// Update price feeder oracle with latest params.
 			k.PriceFeeder.Oracle.ParamCache.UpdateParamCache(sdkCtx.BlockHeight(), k.GetParams(sdkCtx), nil)
 
+			ammPools := k.GetAllPool(sdkCtx)
+			ammPoolsMap := make(map[uint64]types.Pool)
+			for _, pool := range ammPools {
+				ammPoolsMap[pool.PoolId] = pool
+			}
+
+			accountedPools := k.GetAllAccountedPool(sdkCtx)
+			accountedPoolsMap := make(map[uint64]types.AccountedPool)
+			for _, accountedPool := range accountedPools {
+				accountedPoolsMap[accountedPool.PoolId] = accountedPool
+			}
+
+			k.PriceFeeder.Oracle.AmmPools = ammPoolsMap
+			k.PriceFeeder.Oracle.AccountedPools = accountedPoolsMap
+
 			// Execute price feeder oracle tick.
 			if err := k.PriceFeeder.Oracle.TickClientless(ctx); err != nil {
 				sdkCtx.Logger().Error("Error in Oracle Keeper price feeder clientless tick", "err", err)
