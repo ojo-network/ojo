@@ -130,7 +130,7 @@ func (k Keeper) RemoveAssetInfo(ctx sdk.Context, denom string) {
 // GetAllAssetInfo returns all assetInfo
 func (k Keeper) GetAllAssetInfo(ctx sdk.Context) (list []types.AssetInfo) {
 	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
-	iterator := storetypes.KVStorePrefixIterator(store, []byte{})
+	iterator := storetypes.KVStorePrefixIterator(store, types.KeyPrefixAssetInfo)
 
 	defer iterator.Close()
 
@@ -170,4 +170,94 @@ func (k Keeper) RemovePriceFeeder(ctx sdk.Context, feeder sdk.AccAddress) {
 	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	key := types.KeyPriceFeeder(feeder.String())
 	store.Delete(key)
+}
+
+// SetPool sets a pool in the store from its index.
+func (k Keeper) SetPool(ctx sdk.Context, pool types.Pool) {
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+	key := types.KeyPool(pool.PoolId)
+	bz := k.cdc.MustMarshal(&pool)
+	store.Set(key, bz)
+}
+
+// GetPool returns a pool from its index
+func (k Keeper) GetPool(ctx sdk.Context, poolId uint64) (val types.Pool, found bool) {
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+	key := types.KeyPool(poolId)
+
+	bz := store.Get(key)
+	if bz == nil {
+		return val, false
+	}
+
+	k.cdc.MustUnmarshal(bz, &val)
+	return val, true
+}
+
+// RemovePool removes a pool from the store
+func (k Keeper) RemovePool(ctx sdk.Context, poolId uint64) {
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+	key := types.KeyPool(poolId)
+	store.Delete(key)
+}
+
+// GetAllPool returns all pool
+func (k Keeper) GetAllPool(ctx sdk.Context) (list []types.Pool) {
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+	iterator := storetypes.KVStorePrefixIterator(store, types.KeyPrefixPool)
+
+	defer iterator.Close()
+
+	for ; iterator.Valid(); iterator.Next() {
+		var val types.Pool
+		k.cdc.MustUnmarshal(iterator.Value(), &val)
+		list = append(list, val)
+	}
+
+	return
+}
+
+// SetAccountedPool sets a accounted pool in the store from its index.
+func (k Keeper) SetAccountedPool(ctx sdk.Context, accountedPool types.AccountedPool) {
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+	key := types.KeyAccountedPool(accountedPool.PoolId)
+	bz := k.cdc.MustMarshal(&accountedPool)
+	store.Set(key, bz)
+}
+
+// GetAccountedPool returns a accounted pool from its index
+func (k Keeper) GetAccountedPool(ctx sdk.Context, poolId uint64) (val types.AccountedPool, found bool) {
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+	key := types.KeyAccountedPool(poolId)
+
+	bz := store.Get(key)
+	if bz == nil {
+		return val, false
+	}
+
+	k.cdc.MustUnmarshal(bz, &val)
+	return val, true
+}
+
+// RemoveAccountedPool removes a accounted pool from the store
+func (k Keeper) RemoveAccountedPool(ctx sdk.Context, poolId uint64) {
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+	key := types.KeyAccountedPool(poolId)
+	store.Delete(key)
+}
+
+// GetAllAccountedPool returns all accounted pool
+func (k Keeper) GetAllAccountedPool(ctx sdk.Context) (list []types.AccountedPool) {
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+	iterator := storetypes.KVStorePrefixIterator(store, types.KeyPrefixAccountedPool)
+
+	defer iterator.Close()
+
+	for ; iterator.Valid(); iterator.Next() {
+		var val types.AccountedPool
+		k.cdc.MustUnmarshal(iterator.Value(), &val)
+		list = append(list, val)
+	}
+
+	return
 }

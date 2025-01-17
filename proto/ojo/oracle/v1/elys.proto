@@ -3,6 +3,7 @@ package ojo.oracle.v1;
 
 import "gogoproto/gogo.proto";
 import "cosmos_proto/cosmos.proto";
+import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/ojo-network/ojo/x/oracle/types";
 
@@ -33,4 +34,31 @@ message Price {
 message PriceFeeder {
     string feeder = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
     bool is_active = 2;
+}
+
+message Pool {
+    uint64 pool_id = 1;
+    repeated PoolAsset pool_assets = 2 [ (gogoproto.nullable) = false ];
+}
+
+message PoolAsset {
+    cosmos.base.v1beta1.Coin token = 1 [ (gogoproto.nullable) = false ];
+    string weight = 2 [
+        (cosmos_proto.scalar) = "cosmos.Int",
+        (gogoproto.customtype) = "cosmossdk.io/math.Int",
+        (gogoproto.nullable) = false
+    ];
+    string external_liquidity_ratio = 3 [
+        (cosmos_proto.scalar) = "cosmos.Dec",
+        (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+        (gogoproto.nullable) = false
+    ];
+}
+
+message AccountedPool {
+    uint64 pool_id = 1;
+    repeated cosmos.base.v1beta1.Coin total_tokens = 2
+        [ (gogoproto.nullable) = false ];
+    repeated cosmos.base.v1beta1.Coin non_amm_pool_tokens = 3
+        [ (gogoproto.nullable) = false ];
 }

@@ -37,7 +37,9 @@ var (
 	KeyPrefixParamUpdatePlan              = []byte{0x10} // prefix for each key to a param update plan
 	KeyPrefixPrice                        = []byte{0x11} // prefix for each key to a price
 	KeyPrefixPriceFeeder                  = []byte{0x12} // prefix for each key to a price feeder
-	KeyPrefixAssetInfo                    = []byte{0x13} // prefic for each key to a asset info
+	KeyPrefixAssetInfo                    = []byte{0x13} // prefix for each key to a asset info
+	KeyPrefixPool                         = []byte{0x14} // prefix for each key to a pool
+	KeyPrefixAccountedPool                = []byte{0x15} // prefix for each key to an accounted pool
 )
 
 // GetExchangeRateKey - stored by *denom*
@@ -119,6 +121,16 @@ func KeyAssetInfo(asset string) (key []byte) {
 // KeyPriceFeeder - stored by *address*
 func KeyPriceFeeder(address string) (key []byte) {
 	return util.ConcatBytes(0, KeyPrefixPriceFeeder, []byte(address))
+}
+
+// KeyPool - stored by *poolId*
+func KeyPool(poolId uint64) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixPool, util.UintWithNullPrefix(poolId))
+}
+
+// KeyAccountedPool - stored by *poolId*
+func KeyAccountedPool(poolId uint64) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixAccountedPool, util.UintWithNullPrefix(poolId))
 }
 
 // ParseDenomAndBlockFromKey returns the denom and block contained in the *key*
