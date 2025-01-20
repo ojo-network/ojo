@@ -123,14 +123,14 @@ func KeyPriceFeeder(address string) (key []byte) {
 	return util.ConcatBytes(0, KeyPrefixPriceFeeder, []byte(address))
 }
 
-// KeyPool - stored by *poolId*
-func KeyPool(poolId uint64) (key []byte) {
-	return util.ConcatBytes(0, KeyPrefixPool, util.UintWithNullPrefix(poolId))
+// KeyPool - stored by *poolID*
+func KeyPool(poolID uint64) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixPool, util.UintWithNullPrefix(poolID))
 }
 
-// KeyAccountedPool - stored by *poolId*
-func KeyAccountedPool(poolId uint64) (key []byte) {
-	return util.ConcatBytes(0, KeyPrefixAccountedPool, util.UintWithNullPrefix(poolId))
+// KeyAccountedPool - stored by *poolID*
+func KeyAccountedPool(poolID uint64) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixAccountedPool, util.UintWithNullPrefix(poolID))
 }
 
 // ParseDenomAndBlockFromKey returns the denom and block contained in the *key*

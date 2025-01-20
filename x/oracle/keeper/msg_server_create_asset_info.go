@@ -37,7 +37,11 @@ func (ms msgServer) RemoveAssetInfo(
 ) (*types.MsgRemoveAssetInfoResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	if ms.authority != msg.Authority {
-		return nil, errors.Wrapf(types.ErrNoGovAuthority, "invalid authority; expected %s, got %s", ms.authority, msg.Authority)
+		return nil, errors.Wrapf(
+			types.ErrNoGovAuthority,
+			"invalid authority; expected %s, got %s",
+			ms.authority, msg.Authority,
+		)
 	}
 
 	ms.Keeper.RemoveAssetInfo(ctx, msg.Denom)
