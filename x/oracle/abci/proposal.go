@@ -7,7 +7,7 @@ import (
 	"cosmossdk.io/log"
 	cometabci "github.com/cometbft/cometbft/abci/types"
 	cmtproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	"github.com/cosmos/cosmos-sdk/baseapp"
+	//"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 
@@ -46,10 +46,10 @@ func (h *ProposalHandler) PrepareProposalHandler() sdk.PrepareProposalHandler {
 			return nil, err
 		}
 
-		err := baseapp.ValidateVoteExtensions(ctx, h.stakingKeeper, req.Height, ctx.ChainID(), req.LocalLastCommit)
-		if err != nil {
-			return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, err
-		}
+		// err := baseapp.ValidateVoteExtensions(ctx, h.stakingKeeper, req.Height, ctx.ChainID(), req.LocalLastCommit)
+		// if err != nil {
+		// 	return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, err
+		// }
 
 		if req.Txs == nil {
 			err := fmt.Errorf("prepare proposal received a request with nil Txs")
@@ -156,16 +156,16 @@ func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
 			}
 
-			err := baseapp.ValidateVoteExtensions(
-				ctx,
-				h.stakingKeeper,
-				req.Height,
-				ctx.ChainID(),
-				extendedCommitInfo,
-			)
-			if err != nil {
-				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
-			}
+			// err := baseapp.ValidateVoteExtensions(
+			// 	ctx,
+			// 	h.stakingKeeper,
+			// 	req.Height,
+			// 	ctx.ChainID(),
+			// 	extendedCommitInfo,
+			// )
+			// if err != nil {
+			// 	return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
+			// }
 
 			// Verify the proposer's oracle exchange rate votes by computing the same
 			// calculation and comparing the results.
