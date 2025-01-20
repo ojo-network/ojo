@@ -8,7 +8,10 @@ import (
 	"github.com/ojo-network/ojo/x/oracle/types"
 )
 
-func (ms msgServer) SetPriceFeeder(goCtx context.Context, msg *types.MsgSetPriceFeeder) (*types.MsgSetPriceFeederResponse, error) {
+func (ms msgServer) SetPriceFeeder(
+	goCtx context.Context,
+	msg *types.MsgSetPriceFeeder,
+) (*types.MsgSetPriceFeederResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	feederAccount := sdk.MustAccAddressFromBech32(msg.Feeder)
 	_, found := ms.Keeper.GetPriceFeeder(ctx, feederAccount)
@@ -22,7 +25,10 @@ func (ms msgServer) SetPriceFeeder(goCtx context.Context, msg *types.MsgSetPrice
 	return &types.MsgSetPriceFeederResponse{}, nil
 }
 
-func (ms msgServer) DeletePriceFeeder(goCtx context.Context, msg *types.MsgDeletePriceFeeder) (*types.MsgDeletePriceFeederResponse, error) {
+func (ms msgServer) DeletePriceFeeder(
+	goCtx context.Context,
+	msg *types.MsgDeletePriceFeeder,
+) (*types.MsgDeletePriceFeederResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	feederAccount := sdk.MustAccAddressFromBech32(msg.Feeder)
 	_, found := ms.Keeper.GetPriceFeeder(ctx, feederAccount)
@@ -33,10 +39,17 @@ func (ms msgServer) DeletePriceFeeder(goCtx context.Context, msg *types.MsgDelet
 	return &types.MsgDeletePriceFeederResponse{}, nil
 }
 
-func (ms msgServer) AddPriceFeeders(goCtx context.Context, msg *types.MsgAddPriceFeeders) (*types.MsgAddPriceFeedersResponse, error) {
+func (ms msgServer) AddPriceFeeders(
+	goCtx context.Context,
+	msg *types.MsgAddPriceFeeders,
+) (*types.MsgAddPriceFeedersResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	if ms.authority != msg.Authority {
-		return nil, errors.Wrapf(types.ErrNoGovAuthority, "invalid authority; expected %s, got %s", ms.authority, msg.Authority)
+		return nil, errors.Wrapf(
+			types.ErrNoGovAuthority,
+			"invalid authority; expected %s, got %s",
+			ms.authority, msg.Authority,
+		)
 	}
 
 	for _, feeder := range msg.Feeders {
@@ -48,10 +61,17 @@ func (ms msgServer) AddPriceFeeders(goCtx context.Context, msg *types.MsgAddPric
 	return &types.MsgAddPriceFeedersResponse{}, nil
 }
 
-func (ms msgServer) RemovePriceFeeders(goCtx context.Context, msg *types.MsgRemovePriceFeeders) (*types.MsgRemovePriceFeedersResponse, error) {
+func (ms msgServer) RemovePriceFeeders(
+	goCtx context.Context,
+	msg *types.MsgRemovePriceFeeders,
+) (*types.MsgRemovePriceFeedersResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	if ms.authority != msg.Authority {
-		return nil, errors.Wrapf(types.ErrNoGovAuthority, "invalid authority; expected %s, got %s", ms.authority, msg.Authority)
+		return nil, errors.Wrapf(
+			types.ErrNoGovAuthority,
+			"invalid authority; expected %s, got %s",
+			ms.authority, msg.Authority,
+		)
 	}
 
 	for _, feeder := range msg.Feeders {

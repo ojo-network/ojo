@@ -4,6 +4,7 @@ import (
 	"context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/ojo-network/ojo/util"
 	"github.com/ojo-network/ojo/x/oracle/types"
 )
 
@@ -25,8 +26,8 @@ func (ms msgServer) FeedPrice(goCtx context.Context, msg *types.MsgFeedPrice) (*
 		Price:       msg.FeedPrice.Price,
 		Source:      msg.FeedPrice.Source,
 		Provider:    msg.Provider,
-		Timestamp:   uint64(ctx.BlockTime().Unix()),
-		BlockHeight: uint64(ctx.BlockHeight()),
+		Timestamp:   util.SafeInt64ToUint64(ctx.BlockTime().Unix()),
+		BlockHeight: util.SafeInt64ToUint64(ctx.BlockHeight()),
 	}
 
 	ms.SetPrice(ctx, price)

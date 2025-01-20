@@ -8,7 +8,10 @@ import (
 	"github.com/ojo-network/ojo/x/oracle/types"
 )
 
-func (ms msgServer) CreateAssetInfo(goCtx context.Context, msg *types.MsgCreateAssetInfo) (*types.MsgCreateAssetInfoResponse, error) {
+func (ms msgServer) CreateAssetInfo(
+	goCtx context.Context,
+	msg *types.MsgCreateAssetInfo,
+) (*types.MsgCreateAssetInfoResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	_, found := ms.GetAssetInfo(ctx, msg.Denom)
@@ -28,7 +31,10 @@ func (ms msgServer) CreateAssetInfo(goCtx context.Context, msg *types.MsgCreateA
 	return &types.MsgCreateAssetInfoResponse{}, nil
 }
 
-func (ms msgServer) RemoveAssetInfo(goCtx context.Context, msg *types.MsgRemoveAssetInfo) (*types.MsgRemoveAssetInfoResponse, error) {
+func (ms msgServer) RemoveAssetInfo(
+	goCtx context.Context,
+	msg *types.MsgRemoveAssetInfo,
+) (*types.MsgRemoveAssetInfoResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	if ms.authority != msg.Authority {
 		return nil, errors.Wrapf(types.ErrNoGovAuthority, "invalid authority; expected %s, got %s", ms.authority, msg.Authority)

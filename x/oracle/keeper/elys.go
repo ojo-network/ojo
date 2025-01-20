@@ -5,6 +5,7 @@ import (
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/runtime"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/ojo-network/ojo/util"
 	"github.com/ojo-network/ojo/x/oracle/types"
 )
 
@@ -84,7 +85,7 @@ func (k Keeper) GetAssetPrice(ctx sdk.Context, asset string) (types.Price, bool)
 
 func Pow10(decimal uint64) (value math.LegacyDec) {
 	value = math.LegacyNewDec(1)
-	for i := 0; i < int(decimal); i++ {
+	for i := 0; i < util.SafeUint64ToInt(decimal); i++ {
 		value = value.Mul(math.LegacyNewDec(10))
 	}
 	return
@@ -181,9 +182,9 @@ func (k Keeper) SetPool(ctx sdk.Context, pool types.Pool) {
 }
 
 // GetPool returns a pool from its index
-func (k Keeper) GetPool(ctx sdk.Context, poolId uint64) (val types.Pool, found bool) {
+func (k Keeper) GetPool(ctx sdk.Context, poolID uint64) (val types.Pool, found bool) {
 	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
-	key := types.KeyPool(poolId)
+	key := types.KeyPool(poolID)
 
 	bz := store.Get(key)
 	if bz == nil {
@@ -195,9 +196,9 @@ func (k Keeper) GetPool(ctx sdk.Context, poolId uint64) (val types.Pool, found b
 }
 
 // RemovePool removes a pool from the store
-func (k Keeper) RemovePool(ctx sdk.Context, poolId uint64) {
+func (k Keeper) RemovePool(ctx sdk.Context, poolID uint64) {
 	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
-	key := types.KeyPool(poolId)
+	key := types.KeyPool(poolID)
 	store.Delete(key)
 }
 
@@ -226,9 +227,9 @@ func (k Keeper) SetAccountedPool(ctx sdk.Context, accountedPool types.AccountedP
 }
 
 // GetAccountedPool returns a accounted pool from its index
-func (k Keeper) GetAccountedPool(ctx sdk.Context, poolId uint64) (val types.AccountedPool, found bool) {
+func (k Keeper) GetAccountedPool(ctx sdk.Context, poolID uint64) (val types.AccountedPool, found bool) {
 	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
-	key := types.KeyAccountedPool(poolId)
+	key := types.KeyAccountedPool(poolID)
 
 	bz := store.Get(key)
 	if bz == nil {
@@ -240,9 +241,9 @@ func (k Keeper) GetAccountedPool(ctx sdk.Context, poolId uint64) (val types.Acco
 }
 
 // RemoveAccountedPool removes a accounted pool from the store
-func (k Keeper) RemoveAccountedPool(ctx sdk.Context, poolId uint64) {
+func (k Keeper) RemoveAccountedPool(ctx sdk.Context, poolID uint64) {
 	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
-	key := types.KeyAccountedPool(poolId)
+	key := types.KeyAccountedPool(poolID)
 	store.Delete(key)
 }
 

@@ -95,7 +95,7 @@ func EndBlocker(ctx context.Context, k keeper.Keeper) error {
 			k.RemovePrice(sdkCtx, price.Asset, price.Source, price.Timestamp)
 		}
 
-		if price.BlockHeight+params.LifeTimeInBlocks < uint64(sdkCtx.BlockHeight()) {
+		if price.BlockHeight+params.LifeTimeInBlocks < util.SafeInt64ToUint64(sdkCtx.BlockHeight()) {
 			k.RemovePrice(sdkCtx, price.Asset, price.Source, price.Timestamp)
 		}
 	}

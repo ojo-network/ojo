@@ -329,7 +329,10 @@ func (q querier) ValidatorRewardSet(
 	}, nil
 }
 
-func (q querier) PriceAll(goCtx context.Context, req *types.QueryAllPriceRequest) (*types.QueryAllPriceResponse, error) {
+func (q querier) PriceAll(
+	goCtx context.Context,
+	req *types.QueryAllPriceRequest,
+) (*types.QueryAllPriceResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}

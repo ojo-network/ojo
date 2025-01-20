@@ -2,11 +2,16 @@ package keeper
 
 import (
 	"context"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/ojo-network/ojo/util"
 	"github.com/ojo-network/ojo/x/oracle/types"
 )
 
-func (ms msgServer) FeedMultiplePrices(goCtx context.Context, msg *types.MsgFeedMultiplePrices) (*types.MsgFeedMultiplePricesResponse, error) {
+func (ms msgServer) FeedMultiplePrices(
+	goCtx context.Context,
+	msg *types.MsgFeedMultiplePrices,
+) (*types.MsgFeedMultiplePricesResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	creator := sdk.MustAccAddressFromBech32(msg.Creator)
@@ -25,8 +30,8 @@ func (ms msgServer) FeedMultiplePrices(goCtx context.Context, msg *types.MsgFeed
 			Price:       feedPrice.Price,
 			Source:      feedPrice.Source,
 			Provider:    msg.Creator,
-			Timestamp:   uint64(ctx.BlockTime().Unix()),
-			BlockHeight: uint64(ctx.BlockHeight()),
+			Timestamp:   util.SafeInt64ToUint64(ctx.BlockTime().Unix()),
+			BlockHeight: util.SafeInt64ToUint64(ctx.BlockHeight()),
 		}
 		ms.SetPrice(ctx, price)
 	}
