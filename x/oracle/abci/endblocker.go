@@ -254,7 +254,7 @@ func Tally(
 			tallyVote.ExchangeRate.LTE(weightedMedian.Add(rewardSpread))) ||
 			!tallyVote.ExchangeRate.IsPositive() {
 
-			key := tallyVote.Voter.String()
+			key := tallyVote.Voter
 			claim := validatorClaimMap[key]
 
 			if incrementWin {

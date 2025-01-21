@@ -220,7 +220,7 @@ func (q querier) AggregateVote(
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	vote, err := q.GetAggregateExchangeRateVote(ctx, valAddr)
+	vote, err := q.GetAggregateExchangeRateVote(ctx, valAddr.String())
 	if err != nil {
 		return nil, err
 	}
@@ -242,7 +242,7 @@ func (q querier) AggregateVotes(
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	var votes []types.AggregateExchangeRateVote
-	q.IterateAggregateExchangeRateVotes(ctx, func(_ sdk.ValAddress, vote types.AggregateExchangeRateVote) bool {
+	q.IterateAggregateExchangeRateVotes(ctx, func(_ string, vote types.AggregateExchangeRateVote) bool {
 		votes = append(votes, vote)
 		return false
 	})

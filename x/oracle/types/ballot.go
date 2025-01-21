@@ -12,12 +12,12 @@ import (
 type VoteForTally struct {
 	Denom        string
 	ExchangeRate math.LegacyDec
-	Voter        sdk.ValAddress
+	Voter        string
 	Power        int64
 }
 
 // NewVoteForTally returns a new VoteForTally instance.
-func NewVoteForTally(rate math.LegacyDec, denom string, voter sdk.ValAddress, power int64) VoteForTally {
+func NewVoteForTally(rate math.LegacyDec, denom string, voter string, power int64) VoteForTally {
 	return VoteForTally{
 		ExchangeRate: rate,
 		Denom:        denom,
@@ -34,7 +34,7 @@ func (pb ExchangeRateBallot) ToMap() map[string]math.LegacyDec {
 	exchangeRateMap := make(map[string]math.LegacyDec)
 	for _, vote := range pb {
 		if vote.ExchangeRate.IsPositive() {
-			exchangeRateMap[vote.Voter.String()] = vote.ExchangeRate
+			exchangeRateMap[vote.Voter] = vote.ExchangeRate
 		}
 	}
 
@@ -119,7 +119,7 @@ func (pb ExchangeRateBallot) Less(i, j int) bool {
 		return true
 	}
 	if pb[i].ExchangeRate.Equal(pb[j].ExchangeRate) {
-		return bytes.Compare(pb[i].Voter, pb[j].Voter) < 0
+		return bytes.Compare([]byte(pb[i].Voter), []byte(pb[j].Voter)) < 0
 	}
 	return false
 }

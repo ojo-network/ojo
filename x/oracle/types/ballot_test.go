@@ -21,19 +21,19 @@ func TestToMap(t *testing.T) {
 	}{
 		[]VoteForTally{
 			{
-				Voter:        sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address()),
+				Voter:        sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address()).String(),
 				Denom:        OjoDenom,
 				ExchangeRate: sdkmath.LegacyNewDec(1600),
 				Power:        100,
 			},
 			{
-				Voter:        sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address()),
+				Voter:        sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address()).String(),
 				Denom:        OjoDenom,
 				ExchangeRate: sdkmath.LegacyZeroDec(),
 				Power:        100,
 			},
 			{
-				Voter:        sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address()),
+				Voter:        sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address()).String(),
 				Denom:        OjoDenom,
 				ExchangeRate: sdkmath.LegacyNewDec(1500),
 				Power:        100,
@@ -46,7 +46,7 @@ func TestToMap(t *testing.T) {
 	mapData := pb.ToMap()
 
 	for i, vote := range tests.votes {
-		exchangeRate, ok := mapData[vote.Voter.String()]
+		exchangeRate, ok := mapData[vote.Voter]
 		if tests.isValid[i] {
 			require.True(t, ok)
 			require.Equal(t, exchangeRate, vote.ExchangeRate)
@@ -81,7 +81,7 @@ func TestPBPower(t *testing.T) {
 		vote := NewVoteForTally(
 			sdkmath.LegacyZeroDec(),
 			OjoDenom,
-			valAccAddrs[i],
+			valAccAddrs[i].String(),
 			power,
 		)
 
@@ -99,7 +99,7 @@ func TestPBPower(t *testing.T) {
 	fakeVote := NewVoteForTally(
 		sdkmath.LegacyOneDec(),
 		OjoDenom,
-		faceValAddr,
+		faceValAddr.String(),
 		0,
 	)
 
@@ -170,7 +170,7 @@ func TestPBWeightedMedian(t *testing.T) {
 			vote := NewVoteForTally(
 				sdkmath.LegacyNewDec(int64(input)),
 				OjoDenom,
-				valAddr,
+				valAddr.String(),
 				power,
 			)
 
@@ -253,7 +253,7 @@ func TestPBStandardDeviation(t *testing.T) {
 			vote := NewVoteForTally(
 				input,
 				OjoDenom,
-				valAddr,
+				valAddr.String(),
 				power,
 			)
 
@@ -273,19 +273,19 @@ func TestPBStandardDeviation_Overflow(t *testing.T) {
 		NewVoteForTally(
 			sdkmath.LegacyOneDec(),
 			OjoSymbol,
-			valAddr,
+			valAddr.String(),
 			2,
 		),
 		NewVoteForTally(
 			sdkmath.LegacyNewDec(1234),
 			OjoSymbol,
-			valAddr,
+			valAddr.String(),
 			2,
 		),
 		NewVoteForTally(
 			overflowRate,
 			OjoSymbol,
-			valAddr,
+			valAddr.String(),
 			1,
 		),
 	}
@@ -303,13 +303,13 @@ func TestBallotMapToSlice(t *testing.T) {
 		NewVoteForTally(
 			sdkmath.LegacyNewDec(1234),
 			OjoSymbol,
-			valAddress[0],
+			valAddress[0].String(),
 			2,
 		),
 		NewVoteForTally(
 			sdkmath.LegacyNewDec(12345),
 			OjoSymbol,
-			valAddress[0],
+			valAddress[0].String(),
 			1,
 		),
 	}
@@ -328,13 +328,13 @@ func TestExchangeRateBallotSwap(t *testing.T) {
 		NewVoteForTally(
 			sdkmath.LegacyNewDec(1234),
 			OjoSymbol,
-			valAddress[0],
+			valAddress[0].String(),
 			2,
 		),
 		NewVoteForTally(
 			sdkmath.LegacyNewDec(12345),
 			OjoSymbol,
-			valAddress[1],
+			valAddress[1].String(),
 			1,
 		),
 	}
@@ -354,13 +354,13 @@ func TestStandardDeviationUnsorted(t *testing.T) {
 		NewVoteForTally(
 			sdkmath.LegacyNewDec(1234),
 			OjoSymbol,
-			valAddress[0],
+			valAddress[0].String(),
 			2,
 		),
 		NewVoteForTally(
 			sdkmath.LegacyNewDec(12),
 			OjoSymbol,
-			valAddress[0],
+			valAddress[0].String(),
 			1,
 		),
 	}
@@ -388,11 +388,11 @@ func TestClaimMapToSlices(t *testing.T) {
 }
 
 func TestExchangeRateBallotSort(t *testing.T) {
-	v1 := VoteForTally{ExchangeRate: sdkmath.LegacyMustNewDecFromStr("0.2"), Voter: sdk.ValAddress{0, 1}}
-	v1Cpy := VoteForTally{ExchangeRate: sdkmath.LegacyMustNewDecFromStr("0.2"), Voter: sdk.ValAddress{0, 1}}
-	v2 := VoteForTally{ExchangeRate: sdkmath.LegacyMustNewDecFromStr("0.1"), Voter: sdk.ValAddress{0, 1, 1}}
-	v3 := VoteForTally{ExchangeRate: sdkmath.LegacyMustNewDecFromStr("0.1"), Voter: sdk.ValAddress{0, 1}}
-	v4 := VoteForTally{ExchangeRate: sdkmath.LegacyMustNewDecFromStr("0.5"), Voter: sdk.ValAddress{1}}
+	v1 := VoteForTally{ExchangeRate: sdkmath.LegacyMustNewDecFromStr("0.2"), Voter: sdk.ValAddress{0, 1}.String()}
+	v1Cpy := VoteForTally{ExchangeRate: sdkmath.LegacyMustNewDecFromStr("0.2"), Voter: sdk.ValAddress{0, 1}.String()}
+	v2 := VoteForTally{ExchangeRate: sdkmath.LegacyMustNewDecFromStr("0.1"), Voter: sdk.ValAddress{0, 1, 1}.String()}
+	v3 := VoteForTally{ExchangeRate: sdkmath.LegacyMustNewDecFromStr("0.1"), Voter: sdk.ValAddress{0, 1}.String()}
+	v4 := VoteForTally{ExchangeRate: sdkmath.LegacyMustNewDecFromStr("0.5"), Voter: sdk.ValAddress{1}.String()}
 
 	tcs := []struct {
 		got      ExchangeRateBallot

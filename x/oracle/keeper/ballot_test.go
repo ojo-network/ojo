@@ -17,7 +17,7 @@ func (s *IntegrationTestSuite) TestBallot_OrganizeBallotByDenom() {
 	require.Empty(res)
 
 	s.app.OracleKeeper.SetAggregateExchangeRateVote(
-		s.ctx, valAddr, types.AggregateExchangeRateVote{
+		s.ctx, valAddr.String(), types.AggregateExchangeRateVote{
 			ExchangeRates: sdk.DecCoins{
 				sdk.DecCoin{
 					Denom:  "OJO",
@@ -37,7 +37,7 @@ func (s *IntegrationTestSuite) TestBallot_OrganizeBallotByDenom() {
 	res = s.app.OracleKeeper.OrganizeBallotByDenom(s.ctx, claimMap)
 	require.Equal([]types.BallotDenom{
 		{
-			Ballot: types.ExchangeRateBallot{types.NewVoteForTally(math.LegacyOneDec(), "OJO", valAddr, 1)},
+			Ballot: types.ExchangeRateBallot{types.NewVoteForTally(math.LegacyOneDec(), "OJO", valAddr.String(), 1)},
 			Denom:  "OJO",
 		},
 	}, res)
@@ -63,14 +63,14 @@ func (s *IntegrationTestSuite) TestBallot_ClearBallots() {
 		ExchangeRates: decCoins,
 		Voter:         addr.String(),
 	}
-	s.app.OracleKeeper.SetAggregateExchangeRateVote(s.ctx, valAddr, vote)
-	voteRes, err := s.app.OracleKeeper.GetAggregateExchangeRateVote(s.ctx, valAddr)
+	s.app.OracleKeeper.SetAggregateExchangeRateVote(s.ctx, valAddr.String(), vote)
+	voteRes, err := s.app.OracleKeeper.GetAggregateExchangeRateVote(s.ctx, valAddr.String())
 	s.Require().NoError(err)
 	s.Require().Equal(voteRes, vote)
 
 	s.app.OracleKeeper.ClearBallots(s.ctx, 0)
 	_, err = s.app.OracleKeeper.GetAggregateExchangeRatePrevote(s.ctx, valAddr)
 	s.Require().Error(err)
-	_, err = s.app.OracleKeeper.GetAggregateExchangeRateVote(s.ctx, valAddr)
+	_, err = s.app.OracleKeeper.GetAggregateExchangeRateVote(s.ctx, valAddr.String())
 	s.Require().Error(err)
 }

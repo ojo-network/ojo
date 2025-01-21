@@ -55,7 +55,7 @@ func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, genState types.GenesisSt
 			panic(err)
 		}
 
-		keeper.SetAggregateExchangeRateVote(ctx, valAddr, av)
+		keeper.SetAggregateExchangeRateVote(ctx, valAddr.String(), av)
 	}
 
 	for _, hp := range genState.HistoricPrices {
@@ -130,7 +130,7 @@ func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) *types.GenesisState {
 	aggregateExchangeRateVotes := []types.AggregateExchangeRateVote{}
 	keeper.IterateAggregateExchangeRateVotes(
 		ctx,
-		func(_ sdk.ValAddress, aggregateVote types.AggregateExchangeRateVote) bool {
+		func(_ string, aggregateVote types.AggregateExchangeRateVote) bool {
 			aggregateExchangeRateVotes = append(aggregateExchangeRateVotes, aggregateVote)
 			return false
 		},

@@ -103,7 +103,7 @@ func TestGetAggregateExchangeRateVoteKey(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		actualKey := types.GetAggregateExchangeRateVoteKey(testCase.val)
+		actualKey := types.GetAggregateExchangeRateVoteKey(testCase.val.String())
 		require.Equalf(t, testCase.expectedKey, actualKey, "test %d - expected key: %s should be the same as actual key: %s", i, testCase.expectedKey, actualKey)
 	}
 }

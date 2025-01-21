@@ -126,7 +126,7 @@ func (s *IntegrationTestSuite) TestQuerier_AggregateVote() {
 		ExchangeRates: decCoins,
 		Voter:         addr.String(),
 	}
-	s.app.OracleKeeper.SetAggregateExchangeRateVote(s.ctx, valAddr, vote)
+	s.app.OracleKeeper.SetAggregateExchangeRateVote(s.ctx, valAddr.String(), vote)
 
 	res, err := s.queryClient.AggregateVote(s.ctx.Context(), &types.QueryAggregateVote{
 		ValidatorAddr: valAddr.String(),
@@ -194,7 +194,7 @@ func (s *IntegrationTestSuite) TestQuerier_AggregatePrevotesAppendVotes() {
 }
 
 func (s *IntegrationTestSuite) TestQuerier_AggregateVotesAppendVotes() {
-	s.app.OracleKeeper.SetAggregateExchangeRateVote(s.ctx, valAddr, types.NewAggregateExchangeRateVote(
+	s.app.OracleKeeper.SetAggregateExchangeRateVote(s.ctx, valAddr.String(), types.NewAggregateExchangeRateVote(
 		types.DefaultGenesisState().ExchangeRates,
 		valAddr.String(),
 	))

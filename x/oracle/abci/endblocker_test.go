@@ -80,9 +80,9 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
 	ctx = ctx.WithBlockTime(currTime)
 	currTime = currTime.Add(timeDiff)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1.String(), val1Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2.String(), val2Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3.String(), val3Votes)
 	err := abci.EndBlocker(ctx, app.OracleKeeper)
 	s.Require().NoError(err)
 
@@ -114,7 +114,7 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
 	ctx = ctx.WithBlockTime(currTime)
 	currTime = currTime.Add(timeDiff)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2.String(), val2Votes)
 	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
@@ -139,8 +139,8 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
 	ctx = ctx.WithBlockTime(currTime)
 	currTime = currTime.Add(timeDiff)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2.String(), val2Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3.String(), val3Votes)
 	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
@@ -179,8 +179,8 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
 	ctx = ctx.WithBlockTime(currTime)
 	currTime = currTime.Add(timeDiff)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1.String(), val1Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2.String(), val2Votes)
 	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	rate, err := app.OracleKeeper.GetExchangeRate(ctx, "ojo")
@@ -255,9 +255,9 @@ func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1.String(), val1Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2.String(), val2Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3.String(), val3Votes)
 	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	currRewards1, err := app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1)
@@ -314,9 +314,9 @@ func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1.String(), val1Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2.String(), val2Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3.String(), val3Votes)
 	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	currRewards1, err = app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1)
@@ -346,9 +346,9 @@ func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
 	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1.String(), val1Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2.String(), val2Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3.String(), val3Votes)
 	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	currRewards1, err = app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1)
@@ -415,7 +415,7 @@ func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 				ExchangeRates: decCoins,
 				Voter:         valAddr1.String(),
 			}
-			app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, vote)
+			app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1.String(), vote)
 			abci.EndBlocker(ctx, app.OracleKeeper)
 		}
 

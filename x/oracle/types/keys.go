@@ -68,9 +68,8 @@ func GetAggregateExchangeRatePrevoteKey(v sdk.ValAddress) (key []byte) {
 }
 
 // GetAggregateExchangeRateVoteKey - stored by *Validator* address
-func GetAggregateExchangeRateVoteKey(v sdk.ValAddress) (key []byte) {
-	key = append(key, KeyPrefixAggregateExchangeRateVote...)
-	return append(key, address.MustLengthPrefix(v)...)
+func GetAggregateExchangeRateVoteKey(v string) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixAggregateExchangeRateVote, []byte(v))
 }
 
 // KeyMedian - stored by *denom*
