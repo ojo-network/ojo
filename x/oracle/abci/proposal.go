@@ -9,7 +9,6 @@ import (
 	cmtproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 
 	oraclekeeper "github.com/ojo-network/ojo/x/oracle/keeper"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
@@ -18,18 +17,18 @@ import (
 type ProposalHandler struct {
 	logger        log.Logger
 	oracleKeeper  oraclekeeper.Keeper
-	stakingKeeper *stakingkeeper.Keeper
+	valStore      baseapp.ValidatorStore
 }
 
 func NewProposalHandler(
 	logger log.Logger,
 	oracleKeeper oraclekeeper.Keeper,
-	stakingKeeper *stakingkeeper.Keeper,
+	valStore baseapp.ValidatorStore,
 ) *ProposalHandler {
 	return &ProposalHandler{
 		logger:        logger,
 		oracleKeeper:  oracleKeeper,
-		stakingKeeper: stakingKeeper,
+		valStore:      valStore,
 	}
 }
 
@@ -46,7 +45,7 @@ func (h *ProposalHandler) PrepareProposalHandler() sdk.PrepareProposalHandler {
 			return nil, err
 		}
 
-		err := baseapp.ValidateVoteExtensions(ctx, h.stakingKeeper, req.Height, ctx.ChainID(), req.LocalLastCommit)
+		err := baseapp.ValidateVoteExtensions(ctx, h.valStore, req.Height, ctx.ChainID(), req.LocalLastCommit)
 		if err != nil {
 			return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, err
 		}
@@ -158,7 +157,7 @@ func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 
 			err := baseapp.ValidateVoteExtensions(
 				ctx,
-				h.stakingKeeper,
+				h.valStore,
 				req.Height,
 				ctx.ChainID(),
 				extendedCommitInfo,
@@ -223,15 +222,7 @@ func (h *ProposalHandler) generateExchangeRateVotes(
 			)
 			return nil, err
 		}
-		val, err := h.stakingKeeper.GetValidatorByConsAddr(ctx, valConsAddr)
-		if err != nil {
-			h.logger.Error(
-				"failed to get consensus validator from staking keeper",
-				"err", err,
-			)
-			return nil, err
-		}
-		valAddr, err := sdk.ValAddressFromBech32(val.OperatorAddress)
+		valAddr, err := sdk.ValAddressFromBech32(valConsAddr.String())
 		if err != nil {
 			return nil, err
 		}
@@ -294,15 +285,7 @@ func (h *ProposalHandler) generateExternalLiquidity(
 			)
 			return nil, err
 		}
-		val, err := h.stakingKeeper.GetValidatorByConsAddr(ctx, valConsAddr)
-		if err != nil {
-			h.logger.Error(
-				"failed to get consensus validator from staking keeper",
-				"err", err,
-			)
-			return nil, err
-		}
-		_, err = sdk.ValAddressFromBech32(val.OperatorAddress)
+		_, err := sdk.ValAddressFromBech32(valConsAddr.String())
 		if err != nil {
 			return nil, err
 		}
