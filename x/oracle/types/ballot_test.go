@@ -372,15 +372,15 @@ func TestStandardDeviationUnsorted(t *testing.T) {
 
 func TestClaimMapToSlices(t *testing.T) {
 	valAddresses := GenerateRandomValAddr(2)
-	claim1 := NewClaim(10, 1, 4, valAddresses[0])
-	claim2 := NewClaim(10, 1, 4, valAddresses[1])
+	claim1 := NewClaim(10, 1, 4, valAddresses[0].String())
+	claim2 := NewClaim(10, 1, 4, valAddresses[1].String())
 	claimSlice, rewardSlice := ClaimMapToSlices(
 		map[string]Claim{
 			"testClaim":    claim1,
 			"anotherClaim": claim2,
 		},
 		[]string{
-			claim1.Recipient.String(),
+			claim1.Recipient,
 		},
 	)
 	require.Contains(t, claimSlice, claim1, claim2)

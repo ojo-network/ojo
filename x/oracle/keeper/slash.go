@@ -1,5 +1,6 @@
 package keeper
 
+/*
 import (
 	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/runtime"
@@ -25,7 +26,7 @@ func (k Keeper) SlashAndResetMissCounters(ctx sdk.Context) {
 		powerReduction     = k.StakingKeeper.PowerReduction(ctx)
 	)
 
-	k.IterateMissCounters(ctx, func(operator sdk.ValAddress, missCounter uint64) bool {
+	k.IterateMissCounters(ctx, func(operator string, missCounter uint64) bool {
 		validVotes := math.NewInt(possibleWinsPerSlashWindow - util.SafeUint64ToInt64(missCounter))
 		validVoteRate := math.LegacyNewDecFromInt(validVotes).QuoInt64(possibleWinsPerSlashWindow)
 
@@ -109,3 +110,4 @@ func (k Keeper) GetValidatorRewardSet(ctx sdk.Context) types.ValidatorRewardSet 
 
 	return rewardSet
 }
+*/

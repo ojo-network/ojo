@@ -37,7 +37,7 @@ func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, genState types.GenesisSt
 			panic(err)
 		}
 
-		keeper.SetMissCounter(ctx, operator, mc.MissCounter)
+		keeper.SetMissCounter(ctx, operator.String(), mc.MissCounter)
 	}
 
 	for _, ap := range genState.AggregateExchangeRatePrevotes {
@@ -109,9 +109,9 @@ func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) *types.GenesisState {
 	})
 
 	missCounters := []types.MissCounter{}
-	keeper.IterateMissCounters(ctx, func(operator sdk.ValAddress, missCounter uint64) (stop bool) {
+	keeper.IterateMissCounters(ctx, func(operator string, missCounter uint64) (stop bool) {
 		missCounters = append(missCounters, types.MissCounter{
-			ValidatorAddress: operator.String(),
+			ValidatorAddress: operator,
 			MissCounter:      missCounter,
 		})
 

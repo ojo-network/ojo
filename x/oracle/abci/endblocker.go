@@ -42,13 +42,13 @@ func EndBlocker(ctx context.Context, k keeper.Keeper) error {
 		}()
 	}
 
-	// Set all current active validators into the ValidatorRewardSet at
-	// the beginning of a new Slash Window.
-	if k.IsPeriodLastBlock(sdkCtx, params.SlashWindow+1) {
-		if err := k.SetValidatorRewardSet(sdkCtx); err != nil {
-			return err
-		}
-	}
+	// // Set all current active validators into the ValidatorRewardSet at
+	// // the beginning of a new Slash Window.
+	// if k.IsPeriodLastBlock(sdkCtx, params.SlashWindow+1) {
+	// 	if err := k.SetValidatorRewardSet(sdkCtx); err != nil {
+	// 		return err
+	// 	}
+	// }
 
 	if k.IsPeriodLastBlock(sdkCtx, params.VotePeriod) {
 		if k.PriceFeeder.Oracle != nil && k.PriceFeeder.AppConfig.Enable {
@@ -82,11 +82,11 @@ func EndBlocker(ctx context.Context, k keeper.Keeper) error {
 		}
 	}
 
-	// Slash oracle providers who missed voting over the threshold and reset
-	// miss counters of all validators at the last block of slash window.
-	if k.IsPeriodLastBlock(sdkCtx, params.SlashWindow) {
-		k.SlashAndResetMissCounters(sdkCtx)
-	}
+	// // Slash oracle providers who missed voting over the threshold and reset
+	// // miss counters of all validators at the last block of slash window.
+	// if k.IsPeriodLastBlock(sdkCtx, params.SlashWindow) {
+	// 	k.SlashAndResetMissCounters(sdkCtx)
+	// }
 	k.PruneAllPrices(sdkCtx)
 
 	// Prune expired elys prices
@@ -114,14 +114,9 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 		return err
 	}
 	for _, v := range vals {
-		addrString := v.GetOperator()
-		addr, err := sdk.ValAddressFromBech32(addrString)
-		if err != nil {
-			return err
-		}
 		power := v.GetConsensusPower(powerReduction)
 		totalBondedPower += power
-		validatorClaimMap[addrString] = types.NewClaim(power, 0, 0, addr)
+		validatorClaimMap[v.GetOperator()] = types.NewClaim(power, 0, 0, v.GetOperator())
 	}
 
 	// voteTargets defines the symbol (ticker) denoms that we require votes on
@@ -195,30 +190,30 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 		}
 	}
 
-	// Get the validators which can earn rewards in this Slash Window.
-	validatorRewardSet := k.GetValidatorRewardSet(ctx)
+	// // Get the validators which can earn rewards in this Slash Window.
+	// validatorRewardSet := k.GetValidatorRewardSet(ctx)
 
-	// update miss counting & slashing
-	voteTargetsLen := len(params.MandatoryList)
-	claimSlice, rewardSlice := types.ClaimMapToSlices(validatorClaimMap, validatorRewardSet.ValidatorSet)
-	for _, claim := range claimSlice {
-		misses := util.SafeIntToUint64(voteTargetsLen - int(claim.MandatoryWinCount))
-		if misses == 0 {
-			continue
-		}
+	// // update miss counting & slashing
+	// voteTargetsLen := len(params.MandatoryList)
+	// claimSlice, rewardSlice := types.ClaimMapToSlices(validatorClaimMap, validatorRewardSet.ValidatorSet)
+	// for _, claim := range claimSlice {
+	// 	misses := util.SafeIntToUint64(voteTargetsLen - int(claim.MandatoryWinCount))
+	// 	if misses == 0 {
+	// 		continue
+	// 	}
 
-		// Increase miss counter
-		k.SetMissCounter(ctx, claim.Recipient, k.GetMissCounter(ctx, claim.Recipient)+misses)
-	}
+	// 	// Increase miss counter
+	// 	k.SetMissCounter(ctx, claim.Recipient, k.GetMissCounter(ctx, claim.Recipient)+misses)
+	// }
 
-	// Distribute rewards to ballot winners
-	k.RewardBallotWinners(
-		ctx,
-		util.SafeUint64ToInt64(params.VotePeriod),
-		util.SafeUint64ToInt64(params.RewardDistributionWindow),
-		voteTargetDenoms,
-		rewardSlice,
-	)
+	// // Distribute rewards to ballot winners
+	// k.RewardBallotWinners(
+	// 	ctx,
+	// 	util.SafeUint64ToInt64(params.VotePeriod),
+	// 	util.SafeUint64ToInt64(params.RewardDistributionWindow),
+	// 	voteTargetDenoms,
+	// 	rewardSlice,
+	// )
 
 	// Clear the ballot
 	k.ClearBallots(ctx, params.VotePeriod)

@@ -3,7 +3,6 @@ package metrics
 import (
 	"cosmossdk.io/math"
 	"github.com/armon/go-metrics"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 const (
@@ -14,11 +13,11 @@ const (
 )
 
 // RecordMissCounter records the miss counter gauge for a validator
-func RecordMissCounter(operator sdk.ValAddress, missCounter uint64) {
+func RecordMissCounter(operator string, missCounter uint64) {
 	metrics.SetGaugeWithLabels(
 		[]string{missCounterLabel},
 		float32(missCounter),
-		[]metrics.Label{{Name: "address", Value: operator.String()}},
+		[]metrics.Label{{Name: "address", Value: operator}},
 	)
 }
 

@@ -56,9 +56,8 @@ func GetFeederDelegationKey(v sdk.ValAddress) (key []byte) {
 }
 
 // GetMissCounterKey - stored by *Validator* address
-func GetMissCounterKey(v sdk.ValAddress) (key []byte) {
-	key = append(key, KeyPrefixMissCounter...)
-	return append(key, address.MustLengthPrefix(v)...)
+func GetMissCounterKey(v string) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixMissCounter, []byte(v))
 }
 
 // GetAggregateExchangeRatePrevoteKey - stored by *Validator* address

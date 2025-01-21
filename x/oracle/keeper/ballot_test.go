@@ -32,7 +32,7 @@ func (s *IntegrationTestSuite) TestBallot_OrganizeBallotByDenom() {
 		Power:             1,
 		Weight:            1,
 		MandatoryWinCount: 1,
-		Recipient:         valAddr,
+		Recipient:         valAddr.String(),
 	}
 	res = s.app.OracleKeeper.OrganizeBallotByDenom(s.ctx, claimMap)
 	require.Equal([]types.BallotDenom{

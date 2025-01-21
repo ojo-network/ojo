@@ -67,7 +67,7 @@ func TestGetMissCounterKey(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		actualKey := types.GetMissCounterKey(testCase.val)
+		actualKey := types.GetMissCounterKey(testCase.val.String())
 		require.Equalf(t, testCase.expectedKey, actualKey, "test %d - expected key: %s should be the same as actual key: %s", i, testCase.expectedKey, actualKey)
 	}
 }

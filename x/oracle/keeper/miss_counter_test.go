@@ -12,12 +12,12 @@ func (s *IntegrationTestSuite) TestMissCounter() {
 	app, ctx := s.app, s.ctx
 	missCounter := uint64(rand.Intn(100))
 
-	s.Require().Equal(app.OracleKeeper.GetMissCounter(ctx, valAddr), uint64(0))
-	app.OracleKeeper.SetMissCounter(ctx, valAddr, missCounter)
-	s.Require().Equal(app.OracleKeeper.GetMissCounter(ctx, valAddr), missCounter)
+	s.Require().Equal(app.OracleKeeper.GetMissCounter(ctx, valAddr.String()), uint64(0))
+	app.OracleKeeper.SetMissCounter(ctx, valAddr.String(), missCounter)
+	s.Require().Equal(app.OracleKeeper.GetMissCounter(ctx, valAddr.String()), missCounter)
 
-	app.OracleKeeper.DeleteMissCounter(ctx, valAddr)
-	s.Require().Equal(app.OracleKeeper.GetMissCounter(ctx, valAddr), uint64(0))
+	app.OracleKeeper.DeleteMissCounter(ctx, valAddr.String())
+	s.Require().Equal(app.OracleKeeper.GetMissCounter(ctx, valAddr.String()), uint64(0))
 }
 
 func (s *IntegrationTestSuite) TestIterateMissCounters() {
@@ -29,13 +29,13 @@ func (s *IntegrationTestSuite) TestIterateMissCounters() {
 
 	for _, mc := range missCounters {
 		operator, _ := sdk.ValAddressFromBech32(mc.ValidatorAddress)
-		keeper.SetMissCounter(ctx, operator, mc.MissCounter)
+		keeper.SetMissCounter(ctx, operator.String(), mc.MissCounter)
 	}
 
 	newCounters := []types.MissCounter{}
-	keeper.IterateMissCounters(ctx, func(operator sdk.ValAddress, missCounter uint64) (stop bool) {
+	keeper.IterateMissCounters(ctx, func(operator string, missCounter uint64) (stop bool) {
 		newCounters = append(newCounters, types.MissCounter{
-			ValidatorAddress: operator.String(),
+			ValidatorAddress: operator,
 			MissCounter:      missCounter,
 		})
 

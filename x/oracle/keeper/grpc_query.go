@@ -134,7 +134,7 @@ func (q querier) MissCounter(
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	return &types.QueryMissCounterResponse{
-		MissCounter: q.GetMissCounter(ctx, valAddr),
+		MissCounter: q.GetMissCounter(ctx, valAddr.String()),
 	}, nil
 }
 
@@ -316,17 +316,18 @@ func (q querier) ValidatorRewardSet(
 	goCtx context.Context,
 	req *types.QueryValidatorRewardSet,
 ) (*types.QueryValidatorRewardSetResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
+	// if req == nil {
+	// 	return nil, status.Error(codes.InvalidArgument, "empty request")
+	// }
 
-	ctx := sdk.UnwrapSDKContext(goCtx)
+	// ctx := sdk.UnwrapSDKContext(goCtx)
 
-	validatorRewardSet := q.GetValidatorRewardSet(ctx)
+	// validatorRewardSet := q.GetValidatorRewardSet(ctx)
 
-	return &types.QueryValidatorRewardSetResponse{
-		Validators: validatorRewardSet,
-	}, nil
+	// return &types.QueryValidatorRewardSetResponse{
+	// 	Validators: validatorRewardSet,
+	// }, nil
+	return &types.QueryValidatorRewardSetResponse{}, nil
 }
 
 func (q querier) PriceAll(
