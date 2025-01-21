@@ -248,6 +248,10 @@ func (h *ProposalHandler) verifyExchangeRateVotes(
 		generatedVote := generatedVotes[i]
 
 		if injectedVote.Voter != generatedVote.Voter || !injectedVote.ExchangeRates.Equal(generatedVote.ExchangeRates) {
+			h.logger.Info("injected voter %s", injectedVote.Voter)
+			h.logger.Info("generated voter %s", generatedVote.Voter)
+			h.logger.Info("injected voter %+v", injectedVote.ExchangeRates)
+			h.logger.Info("injected voter %+v", generatedVote.ExchangeRates)
 			return oracletypes.ErrNonEqualInjVotesRates
 		}
 	}
@@ -301,12 +305,16 @@ func (h *ProposalHandler) verifyExternalLiquidity(
 		generatedExternalLiquidity := generatedExternalLiquidityList[i]
 
 		if injectedExternalLiquidity.PoolId != generatedExternalLiquidity.PoolId {
+			h.logger.Info("injected PoolId %d", injectedExternalLiquidity.PoolId)
+			h.logger.Info("generated PoolId %d", generatedExternalLiquidity.PoolId)
 			return oracletypes.ErrNonEqualInjVotesRates
 		}
 
 		if len(injectedExternalLiquidity.AmountDepthInfo) != len(generatedExternalLiquidity.AmountDepthInfo) ||
 			injectedExternalLiquidity.AmountDepthInfo[0] != generatedExternalLiquidity.AmountDepthInfo[0] ||
 			injectedExternalLiquidity.AmountDepthInfo[1] != generatedExternalLiquidity.AmountDepthInfo[1] {
+			h.logger.Info("injected ExternalLiquidity AmountDepthInfo %+v", injectedExternalLiquidity.AmountDepthInfo)
+			h.logger.Info("generated ExternalLiquidity AmountDepthInfo %+v", generatedExternalLiquidity.AmountDepthInfo)
 			return oracletypes.ErrNonEqualInjVotesRates
 		}
 	}
