@@ -15,9 +15,9 @@ import (
 )
 
 type ProposalHandler struct {
-	logger        log.Logger
-	oracleKeeper  oraclekeeper.Keeper
-	valStore      baseapp.ValidatorStore
+	logger       log.Logger
+	oracleKeeper oraclekeeper.Keeper
+	valStore     baseapp.ValidatorStore
 }
 
 func NewProposalHandler(
@@ -26,9 +26,9 @@ func NewProposalHandler(
 	valStore baseapp.ValidatorStore,
 ) *ProposalHandler {
 	return &ProposalHandler{
-		logger:        logger,
-		oracleKeeper:  oracleKeeper,
-		valStore:      valStore,
+		logger:       logger,
+		oracleKeeper: oracleKeeper,
+		valStore:     valStore,
 	}
 }
 
@@ -222,12 +222,8 @@ func (h *ProposalHandler) generateExchangeRateVotes(
 			)
 			return nil, err
 		}
-		valAddr, err := sdk.ValAddressFromHex(valConsAddr.String())
-		if err != nil {
-			return nil, err
-		}
 
-		exchangeRateVote := oracletypes.NewAggregateExchangeRateVote(voteExt.ExchangeRates, valAddr)
+		exchangeRateVote := oracletypes.NewAggregateExchangeRateVote(voteExt.ExchangeRates, valConsAddr.String())
 		votes = append(votes, exchangeRateVote)
 	}
 
@@ -283,10 +279,6 @@ func (h *ProposalHandler) generateExternalLiquidity(
 				"failed to unmarshal validator consensus address",
 				"err", err,
 			)
-			return nil, err
-		}
-		_, err := sdk.ValAddressFromHex(valConsAddr.String())
-		if err != nil {
 			return nil, err
 		}
 

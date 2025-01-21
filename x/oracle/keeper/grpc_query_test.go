@@ -196,7 +196,7 @@ func (s *IntegrationTestSuite) TestQuerier_AggregatePrevotesAppendVotes() {
 func (s *IntegrationTestSuite) TestQuerier_AggregateVotesAppendVotes() {
 	s.app.OracleKeeper.SetAggregateExchangeRateVote(s.ctx, valAddr, types.NewAggregateExchangeRateVote(
 		types.DefaultGenesisState().ExchangeRates,
-		valAddr,
+		valAddr.String(),
 	))
 
 	_, err := s.queryClient.AggregateVotes(s.ctx.Context(), &types.QueryAggregateVotes{})

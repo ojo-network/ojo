@@ -29,11 +29,11 @@ func (v AggregateExchangeRatePrevote) String() string {
 
 func NewAggregateExchangeRateVote(
 	decCoins sdk.DecCoins,
-	voter sdk.ValAddress,
+	voter string,
 ) AggregateExchangeRateVote {
 	return AggregateExchangeRateVote{
 		ExchangeRates: decCoins,
-		Voter:         voter.String(),
+		Voter:         voter,
 	}
 }
 
