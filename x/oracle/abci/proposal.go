@@ -305,18 +305,39 @@ func (h *ProposalHandler) verifyExternalLiquidity(
 		generatedExternalLiquidity := generatedExternalLiquidityList[i]
 
 		if injectedExternalLiquidity.PoolId != generatedExternalLiquidity.PoolId {
-			h.logger.Info("injected", "PoolId %d", injectedExternalLiquidity.PoolId)
-			h.logger.Info("generated", "PoolId %d", generatedExternalLiquidity.PoolId)
-			return oracletypes.ErrNonEqualInjVotesRates
+			return oracletypes.ErrNonEqualInjPoolID
 		}
 
-		if len(injectedExternalLiquidity.AmountDepthInfo) != len(generatedExternalLiquidity.AmountDepthInfo) ||
-			injectedExternalLiquidity.AmountDepthInfo[0] != generatedExternalLiquidity.AmountDepthInfo[0] ||
-			injectedExternalLiquidity.AmountDepthInfo[1] != generatedExternalLiquidity.AmountDepthInfo[1] {
-			h.logger.Info("injected ExternalLiquidity", "AmountDepthInfo %+v", injectedExternalLiquidity.AmountDepthInfo)
-			h.logger.Info("generated ExternalLiquidity", "AmountDepthInfo %+v", generatedExternalLiquidity.AmountDepthInfo)
-			return oracletypes.ErrNonEqualInjVotesRates
+		if err := verifyAmountDepthInfo(
+			injectedExternalLiquidity.AmountDepthInfo,
+			generatedExternalLiquidity.AmountDepthInfo,
+		); err != nil {
+			return err
 		}
+	}
+
+	return nil
+}
+
+func verifyAmountDepthInfo(
+	injectedAmountDepthInfo []oracletypes.AssetAmountDepth,
+	generatedAmountDepthInfo []oracletypes.AssetAmountDepth,
+) error {
+	if len(injectedAmountDepthInfo) != 2 {
+		return oracletypes.ErrInvalidAssetDepthLen
+	}
+
+	if len(injectedAmountDepthInfo) != len(generatedAmountDepthInfo) {
+		return oracletypes.ErrInvalidAssetDepthLen
+	}
+
+	if injectedAmountDepthInfo[0].Asset != generatedAmountDepthInfo[0].Asset ||
+		injectedAmountDepthInfo[1].Asset != generatedAmountDepthInfo[1].Asset ||
+		!injectedAmountDepthInfo[0].Amount.Equal(generatedAmountDepthInfo[0].Amount) ||
+		!injectedAmountDepthInfo[1].Amount.Equal(generatedAmountDepthInfo[1].Amount) ||
+		!injectedAmountDepthInfo[0].Depth.Equal(generatedAmountDepthInfo[0].Depth) ||
+		!injectedAmountDepthInfo[1].Depth.Equal(generatedAmountDepthInfo[1].Depth) {
+		return oracletypes.ErrNonEqualAssetDepth
 	}
 
 	return nil
