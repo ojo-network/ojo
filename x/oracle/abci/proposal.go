@@ -222,7 +222,7 @@ func (h *ProposalHandler) generateExchangeRateVotes(
 			)
 			return nil, err
 		}
-		valAddr, err := sdk.ValAddressFromBech32(valConsAddr.String())
+		valAddr, err := sdk.ValAddressFromHex(valConsAddr.String())
 		if err != nil {
 			return nil, err
 		}
@@ -285,7 +285,7 @@ func (h *ProposalHandler) generateExternalLiquidity(
 			)
 			return nil, err
 		}
-		_, err := sdk.ValAddressFromBech32(valConsAddr.String())
+		_, err := sdk.ValAddressFromHex(valConsAddr.String())
 		if err != nil {
 			return nil, err
 		}
