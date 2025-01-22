@@ -113,14 +113,13 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 	if err != nil {
 		return err
 	}
-	k.Logger(ctx).Info("vals", "vals", vals)
+
 	for _, v := range vals {
 		power := v.GetConsensusPower(powerReduction)
-		k.Logger(ctx).Info("power", "power", power)
 		totalBondedPower += power
 		validatorClaimMap[v.GetOperator()] = types.NewClaim(power, 0, 0, v.GetOperator())
 	}
-	k.Logger(ctx).Info("totalBondedPower", "totalBondedPower", totalBondedPower)
+
 	// voteTargets defines the symbol (ticker) denoms that we require votes on
 	voteTargetDenoms := make([]string, 0)
 	for _, v := range params.AcceptList {
