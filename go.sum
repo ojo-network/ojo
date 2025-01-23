@@ -1307,6 +1307,8 @@ github.com/ojo-network/price-feeder v0.2.1-rc1.0.20250122181659-b0eeeeeada2b h1:
 github.com/ojo-network/price-feeder v0.2.1-rc1.0.20250122181659-b0eeeeeada2b/go.mod h1:QcTohaAoGK0kPOzCWa50KevNRRNqi2mVa66nGiWWqUI=
 github.com/ojo-network/price-feeder v0.2.1-rc1.0.20250122194622-5fa8373e2abd h1:zMJyVECBoOPxu/JTJl9eFJzUAm3zGqlorn8SoevssVI=
 github.com/ojo-network/price-feeder v0.2.1-rc1.0.20250122194622-5fa8373e2abd/go.mod h1:QcTohaAoGK0kPOzCWa50KevNRRNqi2mVa66nGiWWqUI=
+github.com/ojo-network/price-feeder v0.2.1-rc1.0.20250123153921-6283f6221230 h1:Aj2zHQZXZOYk7ChasEt+Xf80RpNQZiuSQBl2mPPn6aI=
+github.com/ojo-network/price-feeder v0.2.1-rc1.0.20250123153921-6283f6221230/go.mod h1:QcTohaAoGK0kPOzCWa50KevNRRNqi2mVa66nGiWWqUI=
 github.com/oklog/oklog v0.3.2/go.mod h1:FCV+B7mhrz4o+ueLpx+KqkyXRGMWOYEvfiXtdGtbWGs=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
 github.com/oklog/run v1.1.0 h1:GEenZ1cK0+q0+wsJew9qUg/DyD8k3JzYsZAi5gYi2mA=
