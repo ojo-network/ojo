@@ -35,6 +35,7 @@ message InjectedVoteExtensionTx {
   bytes extended_commit_info = 3;
 }
 
+// Elys Asset Amount Depth
 message AssetAmountDepth {
   string asset = 1;
   string amount = 2 [

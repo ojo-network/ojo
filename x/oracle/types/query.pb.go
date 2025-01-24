@@ -1063,6 +1063,7 @@ func (m *QueryValidatorRewardSetResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryValidatorRewardSetResponse proto.InternalMessageInfo
 
+// QueryGetPriceRequest is the request type for the Query/GetPriceRequest RPC method.
 type QueryGetPriceRequest struct {
 	Asset     string `protobuf:"bytes,1,opt,name=asset,proto3" json:"asset,omitempty"`
 	Source    string `protobuf:"bytes,2,opt,name=source,proto3" json:"source,omitempty"`
@@ -1102,6 +1103,7 @@ func (m *QueryGetPriceRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryGetPriceRequest proto.InternalMessageInfo
 
+// QueryGetPriceResponse is the response type for the Query/GetPriceRequest RPC method.
 type QueryGetPriceResponse struct {
 	Price Price `protobuf:"bytes,1,opt,name=price,proto3" json:"price"`
 }
@@ -1139,6 +1141,7 @@ func (m *QueryGetPriceResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryGetPriceResponse proto.InternalMessageInfo
 
+// QueryAllPriceRequest is the request type for the Query/AllPriceRequest RPC method.
 type QueryAllPriceRequest struct {
 }
 
@@ -1175,6 +1178,7 @@ func (m *QueryAllPriceRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryAllPriceRequest proto.InternalMessageInfo
 
+// QueryAllPriceResponse is the response type for the Query/AllPriceRequest RPC method.
 type QueryAllPriceResponse struct {
 	Price []Price `protobuf:"bytes,1,rep,name=price,proto3" json:"price"`
 }

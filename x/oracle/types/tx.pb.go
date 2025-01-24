@@ -273,6 +273,7 @@ func (m *MsgDelegateFeedConsentResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgDelegateFeedConsentResponse proto.InternalMessageInfo
 
+// FeedPrice defines a feed price object for feeding an elys price.
 type FeedPrice struct {
 	Asset  string                      `protobuf:"bytes,1,opt,name=asset,proto3" json:"asset,omitempty"`
 	Price  cosmossdk_io_math.LegacyDec `protobuf:"bytes,2,opt,name=price,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"price"`
@@ -312,6 +313,7 @@ func (m *FeedPrice) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_FeedPrice proto.InternalMessageInfo
 
+// MsgFeedPrice defines a message to feed an elys price.
 type MsgFeedPrice struct {
 	Provider  string    `protobuf:"bytes,1,opt,name=provider,proto3" json:"provider,omitempty"`
 	FeedPrice FeedPrice `protobuf:"bytes,2,opt,name=feed_price,json=feedPrice,proto3" json:"feed_price"`
@@ -350,6 +352,8 @@ func (m *MsgFeedPrice) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgFeedPrice proto.InternalMessageInfo
 
+// MsgFeedPriceResponse defines the Msg/FeedPrice response
+// type.
 type MsgFeedPriceResponse struct {
 }
 
@@ -386,6 +390,7 @@ func (m *MsgFeedPriceResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgFeedPriceResponse proto.InternalMessageInfo
 
+// MsgSetPriceFeeder defines a message to set an elys price feeder.
 type MsgSetPriceFeeder struct {
 	Feeder   string `protobuf:"bytes,1,opt,name=feeder,proto3" json:"feeder,omitempty"`
 	IsActive bool   `protobuf:"varint,2,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
@@ -424,6 +429,8 @@ func (m *MsgSetPriceFeeder) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgSetPriceFeeder proto.InternalMessageInfo
 
+// MsgSetPriceFeederResponse defines the Msg/SetPriceFeederResponse response
+// type.
 type MsgSetPriceFeederResponse struct {
 }
 
@@ -460,6 +467,7 @@ func (m *MsgSetPriceFeederResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgSetPriceFeederResponse proto.InternalMessageInfo
 
+// MsgDeletePriceFeeder defines a message to delete an elys price feeder.
 type MsgDeletePriceFeeder struct {
 	Feeder string `protobuf:"bytes,1,opt,name=feeder,proto3" json:"feeder,omitempty"`
 }
@@ -497,6 +505,8 @@ func (m *MsgDeletePriceFeeder) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgDeletePriceFeeder proto.InternalMessageInfo
 
+// MsgDeletePriceFeederResponse defines the Msg/DeleteFeederResponse response
+// type.
 type MsgDeletePriceFeederResponse struct {
 }
 
@@ -533,6 +543,7 @@ func (m *MsgDeletePriceFeederResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgDeletePriceFeederResponse proto.InternalMessageInfo
 
+// MsgFeedMultiplePrices defines a message to feed multiple elys prices.
 type MsgFeedMultiplePrices struct {
 	Creator    string      `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
 	FeedPrices []FeedPrice `protobuf:"bytes,2,rep,name=feed_prices,json=feedPrices,proto3" json:"feed_prices"`
@@ -571,6 +582,8 @@ func (m *MsgFeedMultiplePrices) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgFeedMultiplePrices proto.InternalMessageInfo
 
+// MsgFeedMultiplePricesResponse defines the Msg/FeedMultiplePrices response
+// type.
 type MsgFeedMultiplePricesResponse struct {
 }
 
@@ -607,6 +620,7 @@ func (m *MsgFeedMultiplePricesResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgFeedMultiplePricesResponse proto.InternalMessageInfo
 
+// MsgRemoveAssetInfo represents a message to remove an elys asset info.
 type MsgRemoveAssetInfo struct {
 	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
 	Denom     string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
@@ -645,6 +659,8 @@ func (m *MsgRemoveAssetInfo) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgRemoveAssetInfo proto.InternalMessageInfo
 
+// MsgRemoveAssetInfo defines the Msg/RemoveAssetInfo response
+// type.
 type MsgRemoveAssetInfoResponse struct {
 }
 
@@ -681,6 +697,7 @@ func (m *MsgRemoveAssetInfoResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgRemoveAssetInfoResponse proto.InternalMessageInfo
 
+// MsgAddPriceFeeders represents a message to add elys price feeders.
 type MsgAddPriceFeeders struct {
 	Authority string   `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
 	Feeders   []string `protobuf:"bytes,2,rep,name=feeders,proto3" json:"feeders,omitempty"`
@@ -719,6 +736,8 @@ func (m *MsgAddPriceFeeders) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgAddPriceFeeders proto.InternalMessageInfo
 
+// MsgAddPriceFeedersResponse defines the Msg/AddPriceFeeders response
+// type.
 type MsgAddPriceFeedersResponse struct {
 }
 
@@ -755,6 +774,7 @@ func (m *MsgAddPriceFeedersResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgAddPriceFeedersResponse proto.InternalMessageInfo
 
+// MsgRemovePriceFeeders represents a message to remove elys price feeders.
 type MsgRemovePriceFeeders struct {
 	Authority string   `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
 	Feeders   []string `protobuf:"bytes,2,rep,name=feeders,proto3" json:"feeders,omitempty"`
@@ -793,6 +813,8 @@ func (m *MsgRemovePriceFeeders) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgRemovePriceFeeders proto.InternalMessageInfo
 
+// MsgRemovePriceFeedersResponse defines the Msg/RemovePriceFeeders response
+// type.
 type MsgRemovePriceFeedersResponse struct {
 }
 
@@ -829,6 +851,7 @@ func (m *MsgRemovePriceFeedersResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgRemovePriceFeedersResponse proto.InternalMessageInfo
 
+// MsgCreateAssetInfo represents a message to create elys asset info.
 type MsgCreateAssetInfo struct {
 	Creator    string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
 	Denom      string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
@@ -871,6 +894,8 @@ func (m *MsgCreateAssetInfo) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgCreateAssetInfo proto.InternalMessageInfo
 
+// MsgCreateAssetInfoResponse defines the Msg/CreateAssetInfo response
+// type.
 type MsgCreateAssetInfoResponse struct {
 }
 
@@ -1845,14 +1870,21 @@ type MsgClient interface {
 	AggregateExchangeRateVote(ctx context.Context, in *MsgAggregateExchangeRateVote, opts ...grpc.CallOption) (*MsgAggregateExchangeRateVoteResponse, error)
 	// DelegateFeedConsent defines a method for setting the feeder delegation.
 	DelegateFeedConsent(ctx context.Context, in *MsgDelegateFeedConsent, opts ...grpc.CallOption) (*MsgDelegateFeedConsentResponse, error)
+	// FeedPrice defines a method for setting and elys price.
 	FeedPrice(ctx context.Context, in *MsgFeedPrice, opts ...grpc.CallOption) (*MsgFeedPriceResponse, error)
+	// FeedMultiplePrices defines a method for setting multiple elys prices.
 	FeedMultiplePrices(ctx context.Context, in *MsgFeedMultiplePrices, opts ...grpc.CallOption) (*MsgFeedMultiplePricesResponse, error)
+	// SetPriceFeeder defines a method for setting an elys price feeder.
 	SetPriceFeeder(ctx context.Context, in *MsgSetPriceFeeder, opts ...grpc.CallOption) (*MsgSetPriceFeederResponse, error)
+	// DeletePriceFeeder defines a method for deleting an elys price feeder.
 	DeletePriceFeeder(ctx context.Context, in *MsgDeletePriceFeeder, opts ...grpc.CallOption) (*MsgDeletePriceFeederResponse, error)
-	// proposals
+	// RemoveAssetInfo defines a method for removing an elys asset info.
 	RemoveAssetInfo(ctx context.Context, in *MsgRemoveAssetInfo, opts ...grpc.CallOption) (*MsgRemoveAssetInfoResponse, error)
+	// AddPriceFeeders defines a method for adding elys price feeders.
 	AddPriceFeeders(ctx context.Context, in *MsgAddPriceFeeders, opts ...grpc.CallOption) (*MsgAddPriceFeedersResponse, error)
+	// RemovePriceFeeders defines a method for removing elys price feeders.
 	RemovePriceFeeders(ctx context.Context, in *MsgRemovePriceFeeders, opts ...grpc.CallOption) (*MsgRemovePriceFeedersResponse, error)
+	// CreateAssetInfo defines a method for creating elys asset infos.
 	CreateAssetInfo(ctx context.Context, in *MsgCreateAssetInfo, opts ...grpc.CallOption) (*MsgCreateAssetInfoResponse, error)
 	// LegacyGovUpdateParams defines the legacy message that updates the oracle parameters.
 	LegacyGovUpdateParams(ctx context.Context, in *MsgLegacyGovUpdateParams, opts ...grpc.CallOption) (*MsgLegacyGovUpdateParamsResponse, error)
@@ -2041,14 +2073,21 @@ type MsgServer interface {
 	AggregateExchangeRateVote(context.Context, *MsgAggregateExchangeRateVote) (*MsgAggregateExchangeRateVoteResponse, error)
 	// DelegateFeedConsent defines a method for setting the feeder delegation.
 	DelegateFeedConsent(context.Context, *MsgDelegateFeedConsent) (*MsgDelegateFeedConsentResponse, error)
+	// FeedPrice defines a method for setting and elys price.
 	FeedPrice(context.Context, *MsgFeedPrice) (*MsgFeedPriceResponse, error)
+	// FeedMultiplePrices defines a method for setting multiple elys prices.
 	FeedMultiplePrices(context.Context, *MsgFeedMultiplePrices) (*MsgFeedMultiplePricesResponse, error)
+	// SetPriceFeeder defines a method for setting an elys price feeder.
 	SetPriceFeeder(context.Context, *MsgSetPriceFeeder) (*MsgSetPriceFeederResponse, error)
+	// DeletePriceFeeder defines a method for deleting an elys price feeder.
 	DeletePriceFeeder(context.Context, *MsgDeletePriceFeeder) (*MsgDeletePriceFeederResponse, error)
-	// proposals
+	// RemoveAssetInfo defines a method for removing an elys asset info.
 	RemoveAssetInfo(context.Context, *MsgRemoveAssetInfo) (*MsgRemoveAssetInfoResponse, error)
+	// AddPriceFeeders defines a method for adding elys price feeders.
 	AddPriceFeeders(context.Context, *MsgAddPriceFeeders) (*MsgAddPriceFeedersResponse, error)
+	// RemovePriceFeeders defines a method for removing elys price feeders.
 	RemovePriceFeeders(context.Context, *MsgRemovePriceFeeders) (*MsgRemovePriceFeedersResponse, error)
+	// CreateAssetInfo defines a method for creating elys asset infos.
 	CreateAssetInfo(context.Context, *MsgCreateAssetInfo) (*MsgCreateAssetInfoResponse, error)
 	// LegacyGovUpdateParams defines the legacy message that updates the oracle parameters.
 	LegacyGovUpdateParams(context.Context, *MsgLegacyGovUpdateParams) (*MsgLegacyGovUpdateParamsResponse, error)

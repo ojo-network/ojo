@@ -305,18 +305,22 @@ message QueryValidatorRewardSetResponse {
   ValidatorRewardSet validators = 1 [(gogoproto.nullable) = false];
 }
 
+// QueryGetPriceRequest is the request type for the Query/GetPriceRequest RPC method.
 message QueryGetPriceRequest {
   string asset = 1;
   string source = 2;
   uint64 timestamp = 3;
 }
 
+// QueryGetPriceResponse is the response type for the Query/GetPriceRequest RPC method.
 message QueryGetPriceResponse {
   Price price = 1 [ (gogoproto.nullable) = false ];
 }
 
+// QueryAllPriceRequest is the request type for the Query/AllPriceRequest RPC method.
 message QueryAllPriceRequest {}
 
+// QueryAllPriceResponse is the response type for the Query/AllPriceRequest RPC method.
 message QueryAllPriceResponse {
   repeated Price price = 1 [ (gogoproto.nullable) = false ];
 }

@@ -109,6 +109,7 @@ func (m *InjectedVoteExtensionTx) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_InjectedVoteExtensionTx proto.InternalMessageInfo
 
+// Elys Asset Amount Depth
 type AssetAmountDepth struct {
 	Asset  string                      `protobuf:"bytes,1,opt,name=asset,proto3" json:"asset,omitempty"`
 	Amount cosmossdk_io_math.LegacyDec `protobuf:"bytes,2,opt,name=amount,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"amount"`

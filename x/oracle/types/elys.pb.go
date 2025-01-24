@@ -26,6 +26,7 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
+// Elys AssetInfo
 type AssetInfo struct {
 	Denom      string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 	Display    string `protobuf:"bytes,2,opt,name=display,proto3" json:"display,omitempty"`
@@ -67,6 +68,7 @@ func (m *AssetInfo) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_AssetInfo proto.InternalMessageInfo
 
+// Elys Price
 type Price struct {
 	Asset       string                      `protobuf:"bytes,1,opt,name=asset,proto3" json:"asset,omitempty"`
 	Price       cosmossdk_io_math.LegacyDec `protobuf:"bytes,2,opt,name=price,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"price"`
@@ -109,6 +111,7 @@ func (m *Price) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Price proto.InternalMessageInfo
 
+// Elys PriceFeeder
 type PriceFeeder struct {
 	Feeder   string `protobuf:"bytes,1,opt,name=feeder,proto3" json:"feeder,omitempty"`
 	IsActive bool   `protobuf:"varint,2,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
@@ -147,6 +150,7 @@ func (m *PriceFeeder) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_PriceFeeder proto.InternalMessageInfo
 
+// Elys Pool
 type Pool struct {
 	PoolId     uint64      `protobuf:"varint,1,opt,name=pool_id,json=poolId,proto3" json:"pool_id,omitempty"`
 	PoolAssets []PoolAsset `protobuf:"bytes,2,rep,name=pool_assets,json=poolAssets,proto3" json:"pool_assets"`
@@ -185,6 +189,7 @@ func (m *Pool) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Pool proto.InternalMessageInfo
 
+// Elys PoolAsset
 type PoolAsset struct {
 	Token                  types.Coin                  `protobuf:"bytes,1,opt,name=token,proto3" json:"token"`
 	Weight                 cosmossdk_io_math.Int       `protobuf:"bytes,2,opt,name=weight,proto3,customtype=cosmossdk.io/math.Int" json:"weight"`
@@ -224,6 +229,7 @@ func (m *PoolAsset) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_PoolAsset proto.InternalMessageInfo
 
+// Elys AccountedPool
 type AccountedPool struct {
 	PoolId           uint64       `protobuf:"varint,1,opt,name=pool_id,json=poolId,proto3" json:"pool_id,omitempty"`
 	TotalTokens      []types.Coin `protobuf:"bytes,2,rep,name=total_tokens,json=totalTokens,proto3" json:"total_tokens"`
