@@ -39,7 +39,7 @@ var (
 	ErrNonEqualInjVotesRates = errors.Register(ModuleName, 29, "injected exchange rate votes and generated exchange votes are not equal")                //nolint: lll
 	ErrNonEqualInjPoolID     = errors.Register(ModuleName, 30, "pool ids in injected and generated external liquidity asset deoth info are not equal")   //nolint: lll
 	ErrInvalidAssetDepthLen  = errors.Register(ModuleName, 31, "invalid asset depth info length")
-	ErrNonEqualAssetDepth    = errors.Register(ModuleName, 32, "injected asset deoth info and generated asset deoth info are not equal")
+	ErrNonEqualAssetDepth    = errors.Register(ModuleName, 32, "injected asset deoth info and generated asset deoth info are not equal") //nolint: lll
 	ErrNoCommitInfo          = errors.Register(ModuleName, 33, "no commit info in process proposal request")
 	ErrNotAPriceFeeder       = errors.Register(ModuleName, 34, "not a price feeder")
 	ErrPriceFeederNotActive  = errors.Register(ModuleName, 35, "price feeder is not active")

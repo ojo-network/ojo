@@ -197,7 +197,7 @@ func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 }
 
 func (h *ProposalHandler) generateExchangeRateVotes(
-	ctx sdk.Context,
+	_ sdk.Context,
 	ci cometabci.ExtendedCommitInfo,
 ) (votes []oracletypes.AggregateExchangeRateVote, err error) {
 	for _, vote := range ci.Votes {
@@ -260,7 +260,7 @@ func (h *ProposalHandler) verifyExchangeRateVotes(
 }
 
 func (h *ProposalHandler) generateExternalLiquidity(
-	ctx sdk.Context,
+	_ sdk.Context,
 	ci cometabci.ExtendedCommitInfo,
 ) (externalLiquidityList []oracletypes.ExternalLiquidity, err error) {
 	for _, vote := range ci.Votes {

@@ -98,7 +98,7 @@ func (h *VoteExtensionHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 				},
 			}
 			externalLiquidityMsg = append(externalLiquidityMsg, types.ExternalLiquidity{
-				PoolId:          el.PoolId,
+				PoolId:          el.PoolID,
 				AmountDepthInfo: amountDepthInfo,
 			})
 		}
@@ -130,7 +130,7 @@ func (h *VoteExtensionHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 // VerifyVoteExtensionHandler validates the OracleVoteExtension created by the ExtendVoteHandler. It
 // verifies that the vote extension can unmarshal correctly and is for the correct height.
 func (h *VoteExtensionHandler) VerifyVoteExtensionHandler() sdk.VerifyVoteExtensionHandler {
-	return func(ctx sdk.Context, req *cometabci.RequestVerifyVoteExtension) (
+	return func(_ sdk.Context, req *cometabci.RequestVerifyVoteExtension) (
 		*cometabci.ResponseVerifyVoteExtension,
 		error,
 	) {

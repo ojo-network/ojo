@@ -30,7 +30,7 @@ type PriceFeeder struct {
 	AppConfig AppConfig
 }
 
-func (pf *PriceFeeder) Start(currentBlockHeight int64, oracleParams types.Params) error {
+func (pf *PriceFeeder) Start(oracleParams types.Params) error {
 	logWriter := zerolog.ConsoleWriter{Out: os.Stderr}
 	logLevel, err := zerolog.ParseLevel(pf.AppConfig.LogLevel)
 	if err != nil {

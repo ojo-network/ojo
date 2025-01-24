@@ -35,7 +35,7 @@ func EndBlocker(ctx context.Context, k keeper.Keeper) error {
 	// Start price feeder if it hasn't been started, and it is enabled.
 	if k.PriceFeeder.Oracle == nil && k.PriceFeeder.AppConfig.Enable {
 		go func() {
-			err := k.PriceFeeder.Start(sdkCtx.BlockHeight(), params)
+			err := k.PriceFeeder.Start(params)
 			if err != nil {
 				sdkCtx.Logger().Error("Error starting Oracle Keeper price feeder", "err", err)
 			}
@@ -120,11 +120,11 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 		validatorClaimMap[v.GetOperator()] = types.NewClaim(power, 0, 0, v.GetOperator())
 	}
 
-	// voteTargets defines the symbol (ticker) denoms that we require votes on
-	voteTargetDenoms := make([]string, 0)
-	for _, v := range params.AcceptList {
-		voteTargetDenoms = append(voteTargetDenoms, v.BaseDenom)
-	}
+	// // voteTargets defines the symbol (ticker) denoms that we require votes on
+	// voteTargetDenoms := make([]string, 0)
+	// for _, v := range params.AcceptList {
+	// 	voteTargetDenoms = append(voteTargetDenoms, v.BaseDenom)
+	// }
 
 	k.ClearExchangeRates(ctx)
 
