@@ -332,8 +332,8 @@ func (q querier) ValidatorRewardSet(
 
 func (q querier) PriceAll(
 	goCtx context.Context,
-	req *types.QueryAllPriceRequest,
-) (*types.QueryAllPriceResponse, error) {
+	req *types.QueryPriceAllRequest,
+) (*types.QueryPriceAllResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
@@ -342,10 +342,10 @@ func (q querier) PriceAll(
 
 	prices := q.GetAllPrice(ctx)
 
-	return &types.QueryAllPriceResponse{Price: prices}, nil
+	return &types.QueryPriceAllResponse{Price: prices}, nil
 }
 
-func (q querier) Price(goCtx context.Context, req *types.QueryGetPriceRequest) (*types.QueryGetPriceResponse, error) {
+func (q querier) Price(goCtx context.Context, req *types.QueryPriceRequest) (*types.QueryPriceResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
@@ -357,7 +357,7 @@ func (q querier) Price(goCtx context.Context, req *types.QueryGetPriceRequest) (
 		if !found {
 			return nil, status.Error(codes.NotFound, "not found")
 		}
-		return &types.QueryGetPriceResponse{Price: val}, nil
+		return &types.QueryPriceResponse{Price: val}, nil
 	}
 
 	// if source is specified use latest price from source
@@ -366,7 +366,7 @@ func (q querier) Price(goCtx context.Context, req *types.QueryGetPriceRequest) (
 		if !found {
 			return nil, status.Error(codes.NotFound, "not found")
 		}
-		return &types.QueryGetPriceResponse{Price: val}, nil
+		return &types.QueryPriceResponse{Price: val}, nil
 	}
 
 	// find from any source if band source does not exist
@@ -374,5 +374,5 @@ func (q querier) Price(goCtx context.Context, req *types.QueryGetPriceRequest) (
 	if !found {
 		return nil, status.Error(codes.NotFound, "not found")
 	}
-	return &types.QueryGetPriceResponse{Price: val}, nil
+	return &types.QueryPriceResponse{Price: val}, nil
 }

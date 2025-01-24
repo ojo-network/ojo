@@ -291,7 +291,7 @@ func GetCmdListPrice() *cobra.Command {
 			}
 			queryClient := types.NewQueryClient(clientCtx)
 
-			res, err := queryClient.PriceAll(cmd.Context(), &types.QueryAllPriceRequest{})
+			res, err := queryClient.PriceAll(cmd.Context(), &types.QueryPriceAllRequest{})
 			return cli.PrintOrErr(res, err, clientCtx)
 		},
 	}
@@ -314,7 +314,7 @@ func CmdShowPrice() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-			params := &types.QueryGetPriceRequest{
+			params := &types.QueryPriceRequest{
 				Asset:     args[0],
 				Source:    args[1],
 				Timestamp: timestamp,

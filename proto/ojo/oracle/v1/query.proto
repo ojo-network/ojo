@@ -100,14 +100,14 @@ service Query {
   }
 
   // Queries a Price by asset.
-  rpc Price(QueryGetPriceRequest)
-      returns (QueryGetPriceResponse) {
+  rpc Price(QueryPriceRequest)
+      returns (QueryPriceResponse) {
     option (google.api.http).get = "/elys-network/elys/oracle/price/{asset}";
   }
 
   // Queries a list of Price items.
-  rpc PriceAll(QueryAllPriceRequest)
-      returns (QueryAllPriceResponse) {
+  rpc PriceAll(QueryPriceAllRequest)
+      returns (QueryPriceAllResponse) {
     option (google.api.http).get = "/elys-network/elys/oracle/prices";
   }
 }
@@ -305,22 +305,22 @@ message QueryValidatorRewardSetResponse {
   ValidatorRewardSet validators = 1 [(gogoproto.nullable) = false];
 }
 
-// QueryGetPriceRequest is the request type for the Query/GetPriceRequest RPC method.
-message QueryGetPriceRequest {
+// QueryPriceRequest is the request type for the Query/PriceRequest RPC method.
+message QueryPriceRequest {
   string asset = 1;
   string source = 2;
   uint64 timestamp = 3;
 }
 
-// QueryGetPriceResponse is the response type for the Query/GetPriceRequest RPC method.
-message QueryGetPriceResponse {
+// QueryPriceResponse is the response type for the Query/PriceRequest RPC method.
+message QueryPriceResponse {
   Price price = 1 [ (gogoproto.nullable) = false ];
 }
 
-// QueryAllPriceRequest is the request type for the Query/AllPriceRequest RPC method.
-message QueryAllPriceRequest {}
+// QueryPriceAllRequest is the request type for the Query/PriceAllRequest RPC method.
+message QueryPriceAllRequest {}
 
-// QueryAllPriceResponse is the response type for the Query/AllPriceRequest RPC method.
-message QueryAllPriceResponse {
+// QueryPriceAllResponse is the response type for the Query/AllPriceRequest RPC method.
+message QueryPriceAllResponse {
   repeated Price price = 1 [ (gogoproto.nullable) = false ];
 }
