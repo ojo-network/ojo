@@ -113,9 +113,15 @@ func (s *IntegrationTestSuite) TestPrepareProposalHandler() {
 					return valKeys[i].ValAddress.String() < valKeys[j].ValAddress.String()
 				})
 				s.Require().Equal(exchangeRates, injectedVoteExtTx.ExchangeRateVotes[0].ExchangeRates)
-				s.Require().Equal(valKeys[0].ValAddress.String(), injectedVoteExtTx.ExchangeRateVotes[0].Voter)
+				s.Require().Equal(
+					sdk.ConsAddress(valKeys[0].PubKey.Address()).String(),
+					injectedVoteExtTx.ExchangeRateVotes[0].Voter,
+				)
 				s.Require().Equal(exchangeRates, injectedVoteExtTx.ExchangeRateVotes[1].ExchangeRates)
-				s.Require().Equal(valKeys[1].ValAddress.String(), injectedVoteExtTx.ExchangeRateVotes[1].Voter)
+				s.Require().Equal(
+					sdk.ConsAddress(valKeys[1].PubKey.Address()).String(),
+					injectedVoteExtTx.ExchangeRateVotes[1].Voter,
+				)
 			}
 		})
 	}
@@ -160,11 +166,11 @@ func (s *IntegrationTestSuite) TestProcessProposalHandler() {
 	exchangeRateVotes := []oracletypes.AggregateExchangeRateVote{
 		{
 			ExchangeRates: exchangeRates,
-			Voter:         valKeys[0].ValAddress.String(),
+			Voter:         sdk.ConsAddress(valKeys[0].PubKey.Address()).String(),
 		},
 		{
 			ExchangeRates: exchangeRates,
-			Voter:         valKeys[1].ValAddress.String(),
+			Voter:         sdk.ConsAddress(valKeys[1].PubKey.Address()).String(),
 		},
 	}
 	localCommitInfoBz, err := localCommitInfo.Marshal()

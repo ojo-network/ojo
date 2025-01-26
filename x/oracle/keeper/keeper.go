@@ -332,7 +332,7 @@ func (k Keeper) IterateAggregateExchangeRateVotes(
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
-		voterAddr := string(iter.Key()[2:])
+		voterAddr := string(iter.Key()[1:])
 
 		var aggregateVote types.AggregateExchangeRateVote
 		k.cdc.MustUnmarshal(iter.Value(), &aggregateVote)

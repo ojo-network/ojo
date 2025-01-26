@@ -46,7 +46,7 @@ func (s *IntegrationTestSuite) TestBallot_OrganizeBallotByDenom() {
 func (s *IntegrationTestSuite) TestBallot_ClearBallots() {
 	prevote := types.AggregateExchangeRatePrevote{
 		Hash:        "hash",
-		Voter:       addr.String(),
+		Voter:       valAddr.String(),
 		SubmitBlock: 0,
 	}
 	s.app.OracleKeeper.SetAggregateExchangeRatePrevote(s.ctx, valAddr, prevote)
@@ -61,7 +61,7 @@ func (s *IntegrationTestSuite) TestBallot_ClearBallots() {
 	})
 	vote := types.AggregateExchangeRateVote{
 		ExchangeRates: decCoins,
-		Voter:         addr.String(),
+		Voter:         valAddr.String(),
 	}
 	s.app.OracleKeeper.SetAggregateExchangeRateVote(s.ctx, valAddr.String(), vote)
 	voteRes, err := s.app.OracleKeeper.GetAggregateExchangeRateVote(s.ctx, valAddr.String())

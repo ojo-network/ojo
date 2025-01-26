@@ -5,7 +5,6 @@ import "cosmos/msg/v1/msg.proto";
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "ojo/oracle/v1/oracle.proto";
-import "ojo/oracle/v1/elys.proto";
 
 option go_package = "github.com/ojo-network/ojo/x/oracle/types";
 

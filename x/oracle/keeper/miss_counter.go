@@ -48,7 +48,7 @@ func (k Keeper) IterateMissCounters(ctx sdk.Context, handler func(string, uint64
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
-		operator := string(iter.Key()[2:])
+		operator := string(iter.Key()[1:])
 
 		var missCounter gogotypes.UInt64Value
 		k.cdc.MustUnmarshal(iter.Value(), &missCounter)

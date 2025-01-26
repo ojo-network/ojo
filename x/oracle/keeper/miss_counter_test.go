@@ -42,9 +42,7 @@ func (s *IntegrationTestSuite) TestIterateMissCounters() {
 		return false
 	})
 
-	// Validator in integration test will incurr misses so expected amount of validators with miss counters
-	// is 1 more than what we manually set in this unit test.
-	require.Equal(s.T(), len(missCounters)+1, len(newCounters))
+	require.Equal(s.T(), len(missCounters), len(newCounters))
 
 FOUND:
 	for _, oldCounter := range missCounters {
