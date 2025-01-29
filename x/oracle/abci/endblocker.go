@@ -111,7 +111,8 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 	var totalBondedPower int64
 	vals, err := k.StakingKeeper.GetBondedValidatorsByPower(ctx)
 	if err != nil {
-		return err
+		ctx.Logger().Warn("Failed to get validator set in oracle endblocker", "err", err)
+		return nil
 	}
 
 	for _, v := range vals {
