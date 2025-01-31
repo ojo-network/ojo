@@ -64,6 +64,4 @@ message AccountedPool {
     uint64 pool_id = 1;
     repeated cosmos.base.v1beta1.Coin total_tokens = 2
         [ (gogoproto.nullable) = false ];
-    repeated cosmos.base.v1beta1.Coin non_amm_pool_tokens = 3
-        [ (gogoproto.nullable) = false ];
 }

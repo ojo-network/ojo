@@ -2,11 +2,13 @@ package cli
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 
 	"github.com/ojo-network/ojo/util/cli"
@@ -34,6 +36,10 @@ func GetQueryCmd() *cobra.Command {
 		GetCmdQuerySlashWindow(),
 		GetCmdListPrice(),
 		CmdShowPrice(),
+		CmdListPool(),
+		CmdShowPool(),
+		CmdListAccountedPool(),
+		CmdShowAccountedPool(),
 	)
 
 	return cmd
@@ -321,6 +327,131 @@ func CmdShowPrice() *cobra.Command {
 			}
 
 			res, err := queryClient.Price(cmd.Context(), params)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+func CmdListPool() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "list-pool",
+		Short:   "list all pool",
+		Example: "elysd query amm list-pool",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx := client.GetClientContextFromCmd(cmd)
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			params := &types.QueryAllPoolRequest{}
+
+			res, err := queryClient.PoolAll(cmd.Context(), params)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddPaginationFlagsToCmd(cmd, cmd.Use)
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+func CmdShowPool() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "show-pool [pool-id]",
+		Short: "shows a pool",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) (err error) {
+			clientCtx := client.GetClientContextFromCmd(cmd)
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			argPoolId, err := cast.ToUint64E(args[0])
+			if err != nil {
+				return err
+			}
+
+			params := &types.QueryGetPoolRequest{
+				PoolId: argPoolId,
+			}
+
+			res, err := queryClient.Pool(cmd.Context(), params)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+func CmdListAccountedPool() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "list-accounted-pool",
+		Short: "list all accounted pools",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			params := &types.QueryAllAccountedPoolRequest{}
+
+			res, err := queryClient.AccountedPoolAll(cmd.Context(), params)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddPaginationFlagsToCmd(cmd, cmd.Use)
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+func CmdShowAccountedPool() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "show-accounted-pool [index]",
+		Short: "shows a accounted-pool",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) (err error) {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			poolId, err := strconv.ParseUint(args[0], 10, 64)
+			if err != nil {
+				return err
+			}
+
+			params := &types.QueryGetAccountedPoolRequest{
+				PoolId: poolId,
+			}
+
+			res, err := queryClient.AccountedPool(cmd.Context(), params)
 			if err != nil {
 				return err
 			}
