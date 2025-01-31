@@ -376,33 +376,8 @@ func (q querier) Price(goCtx context.Context, req *types.QueryPriceRequest) (*ty
 	}
 	return &types.QueryPriceResponse{Price: val}, nil
 }
-func (q querier) AccountedPoolAll(goCtx context.Context, req *types.QueryAllAccountedPoolRequest) (*types.QueryAllAccountedPoolResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid request")
-	}
 
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	accountedPools := q.GetAllAccountedPool(ctx)
-
-	return &types.QueryAllAccountedPoolResponse{AccountedPool: accountedPools}, nil
-}
-
-func (q querier) AccountedPool(goCtx context.Context, req *types.QueryGetAccountedPoolRequest) (*types.QueryGetAccountedPoolResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid request")
-	}
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	val, found := q.GetAccountedPool(ctx, req.PoolId)
-	if !found {
-		return nil, status.Error(codes.NotFound, "not found")
-	}
-
-	return &types.QueryGetAccountedPoolResponse{AccountedPool: val}, nil
-}
-
-func (q querier) Pool(goCtx context.Context, req *types.QueryGetPoolRequest) (*types.QueryGetPoolResponse, error) {
+func (q querier) Pool(goCtx context.Context, req *types.QueryPoolRequest) (*types.QueryPoolResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
@@ -413,12 +388,12 @@ func (q querier) Pool(goCtx context.Context, req *types.QueryGetPoolRequest) (*t
 		return nil, status.Error(codes.NotFound, "not found")
 	}
 
-	return &types.QueryGetPoolResponse{
+	return &types.QueryPoolResponse{
 		Pool: pool,
 	}, nil
 }
 
-func (q querier) PoolAll(goCtx context.Context, req *types.QueryAllPoolRequest) (*types.QueryAllPoolResponse, error) {
+func (q querier) PoolAll(goCtx context.Context, req *types.QueryPoolAllRequest) (*types.QueryPoolAllResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
@@ -427,5 +402,37 @@ func (q querier) PoolAll(goCtx context.Context, req *types.QueryAllPoolRequest) 
 
 	pools := q.GetAllPool(ctx)
 
-	return &types.QueryAllPoolResponse{Pool: pools}, nil
+	return &types.QueryPoolAllResponse{Pool: pools}, nil
+}
+
+func (q querier) AccountedPoolAll(
+	goCtx context.Context,
+	req *types.QueryAccountedPoolAllRequest,
+) (*types.QueryAccountedPoolAllResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	accountedPools := q.GetAllAccountedPool(ctx)
+
+	return &types.QueryAccountedPoolAllResponse{AccountedPool: accountedPools}, nil
+}
+
+func (q querier) AccountedPool(
+	goCtx context.Context,
+	req *types.QueryAccountedPoolRequest,
+) (*types.QueryAccountedPoolResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	val, found := q.GetAccountedPool(ctx, req.PoolId)
+	if !found {
+		return nil, status.Error(codes.NotFound, "not found")
+	}
+
+	return &types.QueryAccountedPoolResponse{AccountedPool: val}, nil
 }

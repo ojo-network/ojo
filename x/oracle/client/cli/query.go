@@ -350,7 +350,7 @@ func CmdListPool() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			params := &types.QueryAllPoolRequest{}
+			params := &types.QueryPoolAllRequest{}
 
 			res, err := queryClient.PoolAll(cmd.Context(), params)
 			if err != nil {
@@ -377,13 +377,13 @@ func CmdShowPool() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			argPoolId, err := cast.ToUint64E(args[0])
+			argPoolID, err := cast.ToUint64E(args[0])
 			if err != nil {
 				return err
 			}
 
-			params := &types.QueryGetPoolRequest{
-				PoolId: argPoolId,
+			params := &types.QueryPoolRequest{
+				PoolId: argPoolID,
 			}
 
 			res, err := queryClient.Pool(cmd.Context(), params)
@@ -412,7 +412,7 @@ func CmdListAccountedPool() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			params := &types.QueryAllAccountedPoolRequest{}
+			params := &types.QueryAccountedPoolAllRequest{}
 
 			res, err := queryClient.AccountedPoolAll(cmd.Context(), params)
 			if err != nil {
@@ -442,13 +442,13 @@ func CmdShowAccountedPool() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			poolId, err := strconv.ParseUint(args[0], 10, 64)
+			poolID, err := strconv.ParseUint(args[0], 10, 64)
 			if err != nil {
 				return err
 			}
 
-			params := &types.QueryGetAccountedPoolRequest{
-				PoolId: poolId,
+			params := &types.QueryAccountedPoolRequest{
+				PoolId: poolID,
 			}
 
 			res, err := queryClient.AccountedPool(cmd.Context(), params)

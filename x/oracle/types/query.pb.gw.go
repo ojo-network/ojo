@@ -574,7 +574,7 @@ func local_request_Query_PriceAll_0(ctx context.Context, marshaler runtime.Marsh
 }
 
 func request_Query_Pool_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryGetPoolRequest
+	var protoReq QueryPoolRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -601,7 +601,7 @@ func request_Query_Pool_0(ctx context.Context, marshaler runtime.Marshaler, clie
 }
 
 func local_request_Query_Pool_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryGetPoolRequest
+	var protoReq QueryPoolRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -628,7 +628,7 @@ func local_request_Query_Pool_0(ctx context.Context, marshaler runtime.Marshaler
 }
 
 func request_Query_PoolAll_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryAllPoolRequest
+	var protoReq QueryPoolAllRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.PoolAll(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -637,7 +637,7 @@ func request_Query_PoolAll_0(ctx context.Context, marshaler runtime.Marshaler, c
 }
 
 func local_request_Query_PoolAll_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryAllPoolRequest
+	var protoReq QueryPoolAllRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.PoolAll(ctx, &protoReq)
@@ -646,7 +646,7 @@ func local_request_Query_PoolAll_0(ctx context.Context, marshaler runtime.Marsha
 }
 
 func request_Query_AccountedPool_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryGetAccountedPoolRequest
+	var protoReq QueryAccountedPoolRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -673,7 +673,7 @@ func request_Query_AccountedPool_0(ctx context.Context, marshaler runtime.Marsha
 }
 
 func local_request_Query_AccountedPool_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryGetAccountedPoolRequest
+	var protoReq QueryAccountedPoolRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -700,7 +700,7 @@ func local_request_Query_AccountedPool_0(ctx context.Context, marshaler runtime.
 }
 
 func request_Query_AccountedPoolAll_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryAllAccountedPoolRequest
+	var protoReq QueryAccountedPoolAllRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.AccountedPoolAll(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -709,7 +709,7 @@ func request_Query_AccountedPoolAll_0(ctx context.Context, marshaler runtime.Mar
 }
 
 func local_request_Query_AccountedPoolAll_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryAllAccountedPoolRequest
+	var protoReq QueryAccountedPoolAllRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.AccountedPoolAll(ctx, &protoReq)

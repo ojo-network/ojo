@@ -112,25 +112,25 @@ service Query {
   }
 
   // Queries a Pool.
-  rpc Pool(QueryGetPoolRequest) returns (QueryGetPoolResponse) {
+  rpc Pool(QueryPoolRequest) returns (QueryPoolResponse) {
     option (google.api.http).get = "/elys-network/elys/amm/pool/{pool_id}";
   }
 
   // Queries a list of Pool items.
-  rpc PoolAll(QueryAllPoolRequest) returns (QueryAllPoolResponse) {
+  rpc PoolAll(QueryPoolAllRequest) returns (QueryPoolAllResponse) {
     option (google.api.http).get = "/elys-network/elys/amm/pool";
   }
 
   // Queries an AccountedPool.
-  rpc AccountedPool(QueryGetAccountedPoolRequest)
-      returns (QueryGetAccountedPoolResponse) {
+  rpc AccountedPool(QueryAccountedPoolRequest)
+      returns (QueryAccountedPoolResponse) {
     option (google.api.http).get =
         "/elys-network/elys/accountedpool/accounted_pool/{pool_id}";
   }
 
   // Queries a list of AccountedPool items.
-  rpc AccountedPoolAll(QueryAllAccountedPoolRequest)
-      returns (QueryAllAccountedPoolResponse) {
+  rpc AccountedPoolAll(QueryAccountedPoolAllRequest)
+      returns (QueryAccountedPoolAllResponse) {
     option (google.api.http).get =
         "/elys-network/elys/accountedpool/accounted_pool";
   }
@@ -349,34 +349,34 @@ message QueryPriceAllResponse {
   repeated Price price = 1 [ (gogoproto.nullable) = false ];
 }
 
-// QueryGetPoolRequest is the request type for the Query/GetPoolRequest RPC method.
-message QueryGetPoolRequest { uint64 pool_id = 1; }
+// QueryPoolRequest is the request type for the Query/PoolRequest RPC method.
+message QueryPoolRequest { uint64 pool_id = 1; }
 
-// QueryGetPoolResponse is the response type for the Query/GetPoolResponse RPC method.
-message QueryGetPoolResponse {
+// QueryPoolResponse is the response type for the Query/PoolResponse RPC method.
+message QueryPoolResponse {
   Pool pool = 1 [ (gogoproto.nullable) = false ];
 }
 
-// QueryAllPoolRequest is the request type for the Query/AllPoolRequest RPC method.
-message QueryAllPoolRequest {}
+// QueryPoolAllRequest is the request type for the Query/PoolAllRequest RPC method.
+message QueryPoolAllRequest {}
 
-// QueryAllPoolResponse is the response type for the Query/AllPoolResponse RPC method.
-message QueryAllPoolResponse {
+// QueryPoolAllResponse is the response type for the Query/PoolAllResponse RPC method.
+message QueryPoolAllResponse {
   repeated Pool pool = 1 [ (gogoproto.nullable) = false ];
 }
 
-// QueryGetAccountedPoolRequest is the request type for the Query/GetAccountedPoolRequest RPC method.
-message QueryGetAccountedPoolRequest { uint64 pool_id = 1; }
+// QueryAccountedPoolRequest is the request type for the Query/AccountedPoolRequest RPC method.
+message QueryAccountedPoolRequest { uint64 pool_id = 1; }
 
-// QueryGetAccountedPoolResponse is the response type for the Query/GetAccountedPoolResponse RPC method.
-message QueryGetAccountedPoolResponse {
+// QueryAccountedPoolResponse is the response type for the Query/AccountedPoolResponse RPC method.
+message QueryAccountedPoolResponse {
   AccountedPool accounted_pool = 1 [ (gogoproto.nullable) = false ];
 }
 
-// QueryAllAccountedPoolRequest is the request type for the Query/AllAccountedPoolRequest RPC method.
-message QueryAllAccountedPoolRequest {}
+// QueryAccountedPoolAllRequest is the request type for the Query/AccountedPoolAllRequest RPC method.
+message QueryAccountedPoolAllRequest {}
 
-// QueryAllAccountedPoolResponse is the response type for the Query/AllAccountedPoolResponse RPC method.
-message QueryAllAccountedPoolResponse {
+// QueryAccountedPoolAllResponse is the response type for the Query/AccountedPoolAllResponse RPC method.
+message QueryAccountedPoolAllResponse {
   repeated AccountedPool accounted_pool = 1 [ (gogoproto.nullable) = false ];
 }
