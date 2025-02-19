@@ -126,6 +126,12 @@ func (k Keeper) ValidateParamChanges(ctx sdk.Context, keys []string, changes typ
 
 		case string(types.KeyCurrencyDeviationThresholds):
 			params.CurrencyDeviationThresholds = changes.CurrencyDeviationThresholds
+
+		case string(types.KeyPriceExpiryTime):
+			params.PriceExpiryTime = changes.PriceExpiryTime
+
+		case string(types.KeyLifeTimeInBlocks):
+			params.LifeTimeInBlocks = changes.LifeTimeInBlocks
 		}
 	}
 
@@ -181,6 +187,12 @@ func (k Keeper) ExecuteParamUpdatePlan(ctx sdk.Context, plan types.ParamUpdatePl
 
 		case string(types.KeyCurrencyDeviationThresholds):
 			k.SetCurrencyDeviationThresholds(ctx, plan.Changes.CurrencyDeviationThresholds)
+
+		case string(types.KeyPriceExpiryTime):
+			k.SetPriceExpiryTime(ctx, plan.Changes.PriceExpiryTime)
+
+		case string(types.KeyLifeTimeInBlocks):
+			k.SetLifeTimeInBlocks(ctx, plan.Changes.LifeTimeInBlocks)
 		}
 	}
 

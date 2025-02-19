@@ -134,6 +134,18 @@ service Query {
     option (google.api.http).get =
         "/elys-network/elys/accountedpool/accounted_pool";
   }
+
+  // Queries a AssetInfo by denom.
+  rpc AssetInfo(QueryAssetInfoRequest) returns (QueryAssetInfoResponse) {
+    option (google.api.http).get =
+        "/elys-network/elys/oracle/asset_info/{denom}";
+  }
+
+  // Queries a list of AssetInfo items.
+  rpc AssetInfoAll(QueryAssetInfoAllRequest)
+      returns (QueryAssetInfoAllResponse) {
+    option (google.api.http).get = "/elys-network/elys/oracle/asset_info";
+  }
 }
 
 // QueryExchangeRates is the request type for the Query/ExchangeRate RPC
@@ -379,4 +391,20 @@ message QueryAccountedPoolAllRequest {}
 // QueryAccountedPoolAllResponse is the response type for the Query/AccountedPoolAllResponse RPC method.
 message QueryAccountedPoolAllResponse {
   repeated AccountedPool accounted_pool = 1 [ (gogoproto.nullable) = false ];
+}
+
+// QueryAssetInfoRequest is the request type for the Query/AssetInfoRequest RPC method.
+message QueryAssetInfoRequest { string denom = 1; }
+
+// QueryAssetInfoResponse is the response type for the Query/AssetInfoResponse RPC method.
+message QueryAssetInfoResponse {
+  AssetInfo asset_info = 1 [ (gogoproto.nullable) = false ];
+}
+
+// QueryAssetInfoAllRequest is the request type for the Query/AssetInfoAllRequest RPC method.
+message QueryAssetInfoAllRequest {}
+
+// QueryAssetInfoAllResponse is the response type for the Query/AssetInfoAllResponse RPC method.
+message QueryAssetInfoAllResponse {
+  repeated AssetInfo asset_info = 1 [ (gogoproto.nullable) = false ];
 }

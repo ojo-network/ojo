@@ -69,7 +69,7 @@ func (app App) RegisterUpgradeHandlers() {
 // 	)
 // }
 
-//nolint: all
+// nolint: all
 func (app *App) registerUpgrade0_2_0(upgradeInfo upgradetypes.Plan) {
 	const planName = "v0.2.0"
 

@@ -40,6 +40,8 @@ func GetQueryCmd() *cobra.Command {
 		CmdShowPool(),
 		CmdListAccountedPool(),
 		CmdShowAccountedPool(),
+		CmdListAssetInfo(),
+		CmdShowAssetInfo(),
 	)
 
 	return cmd
@@ -452,6 +454,59 @@ func CmdShowAccountedPool() *cobra.Command {
 			}
 
 			res, err := queryClient.AccountedPool(cmd.Context(), params)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+func CmdListAssetInfo() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "list-asset-info",
+		Short: "list all assetInfo",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx := client.GetClientContextFromCmd(cmd)
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			params := &types.QueryAssetInfoAllRequest{}
+
+			res, err := queryClient.AssetInfoAll(cmd.Context(), params)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddPaginationFlagsToCmd(cmd, cmd.Use)
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+func CmdShowAssetInfo() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "show-asset-info [index]",
+		Short: "shows a assetInfo",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) (err error) {
+			clientCtx := client.GetClientContextFromCmd(cmd)
+
+			queryClient := types.NewQueryClient(clientCtx)
+			params := &types.QueryAssetInfoRequest{
+				Denom: args[0],
+			}
+
+			res, err := queryClient.AssetInfo(cmd.Context(), params)
 			if err != nil {
 				return err
 			}

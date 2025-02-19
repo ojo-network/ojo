@@ -436,3 +436,35 @@ func (q querier) AccountedPool(
 
 	return &types.QueryAccountedPoolResponse{AccountedPool: val}, nil
 }
+
+func (q querier) AssetInfoAll(
+	goCtx context.Context,
+	req *types.QueryAssetInfoAllRequest,
+) (*types.QueryAssetInfoAllResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	assetInfos := q.GetAllAssetInfo(ctx)
+
+	return &types.QueryAssetInfoAllResponse{AssetInfo: assetInfos}, nil
+}
+
+func (q querier) AssetInfo(
+	goCtx context.Context,
+	req *types.QueryAssetInfoRequest,
+) (*types.QueryAssetInfoResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	val, found := q.GetAssetInfo(ctx, req.Denom)
+	if !found {
+		return nil, status.Error(codes.NotFound, "not found")
+	}
+
+	return &types.QueryAssetInfoResponse{AssetInfo: val}, nil
+}
