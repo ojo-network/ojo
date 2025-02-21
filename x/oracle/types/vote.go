@@ -69,7 +69,10 @@ func ParseExchangeRateDecCoins(tuplesStr string) (sdk.DecCoins, error) {
 
 		denom := strings.ToUpper(denomAmountStr[0])
 
-		decCoins[i] = sdk.NewDecCoinFromDec(denom, dec)
+		decCoins[i] = sdk.DecCoin{
+			Denom:  denom,
+			Amount: dec,
+		}
 
 		if _, ok := duplicateCheckMap[denom]; ok {
 			return nil, fmt.Errorf("duplicated denom %s", denom)
