@@ -67,8 +67,17 @@ func EndBlocker(ctx context.Context, k keeper.Keeper) error {
 				accountedPoolsMap[accountedPool.PoolId] = accountedPool
 			}
 
+			usdcDenom := "uusdc"
+			assetInfos := k.GetAllAssetInfo(sdkCtx)
+			for _, assetInfo := range assetInfos {
+				if assetInfo.Display == "USDC" {
+					usdcDenom = assetInfo.Denom
+				}
+			}
+
 			k.PriceFeeder.Oracle.AmmPools = ammPoolsMap
 			k.PriceFeeder.Oracle.AccountedPools = accountedPoolsMap
+			k.PriceFeeder.Oracle.USDCDenom = usdcDenom
 
 			// Execute price feeder oracle tick.
 			if err := k.PriceFeeder.Oracle.TickClientless(ctx); err != nil {
