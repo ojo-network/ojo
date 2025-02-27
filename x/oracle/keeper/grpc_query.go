@@ -60,10 +60,10 @@ func (q querier) ExchangeRates(
 			return nil, err
 		}
 
-		exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(req.Denom, exchangeRate))
+		exchangeRates = exchangeRates.Add(sdk.DecCoin{Denom: req.Denom, Amount: exchangeRate})
 	} else {
 		q.IterateExchangeRates(ctx, func(denom string, rate math.LegacyDec) (stop bool) {
-			exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(denom, rate))
+			exchangeRates = exchangeRates.Add(sdk.DecCoin{Denom: denom, Amount: rate})
 			return false
 		})
 	}
