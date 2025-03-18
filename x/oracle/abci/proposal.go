@@ -289,6 +289,11 @@ func (h *ProposalHandler) generateExternalLiquidity(
 		externalLiquidityList = append(externalLiquidityList, voteExt.ExternalLiquidity...)
 	}
 
+	// sort external liquidity so they are verified in the same order in ProcessProposalHandler
+	sort.Slice(externalLiquidityList, func(i, j int) bool {
+		return externalLiquidityList[i].PoolId < externalLiquidityList[j].PoolId
+	})
+
 	return externalLiquidityList, nil
 }
 
