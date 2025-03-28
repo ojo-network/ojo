@@ -30,6 +30,33 @@ type PriceFeeder struct {
 	AppConfig AppConfig
 }
 
+var cfg = config.Config{
+	GasAdjustment:   1,
+	ProviderTimeout: "1000000s",
+	Server: config.Server{
+		ListenAddr:   "0.0.0.0:7171",
+		ReadTimeout:  "20s",
+		VerboseCORS:  true,
+		WriteTimeout: "20s",
+	},
+	RPC: config.RPC{
+		GRPCEndpoint:  "localhost:9090",
+		RPCTimeout:    "100ms",
+		TMRPCEndpoint: "http://localhost:26657",
+	},
+	Telemetry: telemetry.Config{
+		EnableHostname:      true,
+		EnableHostnameLabel: true,
+		EnableServiceLabel:  true,
+		Enabled:             true,
+		GlobalLabels: [][]string{
+			{"chain_id", "ojo-testnet"},
+		},
+		ServiceName:             "price-feeder",
+		PrometheusRetentionTime: 100,
+	},
+}
+
 func (pf *PriceFeeder) Start(oracleParams types.Params) error {
 	logWriter := zerolog.ConsoleWriter{Out: os.Stderr}
 	logLevel, err := zerolog.ParseLevel(pf.AppConfig.LogLevel)
@@ -37,11 +64,6 @@ func (pf *PriceFeeder) Start(oracleParams types.Params) error {
 		return err
 	}
 	logger := zerolog.New(logWriter).Level(logLevel).With().Timestamp().Logger()
-
-	cfg, err := config.LoadConfigFromFlags(pf.AppConfig.ConfigPath, "")
-	if err != nil {
-		return err
-	}
 
 	// listen for and trap any OS signal to gracefully shutdown and exit
 	ctx, cancel := context.WithCancel(context.TODO())
