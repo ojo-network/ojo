@@ -1,12 +1,12 @@
 package keeper
 
 import (
-	"cosmossdk.io/math"
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/runtime"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ojo-network/ojo/util"
 	"github.com/ojo-network/ojo/x/oracle/types"
+	"github.com/osmosis-labs/osmosis/osmomath"
 )
 
 // SetPrice set a specific price in the store from its index
@@ -79,28 +79,32 @@ func (k Keeper) GetAllPrice(ctx sdk.Context) (list []types.Price) {
 	return
 }
 
-func (k Keeper) GetAssetPrice(ctx sdk.Context, asset string) (types.Price, bool) {
-	return k.GetLatestPriceFromAnySource(ctx, asset)
+func (k Keeper) GetAssetPrice(ctx sdk.Context, asset string) (osmomath.BigDec, bool) {
+	val, found := k.GetLatestPriceFromAnySource(ctx, asset)
+	if found {
+		return osmomath.BigDecFromDec(val.Price), true
+	}
+	return osmomath.BigDec{}, false
 }
 
-func Pow10(decimal uint64) (value math.LegacyDec) {
-	value = math.LegacyNewDec(1)
+func Pow10(decimal uint64) (value osmomath.BigDec) {
+	value = osmomath.NewBigDec(1)
 	for i := 0; i < util.SafeUint64ToInt(decimal); i++ {
-		value = value.Mul(math.LegacyNewDec(10))
+		value = value.Mul(osmomath.NewBigDec(10))
 	}
 	return
 }
 
-func (k Keeper) GetAssetPriceFromDenom(ctx sdk.Context, denom string) math.LegacyDec {
+func (k Keeper) GetDenomPrice(ctx sdk.Context, denom string) osmomath.BigDec {
 	info, found := k.GetAssetInfo(ctx, denom)
 	if !found {
-		return math.LegacyZeroDec()
+		return osmomath.ZeroBigDec()
 	}
 	price, found := k.GetAssetPrice(ctx, info.Display)
 	if !found {
-		return math.LegacyZeroDec()
+		return osmomath.ZeroBigDec()
 	}
-	return price.Price.Quo(Pow10(info.Decimal))
+	return price.Quo(Pow10(info.Decimal))
 }
 
 // SetAssetInfo set a specific assetInfo in the store from its index
