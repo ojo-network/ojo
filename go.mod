@@ -35,7 +35,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.1
 	github.com/mgechev/revive v1.3.9
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/ojo-network/price-feeder v0.2.1-rc1.0.20250328154033-0d554482357e
+	github.com/ojo-network/price-feeder v0.2.1-rc1.0.20250421183238-6c793ef22cec
 	github.com/ory/dockertest/v3 v3.10.0
 	github.com/osmosis-labs/osmosis/osmomath v0.0.17
 	github.com/rs/zerolog v1.33.0
