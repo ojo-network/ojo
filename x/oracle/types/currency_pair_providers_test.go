@@ -23,14 +23,14 @@ func TestCurrencyPairProvidersString(t *testing.T) {
 	require.Equal(
 		t,
 		cpp.String(),
-		"base_denom: RETH\nquote_denom: WETH\npair_address:\n    - address: address\n      address_provider: eth-uniswap\nproviders:\n    - eth-uniswap\n",
+		"base_denom: RETH\nquote_denom: WETH\nbase_proxy_denom: \"\"\nquote_proxy_denom: \"\"\npool_id: 0\nextern_liquidity_provider: \"\"\ncrypto_compare_exchange: \"\"\npair_address:\n    - address: address\n      address_provider: eth-uniswap\nproviders:\n    - eth-uniswap\n",
 	)
 
 	cppl := CurrencyPairProvidersList{cpp}
 	require.Equal(
 		t,
 		cppl.String(),
-		"base_denom: RETH\nquote_denom: WETH\npair_address:\n    - address: address\n      address_provider: eth-uniswap\nproviders:\n    - eth-uniswap",
+		"base_denom: RETH\nquote_denom: WETH\nbase_proxy_denom: \"\"\nquote_proxy_denom: \"\"\npool_id: 0\nextern_liquidity_provider: \"\"\ncrypto_compare_exchange: \"\"\npair_address:\n    - address: address\n      address_provider: eth-uniswap\nproviders:\n    - eth-uniswap",
 	)
 }
 

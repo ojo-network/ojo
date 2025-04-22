@@ -17,7 +17,7 @@ func (s *IntegrationTestSuite) TestBallot_OrganizeBallotByDenom() {
 	require.Empty(res)
 
 	s.app.OracleKeeper.SetAggregateExchangeRateVote(
-		s.ctx, valAddr, types.AggregateExchangeRateVote{
+		s.ctx, valAddr.String(), types.AggregateExchangeRateVote{
 			ExchangeRates: sdk.DecCoins{
 				sdk.DecCoin{
 					Denom:  "OJO",
@@ -32,12 +32,12 @@ func (s *IntegrationTestSuite) TestBallot_OrganizeBallotByDenom() {
 		Power:             1,
 		Weight:            1,
 		MandatoryWinCount: 1,
-		Recipient:         valAddr,
+		Recipient:         valAddr.String(),
 	}
 	res = s.app.OracleKeeper.OrganizeBallotByDenom(s.ctx, claimMap)
 	require.Equal([]types.BallotDenom{
 		{
-			Ballot: types.ExchangeRateBallot{types.NewVoteForTally(math.LegacyOneDec(), "OJO", valAddr, 1)},
+			Ballot: types.ExchangeRateBallot{types.NewVoteForTally(math.LegacyOneDec(), "OJO", valAddr.String(), 1)},
 			Denom:  "OJO",
 		},
 	}, res)
@@ -46,7 +46,7 @@ func (s *IntegrationTestSuite) TestBallot_OrganizeBallotByDenom() {
 func (s *IntegrationTestSuite) TestBallot_ClearBallots() {
 	prevote := types.AggregateExchangeRatePrevote{
 		Hash:        "hash",
-		Voter:       addr.String(),
+		Voter:       valAddr.String(),
 		SubmitBlock: 0,
 	}
 	s.app.OracleKeeper.SetAggregateExchangeRatePrevote(s.ctx, valAddr, prevote)
@@ -61,16 +61,16 @@ func (s *IntegrationTestSuite) TestBallot_ClearBallots() {
 	})
 	vote := types.AggregateExchangeRateVote{
 		ExchangeRates: decCoins,
-		Voter:         addr.String(),
+		Voter:         valAddr.String(),
 	}
-	s.app.OracleKeeper.SetAggregateExchangeRateVote(s.ctx, valAddr, vote)
-	voteRes, err := s.app.OracleKeeper.GetAggregateExchangeRateVote(s.ctx, valAddr)
+	s.app.OracleKeeper.SetAggregateExchangeRateVote(s.ctx, valAddr.String(), vote)
+	voteRes, err := s.app.OracleKeeper.GetAggregateExchangeRateVote(s.ctx, valAddr.String())
 	s.Require().NoError(err)
 	s.Require().Equal(voteRes, vote)
 
 	s.app.OracleKeeper.ClearBallots(s.ctx, 0)
 	_, err = s.app.OracleKeeper.GetAggregateExchangeRatePrevote(s.ctx, valAddr)
 	s.Require().Error(err)
-	_, err = s.app.OracleKeeper.GetAggregateExchangeRateVote(s.ctx, valAddr)
+	_, err = s.app.OracleKeeper.GetAggregateExchangeRateVote(s.ctx, valAddr.String())
 	s.Require().Error(err)
 }

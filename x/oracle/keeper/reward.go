@@ -1,5 +1,6 @@
 package keeper
 
+/*
 import (
 	"fmt"
 
@@ -114,3 +115,4 @@ func (k Keeper) RewardBallotWinners(
 		panic(fmt.Errorf("failed to send coins to distribution module %w", err))
 	}
 }
+*/

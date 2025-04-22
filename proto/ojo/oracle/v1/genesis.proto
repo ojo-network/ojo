@@ -3,6 +3,7 @@ package ojo.oracle.v1;
 
 import "gogoproto/gogo.proto";
 import "ojo/oracle/v1/oracle.proto";
+import "ojo/oracle/v1/elys.proto";
 import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/ojo-network/ojo/x/oracle/types";
@@ -26,6 +27,9 @@ message GenesisState {
   repeated PriceStamp medians = 7 [ (gogoproto.nullable) = false ];
   repeated PriceStamp historic_prices = 8 [ (gogoproto.nullable) = false ];
   repeated PriceStamp median_deviations = 9 [ (gogoproto.nullable) = false ];
+  repeated AssetInfo asset_infos = 10 [ (gogoproto.nullable) = false ];
+  repeated Price prices = 11 [ (gogoproto.nullable) = false ];
+  repeated PriceFeeder price_feeders = 12 [ (gogoproto.nullable) = false ];
 }
 
 // FeederDelegation is the address for where oracle feeder authority are

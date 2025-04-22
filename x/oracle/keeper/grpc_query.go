@@ -60,10 +60,10 @@ func (q querier) ExchangeRates(
 			return nil, err
 		}
 
-		exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(req.Denom, exchangeRate))
+		exchangeRates = exchangeRates.Add(sdk.DecCoin{Denom: req.Denom, Amount: exchangeRate})
 	} else {
 		q.IterateExchangeRates(ctx, func(denom string, rate math.LegacyDec) (stop bool) {
-			exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(denom, rate))
+			exchangeRates = exchangeRates.Add(sdk.DecCoin{Denom: denom, Amount: rate})
 			return false
 		})
 	}
@@ -134,7 +134,7 @@ func (q querier) MissCounter(
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	return &types.QueryMissCounterResponse{
-		MissCounter: q.GetMissCounter(ctx, valAddr),
+		MissCounter: q.GetMissCounter(ctx, valAddr.String()),
 	}, nil
 }
 
@@ -220,7 +220,7 @@ func (q querier) AggregateVote(
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	vote, err := q.GetAggregateExchangeRateVote(ctx, valAddr)
+	vote, err := q.GetAggregateExchangeRateVote(ctx, valAddr.String())
 	if err != nil {
 		return nil, err
 	}
@@ -242,7 +242,7 @@ func (q querier) AggregateVotes(
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	var votes []types.AggregateExchangeRateVote
-	q.IterateAggregateExchangeRateVotes(ctx, func(_ sdk.ValAddress, vote types.AggregateExchangeRateVote) bool {
+	q.IterateAggregateExchangeRateVotes(ctx, func(_ string, vote types.AggregateExchangeRateVote) bool {
 		votes = append(votes, vote)
 		return false
 	})
@@ -316,15 +316,155 @@ func (q querier) ValidatorRewardSet(
 	goCtx context.Context,
 	req *types.QueryValidatorRewardSet,
 ) (*types.QueryValidatorRewardSetResponse, error) {
+	// if req == nil {
+	// 	return nil, status.Error(codes.InvalidArgument, "empty request")
+	// }
+
+	// ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// validatorRewardSet := q.GetValidatorRewardSet(ctx)
+
+	// return &types.QueryValidatorRewardSetResponse{
+	// 	Validators: validatorRewardSet,
+	// }, nil
+	return &types.QueryValidatorRewardSetResponse{}, nil
+}
+
+func (q querier) PriceAll(
+	goCtx context.Context,
+	req *types.QueryPriceAllRequest,
+) (*types.QueryPriceAllResponse, error) {
 	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	validatorRewardSet := q.GetValidatorRewardSet(ctx)
+	prices := q.GetAllPrice(ctx)
 
-	return &types.QueryValidatorRewardSetResponse{
-		Validators: validatorRewardSet,
+	return &types.QueryPriceAllResponse{Price: prices}, nil
+}
+
+func (q querier) Price(goCtx context.Context, req *types.QueryPriceRequest) (*types.QueryPriceResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// if both source and timestamp are defined, use specific value
+	if req.Source != "" && req.Timestamp != 0 {
+		val, found := q.GetPrice(ctx, req.Asset, req.Source, req.Timestamp)
+		if !found {
+			return nil, status.Error(codes.NotFound, "not found")
+		}
+		return &types.QueryPriceResponse{Price: val}, nil
+	}
+
+	// if source is specified use latest price from source
+	if req.Source != "" {
+		val, found := q.GetLatestPriceFromAssetAndSource(ctx, req.Asset, req.Source)
+		if !found {
+			return nil, status.Error(codes.NotFound, "not found")
+		}
+		return &types.QueryPriceResponse{Price: val}, nil
+	}
+
+	// find from any source if band source does not exist
+	val, found := q.GetLatestPriceFromAnySource(ctx, req.Asset)
+	if !found {
+		return nil, status.Error(codes.NotFound, "not found")
+	}
+	return &types.QueryPriceResponse{Price: val}, nil
+}
+
+func (q querier) Pool(goCtx context.Context, req *types.QueryPoolRequest) (*types.QueryPoolResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	pool, found := q.GetPool(ctx, req.PoolId)
+	if !found {
+		return nil, status.Error(codes.NotFound, "not found")
+	}
+
+	return &types.QueryPoolResponse{
+		Pool: pool,
 	}, nil
+}
+
+func (q querier) PoolAll(goCtx context.Context, req *types.QueryPoolAllRequest) (*types.QueryPoolAllResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	pools := q.GetAllPool(ctx)
+
+	return &types.QueryPoolAllResponse{Pool: pools}, nil
+}
+
+func (q querier) AccountedPoolAll(
+	goCtx context.Context,
+	req *types.QueryAccountedPoolAllRequest,
+) (*types.QueryAccountedPoolAllResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	accountedPools := q.GetAllAccountedPool(ctx)
+
+	return &types.QueryAccountedPoolAllResponse{AccountedPool: accountedPools}, nil
+}
+
+func (q querier) AccountedPool(
+	goCtx context.Context,
+	req *types.QueryAccountedPoolRequest,
+) (*types.QueryAccountedPoolResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	val, found := q.GetAccountedPool(ctx, req.PoolId)
+	if !found {
+		return nil, status.Error(codes.NotFound, "not found")
+	}
+
+	return &types.QueryAccountedPoolResponse{AccountedPool: val}, nil
+}
+
+func (q querier) AssetInfoAll(
+	goCtx context.Context,
+	req *types.QueryAssetInfoAllRequest,
+) (*types.QueryAssetInfoAllResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	assetInfos := q.GetAllAssetInfo(ctx)
+
+	return &types.QueryAssetInfoAllResponse{AssetInfo: assetInfos}, nil
+}
+
+func (q querier) AssetInfo(
+	goCtx context.Context,
+	req *types.QueryAssetInfoRequest,
+) (*types.QueryAssetInfoResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	val, found := q.GetAssetInfo(ctx, req.Denom)
+	if !found {
+		return nil, status.Error(codes.NotFound, "not found")
+	}
+
+	return &types.QueryAssetInfoResponse{AssetInfo: val}, nil
 }
