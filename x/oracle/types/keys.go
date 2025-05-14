@@ -97,18 +97,13 @@ func KeyParamUpdatePlan(planHeight uint64) (key []byte) {
 }
 
 // KeyPrice - stored by *asset, source, and timestamp*
-func KeyPrice(asset string, source string, timestamp uint64) (key []byte) {
-	return util.ConcatBytes(0, KeyPrefixPrice, []byte(asset), []byte(source), util.UintWithNullPrefix(timestamp))
+func KeyPrice(asset string, timestamp uint64) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixPrice, []byte(asset), util.UintWithNullPrefix(timestamp))
 }
 
 // KeyPriceAsset - stored by *asset*
 func KeyPriceAsset(asset string) (key []byte) {
 	return util.ConcatBytes(0, KeyPrefixPrice, []byte(asset))
-}
-
-// KeyPriceAssetAndSource - stored by *asset and source*
-func KeyPriceAssetAndSource(asset string, source string) (key []byte) {
-	return util.ConcatBytes(0, KeyPrefixPrice, []byte(asset), []byte(source))
 }
 
 // KeyAssetInfo - stored by *asset*

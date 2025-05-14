@@ -6,6 +6,7 @@ import "google/api/annotations.proto";
 import "ojo/oracle/v1/oracle.proto";
 import "ojo/oracle/v1/elys.proto";
 import "cosmos/base/v1beta1/coin.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
 
 option go_package = "github.com/ojo-network/ojo/x/oracle/types";
 
@@ -99,16 +100,19 @@ service Query {
         "/ojo/oracle/v1/valdiators/validator_reward_set";
   }
 
-  // Queries a Price by asset.
-  rpc Price(QueryPriceRequest)
-      returns (QueryPriceResponse) {
-    option (google.api.http).get = "/elys-network/elys/oracle/price/{asset}";
+  rpc LatestPrices(QueryLatestPricesRequest)
+      returns (QueryLatestPricesResponse) {
+        option (google.api.http).get = "/elys-network/elys/oracle/latest_prices/{denoms}";
   }
 
-  // Queries a list of Price items.
-  rpc PriceAll(QueryPriceAllRequest)
-      returns (QueryPriceAllResponse) {
-    option (google.api.http).get = "/elys-network/elys/oracle/prices";
+  rpc AllLatestPrices(QueryAllLatestPricesRequest)
+      returns (QueryAllLatestPricesResponse) {
+        option (google.api.http).get = "/elys-network/elys/oracle/all_latest_prices";
+  }
+
+  rpc PriceHistory(QueryPriceHistoryRequest)
+      returns (QueryPriceHistoryResponse) {
+        option (google.api.http).get = "/elys-network/elys/oracle/price_history/{asset}";
   }
 
   // Queries a Pool.
@@ -341,24 +345,36 @@ message QueryValidatorRewardSetResponse {
   ValidatorRewardSet validators = 1 [(gogoproto.nullable) = false];
 }
 
-// QueryPriceRequest is the request type for the Query/PriceRequest RPC method.
-message QueryPriceRequest {
+// QueryLatestPricesRequest is the request type for the Query/LatestPrices RPC method.
+message QueryLatestPricesRequest {
+  repeated string denoms = 1;
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryLatestPricesResponse is the response type for the Query/LatestPrices RPC method.
+message QueryLatestPricesResponse {
+  repeated LatestPrice prices = 1;
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryAllLatestPricesRequest is the request type for the Query/AllLatestPrices RPC method.
+message QueryAllLatestPricesRequest {}
+
+// QueryAllLatestPricesResponse is the response type for the Query/AllLatestPrices RPC method.
+message QueryAllLatestPricesResponse {
+  repeated LatestPrice prices = 1;
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryPriceHistoryRequest is the request type for the Query/PriceHistory RPC method.
+message QueryPriceHistoryRequest {
   string asset = 1;
-  string source = 2;
-  uint64 timestamp = 3;
 }
 
-// QueryPriceResponse is the response type for the Query/PriceRequest RPC method.
-message QueryPriceResponse {
-  Price price = 1 [ (gogoproto.nullable) = false ];
-}
-
-// QueryPriceAllRequest is the request type for the Query/PriceAllRequest RPC method.
-message QueryPriceAllRequest {}
-
-// QueryPriceAllResponse is the response type for the Query/AllPriceRequest RPC method.
-message QueryPriceAllResponse {
-  repeated Price price = 1 [ (gogoproto.nullable) = false ];
+// QueryPriceHistoryResponse is the response type for the Query/PriceHistory RPC method.
+message QueryPriceHistoryResponse {
+  repeated Price prices = 1;
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
 
 // QueryPoolRequest is the request type for the Query/PoolRequest RPC method.

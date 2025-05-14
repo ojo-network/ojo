@@ -5,9 +5,9 @@ import (
 
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/osmosis-labs/osmosis/osmomath"
 
 	// appparams "github.com/ojo-network/ojo/app/params"
-	"github.com/ojo-network/ojo/util"
 	"github.com/ojo-network/ojo/util/decmath"
 	"github.com/ojo-network/ojo/x/oracle/abci"
 	"github.com/ojo-network/ojo/x/oracle/types"
@@ -91,12 +91,9 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 		s.Require().NoError(err)
 		s.Require().Equal(math.LegacyMustNewDecFromStr("1.0"), rate)
 
-		elysPrice, found := app.OracleKeeper.GetLatestPriceFromAnySource(ctx, denom.SymbolDenom)
+		elysPrice, found := app.OracleKeeper.GetAssetPrice(ctx, denom.SymbolDenom)
 		s.Require().True(found)
-		s.Require().Equal(elysPrice.Asset, denom.SymbolDenom)
-		s.Require().Equal(elysPrice.Price, rate)
-		s.Require().Equal(elysPrice.BlockHeight, util.SafeInt64ToUint64(ctx.BlockHeight()))
-		s.Require().Equal(elysPrice.Timestamp, util.SafeInt64ToUint64(ctx.BlockTime().Unix()))
+		s.Require().Equal(elysPrice, osmomath.BigDecFromDec(rate))
 	}
 
 	// Test: only val2 votes (has 39% vote power).
@@ -148,12 +145,9 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 		s.Require().NoError(err)
 		s.Require().Equal(math.LegacyMustNewDecFromStr("0.5"), rate)
 
-		elysPrice, found := app.OracleKeeper.GetLatestPriceFromAnySource(ctx, denom.SymbolDenom)
+		elysPrice, found := app.OracleKeeper.GetAssetPrice(ctx, denom.SymbolDenom)
 		s.Require().True(found)
-		s.Require().Equal(elysPrice.Asset, denom.SymbolDenom)
-		s.Require().Equal(elysPrice.Price, rate)
-		s.Require().Equal(elysPrice.BlockHeight, util.SafeInt64ToUint64(ctx.BlockHeight()))
-		s.Require().Equal(elysPrice.Timestamp, util.SafeInt64ToUint64(ctx.BlockTime().Unix()))
+		s.Require().Equal(elysPrice, osmomath.BigDecFromDec(rate))
 	}
 
 	// Test: val1 and val2 vote again
@@ -187,12 +181,9 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	s.Require().NoError(err)
 	s.Require().Equal(math.LegacyMustNewDecFromStr("1.0"), rate)
 
-	elysPrice, found := app.OracleKeeper.GetLatestPriceFromAnySource(ctx, "ojo")
+	elysPrice, found := app.OracleKeeper.GetAssetPrice(ctx, "ojo")
 	s.Require().True(found)
-	s.Require().Equal(elysPrice.Asset, "ojo")
-	s.Require().Equal(elysPrice.Price, rate)
-	s.Require().Equal(elysPrice.BlockHeight, util.SafeInt64ToUint64(ctx.BlockHeight()))
-	s.Require().Equal(elysPrice.Timestamp, util.SafeInt64ToUint64(ctx.BlockTime().Unix()))
+	s.Require().Equal(elysPrice, osmomath.BigDecFromDec(rate))
 
 	rate, err = app.OracleKeeper.GetExchangeRate(ctx, "atom")
 	s.Require().ErrorIs(err, types.ErrUnknownDenom.Wrap("atom"))

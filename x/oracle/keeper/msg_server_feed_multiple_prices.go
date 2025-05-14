@@ -28,7 +28,6 @@ func (ms msgServer) FeedMultiplePrices(
 		price := types.Price{
 			Asset:       feedPrice.Asset,
 			Price:       feedPrice.Price,
-			Source:      feedPrice.Source,
 			Provider:    msg.Creator,
 			Timestamp:   util.SafeInt64ToUint64(ctx.BlockTime().Unix()),
 			BlockHeight: util.SafeInt64ToUint64(ctx.BlockHeight()),

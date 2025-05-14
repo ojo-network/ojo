@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"sort"
 
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -330,51 +331,65 @@ func (q querier) ValidatorRewardSet(
 	return &types.QueryValidatorRewardSetResponse{}, nil
 }
 
-func (q querier) PriceAll(
-	goCtx context.Context,
-	req *types.QueryPriceAllRequest,
-) (*types.QueryPriceAllResponse, error) {
+func (q querier) LatestPrices(goCtx context.Context, req *types.QueryLatestPricesRequest) (*types.QueryLatestPricesResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	var prices []*types.LatestPrice
 
-	prices := q.GetAllPrice(ctx)
+	for _, denom := range req.Denoms {
+		tokenLatestPrice := q.GetDenomPrice(ctx, denom)
+		prices = append(prices, &types.LatestPrice{
+			Denom:       denom,
+			LatestPrice: tokenLatestPrice.Dec(),
+		})
+	}
 
-	return &types.QueryPriceAllResponse{Price: prices}, nil
+	return &types.QueryLatestPricesResponse{
+		Prices: prices,
+	}, nil
 }
 
-func (q querier) Price(goCtx context.Context, req *types.QueryPriceRequest) (*types.QueryPriceResponse, error) {
+func (q querier) AllLatestPrices(goCtx context.Context, req *types.QueryAllLatestPricesRequest) (*types.QueryAllLatestPricesResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
+
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	var prices []*types.LatestPrice
 
-	// if both source and timestamp are defined, use specific value
-	if req.Source != "" && req.Timestamp != 0 {
-		val, found := q.GetPrice(ctx, req.Asset, req.Source, req.Timestamp)
-		if !found {
-			return nil, status.Error(codes.NotFound, "not found")
-		}
-		return &types.QueryPriceResponse{Price: val}, nil
+	assetInfos := q.GetAllAssetInfo(ctx)
+
+	for _, assetInfo := range assetInfos {
+		tokenLatestPrice := q.GetDenomPrice(ctx, assetInfo.Denom)
+		prices = append(prices, &types.LatestPrice{
+			Denom:       assetInfo.Denom,
+			LatestPrice: tokenLatestPrice.Dec(),
+		})
 	}
 
-	// if source is specified use latest price from source
-	if req.Source != "" {
-		val, found := q.GetLatestPriceFromAssetAndSource(ctx, req.Asset, req.Source)
-		if !found {
-			return nil, status.Error(codes.NotFound, "not found")
-		}
-		return &types.QueryPriceResponse{Price: val}, nil
+	return &types.QueryAllLatestPricesResponse{
+		Prices: prices,
+	}, nil
+}
+
+func (q querier) PriceHistory(goCtx context.Context, req *types.QueryPriceHistoryRequest) (*types.QueryPriceHistoryResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
 
-	// find from any source if band source does not exist
-	val, found := q.GetLatestPriceFromAnySource(ctx, req.Asset)
-	if !found {
-		return nil, status.Error(codes.NotFound, "not found")
-	}
-	return &types.QueryPriceResponse{Price: val}, nil
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	prices := q.GetAllAssetPrices(ctx, req.Asset)
+
+	sort.Slice(prices, func(i, j int) bool {
+		return prices[i].Timestamp > prices[j].Timestamp
+	})
+
+	return &types.QueryPriceHistoryResponse{
+		Prices: prices,
+	}, nil
 }
 
 func (q querier) Pool(goCtx context.Context, req *types.QueryPoolRequest) (*types.QueryPoolResponse, error) {

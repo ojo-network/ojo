@@ -21,11 +21,10 @@ func (ms msgServer) CreateAssetInfo(
 	}
 
 	ms.Keeper.SetAssetInfo(ctx, types.AssetInfo{
-		Denom:      msg.Denom,
-		Display:    msg.Display,
-		BandTicker: msg.BandTicker,
-		ElysTicker: msg.ElysTicker,
-		Decimal:    msg.Decimal,
+		Denom:   msg.Denom,
+		Display: msg.Display,
+		Ticker:  msg.Ticker,
+		Decimal: msg.Decimal,
 	})
 
 	return &types.MsgCreateAssetInfoResponse{}, nil

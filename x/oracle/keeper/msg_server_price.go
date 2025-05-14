@@ -24,7 +24,6 @@ func (ms msgServer) FeedPrice(goCtx context.Context, msg *types.MsgFeedPrice) (*
 	price := types.Price{
 		Asset:       msg.FeedPrice.Asset,
 		Price:       msg.FeedPrice.Price,
-		Source:      msg.FeedPrice.Source,
 		Provider:    msg.Provider,
 		Timestamp:   util.SafeInt64ToUint64(ctx.BlockTime().Unix()),
 		BlockHeight: util.SafeInt64ToUint64(ctx.BlockHeight()),
