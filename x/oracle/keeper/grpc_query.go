@@ -317,17 +317,6 @@ func (q querier) ValidatorRewardSet(
 	goCtx context.Context,
 	req *types.QueryValidatorRewardSet,
 ) (*types.QueryValidatorRewardSetResponse, error) {
-	// if req == nil {
-	// 	return nil, status.Error(codes.InvalidArgument, "empty request")
-	// }
-
-	// ctx := sdk.UnwrapSDKContext(goCtx)
-
-	// validatorRewardSet := q.GetValidatorRewardSet(ctx)
-
-	// return &types.QueryValidatorRewardSetResponse{
-	// 	Validators: validatorRewardSet,
-	// }, nil
 	return &types.QueryValidatorRewardSetResponse{}, nil
 }
 

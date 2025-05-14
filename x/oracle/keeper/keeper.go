@@ -27,7 +27,6 @@ type Keeper struct {
 
 	accountKeeper types.AccountKeeper
 	bankKeeper    types.BankKeeper
-	distrKeeper   types.DistributionKeeper
 	StakingKeeper types.StakingKeeper
 
 	PriceFeeder *pricefeeder.PriceFeeder
@@ -45,7 +44,6 @@ func NewKeeper(
 	storeService store.KVStoreService,
 	accountKeeper types.AccountKeeper,
 	bankKeeper types.BankKeeper,
-	distrKeeper types.DistributionKeeper,
 	stakingKeeper types.StakingKeeper,
 	distrName string,
 	telemetryEnabled bool,
@@ -61,7 +59,6 @@ func NewKeeper(
 		storeService:     storeService,
 		accountKeeper:    accountKeeper,
 		bankKeeper:       bankKeeper,
-		distrKeeper:      distrKeeper,
 		StakingKeeper:    stakingKeeper,
 		PriceFeeder:      &pricefeeder.PriceFeeder{},
 		distrName:        distrName,
