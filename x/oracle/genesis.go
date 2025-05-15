@@ -37,7 +37,7 @@ func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, genState types.GenesisSt
 			panic(err)
 		}
 
-		keeper.SetMissCounter(ctx, operator, mc.MissCounter)
+		keeper.SetMissCounter(ctx, operator.String(), mc.MissCounter)
 	}
 
 	for _, ap := range genState.AggregateExchangeRatePrevotes {
@@ -55,7 +55,7 @@ func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, genState types.GenesisSt
 			panic(err)
 		}
 
-		keeper.SetAggregateExchangeRateVote(ctx, valAddr, av)
+		keeper.SetAggregateExchangeRateVote(ctx, valAddr.String(), av)
 	}
 
 	for _, hp := range genState.HistoricPrices {
@@ -109,9 +109,9 @@ func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) *types.GenesisState {
 	})
 
 	missCounters := []types.MissCounter{}
-	keeper.IterateMissCounters(ctx, func(operator sdk.ValAddress, missCounter uint64) (stop bool) {
+	keeper.IterateMissCounters(ctx, func(operator string, missCounter uint64) (stop bool) {
 		missCounters = append(missCounters, types.MissCounter{
-			ValidatorAddress: operator.String(),
+			ValidatorAddress: operator,
 			MissCounter:      missCounter,
 		})
 
@@ -130,7 +130,7 @@ func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) *types.GenesisState {
 	aggregateExchangeRateVotes := []types.AggregateExchangeRateVote{}
 	keeper.IterateAggregateExchangeRateVotes(
 		ctx,
-		func(_ sdk.ValAddress, aggregateVote types.AggregateExchangeRateVote) bool {
+		func(_ string, aggregateVote types.AggregateExchangeRateVote) bool {
 			aggregateExchangeRateVotes = append(aggregateExchangeRateVotes, aggregateVote)
 			return false
 		},

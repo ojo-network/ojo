@@ -2,11 +2,13 @@ package cli
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 
 	"github.com/ojo-network/ojo/util/cli"
@@ -32,6 +34,15 @@ func GetQueryCmd() *cobra.Command {
 		GetCmdQueryFeederDelegation(),
 		GetCmdQueryMissCounter(),
 		GetCmdQuerySlashWindow(),
+		CmdLatestPrices(),
+		CmdAllLatestPrices(),
+		CmdPriceHistory(),
+		CmdListPool(),
+		CmdShowPool(),
+		CmdListAccountedPool(),
+		CmdShowAccountedPool(),
+		CmdListAssetInfo(),
+		CmdShowAssetInfo(),
 	)
 
 	return cmd
@@ -275,5 +286,257 @@ func GetCmdQuerySlashWindow() *cobra.Command {
 	}
 
 	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+func CmdLatestPrices() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "latest-prices [denom1,denom2,...]",
+		Short: "list latest prices for multiple denoms",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+			queryClient := types.NewQueryClient(clientCtx)
+
+			denomsList := strings.Split(args[0], ",")
+
+			params := &types.QueryLatestPricesRequest{
+				Denoms: denomsList,
+			}
+
+			res, err := queryClient.LatestPrices(cmd.Context(), params)
+			return cli.PrintOrErr(res, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+func CmdAllLatestPrices() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "all-latest-prices",
+		Short: "list latest prices for all denoms",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+			queryClient := types.NewQueryClient(clientCtx)
+
+			params := &types.QueryAllLatestPricesRequest{}
+
+			res, err := queryClient.AllLatestPrices(cmd.Context(), params)
+			return cli.PrintOrErr(res, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+func CmdPriceHistory() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "price-history [asset]",
+		Short: "list price history of a given asset by descending timestamp",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+			queryClient := types.NewQueryClient(clientCtx)
+
+			params := &types.QueryPriceHistoryRequest{
+				Asset: args[0],
+			}
+
+			res, err := queryClient.PriceHistory(cmd.Context(), params)
+			return cli.PrintOrErr(res, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+func CmdListPool() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "list-pool",
+		Short:   "list all pool",
+		Example: "elysd query amm list-pool",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx := client.GetClientContextFromCmd(cmd)
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			params := &types.QueryPoolAllRequest{}
+
+			res, err := queryClient.PoolAll(cmd.Context(), params)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddPaginationFlagsToCmd(cmd, cmd.Use)
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+func CmdShowPool() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "show-pool [pool-id]",
+		Short: "shows a pool",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) (err error) {
+			clientCtx := client.GetClientContextFromCmd(cmd)
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			argPoolID, err := cast.ToUint64E(args[0])
+			if err != nil {
+				return err
+			}
+
+			params := &types.QueryPoolRequest{
+				PoolId: argPoolID,
+			}
+
+			res, err := queryClient.Pool(cmd.Context(), params)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+func CmdListAccountedPool() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "list-accounted-pool",
+		Short: "list all accounted pools",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			params := &types.QueryAccountedPoolAllRequest{}
+
+			res, err := queryClient.AccountedPoolAll(cmd.Context(), params)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddPaginationFlagsToCmd(cmd, cmd.Use)
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+func CmdShowAccountedPool() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "show-accounted-pool [index]",
+		Short: "shows a accounted-pool",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) (err error) {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			poolID, err := strconv.ParseUint(args[0], 10, 64)
+			if err != nil {
+				return err
+			}
+
+			params := &types.QueryAccountedPoolRequest{
+				PoolId: poolID,
+			}
+
+			res, err := queryClient.AccountedPool(cmd.Context(), params)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+func CmdListAssetInfo() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "list-asset-info",
+		Short: "list all assetInfo",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx := client.GetClientContextFromCmd(cmd)
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			params := &types.QueryAssetInfoAllRequest{}
+
+			res, err := queryClient.AssetInfoAll(cmd.Context(), params)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddPaginationFlagsToCmd(cmd, cmd.Use)
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+func CmdShowAssetInfo() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "show-asset-info [index]",
+		Short: "shows a assetInfo",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) (err error) {
+			clientCtx := client.GetClientContextFromCmd(cmd)
+
+			queryClient := types.NewQueryClient(clientCtx)
+			params := &types.QueryAssetInfoRequest{
+				Denom: args[0],
+			}
+
+			res, err := queryClient.AssetInfo(cmd.Context(), params)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
 	return cmd
 }
