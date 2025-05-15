@@ -126,8 +126,8 @@ func initRootCmd(
 	)
 
 	// add price feeder flags
-	rootCmd.PersistentFlags().String(pricefeeder.FlagLogLevel, "", "Log level of price feeder process")
-	rootCmd.PersistentFlags().Bool(pricefeeder.FlagEnablePriceFeeder, false, "Enable the price feeder")
+	rootCmd.PersistentFlags().String(pricefeeder.FlagLogLevel, "info", "Log level of price feeder process")
+	rootCmd.PersistentFlags().Bool(pricefeeder.FlagEnablePriceFeeder, true, "Enable the price feeder")
 }
 
 // genesisCommand builds genesis-related `simd genesis` command. Users may

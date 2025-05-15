@@ -12,7 +12,7 @@ const (
 log_level = "info"
 
 # Enable the price feeder.
-enable = false
+enable = true
 `
 )
 
@@ -34,6 +34,10 @@ func ReadConfigFromAppOpts(opts servertypes.AppOptions) (AppConfig, error) {
 		err error
 	)
 
+	cfg.LogLevel = "info"
+	cfg.Enable = true
+
+	// Override with values from AppOptions if provided
 	if v := opts.Get(FlagLogLevel); v != nil {
 		if cfg.LogLevel, err = cast.ToStringE(v); err != nil {
 			return cfg, err
