@@ -4,6 +4,7 @@ import (
 	"cosmossdk.io/errors"
 	"cosmossdk.io/math"
 	storetypes "cosmossdk.io/store/types"
+	"github.com/cosmos/cosmos-sdk/runtime"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ojo-network/ojo/util"
@@ -69,7 +70,7 @@ func (k Keeper) SetHistoricMedian(
 	blockNum uint64,
 	median math.LegacyDec,
 ) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: median})
 	store.Set(types.KeyMedian(denom, blockNum), bz)
 }
@@ -80,7 +81,7 @@ func (k Keeper) HistoricMedianDeviation(
 	ctx sdk.Context,
 	denom string,
 ) (*types.PriceStamp, error) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	blockDiff := util.SafeInt64ToUint64(ctx.BlockHeight())%k.MedianStampPeriod(ctx) + 1
 	blockNum := util.SafeInt64ToUint64(ctx.BlockHeight()) - blockDiff
 	bz := store.Get(types.KeyMedianDeviation(denom, blockNum))
@@ -147,7 +148,7 @@ func (k Keeper) SetHistoricMedianDeviation(
 	blockNum uint64,
 	medianDeviation math.LegacyDec,
 ) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: medianDeviation})
 	store.Set(types.KeyMedianDeviation(denom, blockNum), bz)
 }
@@ -258,7 +259,7 @@ func (k Keeper) IterateHistoricPrices(
 	numStamps uint,
 	handler func(math.LegacyDec) bool,
 ) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 
 	// make sure we have one zero byte to correctly separate denoms
 	prefix := util.ConcatBytes(1, types.KeyPrefixHistoricPrice, []byte(denom))
@@ -283,7 +284,7 @@ func (k Keeper) IterateHistoricMedians(
 	numStamps uint,
 	handler func(types.PriceStamp) bool,
 ) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 
 	// make sure we have one zero byte to correctly separate denoms
 	prefix := util.ConcatBytes(1, types.KeyPrefixMedian, []byte(denom))
@@ -310,7 +311,7 @@ func (k Keeper) IterateHistoricDeviations(
 	numStamps uint,
 	handler func(types.PriceStamp) bool,
 ) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 
 	// make sure we have one zero byte to correctly separate denoms
 	prefix := util.ConcatBytes(1, types.KeyPrefixMedianDeviation, []byte(denom))
@@ -345,7 +346,7 @@ func (k Keeper) SetHistoricPrice(
 	blockNum uint64,
 	exchangeRate math.LegacyDec,
 ) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: exchangeRate})
 	store.Set(types.KeyHistoricPrice(denom, blockNum), bz)
 }
@@ -357,7 +358,7 @@ func (k Keeper) DeleteHistoricPrice(
 	denom string,
 	blockNum uint64,
 ) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	store.Delete(types.KeyHistoricPrice(denom, blockNum))
 }
 
@@ -367,7 +368,7 @@ func (k Keeper) DeleteHistoricMedian(
 	denom string,
 	blockNum uint64,
 ) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	store.Delete(types.KeyMedian(denom, blockNum))
 }
 
@@ -378,7 +379,7 @@ func (k Keeper) DeleteHistoricMedianDeviation(
 	denom string,
 	blockNum uint64,
 ) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	store.Delete(types.KeyMedianDeviation(denom, blockNum))
 }
 

@@ -423,13 +423,10 @@ func New(
 
 	app.OracleKeeper = oraclekeeper.NewKeeper(
 		appCodec,
-		keys[oracletypes.ModuleName],
-		app.GetSubspace(oracletypes.ModuleName),
+		runtime.NewKVStoreService(app.keys[oracletypes.StoreKey]),
 		app.AccountKeeper,
 		app.BankKeeper,
-		app.DistrKeeper,
 		app.StakingKeeper,
-		app.GasEstimateKeeper,
 		distrtypes.ModuleName,
 		cast.ToBool(appOpts.Get("telemetry.enabled")),
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
