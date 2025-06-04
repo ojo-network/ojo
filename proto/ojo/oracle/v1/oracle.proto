@@ -78,6 +78,8 @@ message Params {
   uint64 price_expiry_time = 16;
   // Lifetime of an elys price in blocks
   uint64 life_time_in_blocks = 17;
+  // Number of blocks between updating external liquidity information.
+  uint64 external_liquidity_period = 18 [ (gogoproto.moretags) = "yaml:\"external_liquidity_period\"" ];
 }
 
 // Denom - the object to hold configurations of each denom

@@ -287,3 +287,16 @@ func (k Keeper) GetExponent(ctx sdk.Context, denom string) (uint32, error) {
 	}
 	return 0, fmt.Errorf("unable to find exponent for %s", denom)
 }
+
+// ExternalLiquidityPeriod returns the number of blocks during which external liquidity updating takes place.
+func (k Keeper) ExternalLiquidityPeriod(ctx sdk.Context) uint64 {
+	params := k.GetParams(ctx)
+	return params.ExternalLiquidityPeriod
+}
+
+// SetExternalLiquidityPeriod updates the number of blocks during which external liquidity updating takes place.
+func (k Keeper) SetExternalLiquidityPeriod(ctx sdk.Context, externalLiquidityPeriod uint64) {
+	params := k.GetParams(ctx)
+	params.ExternalLiquidityPeriod = externalLiquidityPeriod
+	k.SetParams(ctx, params)
+}

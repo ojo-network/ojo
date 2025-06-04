@@ -132,6 +132,9 @@ func (k Keeper) ValidateParamChanges(ctx sdk.Context, keys []string, changes typ
 
 		case string(types.KeyLifeTimeInBlocks):
 			params.LifeTimeInBlocks = changes.LifeTimeInBlocks
+
+		case string(types.KeyExternalLiquidityPeriod):
+			params.ExternalLiquidityPeriod = changes.ExternalLiquidityPeriod
 		}
 	}
 
@@ -193,6 +196,9 @@ func (k Keeper) ExecuteParamUpdatePlan(ctx sdk.Context, plan types.ParamUpdatePl
 
 		case string(types.KeyLifeTimeInBlocks):
 			k.SetLifeTimeInBlocks(ctx, plan.Changes.LifeTimeInBlocks)
+
+		case string(types.KeyExternalLiquidityPeriod):
+			k.SetExternalLiquidityPeriod(ctx, plan.Changes.ExternalLiquidityPeriod)
 		}
 	}
 

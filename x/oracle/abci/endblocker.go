@@ -75,6 +75,11 @@ func EndBlocker(ctx context.Context, k keeper.Keeper) error {
 			if err := k.PriceFeeder.Oracle.TickClientless(ctx); err != nil {
 				sdkCtx.Logger().Error("Error in Oracle Keeper price feeder clientless tick", "err", err)
 			}
+
+			// Execute price feeder external liquidity tick
+			if err := k.PriceFeeder.Oracle.TickExternalLiquidityClientless(ctx); err != nil {
+				sdkCtx.Logger().Error("Error in Oracle Keeper price feeder clientless external liquidity tick", "err", err)
+			}
 		}
 
 		// Update oracle module with prices.

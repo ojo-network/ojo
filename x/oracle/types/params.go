@@ -37,6 +37,7 @@ var (
 	KeyCurrencyDeviationThresholds = []byte("CurrencyDeviationThresholds")
 	KeyPriceExpiryTime             = []byte("PriceExpiryTime")
 	KeyLifeTimeInBlocks            = []byte("LifeTimeInBlocks")
+	KeyExternalLiquidityPeriod     = []byte("ExternalLiquidityPeriod")
 )
 
 // Default parameter values
@@ -50,6 +51,7 @@ const (
 	DefaultMaximumMedianStamps      = 24                  // retain for 3 days
 	DefaultPriceExpiryTime          = 86400               // retain for 1 day
 	DefaultLifeTimeInBlocks         = 1                   // retain for 1 block
+	DefaultExternalLiquidityPeriod  = BlocksPerMinute * 5 // window for 5 minutes
 )
 
 // Default parameter values
@@ -373,6 +375,7 @@ func DefaultParams() Params {
 		CurrencyDeviationThresholds: DefaultCurrencyDeviationThresholds,
 		PriceExpiryTime:             DefaultPriceExpiryTime,
 		LifeTimeInBlocks:            DefaultLifeTimeInBlocks,
+		ExternalLiquidityPeriod:     DefaultExternalLiquidityPeriod,
 	}
 }
 
@@ -470,6 +473,11 @@ func (p *Params) ParamSetPairs() paramstypes.ParamSetPairs {
 			&p.CurrencyDeviationThresholds,
 			validateCurrencyDeviationThresholds,
 		),
+		paramstypes.NewParamSetPair(
+			KeyExternalLiquidityPeriod,
+			&p.ExternalLiquidityPeriod,
+			validateExternalLiquidityPeriod,
+		),
 	}
 }
 
@@ -524,9 +532,9 @@ func (p Params) Validate() error {
 		)
 	}
 
-	if p.HistoricStampPeriod%p.VotePeriod != 0 || p.MedianStampPeriod%p.VotePeriod != 0 {
+	if p.HistoricStampPeriod%p.VotePeriod != 0 || p.MedianStampPeriod%p.VotePeriod != 0 || p.ExternalLiquidityPeriod%p.VotePeriod != 0 {
 		return ErrInvalidParamValue.Wrap(
-			"oracle parameters HistoricStampPeriod and MedianStampPeriod must be exact multiples of VotePeriod",
+			"oracle parameters HistoricStampPeriod, MedianStampPeriod, and ExternalLiquidityPeriod must be exact multiples of VotePeriod",
 		)
 	}
 
@@ -797,6 +805,19 @@ func validateCurrencyDeviationThresholds(i interface{}) error {
 		if len(c.Threshold) == 0 {
 			return ErrInvalidParamValue.Wrap("oracle parameter CurrencyDeviationThreshold must have Threshold")
 		}
+	}
+
+	return nil
+}
+
+func validateExternalLiquidityPeriod(i interface{}) error {
+	v, ok := i.(uint64)
+	if !ok {
+		return ErrInvalidParamValue.Wrapf("invalid parameter type: %T", i)
+	}
+
+	if v == 0 {
+		return ErrInvalidParamValue.Wrap("oracle parameter ExternalLiquidityPeriod must be > 0")
 	}
 
 	return nil
