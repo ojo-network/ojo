@@ -1872,13 +1872,13 @@ var (
 
 	pattern_Query_PriceHistory_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"elys-network", "elys", "oracle", "price_history", "asset"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_Pool_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"elys-network", "elys", "amm", "pool", "pool_id"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_Pool_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"elys-network", "elys", "oracle", "pool", "pool_id"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_PoolAll_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"elys-network", "elys", "amm", "pool"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_PoolAll_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"elys-network", "elys", "oracle", "pool"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_AccountedPool_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"elys-network", "elys", "accountedpool", "accounted_pool", "pool_id"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_AccountedPool_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"elys-network", "elys", "oracle", "accounted_pool", "pool_id"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_AccountedPoolAll_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"elys-network", "elys", "accountedpool", "accounted_pool"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_AccountedPoolAll_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"elys-network", "elys", "oracle", "accounted_pool"}, "", runtime.AssumeColonVerbOpt(false)))
 
 	pattern_Query_AssetInfo_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"elys-network", "elys", "oracle", "asset_info", "denom"}, "", runtime.AssumeColonVerbOpt(false)))
 

@@ -117,26 +117,26 @@ service Query {
 
   // Queries a Pool.
   rpc Pool(QueryPoolRequest) returns (QueryPoolResponse) {
-    option (google.api.http).get = "/elys-network/elys/amm/pool/{pool_id}";
+    option (google.api.http).get = "/elys-network/elys/oracle/pool/{pool_id}";
   }
 
   // Queries a list of Pool items.
   rpc PoolAll(QueryPoolAllRequest) returns (QueryPoolAllResponse) {
-    option (google.api.http).get = "/elys-network/elys/amm/pool";
+    option (google.api.http).get = "/elys-network/elys/oracle/pool";
   }
 
   // Queries an AccountedPool.
   rpc AccountedPool(QueryAccountedPoolRequest)
       returns (QueryAccountedPoolResponse) {
     option (google.api.http).get =
-        "/elys-network/elys/accountedpool/accounted_pool/{pool_id}";
+        "/elys-network/elys/oracle/accounted_pool/{pool_id}";
   }
 
   // Queries a list of AccountedPool items.
   rpc AccountedPoolAll(QueryAccountedPoolAllRequest)
       returns (QueryAccountedPoolAllResponse) {
     option (google.api.http).get =
-        "/elys-network/elys/accountedpool/accounted_pool";
+        "/elys-network/elys/oracle/accounted_pool";
   }
 
   // Queries a AssetInfo by denom.
