@@ -71,7 +71,7 @@ func (s *IntegrationTestSuite) TestQuerier_MissCounter() {
 	s.Require().NoError(err)
 	s.Require().Equal(res.MissCounter, uint64(0))
 
-	s.app.OracleKeeper.SetMissCounter(s.ctx, valAddr, missCounter)
+	s.app.OracleKeeper.SetMissCounter(s.ctx, valAddr.String(), missCounter)
 
 	res, err = s.queryClient.MissCounter(s.ctx.Context(), &types.QueryMissCounter{
 		ValidatorAddr: valAddr.String(),
@@ -126,7 +126,7 @@ func (s *IntegrationTestSuite) TestQuerier_AggregateVote() {
 		ExchangeRates: decCoins,
 		Voter:         addr.String(),
 	}
-	s.app.OracleKeeper.SetAggregateExchangeRateVote(s.ctx, valAddr, vote)
+	s.app.OracleKeeper.SetAggregateExchangeRateVote(s.ctx, valAddr.String(), vote)
 
 	res, err := s.queryClient.AggregateVote(s.ctx.Context(), &types.QueryAggregateVote{
 		ValidatorAddr: valAddr.String(),
@@ -194,9 +194,9 @@ func (s *IntegrationTestSuite) TestQuerier_AggregatePrevotesAppendVotes() {
 }
 
 func (s *IntegrationTestSuite) TestQuerier_AggregateVotesAppendVotes() {
-	s.app.OracleKeeper.SetAggregateExchangeRateVote(s.ctx, valAddr, types.NewAggregateExchangeRateVote(
+	s.app.OracleKeeper.SetAggregateExchangeRateVote(s.ctx, valAddr.String(), types.NewAggregateExchangeRateVote(
 		types.DefaultGenesisState().ExchangeRates,
-		valAddr,
+		valAddr.String(),
 	))
 
 	_, err := s.queryClient.AggregateVotes(s.ctx.Context(), &types.QueryAggregateVotes{})
@@ -288,23 +288,6 @@ func (s *IntegrationTestSuite) TestQuerier_MedianDeviations() {
 		*types.NewPriceStamp(atomMedianDeviation.Amount, "atom", blockHeight),
 	}
 	s.Require().Equal(res.MedianDeviations, expected)
-}
-
-func (s *IntegrationTestSuite) TestQuerier_ValidatorRewardSet() {
-	app, ctx := s.app, s.ctx
-	originalBlockHeight := ctx.BlockHeight()
-
-	slashWindowBlock := int64(app.OracleKeeper.SlashWindow(ctx))
-	ctx = ctx.WithBlockHeight(slashWindowBlock)
-	err := app.OracleKeeper.SetValidatorRewardSet(ctx)
-	s.Require().NoError(err)
-
-	ctx = ctx.WithBlockHeight(slashWindowBlock + 20)
-	valRewardSetResp, err := s.queryClient.ValidatorRewardSet(ctx.Context(), &types.QueryValidatorRewardSet{})
-	s.Require().NoError(err)
-	s.Require().Equal(3, len(valRewardSetResp.Validators.ValidatorSet))
-
-	ctx = ctx.WithBlockHeight(originalBlockHeight)
 }
 
 func (s *IntegrationTestSuite) TestEmptyRequest() {

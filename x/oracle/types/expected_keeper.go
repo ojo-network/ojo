@@ -4,11 +4,8 @@ import (
 	"context"
 
 	sdkmath "cosmossdk.io/math"
-	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	gasestimatetypes "github.com/ojo-network/ojo/x/gasestimate/types"
 )
 
 // StakingKeeper defines the expected interface contract defined by the x/staking
@@ -16,19 +13,7 @@ import (
 type StakingKeeper interface {
 	Validator(ctx context.Context, address sdk.ValAddress) (stakingtypes.ValidatorI, error)
 	GetBondedValidatorsByPower(ctx context.Context) ([]stakingtypes.Validator, error)
-	TotalBondedTokens(context.Context) (sdkmath.Int, error)
-	Slash(context.Context, sdk.ConsAddress, int64, int64, sdkmath.LegacyDec) (sdkmath.Int, error)
-	Jail(context.Context, sdk.ConsAddress) error
-	ValidatorsPowerStoreIterator(context context.Context) (storetypes.Iterator, error)
-	MaxValidators(context.Context) (uint32, error)
 	PowerReduction(ctx context.Context) (res sdkmath.Int)
-}
-
-// DistributionKeeper defines the expected interface contract defined by the
-// x/distribution module.
-type DistributionKeeper interface {
-	AllocateTokensToValidator(ctx context.Context, val stakingtypes.ValidatorI, tokens sdk.DecCoins) error
-	GetValidatorOutstandingRewardsCoins(ctx context.Context, val sdk.ValAddress) (sdk.DecCoins, error)
 }
 
 // AccountKeeper defines the expected interface contract defined by the x/auth
@@ -45,12 +30,4 @@ type AccountKeeper interface {
 // module.
 type BankKeeper interface {
 	GetBalance(ctx context.Context, addr sdk.AccAddress, denom string) sdk.Coin
-	GetAllBalances(ctx context.Context, addr sdk.AccAddress) sdk.Coins
-	SendCoinsFromModuleToModule(ctx context.Context, senderModule, recipientModule string, amt sdk.Coins) error
-	GetDenomMetaData(ctx context.Context, denom string) (banktypes.Metadata, bool)
-	SetDenomMetaData(ctx context.Context, denomMetaData banktypes.Metadata)
-}
-
-type GasEstimateKeeper interface {
-	GetParams(ctx sdk.Context) (params gasestimatetypes.Params)
 }

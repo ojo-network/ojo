@@ -29,11 +29,11 @@ func (v AggregateExchangeRatePrevote) String() string {
 
 func NewAggregateExchangeRateVote(
 	decCoins sdk.DecCoins,
-	voter sdk.ValAddress,
+	voter string,
 ) AggregateExchangeRateVote {
 	return AggregateExchangeRateVote{
 		ExchangeRates: decCoins,
-		Voter:         voter.String(),
+		Voter:         voter,
 	}
 }
 
@@ -69,7 +69,10 @@ func ParseExchangeRateDecCoins(tuplesStr string) (sdk.DecCoins, error) {
 
 		denom := strings.ToUpper(denomAmountStr[0])
 
-		decCoins[i] = sdk.NewDecCoinFromDec(denom, dec)
+		decCoins[i] = sdk.DecCoin{
+			Denom:  denom,
+			Amount: dec,
+		}
 
 		if _, ok := duplicateCheckMap[denom]; ok {
 			return nil, fmt.Errorf("duplicated denom %s", denom)

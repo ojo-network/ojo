@@ -2,6 +2,7 @@ package keeper
 
 import (
 	storetypes "cosmossdk.io/store/types"
+	"github.com/cosmos/cosmos-sdk/runtime"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ojo-network/ojo/x/oracle/types"
@@ -13,7 +14,7 @@ func (k Keeper) IterateAllHistoricPrices(
 	ctx sdk.Context,
 	handler func(types.PriceStamp) bool,
 ) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	iter := storetypes.KVStorePrefixIterator(store, types.KeyPrefixHistoricPrice)
 	defer iter.Close()
 
@@ -48,7 +49,7 @@ func (k Keeper) IterateAllMedianPrices(
 	ctx sdk.Context,
 	handler func(types.PriceStamp) bool,
 ) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	iter := storetypes.KVStorePrefixIterator(store, types.KeyPrefixMedian)
 	defer iter.Close()
 
@@ -84,7 +85,7 @@ func (k Keeper) IterateAllMedianDeviationPrices(
 	ctx sdk.Context,
 	handler func(types.PriceStamp) bool,
 ) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	iter := storetypes.KVStorePrefixIterator(store, types.KeyPrefixMedianDeviation)
 	defer iter.Close()
 

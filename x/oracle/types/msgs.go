@@ -267,6 +267,11 @@ func (msg MsgLegacyGovUpdateParams) ValidateBasic() error {
 				return err
 			}
 
+		case string(KeyExternalLiquidityPeriod):
+			if err := validateExternalLiquidityPeriod(msg.Changes.ExternalLiquidityPeriod); err != nil {
+				return err
+			}
+
 		default:
 			return fmt.Errorf("%s is not an existing oracle param key", key)
 		}

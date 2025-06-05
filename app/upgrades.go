@@ -36,7 +36,7 @@ func (app App) RegisterUpgradeHandlers() {
 		panic(err)
 	}
 
-	app.registerUpgrade0_1_4(upgradeInfo)
+	// app.registerUpgrade0_1_4(upgradeInfo)
 	app.registerUpgrade0_2_0(upgradeInfo)
 	app.registerUpgrade0_2_1(upgradeInfo)
 	app.registerUpgrade0_2_2(upgradeInfo)
@@ -52,22 +52,22 @@ func (app App) RegisterUpgradeHandlers() {
 	app.registerUpgrade0_5_1(upgradeInfo)
 }
 
-// performs upgrade from v0.1.3 to v0.1.4
-func (app *App) registerUpgrade0_1_4(_ upgradetypes.Plan) {
-	const planName = "v0.1.4"
-	app.UpgradeKeeper.SetUpgradeHandler(planName,
-		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			sdkCtx := sdk.UnwrapSDKContext(ctx)
-			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
-			upgrader := oraclekeeper.NewMigrator(&app.OracleKeeper)
-			err := upgrader.MigrateValidatorSet(sdkCtx)
-			if err != nil {
-				panic(err)
-			}
-			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
-		},
-	)
-}
+// // performs upgrade from v0.1.3 to v0.1.4
+// func (app *App) registerUpgrade0_1_4(_ upgradetypes.Plan) {
+// 	const planName = "v0.1.4"
+// 	app.UpgradeKeeper.SetUpgradeHandler(planName,
+// 		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+// 			sdkCtx := sdk.UnwrapSDKContext(ctx)
+// 			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
+// 			upgrader := oraclekeeper.NewMigrator(&app.OracleKeeper)
+// 			err := upgrader.MigrateValidatorSet(sdkCtx)
+// 			if err != nil {
+// 				panic(err)
+// 			}
+// 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+// 		},
+// 	)
+// }
 
 //nolint: all
 func (app *App) registerUpgrade0_2_0(upgradeInfo upgradetypes.Plan) {

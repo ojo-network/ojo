@@ -39,7 +39,7 @@ func (k *Keeper) RecordEndBlockMetrics(ctx sdk.Context) {
 		return
 	}
 
-	k.IterateMissCounters(ctx, func(operator sdk.ValAddress, missCounter uint64) bool {
+	k.IterateMissCounters(ctx, func(operator string, missCounter uint64) bool {
 		metrics.RecordMissCounter(operator, missCounter)
 		return false
 	})

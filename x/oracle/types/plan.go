@@ -97,6 +97,11 @@ func (p ParamUpdatePlan) ValidateBasic() error {
 				return err
 			}
 
+		case string(KeyExternalLiquidityPeriod):
+			if err := validateExternalLiquidityPeriod(p.Changes.ExternalLiquidityPeriod); err != nil {
+				return err
+			}
+
 		default:
 			return fmt.Errorf("%s is not an existing oracle param key", key)
 		}

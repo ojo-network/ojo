@@ -1,10 +1,12 @@
 package abci_test
 
 import (
+	"time"
+
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/osmosis-labs/osmosis/osmomath"
 
-	appparams "github.com/ojo-network/ojo/app/params"
 	"github.com/ojo-network/ojo/util/decmath"
 	"github.com/ojo-network/ojo/x/oracle/abci"
 	"github.com/ojo-network/ojo/x/oracle/types"
@@ -26,7 +28,11 @@ func createVotes(hash string, val sdk.ValAddress, rates sdk.DecCoins, blockHeigh
 func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	app, ctx := s.app, s.ctx
 	valAddr1, valAddr2, valAddr3 := s.keys[0].ValAddress, s.keys[1].ValAddress, s.keys[2].ValAddress
+	currTime := time.Now()
+	timeDiff := time.Second * 5
 	ctx = ctx.WithBlockHeight(0)
+	ctx = ctx.WithBlockTime(currTime)
+	currTime = currTime.Add(timeDiff)
 	preVoteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx) / 2)
 	voteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx)/2 + 1)
 
@@ -71,9 +77,11 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
+	ctx = ctx.WithBlockTime(currTime)
+	currTime = currTime.Add(timeDiff)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1.String(), val1Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2.String(), val2Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3.String(), val3Votes)
 	err := abci.EndBlocker(ctx, app.OracleKeeper)
 	s.Require().NoError(err)
 
@@ -81,12 +89,18 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 		rate, err := app.OracleKeeper.GetExchangeRate(ctx, denom.SymbolDenom)
 		s.Require().NoError(err)
 		s.Require().Equal(math.LegacyMustNewDecFromStr("1.0"), rate)
+
+		elysPrice, found := app.OracleKeeper.GetAssetPrice(ctx, denom.SymbolDenom)
+		s.Require().True(found)
+		s.Require().Equal(elysPrice, osmomath.BigDecFromDec(rate))
 	}
 
 	// Test: only val2 votes (has 39% vote power).
 	// Total voting power per denom must be bigger or equal than 40% (see SetupTest).
 	// So if only val2 votes, we won't have any prices next block.
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
+	ctx = ctx.WithBlockTime(currTime)
+	currTime = currTime.Add(timeDiff)
 	h = uint64(ctx.BlockHeight())
 	val2PreVotes.SubmitBlock = h
 
@@ -94,7 +108,9 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
+	ctx = ctx.WithBlockTime(currTime)
+	currTime = currTime.Add(timeDiff)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2.String(), val2Votes)
 	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
@@ -106,6 +122,8 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	// Test: val2 and val3 votes.
 	// now we will have 40% of the power, so now we should have prices
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
+	ctx = ctx.WithBlockTime(currTime)
+	currTime = currTime.Add(timeDiff)
 	h = uint64(ctx.BlockHeight())
 	val2PreVotes.SubmitBlock = h
 	val3PreVotes.SubmitBlock = h
@@ -115,19 +133,27 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
+	ctx = ctx.WithBlockTime(currTime)
+	currTime = currTime.Add(timeDiff)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2.String(), val2Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3.String(), val3Votes)
 	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		rate, err := app.OracleKeeper.GetExchangeRate(ctx, denom.SymbolDenom)
 		s.Require().NoError(err)
 		s.Require().Equal(math.LegacyMustNewDecFromStr("0.5"), rate)
+
+		elysPrice, found := app.OracleKeeper.GetAssetPrice(ctx, denom.SymbolDenom)
+		s.Require().True(found)
+		s.Require().Equal(elysPrice, osmomath.BigDecFromDec(rate))
 	}
 
 	// Test: val1 and val2 vote again
 	// umee has 69.9% power, and atom has 30%, so we should have price for umee, but not for atom
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
+	ctx = ctx.WithBlockTime(currTime)
+	currTime = currTime.Add(timeDiff)
 	h = uint64(ctx.BlockHeight())
 	val1PreVotes.SubmitBlock = h
 	val2PreVotes.SubmitBlock = h
@@ -144,179 +170,23 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
+	ctx = ctx.WithBlockTime(currTime)
+	currTime = currTime.Add(timeDiff)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1.String(), val1Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2.String(), val2Votes)
 	abci.EndBlocker(ctx, app.OracleKeeper)
 
 	rate, err := app.OracleKeeper.GetExchangeRate(ctx, "ojo")
 	s.Require().NoError(err)
 	s.Require().Equal(math.LegacyMustNewDecFromStr("1.0"), rate)
+
+	elysPrice, found := app.OracleKeeper.GetAssetPrice(ctx, "ojo")
+	s.Require().True(found)
+	s.Require().Equal(elysPrice, osmomath.BigDecFromDec(rate))
+
 	rate, err = app.OracleKeeper.GetExchangeRate(ctx, "atom")
 	s.Require().ErrorIs(err, types.ErrUnknownDenom.Wrap("atom"))
 	s.Require().Equal(math.LegacyZeroDec(), rate)
-}
-
-func (s *IntegrationTestSuite) TestEndBlockerValidatorRewards() {
-	app, ctx := s.app, s.ctx
-	valAddr1, valAddr2, valAddr3 := s.keys[0].ValAddress, s.keys[1].ValAddress, s.keys[2].ValAddress
-	preVoteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx) / 2)
-	voteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx)/2 + 1)
-
-	// start test in new slash window
-	ctx = ctx.WithBlockHeight(int64(app.OracleKeeper.SlashWindow(ctx)))
-	abci.EndBlocker(ctx, app.OracleKeeper)
-
-	denomList := types.DenomList{
-		{
-			BaseDenom:   appparams.BondDenom,
-			SymbolDenom: appparams.DisplayDenom,
-			Exponent:    uint32(6),
-		},
-		{
-			BaseDenom:   "ibc/C4CFF46FD6DE35CA4CF4CE031E643C8FDC9BA4B99AE598E9B0ED98FE3A2319F9",
-			SymbolDenom: "atom",
-			Exponent:    uint32(6),
-		},
-	}
-	app.OracleKeeper.SetAcceptList(ctx, denomList)
-	app.OracleKeeper.SetMandatoryList(ctx, denomList)
-
-	var (
-		val1DecCoins sdk.DecCoins
-		val2DecCoins sdk.DecCoins
-		val3DecCoins sdk.DecCoins
-	)
-	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
-		val1DecCoins = append(val1DecCoins, sdk.DecCoin{
-			Denom:  denom.SymbolDenom,
-			Amount: math.LegacyMustNewDecFromStr("0.6"),
-		})
-		val2DecCoins = append(val2DecCoins, sdk.DecCoin{
-			Denom:  denom.SymbolDenom,
-			Amount: math.LegacyMustNewDecFromStr("0.6"),
-		})
-		val3DecCoins = append(val3DecCoins, sdk.DecCoin{
-			Denom:  denom.SymbolDenom,
-			Amount: math.LegacyMustNewDecFromStr("0.6"),
-		})
-	}
-
-	h := uint64(ctx.BlockHeight())
-	val1PreVotes, val1Votes := createVotes("hash1", valAddr1, val1DecCoins, h)
-	val2PreVotes, val2Votes := createVotes("hash2", valAddr2, val2DecCoins, h)
-	val3PreVotes, val3Votes := createVotes("hash3", valAddr3, val3DecCoins, h)
-	// validator 1, 2, and 3 vote on both currencies so all have 0 misses
-	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr1, val1PreVotes)
-	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
-	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr3, val3PreVotes)
-	abci.EndBlocker(ctx, app.OracleKeeper)
-
-	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
-	abci.EndBlocker(ctx, app.OracleKeeper)
-
-	currRewards1, err := app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1)
-	s.Require().NoError(err)
-	currRewards2, err := app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr2)
-	s.Require().NoError(err)
-	currRewards3, err := app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr3)
-	s.Require().NoError(err)
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 141), currRewards1.Rewards[0])
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 141), currRewards2.Rewards[0])
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 141), currRewards3.Rewards[0])
-
-	// update prevotes' block
-	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
-	val1PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
-	val2PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
-	val3PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
-
-	// validator 1 and 3 votes on both currencies to end up with 0 misses
-	// validator 2 votes on 1 currency to end up with 1 misses
-	val1DecCoins = sdk.DecCoins{
-		sdk.DecCoin{
-			Denom:  "ojo",
-			Amount: math.LegacyMustNewDecFromStr("0.6"),
-		},
-		sdk.DecCoin{
-			Denom:  "atom",
-			Amount: math.LegacyMustNewDecFromStr("0.6"),
-		},
-	}
-	val2DecCoins = sdk.DecCoins{
-		sdk.DecCoin{
-			Denom:  "ojo",
-			Amount: math.LegacyMustNewDecFromStr("0.6"),
-		},
-	}
-	val3DecCoins = sdk.DecCoins{
-		sdk.DecCoin{
-			Denom:  "ojo",
-			Amount: math.LegacyMustNewDecFromStr("0.6"),
-		},
-		sdk.DecCoin{
-			Denom:  "atom",
-			Amount: math.LegacyMustNewDecFromStr("0.6"),
-		},
-	}
-	val1Votes.ExchangeRates = val1DecCoins
-	val2Votes.ExchangeRates = val2DecCoins
-	val3Votes.ExchangeRates = val3DecCoins
-
-	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr1, val1PreVotes)
-	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
-	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr3, val3PreVotes)
-	abci.EndBlocker(ctx, app.OracleKeeper)
-
-	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
-	abci.EndBlocker(ctx, app.OracleKeeper)
-
-	currRewards1, err = app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1)
-	s.Require().NoError(err)
-	currRewards2, err = app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr2)
-	s.Require().NoError(err)
-	currRewards3, err = app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr3)
-	s.Require().NoError(err)
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 235), currRewards1.Rewards[0])
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 232), currRewards2.Rewards[0])
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 235), currRewards3.Rewards[0])
-
-	// update prevotes' block
-	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
-	val1PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
-	val2PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
-
-	// validator 1, 2, and 3 miss both currencies so validator 1 and 3 has 2 misses and
-	// validator 2 has 3 misses
-	val1Votes.ExchangeRates = sdk.DecCoins{}
-	val2Votes.ExchangeRates = sdk.DecCoins{}
-	val3Votes.ExchangeRates = sdk.DecCoins{}
-
-	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr1, val1PreVotes)
-	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
-	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr3, val3PreVotes)
-	abci.EndBlocker(ctx, app.OracleKeeper)
-
-	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
-	abci.EndBlocker(ctx, app.OracleKeeper)
-
-	currRewards1, err = app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr1)
-	s.Require().NoError(err)
-	currRewards2, err = app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr2)
-	s.Require().NoError(err)
-	currRewards3, err = app.DistrKeeper.GetValidatorCurrentRewards(ctx, valAddr3)
-	s.Require().NoError(err)
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 329), currRewards1.Rewards[0])
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 320), currRewards2.Rewards[0])
-	s.Require().Equal(sdk.NewInt64DecCoin("uojo", 329), currRewards3.Rewards[0])
 }
 
 var exchangeRates = map[string][]math.LegacyDec{
@@ -372,7 +242,7 @@ func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 				ExchangeRates: decCoins,
 				Voter:         valAddr1.String(),
 			}
-			app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, vote)
+			app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1.String(), vote)
 			abci.EndBlocker(ctx, app.OracleKeeper)
 		}
 
