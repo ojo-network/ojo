@@ -146,50 +146,6 @@ Key points about governance messages:
 
 ## Updating Oracle Parameters
 
-To update oracle parameters through governance, you can use the `GovUpdateParams` message. Here's a complete example:
-
-```go
-package main
-
-import (
-    "context"
-    "time"
-
-    sdk "github.com/cosmos/cosmos-sdk/types"
-    "github.com/ojo-network/ojo/x/oracle/types"
-)
-
-func submitParamUpdateProposal() error {
-    // Create the parameter update plan
-    plan := types.ParamUpdatePlan{
-        Keys: []string{
-            string(types.KeyVotePeriod),
-            string(types.KeyVoteThreshold),
-        },
-        Height: 1000000, // Block height at which the update should occur
-        Changes: types.Params{
-            VotePeriod:    12,              // Number of blocks in a voting period
-            VoteThreshold: sdk.NewDec(50),  // 50% vote threshold
-        },
-    }
-
-    // Create the governance message
-    msg := types.NewMsgGovUpdateParams(
-        "ojo1...",  // Authority (governance module account)
-        "Update Oracle Parameters",
-        "This proposal updates the vote period and threshold for the oracle module",
-        plan,
-    )
-
-    // Submit the proposal using the governance module
-    // Note: This is a simplified example. In practice, you would:
-    // 1. Create a governance proposal
-    // 2. Submit it through the governance module
-    // 3. Wait for the voting period
-    // 4. If passed, the changes will be applied at the specified height
-}
-```
-
 CLI example:
 ```bash
 # Submit a parameter update proposal
@@ -212,66 +168,6 @@ ojod tx gov submit-proposal \
 
 ### Adding New Assets
 
-To add new assets to the oracle through governance, use the `GovAddDenoms` message:
-
-```go
-func submitAddDenomsProposal() error {
-    // Create the denom list
-    denoms := types.DenomList{
-        {
-            BaseDenom:   "uatom",
-            SymbolDenom: "ATOM",
-            Exponent:    6,
-        },
-        {
-            BaseDenom:   "ubtc",
-            SymbolDenom: "BTC",
-            Exponent:    8,
-        },
-    }
-
-    // Create currency pair providers
-    providers := types.CurrencyPairProvidersList{
-        {
-            BaseDenom: "ATOM",
-            Providers: []string{"binance", "coinbase", "kraken"},
-        },
-        {
-            BaseDenom: "BTC",
-            Providers: []string{"binance", "coinbase", "kraken"},
-        },
-    }
-
-    // Create deviation thresholds
-    thresholds := types.CurrencyDeviationThresholdList{
-        {
-            BaseDenom: "ATOM",
-            Threshold: sdk.NewDec(1), // 1% threshold
-        },
-        {
-            BaseDenom: "BTC",
-            Threshold: sdk.NewDec(1), // 1% threshold
-        },
-    }
-
-    // Create the governance message
-    msg := types.NewMsgGovAddDenoms(
-        "ojo1...",  // Authority
-        "Add New Assets",
-        "Add ATOM and BTC to the oracle",
-        1000000,    // Height
-        denoms,
-        true,       // Mandatory
-        sdk.NewDec(2), // Reward band
-        providers,
-        thresholds,
-    )
-
-    // Submit the proposal
-    // Implementation details same as above
-}
-```
-
 CLI example:
 ```bash
 ojod tx gov submit-proposal \
@@ -284,7 +180,7 @@ ojod tx gov submit-proposal \
     --mandatory=true \
     --reward-band=0.02 \
     --currency-pair-providers='[{"base_denom":"ATOM","providers":["binance","coinbase","kraken"]},{"base_denom":"BTC","providers":["binance","coinbase","kraken"]}]' \
-    --currency-deviation-thresholds='[{"base_denom":"ATOM","threshold":"0.01"},{"base_denom":"BTC","threshold":"0.01"}]' \
+    --currency-deviation-thresholds='[{"base_denom":"ATOM","threshold":"2"},{"base_denom":"BTC","threshold":"2"}]' \
     --from=<key_name> \
     --chain-id=<chain_id> \
     --gas=auto \
@@ -292,32 +188,6 @@ ojod tx gov submit-proposal \
 ```
 
 ## Managing Currency Pair Providers
-
-To remove currency pair providers, use the `GovRemoveCurrencyPairProviders` message:
-
-```go
-func submitRemoveProvidersProposal() error {
-    // Create the provider list to remove
-    providers := types.CurrencyPairProvidersList{
-        {
-            BaseDenom: "ATOM",
-            Providers: []string{"binance"},
-        },
-    }
-
-    // Create the governance message
-    msg := types.NewMsgGovRemoveCurrencyPairProviders(
-        "ojo1...",  // Authority
-        "Remove Currency Pair Provider",
-        "Remove Binance as a provider for ATOM",
-        1000000,    // Height
-        providers,
-    )
-
-    // Submit the proposal
-    // Implementation details same as above
-}
-```
 
 CLI example:
 ```bash
@@ -336,24 +206,6 @@ ojod tx gov submit-proposal \
 
 ## Managing Currency Deviation Thresholds
 
-To remove currency deviation thresholds, use the `GovRemoveCurrencyDeviationThresholds` message:
-
-```go
-func submitRemoveThresholdsProposal() error {
-    // Create the governance message
-    msg := types.NewMsgGovRemoveCurrencyDeviationThresholds(
-        "ojo1...",  // Authority
-        "Remove Currency Deviation Thresholds",
-        "Remove deviation thresholds for ATOM",
-        1000000,    // Height
-        []string{"ATOM"},
-    )
-
-    // Submit the proposal
-    // Implementation details same as above
-}
-```
-
 CLI example:
 ```bash
 ojod tx gov submit-proposal \
@@ -370,23 +222,6 @@ ojod tx gov submit-proposal \
 ```
 
 ## Canceling Parameter Updates
-
-If you need to cancel a scheduled parameter update, use the `GovCancelUpdateParamPlan` message:
-
-```go
-func submitCancelUpdateProposal() error {
-    // Create the governance message
-    msg := types.NewMsgGovCancelUpdateParamPlan(
-        "ojo1...",  // Authority
-        "Cancel Parameter Update",
-        "Cancel the scheduled parameter update at height 1000000",
-        1000000,    // Height of the update to cancel
-    )
-
-    // Submit the proposal
-    // Implementation details same as above
-}
-```
 
 CLI example:
 ```bash
@@ -459,7 +294,7 @@ Here are some example JSON proposal files that demonstrate different oracle gove
             "currency_deviation_thresholds": [
                 {
                     "base_denom": "ATOM",
-                    "threshold": "0.02"
+                    "threshold": "2"
                 }
             ]
         }
@@ -469,7 +304,7 @@ Here are some example JSON proposal files that demonstrate different oracle gove
 }
 ```
 
-Key components in this example:
+Key components:
 - Configures ATOM with both direct price feeds and external liquidity sources
 - Uses Binance as the external liquidity provider with pool ID 1
 - Sets up proxy denominations for price calculations (ATOM→USDC)
