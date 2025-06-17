@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"cosmossdk.io/math"
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/runtime"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -68,12 +69,12 @@ func (k Keeper) GetAllAssetPrices(ctx sdk.Context, asset string) (list []*types.
 	return
 }
 
-func (k Keeper) GetAssetPrice(ctx sdk.Context, asset string) (osmomath.BigDec, bool) {
+func (k Keeper) GetAssetPrice(ctx sdk.Context, asset string) (math.LegacyDec, bool) {
 	val, found := k.getLatestPrice(ctx, asset)
 	if found {
-		return osmomath.BigDecFromDec(val.Price), true
+		return val.Price, true
 	}
-	return osmomath.BigDec{}, false
+	return math.LegacyDec{}, false
 }
 
 func (k Keeper) GetDenomPrice(ctx sdk.Context, denom string) osmomath.BigDec {
@@ -85,7 +86,10 @@ func (k Keeper) GetDenomPrice(ctx sdk.Context, denom string) osmomath.BigDec {
 	if !found {
 		return osmomath.ZeroBigDec()
 	}
-	return price.Quo(util.Pow10(info.Decimal))
+	if info.Decimal <= 18 {
+		return osmomath.BigDecFromDec(price).QuoInt64(util.Pow10Int64(info.Decimal))
+	}
+	return osmomath.BigDecFromDec(price).Quo(util.Pow10(info.Decimal))
 }
 
 // SetAssetInfo set a specific assetInfo in the store from its index

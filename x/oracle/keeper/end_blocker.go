@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"sort"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ojo-network/ojo/util"
 	"github.com/ojo-network/ojo/util/metrics"
@@ -24,6 +26,23 @@ func (k *Keeper) PruneAllPrices(ctx sdk.Context) {
 				k.PruneMediansBeforeBlock(ctx, blockHeight-pruneMedianPeriod)
 				k.PruneMedianDeviationsBeforeBlock(ctx, blockHeight-pruneMedianPeriod)
 			}
+		}
+	}
+}
+
+// PruneElysPrices prunes elys prices for a given asset except the latest one.
+func (k *Keeper) PruneElysPrices(ctx sdk.Context, asset string) {
+	allAssetPrice := k.GetAllAssetPrices(ctx, asset)
+	total := len(allAssetPrice)
+
+	sort.Slice(allAssetPrice, func(i, j int) bool {
+		return allAssetPrice[i].Timestamp < allAssetPrice[j].Timestamp
+	})
+
+	for i, price := range allAssetPrice {
+		// We don't remove the last element
+		if i < total-1 {
+			k.RemovePrice(ctx, price.Asset, price.Timestamp)
 		}
 	}
 }

@@ -65,6 +65,7 @@ func EndBlocker(ctx context.Context, k keeper.Keeper) error {
 				if assetInfo.Display == "USDC" {
 					usdcDenom = assetInfo.Denom
 				}
+				k.PruneElysPrices(sdkCtx, assetInfo.Display)
 			}
 
 			k.PriceFeeder.Oracle.AmmPools = ammPoolsMap
@@ -91,17 +92,6 @@ func EndBlocker(ctx context.Context, k keeper.Keeper) error {
 	}
 
 	k.PruneAllPrices(sdkCtx)
-
-	// Prune expired elys prices
-	for _, price := range k.GetAllPrice(sdkCtx) {
-		if price.Timestamp+params.PriceExpiryTime < util.SafeInt64ToUint64(sdkCtx.BlockTime().Unix()) {
-			k.RemovePrice(sdkCtx, price.Asset, price.Timestamp)
-		}
-
-		if price.BlockHeight+params.LifeTimeInBlocks < util.SafeInt64ToUint64(sdkCtx.BlockHeight()) {
-			k.RemovePrice(sdkCtx, price.Asset, price.Timestamp)
-		}
-	}
 
 	return nil
 }
