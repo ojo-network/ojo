@@ -7,7 +7,6 @@ import (
 	cometabci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	relayerClient "github.com/ojo-network/ojo-evm/relayer/relayer/client"
 	"github.com/ojo-network/ojo/x/oracle/keeper"
 	"github.com/ojo-network/ojo/x/oracle/types"
 	"github.com/ojo-network/price-feeder/oracle"
@@ -82,29 +81,32 @@ func (h *VoteExtensionHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 			}
 		}
 
-		gasEstimates := []types.GasEstimate{}
-		estimateParams := h.oracleKeeper.GasEstimateKeeper.GetParams(ctx)
-		for _, contract := range estimateParams.ContractRegistry {
-			resp, err := relayerClient.EstimateGasFee(
-				contract.Network,
-				contract.Address,
-				estimateParams.GasLimit,
-				estimateParams.GasAdjustment,
-			)
-			if err != nil {
-				h.logger.Error("error estimating gas fee", "error", err)
-				continue
+		externalLiquidityMsg := []types.ExternalLiquidity{}
+		externalLiquidity := h.oracleKeeper.PriceFeeder.Oracle.GetExternalLiquidity()
+
+		for _, el := range externalLiquidity {
+			amountDepthInfo := []types.AssetAmountDepth{
+				{
+					Asset:  el.BaseAsset,
+					Amount: el.BaseAmount,
+					Depth:  el.BaseDepth,
+				},
+				{
+					Asset:  el.QuoteAsset,
+					Amount: el.QuoteAmount,
+					Depth:  el.QuoteDepth,
+				},
 			}
-			gasEstimates = append(gasEstimates, types.GasEstimate{
-				GasEstimation: resp.Int64(),
-				Network:       contract.Network,
+			externalLiquidityMsg = append(externalLiquidityMsg, types.ExternalLiquidity{
+				PoolId:          el.PoolID,
+				AmountDepthInfo: amountDepthInfo,
 			})
 		}
 
 		voteExt := types.OracleVoteExtension{
-			Height:        req.Height,
-			ExchangeRates: filteredDecCoins,
-			GasEstimates:  gasEstimates,
+			Height:            req.Height,
+			ExchangeRates:     filteredDecCoins,
+			ExternalLiquidity: externalLiquidityMsg,
 		}
 
 		bz, err := voteExt.Marshal()
@@ -128,7 +130,7 @@ func (h *VoteExtensionHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 // VerifyVoteExtensionHandler validates the OracleVoteExtension created by the ExtendVoteHandler. It
 // verifies that the vote extension can unmarshal correctly and is for the correct height.
 func (h *VoteExtensionHandler) VerifyVoteExtensionHandler() sdk.VerifyVoteExtensionHandler {
-	return func(ctx sdk.Context, req *cometabci.RequestVerifyVoteExtension) (
+	return func(_ sdk.Context, req *cometabci.RequestVerifyVoteExtension) (
 		*cometabci.ResponseVerifyVoteExtension,
 		error,
 	) {

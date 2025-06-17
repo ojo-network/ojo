@@ -9,27 +9,26 @@ import (
 	cmtproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 
 	oraclekeeper "github.com/ojo-network/ojo/x/oracle/keeper"
 	oracletypes "github.com/ojo-network/ojo/x/oracle/types"
 )
 
 type ProposalHandler struct {
-	logger        log.Logger
-	oracleKeeper  oraclekeeper.Keeper
-	stakingKeeper *stakingkeeper.Keeper
+	logger       log.Logger
+	oracleKeeper oraclekeeper.Keeper
+	valStore     baseapp.ValidatorStore
 }
 
 func NewProposalHandler(
 	logger log.Logger,
 	oracleKeeper oraclekeeper.Keeper,
-	stakingKeeper *stakingkeeper.Keeper,
+	valStore baseapp.ValidatorStore,
 ) *ProposalHandler {
 	return &ProposalHandler{
-		logger:        logger,
-		oracleKeeper:  oracleKeeper,
-		stakingKeeper: stakingKeeper,
+		logger:       logger,
+		oracleKeeper: oracleKeeper,
+		valStore:     valStore,
 	}
 }
 
@@ -46,7 +45,7 @@ func (h *ProposalHandler) PrepareProposalHandler() sdk.PrepareProposalHandler {
 			return nil, err
 		}
 
-		err := baseapp.ValidateVoteExtensions(ctx, h.stakingKeeper, req.Height, ctx.ChainID(), req.LocalLastCommit)
+		err := baseapp.ValidateVoteExtensions(ctx, h.valStore, req.Height, ctx.ChainID(), req.LocalLastCommit)
 		if err != nil {
 			return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, err
 		}
@@ -68,19 +67,19 @@ func (h *ProposalHandler) PrepareProposalHandler() sdk.PrepareProposalHandler {
 			if err != nil {
 				return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, err
 			}
+			externalLiquidty, err := h.generateExternalLiquidity(ctx, req.LocalLastCommit)
+			if err != nil {
+				return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, err
+			}
 			extendedCommitInfoBz, err := req.LocalLastCommit.Marshal()
 			if err != nil {
 				return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, err
 			}
 
-			medianGasEstimates, err := h.generateMedianGasEstimates(ctx, req.LocalLastCommit)
-			if err != nil {
-				return &cometabci.ResponsePrepareProposal{Txs: make([][]byte, 0)}, err
-			}
 			injectedVoteExtTx := oracletypes.InjectedVoteExtensionTx{
 				ExchangeRateVotes:  exchangeRateVotes,
+				ExternalLiquidity:  externalLiquidty,
 				ExtendedCommitInfo: extendedCommitInfoBz,
-				GasEstimateMedians: medianGasEstimates,
 			}
 
 			bz, err := injectedVoteExtTx.Marshal()
@@ -158,7 +157,7 @@ func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 
 			err := baseapp.ValidateVoteExtensions(
 				ctx,
-				h.stakingKeeper,
+				h.valStore,
 				req.Height,
 				ctx.ChainID(),
 				extendedCommitInfo,
@@ -176,12 +175,13 @@ func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 			if err := h.verifyExchangeRateVotes(injectedVoteExtTx.ExchangeRateVotes, exchangeRateVotes); err != nil {
 				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
 			}
-			// Verify the proposer's gas estimation by computing the same median.
-			gasEstimateMedians, err := h.generateMedianGasEstimates(ctx, extendedCommitInfo)
+
+			// Verify the proposer's external liquidity by computing the same.
+			externalLiquidity, err := h.generateExternalLiquidity(ctx, extendedCommitInfo)
 			if err != nil {
 				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
 			}
-			if err := h.verifyMedianGasEstimations(injectedVoteExtTx.GasEstimateMedians, gasEstimateMedians); err != nil {
+			if err := h.verifyExternalLiquidity(injectedVoteExtTx.ExternalLiquidity, externalLiquidity); err != nil {
 				return &cometabci.ResponseProcessProposal{Status: cometabci.ResponseProcessProposal_REJECT}, err
 			}
 		}
@@ -197,7 +197,7 @@ func (h *ProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 }
 
 func (h *ProposalHandler) generateExchangeRateVotes(
-	ctx sdk.Context,
+	_ sdk.Context,
 	ci cometabci.ExtendedCommitInfo,
 ) (votes []oracletypes.AggregateExchangeRateVote, err error) {
 	for _, vote := range ci.Votes {
@@ -222,20 +222,8 @@ func (h *ProposalHandler) generateExchangeRateVotes(
 			)
 			return nil, err
 		}
-		val, err := h.stakingKeeper.GetValidatorByConsAddr(ctx, valConsAddr)
-		if err != nil {
-			h.logger.Error(
-				"failed to get consensus validator from staking keeper",
-				"err", err,
-			)
-			return nil, err
-		}
-		valAddr, err := sdk.ValAddressFromBech32(val.OperatorAddress)
-		if err != nil {
-			return nil, err
-		}
 
-		exchangeRateVote := oracletypes.NewAggregateExchangeRateVote(voteExt.ExchangeRates, valAddr)
+		exchangeRateVote := oracletypes.NewAggregateExchangeRateVote(voteExt.ExchangeRates, valConsAddr.String())
 		votes = append(votes, exchangeRateVote)
 	}
 
@@ -260,6 +248,10 @@ func (h *ProposalHandler) verifyExchangeRateVotes(
 		generatedVote := generatedVotes[i]
 
 		if injectedVote.Voter != generatedVote.Voter || !injectedVote.ExchangeRates.Equal(generatedVote.ExchangeRates) {
+			h.logger.Info("injected", "voter %s", injectedVote.Voter)
+			h.logger.Info("generated", "voter %s", generatedVote.Voter)
+			h.logger.Info("injected", "voter %+v", injectedVote.ExchangeRates)
+			h.logger.Info("injected", "voter %+v", generatedVote.ExchangeRates)
 			return oracletypes.ErrNonEqualInjVotesRates
 		}
 	}
@@ -267,15 +259,22 @@ func (h *ProposalHandler) verifyExchangeRateVotes(
 	return nil
 }
 
-func (h *ProposalHandler) generateMedianGasEstimates(
-	ctx sdk.Context,
+func (h *ProposalHandler) generateExternalLiquidity(
+	_ sdk.Context,
 	ci cometabci.ExtendedCommitInfo,
-) ([]oracletypes.GasEstimate, error) {
-	gasEstimates := []oracletypes.GasEstimate{}
-
+) (externalLiquidityList []oracletypes.ExternalLiquidity, err error) {
 	for _, vote := range ci.Votes {
 		if vote.BlockIdFlag != cmtproto.BlockIDFlagCommit {
 			continue
+		}
+
+		var voteExt oracletypes.OracleVoteExtension
+		if err := voteExt.Unmarshal(vote.VoteExtension); err != nil {
+			h.logger.Error(
+				"failed to decode vote extension",
+				"err", err,
+			)
+			return nil, err
 		}
 
 		var valConsAddr sdk.ConsAddress
@@ -284,78 +283,66 @@ func (h *ProposalHandler) generateMedianGasEstimates(
 				"failed to unmarshal validator consensus address",
 				"err", err,
 			)
-			return gasEstimates, err
+			return nil, err
 		}
-		val, err := h.stakingKeeper.GetValidatorByConsAddr(ctx, valConsAddr)
-		if err != nil {
-			h.logger.Error(
-				"failed to get consensus validator from staking keeper",
-				"err", err,
-			)
-			return gasEstimates, err
-		}
-		_, err = sdk.ValAddressFromBech32(val.OperatorAddress)
-		if err != nil {
-			return gasEstimates, err
-		}
+
+		externalLiquidityList = append(externalLiquidityList, voteExt.ExternalLiquidity...)
 	}
 
-	networks := []string{}
-	// get contracts on registry list
-	params := h.oracleKeeper.GasEstimateKeeper.GetParams(ctx)
-	for _, contract := range params.ContractRegistry {
-		networks = append(networks, contract.Network)
-	}
+	// sort external liquidity so they are verified in the same order in ProcessProposalHandler
+	sort.Slice(externalLiquidityList, func(i, j int) bool {
+		return externalLiquidityList[i].PoolId < externalLiquidityList[j].PoolId
+	})
 
-	for _, network := range networks {
-		networkEstimates := []oracletypes.GasEstimate{}
-
-		for _, vote := range ci.Votes {
-			var voteExt oracletypes.OracleVoteExtension
-			if err := voteExt.Unmarshal(vote.VoteExtension); err != nil {
-				h.logger.Error(
-					"failed to decode vote extension",
-					"err", err,
-				)
-				continue
-			}
-
-			for _, estimate := range voteExt.GasEstimates {
-				if estimate.Network == network {
-					networkEstimates = append(networkEstimates, estimate)
-				}
-			}
-		}
-
-		median, err := calculateMedian(networkEstimates)
-		if err != nil {
-			continue
-		}
-		gasEstimates = append(gasEstimates, median)
-	}
-
-	return gasEstimates, nil
+	return externalLiquidityList, nil
 }
 
-func (h *ProposalHandler) verifyMedianGasEstimations(
-	injectedEstimates []oracletypes.GasEstimate,
-	generatedEstimates []oracletypes.GasEstimate,
+func (h *ProposalHandler) verifyExternalLiquidity(
+	injectedExternalLiquidityList []oracletypes.ExternalLiquidity,
+	generatedExternalLiquidityList []oracletypes.ExternalLiquidity,
 ) error {
-	if len(injectedEstimates) != len(generatedEstimates) {
+	if len(injectedExternalLiquidityList) != len(generatedExternalLiquidityList) {
 		return oracletypes.ErrNonEqualInjVotesLen
 	}
 
-	for i := range injectedEstimates {
-		injectedEstimate := injectedEstimates[i]
-		generatedEstimate := generatedEstimates[i]
+	for i := range injectedExternalLiquidityList {
+		injectedExternalLiquidity := injectedExternalLiquidityList[i]
+		generatedExternalLiquidity := generatedExternalLiquidityList[i]
 
-		if injectedEstimate.Network != generatedEstimate.Network {
-			return oracletypes.ErrNonEqualInjVotesRates
+		if injectedExternalLiquidity.PoolId != generatedExternalLiquidity.PoolId {
+			return oracletypes.ErrNonEqualInjPoolID
 		}
 
-		if injectedEstimate.GasEstimation != generatedEstimate.GasEstimation {
-			return oracletypes.ErrNonEqualInjVotesRates
+		if err := verifyAmountDepthInfo(
+			injectedExternalLiquidity.AmountDepthInfo,
+			generatedExternalLiquidity.AmountDepthInfo,
+		); err != nil {
+			return err
 		}
+	}
+
+	return nil
+}
+
+func verifyAmountDepthInfo(
+	injectedAmountDepthInfo []oracletypes.AssetAmountDepth,
+	generatedAmountDepthInfo []oracletypes.AssetAmountDepth,
+) error {
+	if len(injectedAmountDepthInfo) != 2 {
+		return oracletypes.ErrInvalidAssetDepthLen
+	}
+
+	if len(injectedAmountDepthInfo) != len(generatedAmountDepthInfo) {
+		return oracletypes.ErrInvalidAssetDepthLen
+	}
+
+	if injectedAmountDepthInfo[0].Asset != generatedAmountDepthInfo[0].Asset ||
+		injectedAmountDepthInfo[1].Asset != generatedAmountDepthInfo[1].Asset ||
+		!injectedAmountDepthInfo[0].Amount.Equal(generatedAmountDepthInfo[0].Amount) ||
+		!injectedAmountDepthInfo[1].Amount.Equal(generatedAmountDepthInfo[1].Amount) ||
+		!injectedAmountDepthInfo[0].Depth.Equal(generatedAmountDepthInfo[0].Depth) ||
+		!injectedAmountDepthInfo[1].Depth.Equal(generatedAmountDepthInfo[1].Depth) {
+		return oracletypes.ErrNonEqualAssetDepth
 	}
 
 	return nil

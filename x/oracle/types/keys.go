@@ -35,6 +35,11 @@ var (
 	KeyPrefixHistoricPrice                = []byte{0x08} // prefix for each key to a historic price
 	KeyPrefixValidatorRewardSet           = []byte{0x09} // prefix for each key to a validator reward set
 	KeyPrefixParamUpdatePlan              = []byte{0x10} // prefix for each key to a param update plan
+	KeyPrefixPrice                        = []byte{0x11} // prefix for each key to a price
+	KeyPrefixPriceFeeder                  = []byte{0x12} // prefix for each key to a price feeder
+	KeyPrefixAssetInfo                    = []byte{0x13} // prefix for each key to a asset info
+	KeyPrefixPool                         = []byte{0x14} // prefix for each key to a pool
+	KeyPrefixAccountedPool                = []byte{0x15} // prefix for each key to an accounted pool
 )
 
 // GetExchangeRateKey - stored by *denom*
@@ -51,9 +56,8 @@ func GetFeederDelegationKey(v sdk.ValAddress) (key []byte) {
 }
 
 // GetMissCounterKey - stored by *Validator* address
-func GetMissCounterKey(v sdk.ValAddress) (key []byte) {
-	key = append(key, KeyPrefixMissCounter...)
-	return append(key, address.MustLengthPrefix(v)...)
+func GetMissCounterKey(v string) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixMissCounter, []byte(v))
 }
 
 // GetAggregateExchangeRatePrevoteKey - stored by *Validator* address
@@ -63,9 +67,8 @@ func GetAggregateExchangeRatePrevoteKey(v sdk.ValAddress) (key []byte) {
 }
 
 // GetAggregateExchangeRateVoteKey - stored by *Validator* address
-func GetAggregateExchangeRateVoteKey(v sdk.ValAddress) (key []byte) {
-	key = append(key, KeyPrefixAggregateExchangeRateVote...)
-	return append(key, address.MustLengthPrefix(v)...)
+func GetAggregateExchangeRateVoteKey(v string) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixAggregateExchangeRateVote, []byte(v))
 }
 
 // KeyMedian - stored by *denom*
@@ -91,6 +94,36 @@ func KeyValidatorRewardSet() (key []byte) {
 // KeyParamUpdatePlan - stored by *planHeight*
 func KeyParamUpdatePlan(planHeight uint64) (key []byte) {
 	return util.ConcatBytes(0, KeyPrefixParamUpdatePlan, util.UintWithNullPrefix(planHeight))
+}
+
+// KeyPrice - stored by *asset, source, and timestamp*
+func KeyPrice(asset string, timestamp uint64) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixPrice, []byte(asset), util.UintWithNullPrefix(timestamp))
+}
+
+// KeyPriceAsset - stored by *asset*
+func KeyPriceAsset(asset string) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixPrice, []byte(asset))
+}
+
+// KeyAssetInfo - stored by *asset*
+func KeyAssetInfo(asset string) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixAssetInfo, []byte(asset))
+}
+
+// KeyPriceFeeder - stored by *address*
+func KeyPriceFeeder(address string) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixPriceFeeder, []byte(address))
+}
+
+// KeyPool - stored by *poolID*
+func KeyPool(poolID uint64) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixPool, util.UintWithNullPrefix(poolID))
+}
+
+// KeyAccountedPool - stored by *poolID*
+func KeyAccountedPool(poolID uint64) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixAccountedPool, util.UintWithNullPrefix(poolID))
 }
 
 // ParseDenomAndBlockFromKey returns the denom and block contained in the *key*

@@ -6,7 +6,6 @@ import (
 	"math/big"
 
 	sdkmath "cosmossdk.io/math"
-	storetypes "cosmossdk.io/store/types"
 	"github.com/cometbft/cometbft/crypto/secp256k1"
 	tmprotocrypto "github.com/cometbft/cometbft/proto/tendermint/crypto"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
@@ -122,32 +121,12 @@ func (sk MockStakingKeeper) Validator(_ context.Context, address sdk.ValAddress)
 	return nil, nil
 }
 
-func (MockStakingKeeper) TotalBondedTokens(_ context.Context) (sdkmath.Int, error) {
-	return sdkmath.ZeroInt(), nil
-}
-
 func (sk MockStakingKeeper) GetBondedValidatorsByPower(_ context.Context) ([]stakingtypes.Validator, error) {
 	return nil, nil
 }
 
-func (MockStakingKeeper) ValidatorsPowerStoreIterator(_ context.Context) (storetypes.Iterator, error) {
-	return storetypes.KVStoreReversePrefixIterator(nil, nil), nil
-}
-
-func (MockStakingKeeper) MaxValidators(context.Context) (uint32, error) {
-	return 100, nil
-}
-
 func (MockStakingKeeper) PowerReduction(_ context.Context) (res sdkmath.Int) {
 	return sdk.DefaultPowerReduction
-}
-
-func (MockStakingKeeper) Slash(context.Context, sdk.ConsAddress, int64, int64, sdkmath.LegacyDec) (sdkmath.Int, error) {
-	return sdkmath.ZeroInt(), nil
-}
-
-func (MockStakingKeeper) Jail(context.Context, sdk.ConsAddress) error {
-	return nil
 }
 
 // MockValidator implements the ValidatorI interface.

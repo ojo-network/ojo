@@ -66,7 +66,7 @@ func (m *Params) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Params proto.InternalMessageInfo
 
-// Contract defines a contract that we
+// Contract defines a contract at a specific address and network that we send gasestimate messages to.
 type Contract struct {
 	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
 	Network string `protobuf:"bytes,2,opt,name=network,proto3" json:"network,omitempty"`

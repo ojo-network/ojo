@@ -112,7 +112,11 @@ func (ms msgServer) AggregateExchangeRateVote(
 	}
 
 	// Move aggregate prevote to aggregate vote with given exchange rates
-	ms.SetAggregateExchangeRateVote(ctx, valAddr, types.NewAggregateExchangeRateVote(filteredDecCoins, valAddr))
+	ms.SetAggregateExchangeRateVote(
+		ctx,
+		valAddr.String(),
+		types.NewAggregateExchangeRateVote(filteredDecCoins, valAddr.String()),
+	)
 	ms.DeleteAggregateExchangeRatePrevote(ctx, valAddr)
 
 	return &types.MsgAggregateExchangeRateVoteResponse{}, nil

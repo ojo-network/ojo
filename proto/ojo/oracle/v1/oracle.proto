@@ -74,6 +74,8 @@ message Params {
     (gogoproto.castrepeated) = "CurrencyDeviationThresholdList",
     (gogoproto.nullable) = false
   ];
+  // Number of blocks between updating external liquidity information.
+  uint64 external_liquidity_period = 16 [ (gogoproto.moretags) = "yaml:\"external_liquidity_period\"" ];
 }
 
 // Denom - the object to hold configurations of each denom
@@ -153,8 +155,13 @@ message CurrencyPairProviders {
 
   string base_denom  = 1 [ (gogoproto.moretags) = "yaml:\"base_denom\"" ];
   string quote_denom = 2 [ (gogoproto.moretags) = "yaml:\"quote_denom\"" ];
-  repeated PairAddressProvider pair_address = 3 [ (gogoproto.moretags) = "yaml:\"pair_address\"", (gogoproto.nullable) = false ];
-  repeated string providers = 4 [ (gogoproto.moretags) = "yaml:\"providers\"" ];
+  string base_proxy_denom  = 3 [ (gogoproto.moretags) = "yaml:\"base_proxy_denom\"" ];
+  string quote_proxy_denom = 4 [ (gogoproto.moretags) = "yaml:\"quote_proxy_denom\"" ];
+  uint64 pool_id = 5 [ (gogoproto.moretags) = "yaml:\"pool_id\"" ];
+  string extern_liquidity_provider = 6 [ (gogoproto.moretags) = "yaml:\"extern_liquidity_provider\"" ];
+  string crypto_compare_exchange = 7 [ (gogoproto.moretags) = "yaml:\"crypto_compare_exchange\"" ];
+  repeated PairAddressProvider pair_address = 8 [ (gogoproto.moretags) = "yaml:\"pair_address\"", (gogoproto.nullable) = false ];
+  repeated string providers = 9 [ (gogoproto.moretags) = "yaml:\"providers\"" ];
 }
 
 // PairAddressProvider defines the uniswap pair address and provider

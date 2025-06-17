@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"sort"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ojo-network/ojo/util"
 	"github.com/ojo-network/ojo/util/metrics"
@@ -28,6 +30,23 @@ func (k *Keeper) PruneAllPrices(ctx sdk.Context) {
 	}
 }
 
+// PruneElysPrices prunes elys prices for a given asset except the latest one.
+func (k *Keeper) PruneElysPrices(ctx sdk.Context, asset string) {
+	allAssetPrice := k.GetAllAssetPrices(ctx, asset)
+	total := len(allAssetPrice)
+
+	sort.Slice(allAssetPrice, func(i, j int) bool {
+		return allAssetPrice[i].Timestamp < allAssetPrice[j].Timestamp
+	})
+
+	for i, price := range allAssetPrice {
+		// We don't remove the last element
+		if i < total-1 {
+			k.RemovePrice(ctx, price.Asset, price.Timestamp)
+		}
+	}
+}
+
 // IsPeriodLastBlock returns true if we are at the last block of the period
 func (k *Keeper) IsPeriodLastBlock(ctx sdk.Context, blocksPerPeriod uint64) bool {
 	return (util.SafeInt64ToUint64(ctx.BlockHeight())+1)%blocksPerPeriod == 0
@@ -39,7 +58,7 @@ func (k *Keeper) RecordEndBlockMetrics(ctx sdk.Context) {
 		return
 	}
 
-	k.IterateMissCounters(ctx, func(operator sdk.ValAddress, missCounter uint64) bool {
+	k.IterateMissCounters(ctx, func(operator string, missCounter uint64) bool {
 		metrics.RecordMissCounter(operator, missCounter)
 		return false
 	})
