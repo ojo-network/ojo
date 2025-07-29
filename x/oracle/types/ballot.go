@@ -5,19 +5,18 @@ import (
 	"sort"
 
 	"cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // VoteForTally is a convenience wrapper to reduce redundant lookup cost.
 type VoteForTally struct {
 	Denom        string
 	ExchangeRate math.LegacyDec
-	Voter        sdk.ValAddress
+	Voter        string
 	Power        int64
 }
 
 // NewVoteForTally returns a new VoteForTally instance.
-func NewVoteForTally(rate math.LegacyDec, denom string, voter sdk.ValAddress, power int64) VoteForTally {
+func NewVoteForTally(rate math.LegacyDec, denom string, voter string, power int64) VoteForTally {
 	return VoteForTally{
 		ExchangeRate: rate,
 		Denom:        denom,
@@ -34,7 +33,7 @@ func (pb ExchangeRateBallot) ToMap() map[string]math.LegacyDec {
 	exchangeRateMap := make(map[string]math.LegacyDec)
 	for _, vote := range pb {
 		if vote.ExchangeRate.IsPositive() {
-			exchangeRateMap[vote.Voter.String()] = vote.ExchangeRate
+			exchangeRateMap[vote.Voter] = vote.ExchangeRate
 		}
 	}
 
@@ -119,7 +118,7 @@ func (pb ExchangeRateBallot) Less(i, j int) bool {
 		return true
 	}
 	if pb[i].ExchangeRate.Equal(pb[j].ExchangeRate) {
-		return bytes.Compare(pb[i].Voter, pb[j].Voter) < 0
+		return bytes.Compare([]byte(pb[i].Voter), []byte(pb[j].Voter)) < 0
 	}
 	return false
 }
@@ -157,11 +156,11 @@ type Claim struct {
 	Power             int64
 	Weight            int64
 	MandatoryWinCount int64
-	Recipient         sdk.ValAddress
+	Recipient         string
 }
 
 // NewClaim generates a Claim instance.
-func NewClaim(power, weight, mandatoryWinCount int64, recipient sdk.ValAddress) Claim {
+func NewClaim(power, weight, mandatoryWinCount int64, recipient string) Claim {
 	return Claim{
 		Power:             power,
 		Weight:            weight,
@@ -180,7 +179,7 @@ func ClaimMapToSlices(claims map[string]Claim, rewardSet []string) ([]Claim, []C
 	i := 0
 	j := 0
 	for _, claim := range claims {
-		if _, ok := rewardMap[claim.Recipient.String()]; ok {
+		if _, ok := rewardMap[claim.Recipient]; ok {
 			r[j] = Claim{
 				Power:             claim.Power,
 				Weight:            claim.Weight,
@@ -198,10 +197,10 @@ func ClaimMapToSlices(claims map[string]Claim, rewardSet []string) ([]Claim, []C
 		i++
 	}
 	sort.Slice(c, func(i, j int) bool {
-		return c[i].Recipient.String() < c[j].Recipient.String()
+		return c[i].Recipient < c[j].Recipient
 	})
 	sort.Slice(r, func(i, j int) bool {
-		return r[i].Recipient.String() < r[j].Recipient.String()
+		return r[i].Recipient < r[j].Recipient
 	})
 	return c, r
 }

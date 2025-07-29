@@ -28,6 +28,30 @@ func (k *Keeper) PruneAllPrices(ctx sdk.Context) {
 	}
 }
 
+// PruneElysPrices prunes elys prices for a given asset except the latest one.
+func (k *Keeper) PruneElysPrices(ctx sdk.Context, asset string) {
+	prices := k.GetAllAssetPrices(ctx, asset)
+	if len(prices) <= 1 {
+		return // nothing to prune
+	}
+
+	// Find the newest price
+	latestIdx, latestTs := 0, prices[0].Timestamp
+	for i := 1; i < len(prices); i++ {
+		if prices[i].Timestamp > latestTs {
+			latestIdx, latestTs = i, prices[i].Timestamp
+		}
+	}
+
+	// Remove everything except the newest
+	for i, p := range prices {
+		if i == latestIdx {
+			continue
+		}
+		k.RemovePrice(ctx, p.Asset, p.Timestamp)
+	}
+}
+
 // IsPeriodLastBlock returns true if we are at the last block of the period
 func (k *Keeper) IsPeriodLastBlock(ctx sdk.Context, blocksPerPeriod uint64) bool {
 	return (util.SafeInt64ToUint64(ctx.BlockHeight())+1)%blocksPerPeriod == 0
@@ -39,7 +63,7 @@ func (k *Keeper) RecordEndBlockMetrics(ctx sdk.Context) {
 		return
 	}
 
-	k.IterateMissCounters(ctx, func(operator sdk.ValAddress, missCounter uint64) bool {
+	k.IterateMissCounters(ctx, func(operator string, missCounter uint64) bool {
 		metrics.RecordMissCounter(operator, missCounter)
 		return false
 	})

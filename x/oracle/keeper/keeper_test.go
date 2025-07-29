@@ -183,21 +183,21 @@ func (s *IntegrationTestSuite) TestAggregateExchangeRateVote() {
 		ExchangeRates: decCoins,
 		Voter:         addr.String(),
 	}
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr, vote)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr.String(), vote)
 
-	_, err := app.OracleKeeper.GetAggregateExchangeRateVote(ctx, valAddr)
+	_, err := app.OracleKeeper.GetAggregateExchangeRateVote(ctx, valAddr.String())
 	s.Require().NoError(err)
 
-	app.OracleKeeper.DeleteAggregateExchangeRateVote(ctx, valAddr)
+	app.OracleKeeper.DeleteAggregateExchangeRateVote(ctx, valAddr.String())
 
-	_, err = app.OracleKeeper.GetAggregateExchangeRateVote(ctx, valAddr)
+	_, err = app.OracleKeeper.GetAggregateExchangeRateVote(ctx, valAddr.String())
 	s.Require().Error(err)
 }
 
 func (s *IntegrationTestSuite) TestAggregateExchangeRateVoteError() {
 	app, ctx := s.app, s.ctx
 
-	_, err := app.OracleKeeper.GetAggregateExchangeRateVote(ctx, valAddr)
+	_, err := app.OracleKeeper.GetAggregateExchangeRateVote(ctx, valAddr.String())
 	s.Require().Errorf(err, types.ErrNoAggregateVote.Error())
 }
 

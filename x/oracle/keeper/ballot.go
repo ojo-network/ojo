@@ -18,7 +18,7 @@ func (k Keeper) OrganizeBallotByDenom(
 	votes := map[string]types.ExchangeRateBallot{}
 
 	// collect aggregate votes
-	aggregateHandler := func(voterAddr sdk.ValAddress, vote types.AggregateExchangeRateVote) bool {
+	aggregateHandler := func(voterAddr string, vote types.AggregateExchangeRateVote) bool {
 		// organize ballot only for the active validators
 		claim, ok := validatorClaimMap[vote.Voter]
 		if ok {
@@ -60,7 +60,7 @@ func (k Keeper) ClearBallots(ctx sdk.Context, votePeriod uint64) {
 	// clear all aggregate votes
 	k.IterateAggregateExchangeRateVotes(
 		ctx,
-		func(voterAddr sdk.ValAddress, _ types.AggregateExchangeRateVote) bool {
+		func(voterAddr string, _ types.AggregateExchangeRateVote) bool {
 			k.DeleteAggregateExchangeRateVote(ctx, voterAddr)
 			return false
 		},

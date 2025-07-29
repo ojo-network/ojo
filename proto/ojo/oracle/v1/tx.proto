@@ -12,6 +12,8 @@ option (gogoproto.goproto_getters_all) = false;
 
 // Msg defines the oracle Msg service.
 service Msg {
+  option (cosmos.msg.v1.service) = true;
+
   // AggregateExchangeRatePrevote defines a method for submitting an aggregate
   // exchange rate prevote.
   rpc AggregateExchangeRatePrevote(MsgAggregateExchangeRatePrevote)
@@ -25,6 +27,38 @@ service Msg {
   // DelegateFeedConsent defines a method for setting the feeder delegation.
   rpc DelegateFeedConsent(MsgDelegateFeedConsent)
       returns (MsgDelegateFeedConsentResponse);
+
+  // FeedPrice defines a method for setting and elys price.
+  rpc FeedPrice(MsgFeedPrice)
+      returns (MsgFeedPriceResponse);
+
+  // FeedMultiplePrices defines a method for setting multiple elys prices.
+  rpc FeedMultiplePrices(MsgFeedMultiplePrices)
+      returns (MsgFeedMultiplePricesResponse);
+
+  // SetPriceFeeder defines a method for setting an elys price feeder.
+  rpc SetPriceFeeder(MsgSetPriceFeeder)
+      returns (MsgSetPriceFeederResponse);
+
+  // DeletePriceFeeder defines a method for deleting an elys price feeder.
+  rpc DeletePriceFeeder(MsgDeletePriceFeeder)
+      returns (MsgDeletePriceFeederResponse);
+
+  // RemoveAssetInfo defines a method for removing an elys asset info.
+  rpc RemoveAssetInfo(MsgRemoveAssetInfo)
+      returns (MsgRemoveAssetInfoResponse);
+
+  // AddPriceFeeders defines a method for adding elys price feeders.
+  rpc AddPriceFeeders(MsgAddPriceFeeders)
+      returns (MsgAddPriceFeedersResponse);
+
+  // RemovePriceFeeders defines a method for removing elys price feeders.
+  rpc RemovePriceFeeders(MsgRemovePriceFeeders)
+      returns (MsgRemovePriceFeedersResponse);
+
+  // CreateAssetInfo defines a method for creating elys asset infos.
+  rpc CreateAssetInfo(MsgCreateAssetInfo)
+      returns (MsgCreateAssetInfoResponse);
 
   // LegacyGovUpdateParams defines the legacy message that updates the oracle parameters.
   rpc LegacyGovUpdateParams(MsgLegacyGovUpdateParams)
@@ -104,6 +138,106 @@ message MsgDelegateFeedConsent {
 // MsgDelegateFeedConsentResponse defines the Msg/DelegateFeedConsent response
 // type.
 message MsgDelegateFeedConsentResponse {}
+
+// FeedPrice defines a feed price object for feeding an elys price.
+message FeedPrice {
+  string asset = 1;
+  string price = 2 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+}
+
+// MsgFeedPrice defines a message to feed an elys price.
+message MsgFeedPrice {
+  option (cosmos.msg.v1.signer) = "provider";
+  string provider = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  FeedPrice feed_price = 2 [ (gogoproto.nullable) = false ];
+}
+
+// MsgFeedPriceResponse defines the Msg/FeedPrice response
+// type.
+message MsgFeedPriceResponse {}
+
+// MsgSetPriceFeeder defines a message to set an elys price feeder.
+message MsgSetPriceFeeder {
+  option (cosmos.msg.v1.signer) = "feeder";
+  string feeder = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  bool is_active = 2;
+}
+
+// MsgSetPriceFeederResponse defines the Msg/SetPriceFeederResponse response
+// type.
+message MsgSetPriceFeederResponse {}
+
+// MsgDeletePriceFeeder defines a message to delete an elys price feeder.
+message MsgDeletePriceFeeder {
+  option (cosmos.msg.v1.signer) = "feeder";
+  string feeder = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+}
+
+// MsgDeletePriceFeederResponse defines the Msg/DeleteFeederResponse response
+// type.
+message MsgDeletePriceFeederResponse {}
+
+// MsgFeedMultiplePrices defines a message to feed multiple elys prices.
+message MsgFeedMultiplePrices {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  repeated FeedPrice feed_prices = 2 [ (gogoproto.nullable) = false ];
+}
+
+// MsgFeedMultiplePricesResponse defines the Msg/FeedMultiplePrices response
+// type.
+message MsgFeedMultiplePricesResponse {}
+
+// MsgRemoveAssetInfo represents a message to remove an elys asset info.
+message MsgRemoveAssetInfo {
+  option (cosmos.msg.v1.signer) = "authority";
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  string denom = 2;
+}
+
+// MsgRemoveAssetInfo defines the Msg/RemoveAssetInfo response
+// type.
+message MsgRemoveAssetInfoResponse {}
+
+// MsgAddPriceFeeders represents a message to add elys price feeders.
+message MsgAddPriceFeeders {
+  option (cosmos.msg.v1.signer) = "authority";
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  repeated string feeders = 2;
+}
+
+// MsgAddPriceFeedersResponse defines the Msg/AddPriceFeeders response
+// type.
+message MsgAddPriceFeedersResponse {}
+
+// MsgRemovePriceFeeders represents a message to remove elys price feeders.
+message MsgRemovePriceFeeders {
+  option (cosmos.msg.v1.signer) = "authority";
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  repeated string feeders = 2;
+}
+
+// MsgRemovePriceFeedersResponse defines the Msg/RemovePriceFeeders response
+// type.
+message MsgRemovePriceFeedersResponse {}
+
+// MsgCreateAssetInfo represents a message to create elys asset info.
+message MsgCreateAssetInfo {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  string denom = 2;
+  string display = 3;
+  string ticker = 4;
+  uint64 decimal = 5;
+}
+
+// MsgCreateAssetInfoResponse defines the Msg/CreateAssetInfo response
+// type.
+message MsgCreateAssetInfoResponse {}
 
 // MsgLegacyGovUpdateParams defines the Msg/MsgLegacyGovUpdateParams request type.
 message MsgLegacyGovUpdateParams {

@@ -19,6 +19,7 @@ const (
 
 // Parameter keys
 var (
+	KeyParams                      = []byte("Params")
 	KeyVotePeriod                  = []byte("VotePeriod")
 	KeyVoteThreshold               = []byte("VoteThreshold")
 	KeyRewardBands                 = []byte("RewardBands")
@@ -34,6 +35,7 @@ var (
 	KeyMaximumMedianStamps         = []byte("MaximumMedianStamps")
 	KeyCurrencyPairProviders       = []byte("CurrencyPairProviders")
 	KeyCurrencyDeviationThresholds = []byte("CurrencyDeviationThresholds")
+	KeyExternalLiquidityPeriod     = []byte("ExternalLiquidityPeriod")
 )
 
 // Default parameter values
@@ -45,6 +47,7 @@ const (
 	DefaultMaximumPriceStamps       = 60                  // retain for 3 hours
 	DefaultMedianStampPeriod        = BlocksPerHour * 3   // window for 3 hours
 	DefaultMaximumMedianStamps      = 24                  // retain for 3 days
+	DefaultExternalLiquidityPeriod  = BlocksPerMinute * 5 // window for 5 minutes
 )
 
 // Default parameter values
@@ -77,6 +80,21 @@ var (
 			SymbolDenom: EthereumSymbol,
 			Exponent:    EthereumExponent,
 		},
+		{
+			BaseDenom:   AKTDenom,
+			SymbolDenom: AKTSymbol,
+			Exponent:    AKTExponent,
+		},
+		{
+			BaseDenom:   TIADenom,
+			SymbolDenom: TIASymbol,
+			Exponent:    TIAExponent,
+		},
+		{
+			BaseDenom:   AXLDenom,
+			SymbolDenom: AXLSymbol,
+			Exponent:    AXLExponent,
+		},
 	}
 	DefaultMandatoryList = DenomList{
 		{
@@ -98,6 +116,21 @@ var (
 			BaseDenom:   EthereumDenom,
 			SymbolDenom: EthereumSymbol,
 			Exponent:    EthereumExponent,
+		},
+		{
+			BaseDenom:   AKTDenom,
+			SymbolDenom: AKTSymbol,
+			Exponent:    AKTExponent,
+		},
+		{
+			BaseDenom:   TIADenom,
+			SymbolDenom: TIASymbol,
+			Exponent:    TIAExponent,
+		},
+		{
+			BaseDenom:   AXLDenom,
+			SymbolDenom: AXLSymbol,
+			Exponent:    AXLExponent,
 		},
 	}
 	DefaultSlashFraction     = math.LegacyNewDecWithPrec(1, 4) // 0.01%
@@ -130,13 +163,25 @@ var (
 			},
 		},
 		CurrencyPairProviders{
+			BaseDenom:  USDCSymbol,
+			QuoteDenom: USDSymbol,
+			Providers: []string{
+				"kraken",
+			},
+		},
+		CurrencyPairProviders{
 			BaseDenom:  AtomSymbol,
 			QuoteDenom: USDTSymbol,
 			Providers: []string{
+				"binance",
 				"okx",
 				"bitget",
 				"gate",
 			},
+			BaseProxyDenom:          AtomSymbol,
+			QuoteProxyDenom:         USDCSymbol,
+			ExternLiquidityProvider: "binance",
+			PoolId:                  1,
 		},
 		CurrencyPairProviders{
 			BaseDenom:  BitcoinSymbol,
@@ -169,6 +214,39 @@ var (
 				"bitget",
 			},
 		},
+		CurrencyPairProviders{
+			BaseDenom:  AKTSymbol,
+			QuoteDenom: USDTSymbol,
+			Providers: []string{
+				"gate",
+			},
+			BaseProxyDenom:          AKTSymbol,
+			QuoteProxyDenom:         USDCSymbol,
+			ExternLiquidityProvider: "gate",
+			PoolId:                  3,
+		},
+		CurrencyPairProviders{
+			BaseDenom:  TIASymbol,
+			QuoteDenom: USDTSymbol,
+			Providers: []string{
+				"binance",
+				"gate",
+				"crypto",
+			},
+			BaseProxyDenom:          TIASymbol,
+			QuoteProxyDenom:         USDCSymbol,
+			ExternLiquidityProvider: "binance",
+			PoolId:                  2,
+		},
+		CurrencyPairProviders{
+			BaseDenom:  AXLSymbol,
+			QuoteDenom: USDTSymbol,
+			Providers: []string{
+				"binance",
+			},
+			BaseProxyDenom:  AXLSymbol,
+			QuoteProxyDenom: USDCSymbol,
+		},
 	}
 
 	DefaultCurrencyDeviationThresholds = CurrencyDeviationThresholdList{
@@ -190,6 +268,18 @@ var (
 		},
 		CurrencyDeviationThreshold{
 			BaseDenom: EthereumSymbol,
+			Threshold: "2",
+		},
+		CurrencyDeviationThreshold{
+			BaseDenom: AKTSymbol,
+			Threshold: "2",
+		},
+		CurrencyDeviationThreshold{
+			BaseDenom: TIASymbol,
+			Threshold: "2",
+		},
+		CurrencyDeviationThreshold{
+			BaseDenom: AXLSymbol,
 			Threshold: "2",
 		},
 	}
@@ -221,6 +311,18 @@ func DefaultRewardBands() RewardBandList {
 		},
 		{
 			SymbolDenom: EthereumSymbol,
+			RewardBand:  defaultRewardBand,
+		},
+		{
+			SymbolDenom: AKTSymbol,
+			RewardBand:  defaultRewardBand,
+		},
+		{
+			SymbolDenom: TIASymbol,
+			RewardBand:  defaultRewardBand,
+		},
+		{
+			SymbolDenom: AXLSymbol,
 			RewardBand:  defaultRewardBand,
 		},
 	}
@@ -267,6 +369,7 @@ func DefaultParams() Params {
 		RewardBands:                 DefaultRewardBands(),
 		CurrencyPairProviders:       DefaultCurrencyPairProviders,
 		CurrencyDeviationThresholds: DefaultCurrencyDeviationThresholds,
+		ExternalLiquidityPeriod:     DefaultExternalLiquidityPeriod,
 	}
 }
 
@@ -354,6 +457,11 @@ func (p *Params) ParamSetPairs() paramstypes.ParamSetPairs {
 			&p.CurrencyDeviationThresholds,
 			validateCurrencyDeviationThresholds,
 		),
+		paramstypes.NewParamSetPair(
+			KeyExternalLiquidityPeriod,
+			&p.ExternalLiquidityPeriod,
+			validateExternalLiquidityPeriod,
+		),
 	}
 }
 
@@ -408,9 +516,9 @@ func (p Params) Validate() error {
 		)
 	}
 
-	if p.HistoricStampPeriod%p.VotePeriod != 0 || p.MedianStampPeriod%p.VotePeriod != 0 {
+	if p.HistoricStampPeriod%p.VotePeriod != 0 || p.MedianStampPeriod%p.VotePeriod != 0 || p.ExternalLiquidityPeriod%p.VotePeriod != 0 {
 		return ErrInvalidParamValue.Wrap(
-			"oracle parameters HistoricStampPeriod and MedianStampPeriod must be exact multiples of VotePeriod",
+			"oracle parameters HistoricStampPeriod, MedianStampPeriod, and ExternalLiquidityPeriod must be exact multiples of VotePeriod",
 		)
 	}
 
@@ -655,6 +763,19 @@ func validateCurrencyDeviationThresholds(i interface{}) error {
 		if len(c.Threshold) == 0 {
 			return ErrInvalidParamValue.Wrap("oracle parameter CurrencyDeviationThreshold must have Threshold")
 		}
+	}
+
+	return nil
+}
+
+func validateExternalLiquidityPeriod(i interface{}) error {
+	v, ok := i.(uint64)
+	if !ok {
+		return ErrInvalidParamValue.Wrapf("invalid parameter type: %T", i)
+	}
+
+	if v == 0 {
+		return ErrInvalidParamValue.Wrap("oracle parameter ExternalLiquidityPeriod must be > 0")
 	}
 
 	return nil

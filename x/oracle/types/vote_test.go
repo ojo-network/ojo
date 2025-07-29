@@ -33,7 +33,7 @@ func TestAggregateExchangeRateVoteString(t *testing.T) {
 		sdk.DecCoins{
 			sdk.NewDecCoinFromDec(types.OjoDenom, math.LegacyOneDec()),
 		},
-		sdk.ValAddress(sdk.AccAddress([]byte("addr1_______________"))),
+		sdk.ValAddress(sdk.AccAddress([]byte("addr1_______________"))).String(),
 	)
 
 	require.Equal(t, "exchangerates:\n    - denom: uojo\n      amount: \"1.000000000000000000\"\nvoter: ojovaloper1v9jxgu33ta047h6lta047h6lta047h6ludnc0y\n", aggregateExchangeRatePreVote.String())

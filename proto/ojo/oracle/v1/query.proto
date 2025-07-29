@@ -4,7 +4,9 @@ package ojo.oracle.v1;
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "ojo/oracle/v1/oracle.proto";
+import "ojo/oracle/v1/elys.proto";
 import "cosmos/base/v1beta1/coin.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
 
 option go_package = "github.com/ojo-network/ojo/x/oracle/types";
 
@@ -96,6 +98,57 @@ service Query {
       returns (QueryValidatorRewardSetResponse) {
     option (google.api.http).get =
         "/ojo/oracle/v1/valdiators/validator_reward_set";
+  }
+
+  rpc LatestPrices(QueryLatestPricesRequest)
+      returns (QueryLatestPricesResponse) {
+        option (google.api.http).get = "/elys-network/elys/oracle/latest_prices/{denoms}";
+  }
+
+  rpc AllLatestPrices(QueryAllLatestPricesRequest)
+      returns (QueryAllLatestPricesResponse) {
+        option (google.api.http).get = "/elys-network/elys/oracle/all_latest_prices";
+  }
+
+  rpc PriceHistory(QueryPriceHistoryRequest)
+      returns (QueryPriceHistoryResponse) {
+        option (google.api.http).get = "/elys-network/elys/oracle/price_history/{asset}";
+  }
+
+  // Queries a Pool.
+  rpc Pool(QueryPoolRequest) returns (QueryPoolResponse) {
+    option (google.api.http).get = "/elys-network/elys/oracle/pool/{pool_id}";
+  }
+
+  // Queries a list of Pool items.
+  rpc PoolAll(QueryPoolAllRequest) returns (QueryPoolAllResponse) {
+    option (google.api.http).get = "/elys-network/elys/oracle/pool";
+  }
+
+  // Queries an AccountedPool.
+  rpc AccountedPool(QueryAccountedPoolRequest)
+      returns (QueryAccountedPoolResponse) {
+    option (google.api.http).get =
+        "/elys-network/elys/oracle/accounted_pool/{pool_id}";
+  }
+
+  // Queries a list of AccountedPool items.
+  rpc AccountedPoolAll(QueryAccountedPoolAllRequest)
+      returns (QueryAccountedPoolAllResponse) {
+    option (google.api.http).get =
+        "/elys-network/elys/oracle/accounted_pool";
+  }
+
+  // Queries a AssetInfo by denom.
+  rpc AssetInfo(QueryAssetInfoRequest) returns (QueryAssetInfoResponse) {
+    option (google.api.http).get =
+        "/elys-network/elys/oracle/asset_info/{denom}";
+  }
+
+  // Queries a list of AssetInfo items.
+  rpc AssetInfoAll(QueryAssetInfoAllRequest)
+      returns (QueryAssetInfoAllResponse) {
+    option (google.api.http).get = "/elys-network/elys/oracle/asset_info";
   }
 }
 
@@ -290,4 +343,84 @@ message QueryValidatorRewardSet {}
 // QueryValidatorRewardSetResponse is the response type for the Query/ValidatorRewardSet RPC method.
 message QueryValidatorRewardSetResponse {
   ValidatorRewardSet validators = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryLatestPricesRequest is the request type for the Query/LatestPrices RPC method.
+message QueryLatestPricesRequest {
+  repeated string denoms = 1;
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryLatestPricesResponse is the response type for the Query/LatestPrices RPC method.
+message QueryLatestPricesResponse {
+  repeated LatestPrice prices = 1;
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryAllLatestPricesRequest is the request type for the Query/AllLatestPrices RPC method.
+message QueryAllLatestPricesRequest {}
+
+// QueryAllLatestPricesResponse is the response type for the Query/AllLatestPrices RPC method.
+message QueryAllLatestPricesResponse {
+  repeated LatestPrice prices = 1;
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryPriceHistoryRequest is the request type for the Query/PriceHistory RPC method.
+message QueryPriceHistoryRequest {
+  string asset = 1;
+}
+
+// QueryPriceHistoryResponse is the response type for the Query/PriceHistory RPC method.
+message QueryPriceHistoryResponse {
+  repeated Price prices = 1;
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryPoolRequest is the request type for the Query/PoolRequest RPC method.
+message QueryPoolRequest { uint64 pool_id = 1; }
+
+// QueryPoolResponse is the response type for the Query/PoolResponse RPC method.
+message QueryPoolResponse {
+  Pool pool = 1 [ (gogoproto.nullable) = false ];
+}
+
+// QueryPoolAllRequest is the request type for the Query/PoolAllRequest RPC method.
+message QueryPoolAllRequest {}
+
+// QueryPoolAllResponse is the response type for the Query/PoolAllResponse RPC method.
+message QueryPoolAllResponse {
+  repeated Pool pool = 1 [ (gogoproto.nullable) = false ];
+}
+
+// QueryAccountedPoolRequest is the request type for the Query/AccountedPoolRequest RPC method.
+message QueryAccountedPoolRequest { uint64 pool_id = 1; }
+
+// QueryAccountedPoolResponse is the response type for the Query/AccountedPoolResponse RPC method.
+message QueryAccountedPoolResponse {
+  AccountedPool accounted_pool = 1 [ (gogoproto.nullable) = false ];
+}
+
+// QueryAccountedPoolAllRequest is the request type for the Query/AccountedPoolAllRequest RPC method.
+message QueryAccountedPoolAllRequest {}
+
+// QueryAccountedPoolAllResponse is the response type for the Query/AccountedPoolAllResponse RPC method.
+message QueryAccountedPoolAllResponse {
+  repeated AccountedPool accounted_pool = 1 [ (gogoproto.nullable) = false ];
+}
+
+// QueryAssetInfoRequest is the request type for the Query/AssetInfoRequest RPC method.
+message QueryAssetInfoRequest { string denom = 1; }
+
+// QueryAssetInfoResponse is the response type for the Query/AssetInfoResponse RPC method.
+message QueryAssetInfoResponse {
+  AssetInfo asset_info = 1 [ (gogoproto.nullable) = false ];
+}
+
+// QueryAssetInfoAllRequest is the request type for the Query/AssetInfoAllRequest RPC method.
+message QueryAssetInfoAllRequest {}
+
+// QueryAssetInfoAllResponse is the response type for the Query/AssetInfoAllResponse RPC method.
+message QueryAssetInfoAllResponse {
+  repeated AssetInfo asset_info = 1 [ (gogoproto.nullable) = false ];
 }
